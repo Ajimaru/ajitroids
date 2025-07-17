@@ -318,18 +318,13 @@ def main():
     
         # ====== TUTORIAL ======
         elif game_state == "tutorial":
-            # Tutorial-Events verarbeiten
-            for event in events:
-                action = tutorial.handle_event(event)
-                if action == "main_menu":
-                    game_state = "main_menu"
-                    main_menu.activate()
-    
-            # Tutorial aktualisieren
-            tutorial.update(dt)
-            
-            # Tutorial zeichnen
+            # Tutorial-Starfield ist bereits in der Tutorial-Klasse integriert
+            action = tutorial.update(dt, events)
             tutorial.draw(screen)
+            
+            if action == "back":
+                game_state = "main_menu"
+                main_menu.activate()
 
         # ====== PAUSE ======
         elif game_state == "pause":

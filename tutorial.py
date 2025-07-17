@@ -1,6 +1,10 @@
 import pygame
 import math
 from constants import *
+try:
+    from starfield import MenuStarfield
+except ImportError:
+    MenuStarfield = None
 
 class Tutorial:
     def __init__(self):
@@ -113,57 +117,76 @@ class Tutorial:
         ]
         
         self.current_page = 0
+        self.transitioning = False
+        self.transition_timer = 0
+        self.transition_duration = 0.3
+        
+        # Schriftarten
         self.font_title = pygame.font.Font(None, 48)
         self.font_content = pygame.font.Font(None, 28)
         self.font_navigation = pygame.font.Font(None, 24)
         
-        # Animation für Seitenwechsel
-        self.transition_timer = 0
-        self.transition_duration = 0.3
-        self.transitioning = False
-        self.next_page = 0
-        
-    def handle_event(self, event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                if self.current_page < len(self.pages) - 1:
-                    self.start_transition(self.current_page + 1)
-                    return None
-                    
-            elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                if self.current_page > 0:
-                    self.start_transition(self.current_page - 1)
-                    return None
-                    
-            elif event.key == pygame.K_ESCAPE or event.key == pygame.K_SPACE:
-                return "main_menu"
-                
-        return None
+        # NEU: Starfield für Hintergrund hinzufügen
+        try:
+            from starfield import MenuStarfield
+            self.starfield = MenuStarfield(num_stars=80)
+        except ImportError:
+            self.starfield = None
+            print("Starfield konnte nicht importiert werden")
+
+    def next_page(self):
+        """Wechselt zur nächsten Seite"""
+        if self.current_page < len(self.pages) - 1:
+            self.start_transition(self.current_page + 1)
+    
+    def previous_page(self):
+        """Wechselt zur vorherigen Seite"""
+        if self.current_page > 0:
+            self.start_transition(self.current_page - 1)
     
     def start_transition(self, target_page):
         """Startet eine animierte Transition zur Zielseite"""
         self.transitioning = True
-        self.next_page = target_page
+        self.target_page = target_page
         self.transition_timer = 0
     
-    def update(self, dt):
+    def update(self, dt, events):
+        # Starfield aktualisieren
+        if hasattr(self, 'starfield') and self.starfield:
+            self.starfield.update(dt)
+        
+        # Transition-Animation
         if self.transitioning:
             self.transition_timer += dt
             if self.transition_timer >= self.transition_duration:
-                self.current_page = self.next_page
                 self.transitioning = False
+                self.current_page = self.target_page
                 self.transition_timer = 0
+                return None
+    
+        # Event-Handling
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE or event.key == pygame.K_SPACE:
+                    return "back"
+                
+                elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                    if not self.transitioning:
+                        self.previous_page()
+                
+                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    if not self.transitioning:
+                        self.next_page()
+        
+        return None
     
     def draw(self, screen):
-        # Hintergrund
-        screen.fill((10, 10, 30))
+        # Schwarzer Hintergrund
+        screen.fill((0, 0, 0))
         
-        # Sterne im Hintergrund
-        for i in range(50):
-            x = (i * 137) % SCREEN_WIDTH
-            y = (i * 197) % SCREEN_HEIGHT
-            brightness = 50 + (i * 31) % 100
-            pygame.draw.circle(screen, (brightness, brightness, brightness), (x, y), 1)
+        # NEU: Starfield zeichnen (falls vorhanden)
+        if hasattr(self, 'starfield') and self.starfield:
+            self.starfield.draw(screen)
         
         # Transition-Effekt
         alpha = 255
@@ -186,30 +209,23 @@ class Tutorial:
         
         y_offset += 80
         
-        # Content - VERWENDE draw_colored_line() für PowerUps und Waffen
+        # Content - VERWENDE draw_colored_line() für PowerUps, Waffen UND Schwierigkeitsgrade
         for line in page["content"]:
             if line == "":
                 y_offset += 15
                 continue
             
-            # Prüfe ob es sich um PowerUp- oder Waffen-Zeilen handelt
-            if (line.startswith("[") and "]" in line) or ":" in line and any(weapon in line for weapon in ["STANDARD", "LASER", "RAKETEN", "SCHROTFLINTE"]):
+            # Prüfe ob es sich um PowerUp-, Waffen- oder Schwierigkeitsgrad-Zeilen handelt
+            if ((line.startswith("[") and "]" in line) or 
+                (":" in line and any(weapon in line for weapon in ["STANDARD", "LASER", "RAKETEN", "SCHROTFLINTE"]))):
                 # Verwende die spezielle Färbungs-Methode
                 self.draw_colored_line(screen, line, SCREEN_WIDTH//2, y_offset)
             else:
                 # Normale Zeilen mit einfacher Formatierung
                 color = (255, 255, 255)  # Standard weiß
                 
-                # Schwierigkeitsgrade-Namen
-                if line.startswith("[LEICHT]:"):
-                    color = (0, 255, 0)  # Grün für Leicht
-                elif line.startswith("[NORMAL]:"):
-                    color = (255, 255, 0)  # Gelb für Normal
-                elif line.startswith("[SCHWER]:"):
-                    color = (255, 0, 0)  # Rot für Schwer
-                
                 # Boss-bezogene Hervorhebungen
-                elif line.startswith("*** BOSS-KÄMPFE ***") or line.startswith("*** Boss-Verhalten ***"):
+                if line.startswith("*** BOSS-KÄMPFE ***") or line.startswith("*** Boss-Verhalten ***"):
                     color = (128, 0, 128)  # Lila - wie Boss-Farbe
                 elif line.startswith("### Tipps ###"):
                     color = (255, 215, 0)  # Gold für wichtige Tipps
@@ -281,6 +297,13 @@ class Tutorial:
                 name_color = (255, 165, 0)
             elif "[3-SHOT]" in name_part or "[SPEED]" in name_part:
                 name_color = (255, 255, 0)
+            # NEU: Schwierigkeitsgrade hinzufügen
+            elif "[LEICHT]" in name_part:
+                name_color = (0, 255, 0)  # Grün
+            elif "[NORMAL]" in name_part:
+                name_color = (255, 255, 0)  # Gelb
+            elif "[SCHWER]" in name_part:
+                name_color = (255, 0, 0)  # Rot
             
             # Name zeichnen
             name_surface = self.font_content.render(name_part, True, name_color)
@@ -295,7 +318,7 @@ class Tutorial:
             
             screen.blit(name_surface, (start_x, y))
             screen.blit(desc_surface, (start_x + name_width, y))
-    
+
         # Waffen-Namen (mit Doppelpunkt) 
         elif ":" in line:
             colon_pos = line.find(":") + 1
