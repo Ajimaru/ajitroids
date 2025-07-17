@@ -156,6 +156,11 @@ class Sounds:
     def play_level_up(self):
         if self.sound_on and self.level_up:
             self.level_up.play()
+    
+    def play_achievement(self):
+        """Spielt den Achievement-Sound ab (verwendet level_up Sound)"""
+        if self.sound_on and self.level_up:
+            self.level_up.play()
             
     def play_powerup(self):
         if self.sound_on and self.powerup:
@@ -180,6 +185,13 @@ class Sounds:
     def play_shield_activate(self):
         if self.sound_on and self.shield_activate:
             self.shield_activate.play()
+    
+    def play_achievement(self):
+        """Spielt den Achievement-Sound ab (verwendet Level-Up-Sound)"""
+        if self.sound_on and self.level_up:
+            self.level_up.play()
+        else:
+            print("Achievement-Sound nicht verfügbar (Level-Up-Sound fehlt)")
     
     def play_game_over(self):
         """Spielt den Game Over Sound ab"""

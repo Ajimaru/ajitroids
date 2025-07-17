@@ -905,6 +905,80 @@ class AchievementsMenu(Menu):
         super().__init__("ACHIEVEMENTS")
         self.achievement_system = achievement_system
         self.add_item("Zurück", "back")
+        
+        # 8-bit ASCII Grafiken für jedes Achievement (kompakter)
+        self.achievement_graphics = {
+            "First Blood": [
+                " ▄▄▄ ",
+                "█░█░█",
+                "░█▄█░",
+                "█░█░█",
+                " ▀▀▀ "
+            ],
+            "Survivor": [
+                " ▄▄▄ ",
+                "█░░░█",
+                "█░█░█",
+                "█░░░█",
+                " ▀▀▀ "
+            ],
+            "Asteroid Hunter": [
+                " ▄███▄ ",
+                "█░▄▄▄░█",
+                "█▄█▀█▄█",
+                "█░▀▀▀░█",
+                " ▀███▀ "
+            ],
+            "Power User": [
+                " ▄█▄ ",
+                "█░█░█",
+                "█▄█▄█",
+                "█░█░█",
+                " ▀█▀ "
+            ],
+            "Boss Slayer": [
+                " ▄▄▄▄▄ ",
+                "█░███░█",
+                "█░▀█▀░█",
+                "█░▄█▄░█",
+                " ▀▀▀▀▀ "
+            ],
+            "Level Master": [
+                " ▄▄▄ ",
+                "█▀▀▀█",
+                "█░█░█",
+                "█▄▄▄█",
+                " ▀▀▀ "
+            ],
+            "High Scorer": [
+                " ▄▄▄ ",
+                "█░█░█",
+                "█▄█▄█",
+                "█░█░█",
+                " ▀▀▀ "
+            ],
+            "Shield Expert": [
+                " ▄▄▄ ",
+                "█░░░█",
+                "█░▄░█",
+                "█░▀░█",
+                " ▀▀▀ "
+            ],
+            "Speed Demon": [
+                " ▄▄▄ ",
+                "█▄▄▄█",
+                "█▀▀▀█",
+                "█▄▄▄█",
+                " ▀▀▀ "
+            ],
+            "Triple Threat": [
+                " ▄ ▄ ▄ ",
+                "█ █ █ █",
+                "█ █ █ █",
+                "█ █ █ █",
+                " ▀ ▀ ▀ "
+            ]
+        }
 
     def draw(self, screen):
         # Halbtransparenten Hintergrund zeichnen
@@ -914,26 +988,72 @@ class AchievementsMenu(Menu):
 
         # Titel zeichnen
         title_surf = self.title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 8))
+        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 12))
         screen.blit(title_surf, title_rect)
 
-        # Achievements zeichnen
-        start_y = SCREEN_HEIGHT / 4
+        # Achievements mit kompaktem Layout zeichnen
+        start_y = SCREEN_HEIGHT / 5
+        achievement_spacing = 45  # Kompakter Abstand
+        graphics_font = pygame.font.Font(None, 20)  # Schrift für ASCII-Grafiken
+        name_font = pygame.font.Font(None, 28)      # Schrift für Achievement-Namen
+        
         for i, achievement in enumerate(self.achievement_system.achievements):
-            color = pygame.Color("green") if achievement.unlocked else pygame.Color("red")
-            text_surf = self.item_font.render(achievement.name, True, color)
-            text_rect = text_surf.get_rect(center=(SCREEN_WIDTH / 2, start_y + i * MENU_ITEM_SPACING))
-            screen.blit(text_surf, text_rect)
+            current_y = start_y + i * achievement_spacing
+            
+            # Prüfen ob Achievement freigeschaltet ist
+            is_unlocked = achievement.unlocked
+            
+            # Farben basierend auf Status
+            if is_unlocked:
+                name_color = pygame.Color("gold")
+                graphic_color = pygame.Color("yellow")
+                status_color = pygame.Color("lightgreen")
+            else:
+                name_color = pygame.Color("darkgray")
+                graphic_color = pygame.Color("darkred")
+                status_color = pygame.Color("gray")
+            
+            # 8-bit Grafik zeichnen (nur wenn freigeschaltet)
+            if is_unlocked and achievement.name in self.achievement_graphics:
+                graphics = self.achievement_graphics[achievement.name]
+                graphic_x = 80  # Links positioniert
+                
+                for line_idx, line in enumerate(graphics):
+                    graphic_surf = graphics_font.render(line, True, graphic_color)
+                    graphic_rect = graphic_surf.get_rect(topleft=(graphic_x, current_y - 8 + line_idx * 8))
+                    screen.blit(graphic_surf, graphic_rect)
+            
+            # Achievement-Name zeichnen
+            name_surf = name_font.render(achievement.name, True, name_color)
+            name_rect = name_surf.get_rect(topleft=(200, current_y + 5))
+            screen.blit(name_surf, name_rect)
+            
+            # Status-Indikator (kompakt)
+            if is_unlocked:
+                status_surf = name_font.render("✓", True, status_color)
+            else:
+                status_surf = name_font.render("🔒", True, status_color)
+            status_rect = status_surf.get_rect(topleft=(520, current_y + 5))
+            screen.blit(status_surf, status_rect)
 
         # Normale Menü-Items zeichnen (für "Zurück"-Button)
-        start_y = SCREEN_HEIGHT - 100
+        back_button_y = SCREEN_HEIGHT - 100
         for i, item in enumerate(self.items):
-            item_rect = item.draw(screen, (SCREEN_WIDTH / 2, start_y + i * MENU_ITEM_SPACING), self.item_font)
+            item_rect = item.draw(screen, (SCREEN_WIDTH / 2, back_button_y + i * MENU_ITEM_SPACING), self.item_font)
 
         # Zusätzliche Anweisung
-        instruction_surf = self.item_font.render("Drücke ESC oder SPACE, um zurückzukehren", True, pygame.Color(MENU_UNSELECTED_COLOR))
-        instruction_rect = instruction_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 50))
+        instruction_font = pygame.font.Font(None, 24)
+        instruction_surf = instruction_font.render("Drücke ESC oder SPACE, um zurückzukehren", True, pygame.Color(MENU_UNSELECTED_COLOR))
+        instruction_rect = instruction_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 40))
         screen.blit(instruction_surf, instruction_rect)
+        
+        # Fortschrittsanzeige
+        unlocked_count = sum(1 for achievement in self.achievement_system.achievements if achievement.unlocked)
+        total_count = len(self.achievement_system.achievements)
+        progress_text = f"Fortschritt: {unlocked_count}/{total_count} Achievements freigeschaltet"
+        progress_surf = instruction_font.render(progress_text, True, pygame.Color("lightblue"))
+        progress_rect = progress_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 12 + 40))
+        screen.blit(progress_surf, progress_rect)
 
     def update(self, dt, events):
         # Erst die normale Menu-Update-Logik aufrufen

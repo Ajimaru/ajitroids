@@ -18,6 +18,7 @@ from settings import Settings
 from boss import Boss
 from bossprojectile import BossProjectile
 from achievements import AchievementSystem
+from achievement_notification import AchievementNotificationManager
 
 
 def main():
@@ -27,12 +28,22 @@ def main():
     global game_state, score, lives, level
     
     # Achievement-System initialisieren
-    global achievement_system
+    global achievement_system, achievement_notifications
     achievement_system = AchievementSystem()
-
-    # Beispiel-Achievements hinzufügen
-    achievement_system.add_achievement("First Blood", "Destroy your first asteroid.")
-    achievement_system.add_achievement("Survivor", "Survive for 5 minutes.")
+    achievement_notifications = AchievementNotificationManager()
+    
+    # Achievement-Statistiken für Tracking
+    global powerups_collected, asteroids_destroyed, shields_used, triple_shots_used, speed_boosts_used
+    powerups_collected = 0
+    asteroids_destroyed = 0
+    shields_used = 0
+    triple_shots_used = 0
+    speed_boosts_used = 0
+    
+    # Benachrichtigungs-Callback setzen
+    achievement_system.set_notification_callback(achievement_notifications.add_notification)
+    
+    # Standard-Achievements werden automatisch im Speicher initialisiert, aber nicht in die JSON geschrieben
 
     # Auch für Boss-Variablen hinzufügen
     global boss_active, boss_defeated_timer, boss_defeated_message
@@ -66,6 +77,9 @@ def main():
     
     # Sound-System initialisieren
     sounds = Sounds()
+    
+    # Sounds an Achievement-Benachrichtigungen weitergeben
+    achievement_notifications.set_sounds(sounds)
 
     # Verzögerung hinzufügen, um sicherzustellen, dass pygame.mixer bereit ist
     pygame.time.delay(200)  # Längere Verzögerung
@@ -177,9 +191,6 @@ def main():
     boss_active = False
     boss_defeated_timer = 0
     boss_defeated_message = ""
-    
-    # Achievement-Benachrichtigungen anzeigen
-    achievement_notifications = []
 
     # Sicherstellen, dass alle globalen Variablen definiert sind
     if 'player' not in globals() or not player:
@@ -210,24 +221,6 @@ def main():
         
         # Bildschirm löschen
         screen.fill("black")
-        
-        # Achievement-Benachrichtigungen aktualisieren
-        for notification in achievement_notifications[:]:
-            notification["timer"] -= dt
-            if notification["timer"] <= 0:
-                achievement_notifications.remove(notification)
-
-        # Achievement-Benachrichtigungen zeichnen
-        for notification in achievement_notifications:
-            font = pygame.font.Font(None, 36)
-            text = font.render(notification["text"], True, (255, 255, 0))
-            rect = text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4))
-            screen.blit(text, rect)
-
-        # Beispiel: Achievement freischalten und Benachrichtigung hinzufügen
-        if score >= 100 and not achievement_system.is_unlocked("First Blood"):
-            achievement_system.unlock("First Blood")
-            achievement_notifications.append({"text": "Achievement Unlocked: First Blood", "timer": 3})
 
         # ====== HAUPTMENÜ ======
         if game_state == "main_menu":
@@ -546,6 +539,21 @@ def main():
                         # Asteroidenexplosion
                         Particle.create_asteroid_explosion(asteroid.position.x, asteroid.position.y)
                         
+                        # Achievement: First Blood (Ersten Asteroid zerstört)
+                        if not achievement_system.is_unlocked("First Blood"):
+                            achievement_system.unlock("First Blood")
+                        
+                        # Asteroid-Zählung für Achievements
+                        asteroids_destroyed += 1
+                        
+                        # Achievement: Asteroid Hunter (1000 Asteroiden zerstört)
+                        if asteroids_destroyed >= 1000 and not achievement_system.is_unlocked("Asteroid Hunter"):
+                            achievement_system.unlock("Asteroid Hunter")
+                        
+                        # Achievement: High Scorer (250,000 Punkte erreichen)
+                        if score >= 250000 and not achievement_system.is_unlocked("High Scorer"):
+                            achievement_system.unlock("High Scorer")
+                        
                         # Power-Up Chance nur bei großen Asteroiden
                         if is_large_asteroid and random.random() < POWERUP_SPAWN_CHANCE:
                             # Nur ein Power-Up pro Asteroid und maximal POWERUP_MAX_COUNT auf dem Bildschirm
@@ -636,6 +644,10 @@ def main():
                 # Level erhöhen (nach der Boss-Check)
                 level = current_level
                 
+                # Achievement: Level Master (Level 666 erreicht)
+                if level >= 666 and not achievement_system.is_unlocked("Level Master"):
+                    achievement_system.unlock("Level Master")
+                
                 # Ab Level 10 die Schwierigkeit nicht mehr erhöhen, um das Spiel spielbar zu halten
                 if level <= 10:
                     asteroid_field.asteroid_count = min(BASE_ASTEROID_COUNT + (level - 1) * ASTEROID_COUNT_PER_LEVEL, 12)
@@ -674,6 +686,33 @@ def main():
                 if powerup.collides_with(player):
                     player.activate_powerup(powerup.type)
                     powerup.kill()
+                    
+                    # PowerUp-Statistiken aktualisieren
+                    powerups_collected += 1
+                    
+                    # Spezifische PowerUp-Zählung
+                    if powerup.type == "shield":
+                        shields_used += 1
+                    elif powerup.type == "triple_shot":
+                        triple_shots_used += 1
+                    elif powerup.type == "speed_boost":
+                        speed_boosts_used += 1
+                    
+                    # Achievement: Power User (250 Power-ups gesammelt)
+                    if powerups_collected >= 250 and not achievement_system.is_unlocked("Power User"):
+                        achievement_system.unlock("Power User")
+                    
+                    # Achievement: Shield Expert (50 Schilde benutzt)
+                    if shields_used >= 50 and not achievement_system.is_unlocked("Shield Expert"):
+                        achievement_system.unlock("Shield Expert")
+                    
+                    # Achievement: Speed Demon (25 Speed Boosts benutzt)
+                    if speed_boosts_used >= 25 and not achievement_system.is_unlocked("Speed Demon"):
+                        achievement_system.unlock("Speed Demon")
+                    
+                    # Achievement: Triple Threat (20 Triple Shots benutzt)
+                    if triple_shots_used >= 20 and not achievement_system.is_unlocked("Triple Threat"):
+                        achievement_system.unlock("Triple Threat")
         
             # Nach dem Level-Up: Boss-Kampf prüfen
             if current_level > level and current_level % BOSS_LEVEL_INTERVAL == 0:
@@ -740,6 +779,10 @@ def main():
                             score += BOSS_SCORE
                             boss_active = False
                             
+                            # Achievement: Boss Slayer (Ersten Boss besiegt)
+                            if not achievement_system.is_unlocked("Boss Slayer"):
+                                achievement_system.unlock("Boss Slayer")
+                            
                             # Extra Leben!
                             lives += 1
                             sounds.play_extra_life()
@@ -747,7 +790,13 @@ def main():
                             # Benachrichtigung anzeigen
                             boss_defeated_timer = 3.0
                             boss_defeated_message = "BOSS BESIEGT! +1 LEBEN!"
-        
+            
+            # Achievement-Benachrichtigungen aktualisieren (immer im Spielzustand)
+            achievement_notifications.update(dt)
+            
+            # Achievement-Benachrichtigungen zeichnen (über allem anderen)
+            achievement_notifications.draw(screen)
+
         # ====== HIGHSCORE EINGABE ======
         elif game_state == "highscore_input":
             # Menü-Starfield auch hier anzeigen
@@ -854,6 +903,5 @@ def debug_music_status():
 
 if __name__ == "__main__":
     main()
-    # Spiel beenden und Achievements speichern
-    achievement_system.save_achievements()
-    print("Achievements wurden gespeichert.")
+    # Spiel beenden - keine automatische Speicherung von Achievements mehr
+    print("Spiel beendet.")
