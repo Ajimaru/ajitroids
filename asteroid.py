@@ -3,7 +3,8 @@ import math
 import pygame
 from circleshape import CircleShape
 from constants import *
-from shot import Shot  # Füge diesen Import hinzu
+from shot import Shot
+from powerup import PowerUp  # PowerUp-Klasse importieren
 
 class Asteroid(CircleShape):
     def __init__(self, x, y, radius):
@@ -115,6 +116,19 @@ class Asteroid(CircleShape):
 
     def split(self):
         self.kill()  # Zerstöre den aktuellen Asteroiden
+    
+        # Einfacherer Weg, um Power-ups zu zählen
+        powerup_group = None
+        for container in PowerUp.containers:
+            if isinstance(container, pygame.sprite.Group):
+                powerup_group = container
+                break
+        
+        powerups_count = len(powerup_group) if powerup_group else 0
+        
+        # Chance, dass ein Power-up erscheint
+        if random.random() < POWERUP_SPAWN_CHANCE and powerups_count < POWERUP_MAX_COUNT:
+            PowerUp(self.position.x, self.position.y)
         
         # Wenn der Asteroid zu klein ist, nicht weiter aufteilen
         if self.radius <= ASTEROID_MIN_RADIUS:

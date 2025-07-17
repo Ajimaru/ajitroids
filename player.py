@@ -3,6 +3,7 @@ from constants import *
 from circleshape import CircleShape
 from shot import Shot
 from sounds import Sounds
+import math
 
 
 class Player(CircleShape):
@@ -14,11 +15,34 @@ class Player(CircleShape):
         self.invincible = False
         self.invincible_timer = 0
         self.sounds = Sounds()
+        self.shield_active = False
+        self.shield_timer = 0
+        self.triple_shot_active = False
+        self.triple_shot_timer = 0
+        self.rapid_fire_active = False
+        self.rapid_fire_timer = 0
+        self.original_cooldown = PLAYER_SHOOT_COOLDOWN
 
     def draw(self, screen):
         # Blinken während Unverwundbarkeit
         if not self.invincible or pygame.time.get_ticks() % 200 < 100:
             pygame.draw.polygon(screen, "white", self.triangle(), 2)
+
+        # Schild zeichnen wenn aktiv
+        if self.shield_active:
+            shield_color = "#00FFFF"  # Cyan
+            # Pulsierender Effekt
+            alpha = int(128 + 127 * abs(math.sin(pygame.time.get_ticks() * 0.005)))
+            shield_surf = pygame.Surface((self.radius * 3, self.radius * 3), pygame.SRCALPHA)
+            
+            # Korrigierte Zeile - Farbe und Alpha richtig setzen
+            color_obj = pygame.Color(shield_color)
+            rgba_color = (color_obj.r, color_obj.g, color_obj.b, alpha)
+            
+            pygame.draw.circle(shield_surf, rgba_color, 
+                             (self.radius * 1.5, self.radius * 1.5), self.radius * 1.4, 2)
+            screen.blit(shield_surf, (self.position.x - self.radius * 1.5, 
+                                    self.position.y - self.radius * 1.5))
 
     def triangle(self):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
@@ -68,15 +92,50 @@ class Player(CircleShape):
             if self.invincible_timer <= 0:
                 self.invincible = False
 
+        # Power-up Timer aktualisieren
+        if self.shield_active:
+            self.shield_timer -= dt
+            if self.shield_timer <= 0:
+                self.shield_active = False
+        
+        if self.triple_shot_active:
+            self.triple_shot_timer -= dt
+            if self.triple_shot_timer <= 0:
+                self.triple_shot_active = False
+        
+        if self.rapid_fire_active:
+            self.rapid_fire_timer -= dt
+            if self.rapid_fire_timer <= 0:
+                self.rapid_fire_active = False
+                self.shoot_timer = self.original_cooldown  # Reset auf normalen Cooldown
+
         if keys[pygame.K_SPACE] and self.shoot_timer <= 0:
             self.shoot()
 
     def shoot(self):
         if self.shoot_timer <= 0:
-            shot = Shot(self.position.x, self.position.y)
-            shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
-            self.shoot_timer = PLAYER_SHOOT_COOLDOWN  # Timer zurücksetzen
-            self.sounds.play_shoot()  # Schuss-Sound
+            if self.triple_shot_active:
+                # Dreifachschuss: Normal + 2 mit Winkel
+                shot1 = Shot(self.position.x, self.position.y)
+                shot1.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+                
+                shot2 = Shot(self.position.x, self.position.y)
+                shot2.velocity = pygame.Vector2(0, 1).rotate(self.rotation - 15) * PLAYER_SHOOT_SPEED
+                
+                shot3 = Shot(self.position.x, self.position.y)
+                shot3.velocity = pygame.Vector2(0, 1).rotate(self.rotation + 15) * PLAYER_SHOOT_SPEED
+            else:
+                # Normaler Einzelschuss
+                shot = Shot(self.position.x, self.position.y)
+                shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+            
+            # Cooldown basierend auf Power-up-Status
+            if self.rapid_fire_active:
+                self.shoot_timer = RAPID_FIRE_COOLDOWN
+            else:
+                self.shoot_timer = self.original_cooldown
+            
+            self.sounds.play_shoot()
 
     def make_invincible(self):
         self.invincible = True
@@ -88,3 +147,17 @@ class Player(CircleShape):
         self.velocity = pygame.Vector2(0, 0)
         self.rotation = 0
         self.make_invincible()
+
+    def activate_powerup(self, powerup_type):
+        if powerup_type == "shield":
+            self.shield_active = True
+            self.shield_timer = SHIELD_DURATION
+            self.invincible = True  # Macht auch unverwundbar
+        
+        elif powerup_type == "triple_shot":
+            self.triple_shot_active = True
+            self.triple_shot_timer = TRIPLE_SHOT_DURATION
+        
+        elif powerup_type == "rapid_fire":
+            self.rapid_fire_active = True
+            self.rapid_fire_timer = RAPID_FIRE_DURATION

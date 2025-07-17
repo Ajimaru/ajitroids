@@ -39,3 +39,19 @@ STAR_SIZES = [1, 2, 3]  # Verschiedene Sterngrößen
 STAR_COLORS = ["white", "#ADD8E6", "#FFD700"]  # Weiß, Hellblau, Gold
 
 COLLISION_DEBUG = False  # Zum Debuggen der Hitboxen
+
+# Power-up Konstanten
+POWERUP_RADIUS = 15
+POWERUP_SPAWN_CHANCE = 0.3  # Erhöht von 0.1 auf 0.3 für häufigere Spawns
+POWERUP_MAX_COUNT = 3  # Maximal 3 Power-ups gleichzeitig
+POWERUP_LIFETIME = 15.0  # Sekunden bis ein Power-up verschwindet
+SHIELD_DURATION = 10.0  # Sekunden
+POWERUP_TYPES = ["shield", "triple_shot", "rapid_fire"]
+POWERUP_COLORS = {
+    "shield": "#00FFFF",      # Cyan
+    "triple_shot": "#FF00FF", # Magenta
+    "rapid_fire": "#FFFF00"   # Gelb
+}
+RAPID_FIRE_COOLDOWN = 0.1    # Cooldown während Rapid-Fire
+RAPID_FIRE_DURATION = 5.0    # Sekunden
+TRIPLE_SHOT_DURATION = 8.0   # Sekunden

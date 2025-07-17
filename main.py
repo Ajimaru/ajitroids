@@ -9,6 +9,22 @@ from shot import Shot
 from particle import Particle
 from sounds import Sounds
 from starfield import Starfield
+from powerup import PowerUp  # PowerUp-Klasse importieren
+
+
+# Power-up Konstanten
+POWERUP_RADIUS = 15
+POWERUP_SPAWN_CHANCE = 0.2  # 20% Chance dass ein Asteroid ein Power-up droppt
+SHIELD_DURATION = 10.0  # Sekunden
+POWERUP_TYPES = ["shield", "triple_shot", "rapid_fire"]
+POWERUP_COLORS = {
+    "shield": "#00FFFF",      # Cyan
+    "triple_shot": "#FF00FF", # Magenta
+    "rapid_fire": "#FFFF00"   # Gelb
+}
+RAPID_FIRE_COOLDOWN = 0.1    # Cooldown während Rapid-Fire
+RAPID_FIRE_DURATION = 5.0    # Sekunden
+TRIPLE_SHOT_DURATION = 8.0
 
 
 def main():
@@ -23,13 +39,14 @@ def main():
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
     particles = pygame.sprite.Group()
-
-    # Container für alle Klassen setzen
-    Asteroid.containers = (asteroids, updatable, drawable)
+    powerups = pygame.sprite.Group()  # Gruppe für Power-ups erstellen
+    
+    # Container für alle Sprite-Typen setzen
     Shot.containers = (shots, updatable, drawable)
-    Particle.containers = (particles, updatable, drawable)  # Diese Zeile war möglicherweise nicht vorhanden
+    Asteroid.containers = (asteroids, updatable, drawable)
     AsteroidField.containers = updatable
     Player.containers = (updatable, drawable)
+    PowerUp.containers = (powerups, updatable, drawable)  # PowerUp-Container definieren
 
     asteroid_field = AsteroidField()
 
@@ -119,6 +136,12 @@ def main():
         # Leben anzeigen
         lives_text = font.render(f"Lives: {lives}", True, "white")
         screen.blit(lives_text, (10, 50))
+
+        # Power-up Kollisionen
+        for powerup in powerups:
+            if powerup.collides_with(player):
+                player.activate_powerup(powerup.type)
+                powerup.kill()
 
         pygame.display.flip()
 
