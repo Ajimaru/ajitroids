@@ -12,7 +12,8 @@ from sounds import Sounds
 from starfield import Starfield, MenuStarfield  # MenuStarfield hinzufügen
 from powerup import PowerUp  # PowerUp-Klasse importieren
 from highscore import HighscoreManager, HighscoreInput, HighscoreDisplay  # Highscore-Klassen importieren
-from menu import MainMenu, PauseMenu, TutorialScreen, OptionsMenu, CreditsScreen, GameOverScreen, DifficultyMenu  # Menü-Klassen importieren
+from menu import MainMenu, PauseMenu, OptionsMenu, CreditsScreen, GameOverScreen, DifficultyMenu  # TutorialScreen entfernen
+from tutorial import Tutorial  # Neue Tutorial-Klasse importieren
 from settings import Settings
 from boss import Boss
 from bossprojectile import BossProjectile
@@ -132,12 +133,12 @@ def main():
     # Menüs
     main_menu = MainMenu()
     pause_menu = PauseMenu()
-    tutorial_screen = TutorialScreen()
     options_menu = OptionsMenu(game_settings)  # Settings übergeben
     credits_screen = CreditsScreen()
     game_over_screen = GameOverScreen()
     difficulty_menu = DifficultyMenu()  # Neu hinzufügen
-    
+    tutorial = Tutorial()  # Tutorial-Instanz erstellen
+
     # Schwierigkeitsgrad-Variable
     difficulty = "normal"  # Standardwert
 
@@ -194,8 +195,6 @@ def main():
             
             elif action == "tutorial":
                 game_state = "tutorial"
-                tutorial_screen.fade_in = True
-                tutorial_screen.background_alpha = 0
             
             elif action == "highscores":
                 game_state = "highscore_display"
@@ -319,23 +318,19 @@ def main():
     
         # ====== TUTORIAL ======
         elif game_state == "tutorial":
-            # Menü-Starfield auch hier anzeigen
-            menu_starfield.update(dt)
-            menu_starfield.draw(screen)
-    
-            action = tutorial_screen.update(dt, events)
-            tutorial_screen.draw(screen)
-            
-            # Leertaste zum Hauptmenü
+            # Tutorial-Events verarbeiten
             for event in events:
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                action = tutorial.handle_event(event)
+                if action == "main_menu":
                     game_state = "main_menu"
                     main_menu.activate()
     
-            if action == "main_menu":
-                game_state = "main_menu"
-                main_menu.activate()
-        
+            # Tutorial aktualisieren
+            tutorial.update(dt)
+            
+            # Tutorial zeichnen
+            tutorial.draw(screen)
+
         # ====== PAUSE ======
         elif game_state == "pause":
             # Spiel im Hintergrund anzeigen
