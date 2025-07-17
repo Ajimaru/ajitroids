@@ -26,3 +26,4 @@ wheels/
 
 # user files
 *.json
+*.sh

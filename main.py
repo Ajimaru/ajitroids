@@ -61,19 +61,32 @@ def main():
     # Sound-Einstellungen anwenden
     print(f"Wende Musik-Einstellung an: {game_settings.music_on}")
 
+    # Debug: Musik-Status überprüfen
+    print(f"🎵 Musik-Debug:")
+    print(f"   - music_on: {game_settings.music_on}")
+    print(f"   - mixer initialized: {pygame.mixer.get_init() is not None}")
+    print(f"   - mixer frequency: {pygame.mixer.get_init()}")
+
     # Musik vollständig neu laden und starten
     if game_settings.music_on:
         try:
-            # Musik vollständig stoppen falls sie läuft
             pygame.mixer.music.stop()
-            # Musik neu laden
             pygame.mixer.music.load("assets/background.mp3")
-            pygame.mixer.music.set_volume(0.2)
-            # Musik starten
+            pygame.mixer.music.set_volume(1.0)  # Maximale Lautstärke testen
             pygame.mixer.music.play(-1)
-            print("Musik beim Start explizit neu geladen und gestartet")
+            
+            # Sofort nach dem Start prüfen
+            pygame.time.delay(100)  # Kurz warten
+            print(f"   - music busy after start: {pygame.mixer.music.get_busy()}")
+            print(f"   - music volume: {pygame.mixer.music.get_volume()}")
+            print("✅ Musik beim Start explizit neu geladen und gestartet")
         except Exception as e:
-            print(f"Fehler beim Starten der Musik: {e}")
+            print(f"❌ Fehler beim Starten der Musik: {e}")
+            # Debug: Prüfe ob Datei existiert
+            import os
+            print(f"Background.mp3 existiert: {os.path.exists('assets/background.mp3')}")
+            if os.path.exists('assets/background.mp3'):
+                print(f"Background.mp3 Größe: {os.path.getsize('assets/background.mp3')} bytes")
     else:
         pygame.mixer.music.set_volume(0.0)
         pygame.mixer.music.stop()
@@ -184,10 +197,12 @@ def main():
             # Überprüfe Musik-Status im Hauptmenü
             if game_settings.music_on and not pygame.mixer.music.get_busy():
                 try:
+                    pygame.mixer.music.load("assets/background.mp3")
+                    pygame.mixer.music.set_volume(0.8)
                     pygame.mixer.music.play(-1)
-                    print("Musik im Hauptmenü erneut gestartet")
+                    print("🎵 Musik im Hauptmenü neu gestartet")
                 except Exception as e:
-                    print(f"Fehler beim Starten der Musik im Hauptmenü: {e}")
+                    print(f"❌ Musik-Fehler im Hauptmenü: {e}")
             
             if action == "start_game":
                 game_state = "difficulty_select"  # Statt direkt zum Spiel zur Schwierigkeitsauswahl
@@ -419,11 +434,12 @@ def main():
                 # Schiffskollision - Schild berücksichtigen 
                 if asteroid.collides_with(player) and not player.invincible and not player.shield_active:
                     lives -= 1
-                    sounds.play_player_death()  # Spieler-Tod Sound
+                    sounds.play_player_hit()  # ÄNDERN: play_player_death() → play_player_hit()
                     Particle.create_ship_explosion(player.position.x, player.position.y)
                     
                     if lives <= 0:
                         print(f"Game Over! Final Score: {score}")
+                        sounds.play_game_over()  # NEU: Game Over Sound hinzufügen
                         game_over_screen.set_score(score)
                         game_over_screen.fade_in = True
                         game_over_screen.background_alpha = 0
@@ -734,6 +750,15 @@ def player_hit():
         player.kill()
         game_state = "game_over"
         sounds.play_game_over()
+
+
+def debug_music_status():
+    """Debug-Funktion für Musik-Status"""
+    print(f"🎵 Musik-Status:")
+    print(f"   - Busy: {pygame.mixer.music.get_busy()}")
+    print(f"   - Volume: {pygame.mixer.music.get_volume()}")
+    print(f"   - Mixer Init: {pygame.mixer.get_init()}")
+    print(f"   - Settings Music: {game_settings.music_on}")
 
 
 if __name__ == "__main__":
