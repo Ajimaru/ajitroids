@@ -291,27 +291,44 @@ class OptionsMenu(Menu):
             self.settings.music_on = not self.settings.music_on
             self.settings.save()
             sounds.toggle_music(self.settings.music_on)
-            # Menütext aktualisieren
-            self.items[0] = ("Music: ON" if self.settings.music_on else "Music: OFF", "toggle_music")
+            # Menütext korrekt aktualisieren (MenuItem-Objekt, nicht Tuple!)
+            self.items[0].text = "Music: ON" if self.settings.music_on else "Music: OFF"
             return None
             
         elif action == "toggle_sound":
             self.settings.sound_on = not self.settings.sound_on
             self.settings.save()
             sounds.toggle_sound(self.settings.sound_on)
-            # Menütext aktualisieren
-            self.items[1] = ("Sound: ON" if self.settings.sound_on else "Sound: OFF", "toggle_sound")
+            # Menütext korrekt aktualisieren (MenuItem-Objekt, nicht Tuple!)
+            self.items[1].text = "Sound: ON" if self.settings.sound_on else "Sound: OFF"
             return None
             
         elif action == "toggle_fullscreen":
             self.settings.fullscreen = not self.settings.fullscreen
             self.settings.save()
-            # Menütext aktualisieren
-            self.items[2] = ("Fullscreen: ON" if self.settings.fullscreen else "Fullscreen: OFF", "toggle_fullscreen")
+            
+            # WICHTIG: Fullscreen sofort anwenden!
+            try:
+                if self.settings.fullscreen:
+                    # Zu Fullscreen wechseln
+                    pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+                    print("Fullscreen aktiviert")
+                else:
+                    # Zu Fenstermodus wechseln
+                    pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+                    print("Fenstermodus aktiviert")
+            except Exception as e:
+                print(f"Fehler beim Umschalten des Bildschirmmodus: {e}")
+                # Einstellung rückgängig machen bei Fehler
+                self.settings.fullscreen = not self.settings.fullscreen
+                self.settings.save()
+            
+            # Menütext korrekt aktualisieren (MenuItem-Objekt, nicht Tuple!)
+            self.items[2].text = "Fullscreen: ON" if self.settings.fullscreen else "Fullscreen: OFF"
             return None
             
         elif action == "sound_test":
-            return "sound_test"  # NEU: Sound Test zurückgeben
+            return "sound_test"
             
         elif action == "back":
             return "main_menu"
@@ -740,7 +757,7 @@ class SoundTestMenu(Menu):
         return None
 
     def draw(self, screen):
-        """Sound-Test-Menü mit Scroll-Indikatoren zeichnen"""
+        """Sound-Test-Menü mit verbessertem Layout zeichnen"""
         # Halbtransparenten Hintergrund zeichnen (wie Menu-Klasse)
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
@@ -749,67 +766,130 @@ class SoundTestMenu(Menu):
         # Titel zeichnen
         title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
         title_surface = title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH/2, 80))
+        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH/2, 60))
         screen.blit(title_surface, title_rect)
         
         # Scroll-Indikatoren
-        indicator_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.8))
+        indicator_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.7))
         
         # Nach oben scrollen möglich?
         if self.scroll_offset > 0:
             up_text = indicator_font.render("▲ Scroll UP", True, pygame.Color("yellow"))
-            up_rect = up_text.get_rect(center=(SCREEN_WIDTH/2, 120))
+            up_rect = up_text.get_rect(center=(SCREEN_WIDTH/2, 100))
             screen.blit(up_text, up_rect)
-        
+    
         # Nach unten scrollen möglich?
         if self.scroll_offset + self.max_visible_items < len(self.sound_items):
             down_text = indicator_font.render("▼ Scroll DOWN", True, pygame.Color("yellow"))
-            down_rect = down_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 200))
+            down_rect = down_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 180))
             screen.blit(down_text, down_rect)
-        
-        # Menu-Items zeichnen
+    
+        # Menu-Items zeichnen mit verbessertem Layout
         font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
-        start_y = 160
-        
+        small_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.9))
+        start_y = 130
+    
+        visible_item_count = 0  # Zähler für sichtbare Items (ohne Leerzeilen)
+    
         for i, (text, action) in enumerate(self.items):
-            if text == "":  # Leerzeile überspringen
+            current_y = start_y + visible_item_count * 35  # Kleinerer Abstand
+    
+            if text == "":  # Leerzeile - nur Platz hinzufügen
+                visible_item_count += 0.3  # Kleine Lücke für Leerzeilen
                 continue
-                
-            # Farbe basierend auf Auswahl
-            color = MENU_SELECTED_COLOR if i == self.current_selection else MENU_UNSELECTED_COLOR
-            
-            # Größe für ausgewähltes Item
-            if i == self.current_selection:
-                scaled_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 1.2))
-                surface = scaled_font.render(text, True, pygame.Color(color))
+    
+            # Farbe und Stil basierend auf Auswahl
+            is_selected = (i == self.current_selection)
+    
+            if is_selected:
+                # Ausgewähltes Item - größer und heller
+                color = MENU_SELECTED_COLOR
+                scaled_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 1.1))
+                surface = scaled_font.render(f"► {text}", True, pygame.Color(color))
+    
+                # Hintergrund für ausgewähltes Item
+                bg_rect = pygame.Rect(SCREEN_WIDTH/2 - 200, current_y - 15, 400, 30)
+                pygame.draw.rect(screen, (30, 30, 50, 100), bg_rect, border_radius=5)
             else:
-                surface = font.render(text, True, pygame.Color(color))
-            
-            rect = surface.get_rect(center=(SCREEN_WIDTH/2, start_y + i * MENU_ITEM_SPACING))
+                # Normales Item
+                color = MENU_UNSELECTED_COLOR
+                surface = small_font.render(f"  {text}", True, pygame.Color(color))
+    
+            # Spezielle Farben für verschiedene Sound-Kategorien
+            if "Shoot" in text:
+                category_color = (150, 255, 150)  # Grün für Waffen
+            elif text in ["Explosion", "Player Hit"]:
+                category_color = (255, 150, 150)  # Rot für Kampf
+            elif text in ["PowerUp", "Shield Activate", "Weapon Pickup"]:
+                category_color = (150, 150, 255)  # Blau für PowerUps
+            elif "Boss" in text:
+                category_color = (255, 200, 100)  # Orange für Boss
+            elif text in ["Level Up", "Game Over"]:
+                category_color = (255, 255, 150)  # Gelb für Spiel-Events
+            elif "Menu" in text:
+                category_color = (200, 200, 200)  # Grau für UI
+            elif text in ["Test All Sounds", "Back"]:
+                category_color = (255, 150, 255)  # Magenta für Aktionen
+            else:
+                category_color = (255, 255, 255)  # Weiß als Standard
+    
+            # Farbe anwenden wenn nicht ausgewählt
+            if not is_selected:
+                surface = small_font.render(f"  {text}", True, category_color)
+    
+            rect = surface.get_rect(center=(SCREEN_WIDTH/2, current_y))
             screen.blit(surface, rect)
-        
-        # "Zuletzt gespielt" Anzeige
+    
+            visible_item_count += 1
+    
+        # "Zuletzt gespielt" Anzeige mit besserem Styling
         if self.last_played:
             played_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.8))
-            played_text = played_font.render(self.last_played, True, pygame.Color("green"))
-            played_rect = played_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 120))
+    
+            # Hintergrund für Feedback
+            feedback_bg = pygame.Rect(SCREEN_WIDTH/2 - 150, SCREEN_HEIGHT - 140, 300, 25)
+            pygame.draw.rect(screen, (0, 100, 0, 150), feedback_bg, border_radius=10)
+    
+            played_text = played_font.render(self.last_played, True, pygame.Color("lightgreen"))
+            played_rect = played_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 128))
             screen.blit(played_text, played_rect)
-        
-        # Anweisungen
+    
+        # Anweisungen mit besserer Formatierung
         instructions = [
-            "Use UP/DOWN arrows to scroll and navigate",
-            "Press ENTER to test sound",
-            "Press SPACE to go back"
+            "Navigation: ↑/↓ | Test: ENTER | Zurück: SPACE"
         ]
-        
-        instruction_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.6))
+    
+        instruction_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.65))
         for i, instruction in enumerate(instructions):
-            text = instruction_font.render(instruction, True, pygame.Color(MENU_UNSELECTED_COLOR))
-            text_rect = text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 80 + i * 20))
+            # Hintergrund für Anweisungen
+            instr_bg = pygame.Rect(20, SCREEN_HEIGHT - 80 + i * 25, SCREEN_WIDTH - 40, 20)
+            pygame.draw.rect(screen, (20, 20, 20, 180), instr_bg, border_radius=5)
+    
+            text = instruction_font.render(instruction, True, pygame.Color("lightgray"))
+            text_rect = text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 70 + i * 25))
             screen.blit(text, text_rect)
-        
-        # Scroll-Info anzeigen
-        scroll_info = f"Items {self.scroll_offset + 1}-{min(self.scroll_offset + self.max_visible_items, len(self.sound_items))} of {len(self.sound_items)}"
-        info_text = instruction_font.render(scroll_info, True, pygame.Color("gray"))
-        info_rect = info_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 20))
+    
+        # Scroll-Info mit verbessertem Design
+        scroll_info = f"Seite {(self.scroll_offset // self.max_visible_items) + 1} | Items {self.scroll_offset + 1}-{min(self.scroll_offset + self.max_visible_items, len(self.sound_items))} von {len(self.sound_items)}"
+        info_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.6))
+        info_text = info_font.render(scroll_info, True, pygame.Color("gray"))
+        info_rect = info_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 25))
         screen.blit(info_text, info_rect)
+    
+        # Legende für Farbkodierung (optional)
+        if self.scroll_offset == 0:  # Nur auf der ersten Seite anzeigen
+            legend_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.5))
+            legend_y = SCREEN_HEIGHT - 50
+    
+            legend_items = [
+                ("Waffen", (150, 255, 150)),
+                ("Kampf", (255, 150, 150)),
+                ("PowerUps", (150, 150, 255)),
+                ("Boss", (255, 200, 100))
+            ]
+    
+            legend_x = 50
+            for legend_text, legend_color in legend_items:
+                legend_surface = legend_font.render(legend_text, True, legend_color)
+                screen.blit(legend_surface, (legend_x, legend_y))
+                legend_x += 120
