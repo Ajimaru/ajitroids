@@ -100,5 +100,5 @@ class MenuStarfield:
                                          (int(screen_x), int(screen_y)), 
                                          max(1, size))
             except (IndexError, TypeError, ValueError) as e:
-                print(f"Fehlerhafter Stern übersprungen: {star}, Fehler: {e}")
+                print(f"Skipped faulty star: {star}, Error: {e}")
                 continue

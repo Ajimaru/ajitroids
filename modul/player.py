@@ -184,7 +184,7 @@ class Player(CircleShape):
         self.rapid_fire_timer = 0
         self.shot_cooldown = 0
         
-        print("Spieler respawnt mit 3 Sekunden Unverwundbarkeit")
+        print("Player respawned with 3 seconds of invincibility")
 
     def activate_powerup(self, powerup_type):
         if powerup_type == "shield":
@@ -203,17 +203,17 @@ class Player(CircleShape):
         elif powerup_type == "laser_weapon":
             self.weapons[WEAPON_LASER] += LASER_AMMO
             self.current_weapon = WEAPON_LASER
-            print(f"Laser-Waffe aktiviert! Munition: {self.weapons[WEAPON_LASER]}")
+            print(f"Laser weapon activated! Ammo: {self.weapons[WEAPON_LASER]}")
             
         elif powerup_type == "missile_weapon":
             self.weapons[WEAPON_MISSILE] += MISSILE_AMMO
             self.current_weapon = WEAPON_MISSILE
-            print(f"Raketen-Waffe aktiviert! Munition: {self.weapons[WEAPON_MISSILE]}")
+            print(f"Missile weapon activated! Ammo: {self.weapons[WEAPON_MISSILE]}")
             
         elif powerup_type == "shotgun_weapon":
             self.weapons[WEAPON_SHOTGUN] += SHOTGUN_AMMO
             self.current_weapon = WEAPON_SHOTGUN
-            print(f"Schrotgewehr aktiviert! Munition: {self.weapons[WEAPON_SHOTGUN]}")
+            print(f"Shotgun activated! Ammo: {self.weapons[WEAPON_SHOTGUN]}")
 
     def cycle_weapon(self):
         weapon_list = list(self.weapons.keys())
@@ -225,7 +225,7 @@ class Player(CircleShape):
             
             if next_weapon == WEAPON_STANDARD or self.weapons[next_weapon] > 0:
                 self.current_weapon = next_weapon
-                print(f"Waffe gewechselt zu: {self.current_weapon}, Munition: {self.weapons[self.current_weapon]}")
+                print(f"Weapon switched to: {self.current_weapon}, Ammo: {self.weapons[self.current_weapon]}")
                 return
         
         self.current_weapon = WEAPON_STANDARD

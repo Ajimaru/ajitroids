@@ -35,7 +35,7 @@ class AchievementSystem:
         for name, description in standard_achievements:
             achievement = Achievement(name, description)
             self.achievements.append(achievement)
-        print(f"Standard-Achievements im Speicher initialisiert: {len(self.achievements)} Einträge")
+        print(f"Standard achievements initialized in memory: {len(self.achievements)} entries")
 
     def load_unlocked_achievements(self):
         try:

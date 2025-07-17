@@ -39,49 +39,34 @@ def main():
     shields_used = 0
     triple_shots_used = 0
     speed_boosts_used = 0
-    
-    
     achievement_system.set_notification_callback(achievement_notifications.add_notification)
-    
-    
-
-    
     global boss_active, boss_defeated_timer, boss_defeated_message
-    
-    
+
     pygame.init()
-    
-    
+
     try:
         pygame.mixer.init(44100, -16, 2, 2048)
-        print("Pygame Mixer erfolgreich initialisiert")
+        print("Pygame Mixer initialized successfully")
     except Exception as e:
-        print(f"Fehler bei der Mixer-Initialisierung: {e}")
+        print(f"Error during mixer initialization: {e}")
     
     pygame.display.set_caption("Ajitroids")
-    
-    
+
     clock = pygame.time.Clock()
-    
-    
+
     game_settings = Settings()
-    
-    
-    
+
     if game_settings.fullscreen:
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
-        print("Vollbildmodus aktiviert")
+        print("Fullscreen mode activated")
     else:
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        print("Fenstermodus aktiviert")
-    
-    
+        print("Windowed mode activated")
+
     sounds = Sounds()
-    
-    
+ 
     achievement_notifications.set_sounds(sounds)
 
-    
     pygame.time.delay(200)
 
     if game_settings.music_on:
@@ -93,15 +78,15 @@ def main():
             
             pygame.time.delay(100)
         except Exception as e:
-            print(f"❌ Fehler beim Starten der Musik: {e}")
+            print(f"❌ Error starting music: {e}")
             import os
-            print(f"Background.mp3 existiert: {os.path.exists('assets/background.mp3')}")
+            print(f"Background.mp3 exists: {os.path.exists('assets/background.mp3')}")
             if os.path.exists('assets/background.mp3'):
-                print(f"Background.mp3 Größe: {os.path.getsize('assets/background.mp3')} bytes")
+                print(f"Background.mp3 size: {os.path.getsize('assets/background.mp3')} bytes")
     else:
         pygame.mixer.music.set_volume(0.0)
         pygame.mixer.music.stop()
-        print("Musik beim Start deaktiviert")
+        print("Music disabled at startup")
 
     sounds.toggle_sound(game_settings.sound_on)
     
@@ -125,17 +110,12 @@ def main():
 
     asteroid_field = AsteroidField()
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-    
     starfield = Starfield()
-    
     menu_starfield = MenuStarfield(200)
-    
     font = pygame.font.Font(None, 36)
-
     dt = 0
     lives = PLAYER_LIVES
     score = 0
-    
     level = 1
     level_up_timer = 0
     level_up_text = ""
@@ -172,7 +152,7 @@ def main():
     if 'game_settings' not in globals() or not game_settings:
         game_settings = Settings()
 
-    print(f"Initialisierte Variablen: player={player}, sounds={sounds}, PLAYER_INVINCIBLE_TIME={PLAYER_INVINCIBLE_TIME}, game_settings={game_settings}")
+    print(f"Initialized variables: player={player}, sounds={sounds}, PLAYER_INVINCIBLE_TIME={PLAYER_INVINCIBLE_TIME}, game_settings={game_settings}")
 
     while True:
         events = pygame.event.get()
@@ -204,7 +184,7 @@ def main():
                     pygame.mixer.music.set_volume(0.8)
                     pygame.mixer.music.play(-1)
                 except Exception as e:
-                    print(f"❌ Musik-Fehler im Hauptmenü: {e}")
+                    print(f"❌ Music error in main menu: {e}")
             
             if action == "start_game":
                 game_state = "difficulty_select"
@@ -474,7 +454,7 @@ def main():
                             if len(powerups) < POWERUP_MAX_COUNT:
                                 powerup_type = random.choice(POWERUP_TYPES)
                                 PowerUp(asteroid.position.x, asteroid.position.y, powerup_type)
-                                print(f"Power-Up {powerup_type} erscheint von großem Asteroid!")
+                                print(f"Power-Up {powerup_type} appears from large asteroid!")
         
                         asteroid.split()
                         shot.kill()
@@ -535,7 +515,7 @@ def main():
                     level_up_timer = LEVEL_UP_DISPLAY_TIME * 2
                     for asteroid in list(asteroids):
                         asteroid.kill()
-                    print(f"Boss-Kampf bei Level {current_level} gestartet!")
+                    print(f"Boss fight started at level {current_level}!")
                     sounds.play_boss_music()
                 
                 level = current_level
@@ -553,7 +533,7 @@ def main():
                 
                 sounds.play_level_up()
                 
-                print(f"Level-Up! Jetzt Level {level}, Asteroiden: {asteroid_field.asteroid_count}, Intervall: {asteroid_field.spawn_interval}") 
+                print(f"Level up! Now level {level}, asteroids: {asteroid_field.asteroid_count}, interval: {asteroid_field.spawn_interval}") 
            
             if level_up_timer > 0:
                 level_up_timer -= dt
@@ -655,7 +635,7 @@ def main():
                             sounds.play_extra_life()
                             
                             boss_defeated_timer = 3.0
-                            boss_defeated_message = "BOSS BESIEGT! +1 LEBEN!"
+                            boss_defeated_message = "BOSS DEFEATED! +1 LIFE!"
             
             achievement_notifications.update(dt)
             achievement_notifications.draw(screen)
@@ -716,7 +696,6 @@ def main():
         
         dt = clock.tick(60) / 1000.0
 
-
 def player_hit():
     global lives
     
@@ -730,22 +709,19 @@ def player_hit():
         player.velocity = pygame.Vector2(0, 0)
         player.invincible = True
         player.invincible_timer = PLAYER_INVINCIBLE_TIME
-        print(f"Spieler respawnt mit {PLAYER_INVINCIBLE_TIME} Sekunden Unverwundbarkeit")
+        print(f"Player respawned with {PLAYER_INVINCIBLE_TIME} seconds of invincibility")
     else:
         player.kill()
         game_state = "game_over"
         sounds.play_game_over()
 
-
 def debug_music_status():
-    """Debug-Funktion für Musik-Status"""
-    print(f"🎵 Musik-Status:")
+    print(f"🎵 Music status:")
     print(f"   - Busy: {pygame.mixer.music.get_busy()}")
     print(f"   - Volume: {pygame.mixer.music.get_volume()}")
     print(f"   - Mixer Init: {pygame.mixer.get_init()}")
     print(f"   - Settings Music: {game_settings.music_on}")
 
-
 if __name__ == "__main__":
     main()
-    print("Spiel beendet.")
+    print("Game over.")

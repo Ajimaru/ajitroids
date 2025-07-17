@@ -213,19 +213,19 @@ class TutorialScreen:
         screen.blit(title_surf, title_rect)
         
         instructions = [
-            "W / Pfeil hoch: Beschleunigen",
-            "A / Pfeil links: Nach links drehen",
-            "D / Pfeil rechts: Nach rechts drehen",
-            "S / Pfeil runter: Rückwärts",
-            "Leertaste: Schießen / Im Menü: Zurück zum Hauptmenü",
+            "W / Arrow Up: Accelerate",
+            "A / Arrow Left: Turn left",
+            "D / Arrow Right: Turn right",
+            "S / Arrow Down: Reverse",
+            "Spacebar: Shoot / In menu: Return to main menu",
             "ESC: Pause",
             "",
-            "Zerstöre alle Asteroiden und sammle Power-ups:",
-            "Schild (Blau): Vorübergehende Unverwundbarkeit",
-            "Dreifachschuss (Magenta): Drei Schüsse auf einmal",
-            "Schnellfeuer (Gelb): Erhöhte Feuerrate",
+            "Destroy all asteroids and collect power-ups:",
+            "Shield (Blue): Temporary invincibility",
+            "Triple Shot (Magenta): Three shots at once",
+            "Rapid Fire (Yellow): Increased fire rate",
             "",
-            "Drücke LEERTASTE, um zum Hauptmenü zurückzukehren"
+            "Press SPACEBAR to return to the main menu"
         ]
         
         y = 180
@@ -271,9 +271,9 @@ class OptionsMenu(Menu):
                     print("Fullscreen aktiviert")
                 else:
                     pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-                    print("Fenstermodus aktiviert")
+                    print("Windowed mode activated")
             except Exception as e:
-                print(f"Fehler beim Umschalten des Bildschirmmodus: {e}")
+                print(f"Error switching screen mode: {e}")
                 self.settings.fullscreen = not self.settings.fullscreen
                 self.settings.save()
             
@@ -325,18 +325,18 @@ class CreditsScreen:
         credits = [
             CREDITS_GAME_NAME,
             "",
-            f"Ein Spiel von {CREDITS_DEVELOPER}",
+            f"A game by {CREDITS_DEVELOPER}",
             "",
-            "Programmierung",
+            "Programming",
             CREDITS_DEVELOPER,
             "",
-            "Grafik & Design",
+            "Graphics & Design",
             CREDITS_GRAPHICS,
             "",
-            "Sound & Musik",
+            "Sound & Music",
             CREDITS_SOUND,
             "",
-            "Besonderer Dank an"
+            "Special thanks to"
         ]
         
         credits.extend(CREDITS_SPECIAL_THANKS)
@@ -345,9 +345,9 @@ class CreditsScreen:
             "",
             f"Download & Updates: {CREDITS_WEBSITE}",
             "",
-            "Vielen Dank fürs Spielen!",
+            "Thank you for playing!",
             "",
-            "Drücke LEERTASTE, um zurückzukehren"
+            "Press SPACE to return"
         ])
         
         y = self.scroll_position
@@ -397,26 +397,26 @@ class GameOverScreen:
         title_rect = title_surf.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/3))
         screen.blit(title_surf, title_rect)
         
-        score_surf = self.text_font.render(f"Dein Score: {self.final_score}", True, (255, 255, 255))
+        score_surf = self.text_font.render(f"Your Score: {self.final_score}", True, (255, 255, 255))
         score_rect = score_surf.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
         screen.blit(score_surf, score_rect)
         
-        instruction1 = self.text_font.render("Drücke LEERTASTE um die Highscores zu sehen", True, (200, 200, 200))
+        instruction1 = self.text_font.render("Press SPACE to view the Highscores", True, (200, 200, 200))
         instruction1_rect = instruction1.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + 80))
         screen.blit(instruction1, instruction1_rect)
         
-        instruction2 = self.text_font.render("Drücke ESC um zum Hauptmenü zurückzukehren", True, (200, 200, 200))
+        instruction2 = self.text_font.render("Press ESC to return to the Main Menu", True, (200, 200, 200))
         instruction2_rect = instruction2.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + 120))
         screen.blit(instruction2, instruction2_rect)
 
 
 class DifficultyMenu(Menu):
     def __init__(self):
-        super().__init__("SCHWIERIGKEIT")
-        self.add_item("Leicht", "difficulty_easy", "L")
+        super().__init__("DIFFICULTY")
+        self.add_item("Easy", "difficulty_easy", "L")
         self.add_item("Normal", "difficulty_normal", "N")
-        self.add_item("Schwer", "difficulty_hard", "S")
-        self.add_item("Zurück", "main_menu", "Z")
+        self.add_item("Hard", "difficulty_hard", "S")
+        self.add_item("Back", "main_menu", "Z")
 
 class SoundTestMenu(Menu):
     def __init__(self):
@@ -754,7 +754,7 @@ class SoundTestMenu(Menu):
             screen.blit(played_text, played_rect)
     
         instructions = [
-            "Navigation: ↑/↓ | Test: ENTER | Zurück: SPACE"
+            "Navigation: ▲ / ▼ | Test: ENTER | Back: SPACE"
         ]
     
         instruction_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.65))
@@ -777,8 +777,8 @@ class SoundTestMenu(Menu):
             legend_y = SCREEN_HEIGHT - 50
     
             legend_items = [
-                ("Waffen", (150, 255, 150)),
-                ("Kampf", (255, 150, 150)),
+                ("Weapons", (150, 255, 150)),
+                ("Combat", (255, 150, 150)),
                 ("PowerUps", (150, 150, 255)),
                 ("Boss", (255, 200, 100))
             ]
@@ -794,7 +794,7 @@ class AchievementsMenu(Menu):
     def __init__(self, achievement_system):
         super().__init__("ACHIEVEMENTS")
         self.achievement_system = achievement_system
-        self.add_item("Zurück", "back")
+        self.add_item("Back", "back")
         
         self.achievement_graphics = {
             "First Blood": [
@@ -922,13 +922,13 @@ class AchievementsMenu(Menu):
             item_rect = item.draw(screen, (SCREEN_WIDTH / 2, back_button_y + i * MENU_ITEM_SPACING), self.item_font)
 
         instruction_font = pygame.font.Font(None, 24)
-        instruction_surf = instruction_font.render("Drücke ESC oder SPACE, um zurückzukehren", True, pygame.Color(MENU_UNSELECTED_COLOR))
+        instruction_surf = instruction_font.render("Press ESC or SPACE to go back", True, pygame.Color(MENU_UNSELECTED_COLOR))
         instruction_rect = instruction_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 40))
         screen.blit(instruction_surf, instruction_rect)
         
         unlocked_count = sum(1 for achievement in self.achievement_system.achievements if achievement.unlocked)
         total_count = len(self.achievement_system.achievements)
-        progress_text = f"Fortschritt: {unlocked_count}/{total_count} Achievements freigeschaltet"
+        progress_text = f"Progress: {unlocked_count}/{total_count} Achievements unlocked"
         progress_surf = instruction_font.render(progress_text, True, pygame.Color("lightblue"))
         progress_rect = progress_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 12 + 40))
         screen.blit(progress_surf, progress_rect)

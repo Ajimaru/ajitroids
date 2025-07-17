@@ -11,34 +11,27 @@ class AchievementNotification:
         self.start_time = time.time()
         self.animation_progress = 0.0
         self.is_fading_out = False
-        
         self.target_x = SCREEN_WIDTH - 350
         self.target_y = 80
         self.current_x = SCREEN_WIDTH
         self.current_y = self.target_y
-        
         self.title_font = pygame.font.Font(None, 32)
         self.desc_font = pygame.font.Font(None, 20)
-        
         self.sound_played = False
         
     def update(self, dt):
         current_time = time.time()
         elapsed = current_time - self.start_time
         
-        
         if elapsed < self.fade_time:
-            
             self.animation_progress = elapsed / self.fade_time
             self.current_x = SCREEN_WIDTH - (SCREEN_WIDTH - self.target_x) * self._ease_out(self.animation_progress)
             
         elif elapsed < self.display_time - self.fade_time:
-            
             self.animation_progress = 1.0
             self.current_x = self.target_x
             
         elif elapsed < self.display_time:
-            
             if not self.is_fading_out:
                 self.is_fading_out = True
             fade_progress = (elapsed - (self.display_time - self.fade_time)) / self.fade_time
@@ -46,9 +39,7 @@ class AchievementNotification:
             self.current_x = self.target_x + (SCREEN_WIDTH - self.target_x) * fade_progress
             
         else:
-            
             return False
-            
         return True
     
     def _ease_out(self, t):
@@ -57,13 +48,10 @@ class AchievementNotification:
     def draw(self, screen):
         if self.animation_progress <= 0:
             return
-            
         
         notification_width = 320
         notification_height = 80
-        
         alpha = int(255 * self.animation_progress)
-        
         bg_surface = pygame.Surface((notification_width, notification_height), pygame.SRCALPHA)
         
         for i in range(notification_height):
@@ -76,9 +64,8 @@ class AchievementNotification:
         
         rect_x = int(self.current_x)
         rect_y = int(self.current_y)
-        
         screen.blit(bg_surface, (rect_x, rect_y))
-        
+
         header_color = (255, 215, 0, alpha)
         header_text = "ACHIEVEMENT UNLOCKED!"
         header_surf = self.title_font.render(header_text, True, header_color)
@@ -108,7 +95,6 @@ class AchievementNotification:
             desc_surf.set_alpha(alpha)
         screen.blit(desc_surf, desc_rect)
 
-
 class AchievementNotificationManager:
     def __init__(self, sounds=None):
         self.notifications = []
@@ -130,7 +116,7 @@ class AchievementNotificationManager:
             self.sounds.play_achievement()
         if len(self.notifications) > self.max_notifications:
             self.notifications.pop(0)
-        print(f"Achievement-Benachrichtigung hinzugefügt: {achievement_name}")
+        print(f"Achievement notification added: {achievement_name}")
     
     def update(self, dt):
         
@@ -139,11 +125,9 @@ class AchievementNotificationManager:
             if notification.update(dt)
         ]
         
-        
         for i, notification in enumerate(self.notifications):
             target_y = 80 + i * 90
             notification.target_y = target_y
-            
             notification.current_y += (target_y - notification.current_y) * dt * 5
     
     def draw(self, screen):

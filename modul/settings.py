@@ -8,7 +8,7 @@ class Settings:
         self.fullscreen = False
         self.difficulty = "normal"
         self.load()
-        print(f"Settings nach dem Laden: Musik={self.music_on}, Sound={self.sound_on}, Vollbild={self.fullscreen}")
+        print(f"Settings after loading: Music={self.music_on}, Sound={self.sound_on}, Fullscreen={self.fullscreen}")
         
     def save(self):
         settings_data = {
@@ -21,15 +21,15 @@ class Settings:
         try:
             with open("settings.json", "w") as f:
                 json.dump(settings_data, f)
-                print("Einstellungen gespeichert")
+                print("Settings saved")
             return True
         except Exception as e:
-            print(f"Fehler beim Speichern der Einstellungen: {e}")
+            print(f"Error saving settings: {e}")
             return False
             
     def load(self):
         if not os.path.exists("settings.json"):
-            print("Keine Einstellungsdatei gefunden, verwende Standardwerte")
+            print("No settings file found, using default values")
             return False
             
         try:
@@ -39,8 +39,8 @@ class Settings:
                 self.sound_on = settings_data.get("sound_on", True)
                 self.fullscreen = settings_data.get("fullscreen", False)
                 self.difficulty = settings_data.get("difficulty", "normal")
-                print("Einstellungen geladen")
+                print("Settings loaded")
             return True
         except Exception as e:
-            print(f"Fehler beim Laden der Einstellungen: {e}")
+            print(f"Error loading settings: {e}")
             return False
