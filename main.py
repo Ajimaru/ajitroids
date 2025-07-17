@@ -8,6 +8,7 @@ from asteroidfield import AsteroidField
 from shot import Shot
 from particle import Particle
 from sounds import Sounds
+from starfield import Starfield
 
 
 def main():
@@ -39,6 +40,8 @@ def main():
     score = 0
 
     font = pygame.font.Font(None, 36)
+
+    starfield = Starfield()
 
     while True:
         for event in pygame.event.get():
@@ -103,7 +106,9 @@ def main():
                 obj.position.y = 0
 
         screen.fill("black")
-
+        starfield.update(dt)
+        starfield.draw(screen)  # Zeichne Sterne vor allen anderen Objekten
+        
         for obj in drawable:
             obj.draw(screen)
 

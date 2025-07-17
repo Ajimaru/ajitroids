@@ -6,6 +6,9 @@ ASTEROID_KINDS = 3
 ASTEROID_SPAWN_RATE = 0.8  # seconds
 ASTEROID_MAX_RADIUS = ASTEROID_MIN_RADIUS * ASTEROID_KINDS
 
+ASTEROID_VERTICES = 12  # Anzahl der Eckpunkte
+ASTEROID_IRREGULARITY = 0.4  # Maximale Abweichung vom perfekten Kreis (0-1)
+
 PLAYER_RADIUS = 20
 PLAYER_TURN_SPEED = 300
 PLAYER_SPEED = 200
@@ -30,3 +33,9 @@ RESPAWN_POSITION_Y = SCREEN_HEIGHT / 2
 
 EXPLOSION_PARTICLES = 15  # Anzahl der Partikel pro Explosion
 PARTICLE_COLORS = ["white", "yellow", "red"]  # Verschiedene Farben für Partikel
+
+STAR_COUNT = 100
+STAR_SIZES = [1, 2, 3]  # Verschiedene Sterngrößen
+STAR_COLORS = ["white", "#ADD8E6", "#FFD700"]  # Weiß, Hellblau, Gold
+
+COLLISION_DEBUG = False  # Zum Debuggen der Hitboxen

@@ -31,19 +31,24 @@ class Player(CircleShape):
     def update(self, dt):
         keys = pygame.key.get_pressed()
         
-        # Rotation
-        if keys[pygame.K_a]:
-            self.rotation += PLAYER_ROTATION_SPEED * dt
+        # Rotation bleibt gleich
         if keys[pygame.K_d]:
+            self.rotation += PLAYER_ROTATION_SPEED * dt
+        if keys[pygame.K_a]:
             self.rotation -= PLAYER_ROTATION_SPEED * dt
             
-        # Beschleunigung
+        # Beschleunigung - jetzt mit passendem Vektor
         if keys[pygame.K_w]:
-            # Richtungsvektor basierend auf Rotation
-            direction = pygame.Vector2(0, -1).rotate(-self.rotation)
-            # Beschleunigung in Blickrichtung
+            # Verwende den gleichen Vektor wie für die Dreiecksspitze
+            direction = pygame.Vector2(0, 1).rotate(self.rotation)
             self.velocity += direction * PLAYER_ACCELERATION * dt
         
+        # Rückwärts - jetzt mit passendem Vektor
+        if keys[pygame.K_s]:
+            # Entgegengesetzt zur Dreiecksspitze
+            direction = pygame.Vector2(0, -1).rotate(self.rotation)
+            self.velocity += direction * (PLAYER_ACCELERATION * 0.5) * dt  # Langsamer rückwärts
+            
         # Geschwindigkeitsbegrenzung
         if self.velocity.length() > PLAYER_MAX_SPEED:
             self.velocity.scale_to_length(PLAYER_MAX_SPEED)
