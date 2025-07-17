@@ -25,5 +25,4 @@ wheels/
 *.lock
 
 # user files
-settings.json
-highscores.json
+*.json

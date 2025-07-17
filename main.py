@@ -1,5 +1,6 @@
 import sys
 import pygame
+import math
 import random
 from constants import *
 from player import Player
@@ -16,6 +17,7 @@ from settings import Settings
 
 
 def main():
+    # Existierende Variablen
     pygame.init()
     
     # Mixer explizit initialisieren mit guten Parametern
@@ -104,6 +106,11 @@ def main():
     dt = 0
     lives = PLAYER_LIVES
     score = 0
+    
+    # Level-System-Variablen
+    level = 1
+    level_up_timer = 0
+    level_up_text = ""
 
     # Highscore-System
     highscore_manager = HighscoreManager()
@@ -197,6 +204,9 @@ def main():
             if action == "difficulty_easy":
                 difficulty = "easy"
                 game_state = "playing"
+                score = 0  # Score zurücksetzen
+                lives = 3  # Leben zurücksetzen
+                level = 1  # Level zurücksetzen
                 # Spiel starten mit leichter Schwierigkeit
                 asteroid_field.asteroid_count = 3  # Weniger Asteroiden
                 asteroid_field.spawn_interval = 8.0  # Langsameres Spawnen
@@ -378,13 +388,61 @@ def main():
             for obj in drawable:
                 obj.draw(screen)
 
-            # Score anzeigen
-            score_text = font.render(f"Score: {score}", True, "white")
-            screen.blit(score_text, (10, 10))
+            # HUD-Elemente mit angepassten Positionen
+            
+            # Score oben links
+            score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+            score_rect = score_text.get_rect(topleft=(20, 20))
+            screen.blit(score_text, score_rect)
+            
+            # Lives oben links, unter dem Score
+            lives_text = font.render(f"Lives: {lives}", True, (255, 255, 255))
+            lives_rect = lives_text.get_rect(topleft=(20, 50))
+            screen.blit(lives_text, lives_rect)
+            
+            # Level oben links, unter den Lives
+            level_text = font.render(f"Level: {level}", True, (200, 200, 200))
+            level_rect = level_text.get_rect(topleft=(20, 80))
+            screen.blit(level_text, level_rect)
 
-            # Leben anzeigen
-            lives_text = font.render(f"Lives: {lives}", True, "white")
-            screen.blit(lives_text, (10, 50))
+            # Level-System aktualisieren
+            current_level = min(score // POINTS_PER_LEVEL + 1, MAX_LEVEL)
+            
+            # Level-Up erkennen
+            if current_level > level:
+                # Level erhöhen
+                level = current_level
+                
+                # Schwierigkeit anpassen
+                asteroid_field.asteroid_count = min(BASE_ASTEROID_COUNT + (level - 1) * ASTEROID_COUNT_PER_LEVEL, 12)
+                asteroid_field.spawn_interval = max(BASE_SPAWN_INTERVAL - (level - 1) * SPAWN_INTERVAL_REDUCTION, 0.8)
+                
+                # Level-Up-Anzeige aktivieren
+                level_up_timer = LEVEL_UP_DISPLAY_TIME
+                level_up_text = f"LEVEL {level}!"
+                
+                # Sound für Level-Up
+                sounds.play_level_up()
+                
+                print(f"Level-Up! Jetzt Level {level}, Asteroiden: {asteroid_field.asteroid_count}, Intervall: {asteroid_field.spawn_interval}") 
+           
+            # Level-Up-Animation anzeigen, wenn aktiv
+            if level_up_timer > 0:
+                level_up_timer -= dt
+                
+                # Pulsierender Text
+                size = int(72 * (1 + 0.2 * math.sin(level_up_timer * 10)))
+                
+                level_font = pygame.font.Font(None, size)
+                level_surf = level_font.render(level_up_text, True, (255, 215, 0))  # Gold-Farbe
+                level_rect = level_surf.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/3))
+                
+                # Animation mit Transparenz
+                alpha = int(255 * min(1, level_up_timer / (LEVEL_UP_DISPLAY_TIME / 2)))
+                if level_up_timer < LEVEL_UP_DISPLAY_TIME / 2:
+                    level_surf.set_alpha(alpha)
+                
+                screen.blit(level_surf, level_rect)
 
             # Power-up Kollisionen
             for powerup in powerups:

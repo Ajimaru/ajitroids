@@ -34,6 +34,15 @@ class Sounds:
             print(f"Aktuelles Verzeichnis: {os.getcwd()}")
             print(f"Datei existiert: {os.path.exists('assets/background.mp3')}")
 
+    def load_sounds(self):
+        # Bestehende Sound-Lade-Logik...
+        
+        try:
+            self.level_up = pygame.mixer.Sound("sassets/level_up.wav")
+        except:
+            self.level_up = None
+            print("Level-Up-Sound konnte nicht geladen werden")
+
     def play_shoot(self):
         self.shoot.play()
 
@@ -54,6 +63,10 @@ class Sounds:
             self.menu_select.play()
         except:
             pass
+
+    def play_level_up(self):
+        if hasattr(self, 'level_up') and self.level_up and self.sound_on:
+            self.level_up.play()
 
     def toggle_music(self, enabled):
         try:

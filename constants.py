@@ -109,3 +109,12 @@ CREDITS_LINE_SPACING = 40  # Pixel zwischen Zeilen
 # Nach den Credits-Konstanten hinzufügen
 CREDITS_WEBSITE = "https://ajimaru.github.io"
 GAME_VERSION = "v0.7.0"  # Aktuelle Spielversion
+
+# Level-Konstanten
+POINTS_PER_LEVEL = 1000           # Punkte für Level-Up
+MAX_LEVEL = 10                     # Höchstes Level
+LEVEL_UP_DISPLAY_TIME = 2.0        # Anzeigezeit in Sekunden
+BASE_ASTEROID_COUNT = 3            # Grundwert für Asteroiden-Anzahl
+BASE_SPAWN_INTERVAL = 5.0          # Grundwert für Spawn-Interval
+ASTEROID_COUNT_PER_LEVEL = 1       # Zusätzliche Asteroiden pro Level
+SPAWN_INTERVAL_REDUCTION = 0.4     # Verkürzung des Intervalls pro Level
