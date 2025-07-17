@@ -12,7 +12,7 @@ from sounds import Sounds
 from starfield import Starfield, MenuStarfield  # MenuStarfield hinzufügen
 from powerup import PowerUp  # PowerUp-Klasse importieren
 from highscore import HighscoreManager, HighscoreInput, HighscoreDisplay  # Highscore-Klassen importieren
-from menu import MainMenu, PauseMenu, OptionsMenu, CreditsScreen, GameOverScreen, DifficultyMenu, SoundTestMenu  # TutorialScreen entfernen
+from menu import MainMenu, PauseMenu, OptionsMenu, CreditsScreen, GameOverScreen, DifficultyMenu, SoundTestMenu, AchievementsMenu  # TutorialScreen entfernen
 from tutorial import Tutorial  # Neue Tutorial-Klasse importieren
 from settings import Settings
 from boss import Boss
@@ -21,9 +21,13 @@ from achievements import AchievementSystem
 
 
 def main():
+    # Globale Variablen deklarieren
+    global sounds, player, PLAYER_INVINCIBLE_TIME, game_settings
+    
     global game_state, score, lives, level
     
     # Achievement-System initialisieren
+    global achievement_system
     achievement_system = AchievementSystem()
 
     # Beispiel-Achievements hinzufügen
@@ -174,6 +178,24 @@ def main():
     boss_defeated_timer = 0
     boss_defeated_message = ""
     
+    # Achievement-Benachrichtigungen anzeigen
+    achievement_notifications = []
+
+    # Sicherstellen, dass alle globalen Variablen definiert sind
+    if 'player' not in globals() or not player:
+        player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+
+    if 'sounds' not in globals() or not sounds:
+        sounds = Sounds()
+
+    if 'PLAYER_INVINCIBLE_TIME' not in globals() or not PLAYER_INVINCIBLE_TIME:
+        PLAYER_INVINCIBLE_TIME = 3  # Beispielwert für Unverwundbarkeit
+
+    if 'game_settings' not in globals() or not game_settings:
+        game_settings = Settings()
+
+    print(f"Initialisierte Variablen: player={player}, sounds={sounds}, PLAYER_INVINCIBLE_TIME={PLAYER_INVINCIBLE_TIME}, game_settings={game_settings}")
+
     # Hauptspielschleife
     while True:
         events = pygame.event.get()
@@ -189,6 +211,24 @@ def main():
         # Bildschirm löschen
         screen.fill("black")
         
+        # Achievement-Benachrichtigungen aktualisieren
+        for notification in achievement_notifications[:]:
+            notification["timer"] -= dt
+            if notification["timer"] <= 0:
+                achievement_notifications.remove(notification)
+
+        # Achievement-Benachrichtigungen zeichnen
+        for notification in achievement_notifications:
+            font = pygame.font.Font(None, 36)
+            text = font.render(notification["text"], True, (255, 255, 0))
+            rect = text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4))
+            screen.blit(text, rect)
+
+        # Beispiel: Achievement freischalten und Benachrichtigung hinzufügen
+        if score >= 100 and not achievement_system.is_unlocked("First Blood"):
+            achievement_system.unlock("First Blood")
+            achievement_notifications.append({"text": "Achievement Unlocked: First Blood", "timer": 3})
+
         # ====== HAUPTMENÜ ======
         if game_state == "main_menu":
             # Animierter Windows 95-artiger Hintergrund
@@ -237,6 +277,11 @@ def main():
             elif action == "exit":
                 return
             
+            elif action == "achievements":
+                game_state = "achievements"
+                achievements_menu = AchievementsMenu(achievement_system)
+                achievements_menu.activate()  # Menü aktivieren
+    
         # ====== SCHWIERIGKEITSWAHL ======
         elif game_state == "difficulty_select":
             # Menü-Starfield auch hier anzeigen
@@ -753,6 +798,18 @@ def main():
                 game_state = "main_menu"
                 main_menu.activate()
         
+        # ====== ACHIEVEMENTS ======
+        elif game_state == "achievements":
+            # Menü-Starfield auch hier anzeigen
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+
+            action = achievements_menu.update(dt, events)
+            achievements_menu.draw(screen)
+
+            if action == "back":
+                game_state = "main_menu"
+    
         # Bildschirm aktualisieren
         pygame.display.flip()
         
@@ -797,3 +854,6 @@ def debug_music_status():
 
 if __name__ == "__main__":
     main()
+    # Spiel beenden und Achievements speichern
+    achievement_system.save_achievements()
+    print("Achievements wurden gespeichert.")

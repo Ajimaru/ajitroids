@@ -16,6 +16,7 @@ class AchievementSystem:
         self.load_achievements()
 
     def load_achievements(self):
+        self.achievements.clear()  # Liste vor dem Laden leeren
         try:
             with open(self.achievements_file, 'r') as file:
                 data = json.load(file)
@@ -49,3 +50,18 @@ class AchievementSystem:
                 self.save_achievements()
                 print(f"Achievement unlocked: {achievement.name} - {achievement.description}")
                 break
+
+    def unlock(self, name):
+        for achievement in self.achievements:
+            if achievement.name == name and not achievement.unlocked:
+                achievement.unlock()
+                self.save_achievements()
+                print(f"Achievement unlocked: {achievement.name} - {achievement.description}")
+                return True
+        return False
+
+    def is_unlocked(self, name):
+        for achievement in self.achievements:
+            if achievement.name == name:
+                return achievement.unlocked
+        return False

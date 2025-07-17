@@ -2,6 +2,9 @@ import pygame
 from constants import *
 import math
 
+# Globale Variable für Sounds
+sounds = None
+
 class MenuItem:
     def __init__(self, text, action):
         self.text = text
@@ -193,9 +196,11 @@ class MainMenu(Menu):
         self.add_item("Start Game", "start_game")
         self.add_item("Tutorial", "tutorial")
         self.add_item("Highscores", "highscores")
+        self.add_item("Achievements", "achievements")  # Neue Option
         self.add_item("Optionen", "options")  # Neue Option
         self.add_item("Credits", "credits")   # Neue Option
         self.add_item("Exit", "exit")
+
     
     # In der MainMenu.draw() Methode hinzufügen
     def draw(self, screen):
@@ -893,3 +898,53 @@ class SoundTestMenu(Menu):
                 legend_surface = legend_font.render(legend_text, True, legend_color)
                 screen.blit(legend_surface, (legend_x, legend_y))
                 legend_x += 120
+
+
+class AchievementsMenu(Menu):
+    def __init__(self, achievement_system):
+        super().__init__("ACHIEVEMENTS")
+        self.achievement_system = achievement_system
+        self.add_item("Zurück", "back")
+
+    def draw(self, screen):
+        # Halbtransparenten Hintergrund zeichnen
+        background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+        background.fill((0, 0, 0, self.background_alpha))
+        screen.blit(background, (0, 0))
+
+        # Titel zeichnen
+        title_surf = self.title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
+        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 8))
+        screen.blit(title_surf, title_rect)
+
+        # Achievements zeichnen
+        start_y = SCREEN_HEIGHT / 4
+        for i, achievement in enumerate(self.achievement_system.achievements):
+            color = pygame.Color("green") if achievement.unlocked else pygame.Color("red")
+            text_surf = self.item_font.render(achievement.name, True, color)
+            text_rect = text_surf.get_rect(center=(SCREEN_WIDTH / 2, start_y + i * MENU_ITEM_SPACING))
+            screen.blit(text_surf, text_rect)
+
+        # Normale Menü-Items zeichnen (für "Zurück"-Button)
+        start_y = SCREEN_HEIGHT - 100
+        for i, item in enumerate(self.items):
+            item_rect = item.draw(screen, (SCREEN_WIDTH / 2, start_y + i * MENU_ITEM_SPACING), self.item_font)
+
+        # Zusätzliche Anweisung
+        instruction_surf = self.item_font.render("Drücke ESC oder SPACE, um zurückzukehren", True, pygame.Color(MENU_UNSELECTED_COLOR))
+        instruction_rect = instruction_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 50))
+        screen.blit(instruction_surf, instruction_rect)
+
+    def update(self, dt, events):
+        # Erst die normale Menu-Update-Logik aufrufen
+        result = super().update(dt, events)
+        if result:
+            return result
+
+        # Zusätzliche ESC/SPACE-Behandlung für direktes Zurückkehren
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE or event.key == pygame.K_SPACE:
+                    return "back"
+
+        return None
