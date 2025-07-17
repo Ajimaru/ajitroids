@@ -74,18 +74,23 @@ class Player(CircleShape):
     def update(self, dt):
         keys = pygame.key.get_pressed()
         
-        # Rotation bleibt gleich
-        if keys[pygame.K_d]:
-            self.rotation += PLAYER_ROTATION_SPEED * dt
-        if keys[pygame.K_a]:
+        # Rotation mit Pfeiltasten (statt A/D)
+        if keys[pygame.K_LEFT]:  # Geändert von pygame.K_a
             self.rotation -= PLAYER_ROTATION_SPEED * dt
+        if keys[pygame.K_RIGHT]:  # Geändert von pygame.K_d
+            self.rotation += PLAYER_ROTATION_SPEED * dt
             
-        # Beschleunigung - jetzt mit passendem Vektor
-        if keys[pygame.K_s]:
+        # Beschleunigung mit Pfeiltasten (statt W/S)
+        if keys[pygame.K_UP]:  # Geändert von pygame.K_w
+            # Entgegengesetzt zur Dreiecksspitze
+            direction = pygame.Vector2(0, -1).rotate(self.rotation)
+            self.velocity += direction * (PLAYER_ACCELERATION * 0.5) * dt  # Langsamer rückwärts
+            
+        if keys[pygame.K_DOWN]:  # Geändert von pygame.K_s
             # Verwende den gleichen Vektor wie für die Dreiecksspitze
             direction = pygame.Vector2(0, 1).rotate(self.rotation)
             self.velocity += direction * PLAYER_ACCELERATION * dt
-        
+    
         # Rückwärts - jetzt mit passendem Vektor
         if keys[pygame.K_w]:
             # Entgegengesetzt zur Dreiecksspitze

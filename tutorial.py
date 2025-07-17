@@ -10,7 +10,8 @@ class Tutorial:
                 "content": [
                     "Bewege dein Raumschiff mit den Pfeiltasten",
                     "Schieße mit der Leertaste",
-                    "Drehe dich mit A und D (oder Links/Rechts)",
+                    "Drehe dich mit Links/Rechts-Pfeiltasten", 
+                    "Bewege dich vor/zurück mit Hoch/Runter-Pfeiltasten",
                     "Zerstöre Asteroiden für Punkte!",
                     "",
                     "Große Asteroiden zerfallen in kleinere Teile",
