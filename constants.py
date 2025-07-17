@@ -47,11 +47,14 @@ POWERUP_SPAWN_CHANCE = 0.3  # Erhöht von 0.1 auf 0.3 für häufigere Spawns
 POWERUP_MAX_COUNT = 3  # Maximal 3 Power-ups gleichzeitig
 POWERUP_LIFETIME = 15.0  # Sekunden bis ein Power-up verschwindet
 SHIELD_DURATION = 10.0  # Sekunden
-POWERUP_TYPES = ["shield", "triple_shot", "rapid_fire"]
+POWERUP_TYPES = ["shield", "triple_shot", "rapid_fire", "laser_weapon", "missile_weapon", "shotgun_weapon"]
 POWERUP_COLORS = {
-    "shield": "#00FFFF",      # Cyan
-    "triple_shot": "#FF00FF", # Magenta
-    "rapid_fire": "#FFFF00"   # Gelb
+    "shield": "#00FFFF",           # Cyan
+    "triple_shot": "#FF00FF",      # Magenta
+    "rapid_fire": "#FFFF00",       # Gelb
+    "laser_weapon": "#00FF00",     # Grün
+    "missile_weapon": "#FF0000",   # Rot
+    "shotgun_weapon": "#FFAA00"    # Orange
 }
 RAPID_FIRE_COOLDOWN = 0.1    # Cooldown während Rapid-Fire
 RAPID_FIRE_DURATION = 5.0    # Sekunden
@@ -119,3 +122,21 @@ BASE_ASTEROID_COUNT = 3            # Grundwert für Asteroiden-Anzahl
 BASE_SPAWN_INTERVAL = 5.0          # Grundwert für Spawn-Interval
 ASTEROID_COUNT_PER_LEVEL = 1       # Zusätzliche Asteroiden pro Level
 SPAWN_INTERVAL_REDUCTION = 0.4     # Verkürzung des Intervalls pro Level
+
+# Waffen-Konstanten
+WEAPON_STANDARD = "standard"
+WEAPON_LASER = "laser"       # Durchdringt mehrere Asteroiden
+WEAPON_MISSILE = "missile"   # Verfolgt nahe Asteroiden
+WEAPON_SHOTGUN = "shotgun"   # Mehrere Schüsse in einem Winkel
+
+WEAPON_COLORS = {
+    WEAPON_STANDARD: "#FFFFFF",  # Weiß
+    WEAPON_LASER: "#00FF00",     # Grün
+    WEAPON_MISSILE: "#FF0000",   # Rot
+    WEAPON_SHOTGUN: "#FFAA00"    # Orange
+}
+
+# Munition für Spezialwaffen
+LASER_AMMO = 15
+MISSILE_AMMO = 8
+SHOTGUN_AMMO = 12

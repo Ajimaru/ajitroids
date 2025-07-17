@@ -23,6 +23,15 @@ class Player(CircleShape):
         self.rapid_fire_timer = 0
         self.original_cooldown = PLAYER_SHOOT_COOLDOWN
 
+        # Waffen-System
+        self.current_weapon = WEAPON_STANDARD
+        self.weapons = {
+            WEAPON_STANDARD: -1,  # Unendlich Munition
+            WEAPON_LASER: 0,      # Keine Munition zu Beginn
+            WEAPON_MISSILE: 0,
+            WEAPON_SHOTGUN: 0
+        }
+
     def draw(self, screen):
         # Blinken während Unverwundbarkeit
         if (not self.invincible or pygame.time.get_ticks() % 200 < 100) or self.shield_active:
@@ -54,11 +63,12 @@ class Player(CircleShape):
         pygame.draw.polygon(screen, color, self.triangle(), 2)
 
     def triangle(self):
-        forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
-        a = self.position + forward * self.radius
-        b = self.position - forward * self.radius - right
-        c = self.position - forward * self.radius + right
+        # Der Vektor (0, -1) zeigt nach oben, damit die Schussrichtung stimmt
+        forward = pygame.Vector2(0, -1).rotate(self.rotation)
+        right = pygame.Vector2(1, 0).rotate(self.rotation) * self.radius / 1.5
+        a = self.position + forward * self.radius  # Spitze des Dreiecks
+        b = self.position - forward * self.radius - right  # Untere linke Ecke
+        c = self.position - forward * self.radius + right  # Untere rechte Ecke
         return [a, b, c]
 
     def update(self, dt):
@@ -123,28 +133,65 @@ class Player(CircleShape):
 
     def shoot(self):
         if self.shoot_timer <= 0:
-            if self.triple_shot_active:
-                # Dreifachschuss: Normal + 2 mit Winkel
-                shot1 = Shot(self.position.x, self.position.y)
-                shot1.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
-                
-                shot2 = Shot(self.position.x, self.position.y)
-                shot2.velocity = pygame.Vector2(0, 1).rotate(self.rotation - 15) * PLAYER_SHOOT_SPEED
-                
-                shot3 = Shot(self.position.x, self.position.y)
-                shot3.velocity = pygame.Vector2(0, 1).rotate(self.rotation + 15) * PLAYER_SHOOT_SPEED
-            else:
-                # Normaler Einzelschuss
-                shot = Shot(self.position.x, self.position.y)
-                shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+            # Prüfen, ob die aktuelle Waffe Munition hat
+            if self.current_weapon != WEAPON_STANDARD and self.weapons[self.current_weapon] <= 0:
+                # Automatisch zur Standard-Waffe zurückkehren
+                self.current_weapon = WEAPON_STANDARD
             
-            # Cooldown basierend auf Power-up-Status
+            # Verschiedene Schuss-Typen basierend auf aktueller Waffe
+            if self.current_weapon == WEAPON_STANDARD:
+                # Standard-Schuss oder Triple-Shot
+                if self.triple_shot_active:
+                    self.fire_triple_shot()
+                else:
+                    shot = Shot(self.position.x, self.position.y)
+                    shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+            
+            elif self.current_weapon == WEAPON_LASER:
+                # Laser-Schuss
+                shot = Shot(self.position.x, self.position.y, WEAPON_LASER)
+                shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 1.5
+                self.weapons[WEAPON_LASER] -= 1
+                
+            elif self.current_weapon == WEAPON_MISSILE:
+                # Raketen-Schuss
+                shot = Shot(self.position.x, self.position.y, WEAPON_MISSILE)
+                shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 0.8
+                self.weapons[WEAPON_MISSILE] -= 1
+                
+            elif self.current_weapon == WEAPON_SHOTGUN:
+                # Schrotflinte (5 Schüsse im Fächer)
+                spread = 30  # Grad
+                for i in range(5):
+                    angle = self.rotation + (i - 2) * (spread / 4)
+                    shot = Shot(self.position.x, self.position.y, WEAPON_SHOTGUN)
+                    shot.velocity = pygame.Vector2(0, -1).rotate(angle) * PLAYER_SHOOT_SPEED
+                self.weapons[WEAPON_SHOTGUN] -= 1
+            
+            # Sound abspielen
+            if hasattr(self, 'sounds') and self.sounds:
+                self.sounds.play_shoot()
+            
+            # Cooldown für nächsten Schuss
             if self.rapid_fire_active:
                 self.shoot_timer = RAPID_FIRE_COOLDOWN
             else:
-                self.shoot_timer = self.original_cooldown
-            
-            self.sounds.play_shoot()
+                self.shoot_timer = PLAYER_SHOOT_COOLDOWN
+
+    def fire_triple_shot(self):
+        # Dreifachschuss: Normal + 2 mit Winkel
+        shot1 = Shot(self.position.x, self.position.y)
+        # Hier ist der Fehler: (0, 1) zeigt nach unten, nicht nach oben
+        # Ändern zu:
+        shot1.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+        
+        shot2 = Shot(self.position.x, self.position.y)
+        # Auch hier korrigieren:
+        shot2.velocity = pygame.Vector2(0, -1).rotate(self.rotation - 15) * PLAYER_SHOOT_SPEED
+        
+        shot3 = Shot(self.position.x, self.position.y)
+        # Und hier:
+        shot3.velocity = pygame.Vector2(0, -1).rotate(self.rotation + 15) * PLAYER_SHOOT_SPEED
 
     def make_invincible(self):
         self.invincible = True
@@ -185,3 +232,51 @@ class Player(CircleShape):
         elif powerup_type == "rapid_fire":
             self.rapid_fire_active = True
             self.rapid_fire_timer = RAPID_FIRE_DURATION
+            
+        elif powerup_type == "laser_weapon":
+            self.weapons[WEAPON_LASER] += LASER_AMMO
+            self.current_weapon = WEAPON_LASER
+            print(f"Laser-Waffe aktiviert! Munition: {self.weapons[WEAPON_LASER]}")
+            
+        elif powerup_type == "missile_weapon":
+            self.weapons[WEAPON_MISSILE] += MISSILE_AMMO
+            self.current_weapon = WEAPON_MISSILE
+            print(f"Raketen-Waffe aktiviert! Munition: {self.weapons[WEAPON_MISSILE]}")
+            
+        elif powerup_type == "shotgun_weapon":
+            self.weapons[WEAPON_SHOTGUN] += SHOTGUN_AMMO
+            self.current_weapon = WEAPON_SHOTGUN
+            print(f"Schrotgewehr aktiviert! Munition: {self.weapons[WEAPON_SHOTGUN]}")
+
+    def cycle_weapon(self):
+        """Wechselt zur nächsten verfügbaren Waffe"""
+        weapon_list = list(self.weapons.keys())
+        current_index = weapon_list.index(self.current_weapon)
+        
+        # Nach der nächsten Waffe mit Munition suchen
+        for i in range(1, len(weapon_list)):
+            next_index = (current_index + i) % len(weapon_list)
+            next_weapon = weapon_list[next_index]
+            
+            # Standard-Waffe hat immer Munition, andere nur wenn > 0
+            if next_weapon == WEAPON_STANDARD or self.weapons[next_weapon] > 0:
+                self.current_weapon = next_weapon
+                print(f"Waffe gewechselt zu: {self.current_weapon}, Munition: {self.weapons[self.current_weapon]}")
+                return
+        
+        # Wenn keine Waffe Munition hat, bleib bei Standard
+        self.current_weapon = WEAPON_STANDARD
+
+    def draw_weapon_hud(self, screen):
+        """Zeigt aktuelle Waffe und Munition auf dem Bildschirm an"""
+        font = pygame.font.Font(None, 24)
+        
+        # Waffen-Symbol
+        weapon_radius = 8
+        weapon_pos = (SCREEN_WIDTH - 50, SCREEN_HEIGHT - 30)
+        pygame.draw.circle(screen, WEAPON_COLORS[self.current_weapon], weapon_pos, weapon_radius)
+        
+        # Munitionsanzeige
+        if self.current_weapon != WEAPON_STANDARD:
+            ammo_text = font.render(f"{self.weapons[self.current_weapon]}", True, WEAPON_COLORS[self.current_weapon])
+            screen.blit(ammo_text, (SCREEN_WIDTH - 30, SCREEN_HEIGHT - 35))

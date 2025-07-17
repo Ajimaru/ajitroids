@@ -74,21 +74,24 @@ def main():
     # Sound-Effekte-Einstellungen anwenden
     sounds.toggle_sound(game_settings.sound_on)
     
-    # Sprite-Gruppen initialisieren
-    updatable = pygame.sprite.Group()
-    drawable = pygame.sprite.Group()
+    # Sprite-Gruppen erstellen
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
     particles = pygame.sprite.Group()
     powerups = pygame.sprite.Group()
-    
-    # Container für alle Sprite-Typen setzen
-    Shot.containers = (shots, updatable, drawable)
-    Asteroid.containers = (asteroids, updatable, drawable)
-    AsteroidField.containers = updatable
-    Player.containers = (updatable, drawable)
-    PowerUp.containers = (powerups, updatable, drawable)
-    Particle.containers = (particles, updatable, drawable)
+    updatable = pygame.sprite.Group()  # Für alle Objekte, die geupdated werden müssen
+    drawable = pygame.sprite.Group()   # Für alle Objekte, die gezeichnet werden müssen
+
+    # Container für Sprites festlegen
+    Asteroid.containers = asteroids, updatable, drawable
+    Shot.containers = shots, updatable, drawable
+    Particle.containers = particles, updatable, drawable
+    PowerUp.containers = powerups, updatable, drawable
+    Player.containers = updatable, drawable
+    AsteroidField.containers = updatable  # AsteroidField nur zur Update-Gruppe hinzufügen
+
+    # Asteroiden-Referenz an Shot übergeben für das Raketen-Tracking
+    Shot.set_asteroids(asteroids)
 
     # Spielobjekte initialisieren
     asteroid_field = AsteroidField()
@@ -231,6 +234,10 @@ def main():
                 # Spiel starten mit leichter Schwierigkeit
                 asteroid_field.asteroid_count = 3  # Weniger Asteroiden
                 asteroid_field.spawn_interval = 8.0  # Langsameres Spawnen
+
+                # Einige Asteroiden zu Beginn spawnen
+                for _ in range(3):
+                    asteroid_field.spawn_random()
 
             elif action == "difficulty_normal":
                 difficulty = "normal"
@@ -397,6 +404,10 @@ def main():
             starfield.update(dt)
             starfield.draw(screen)
             
+            # AsteroidField explizit aktualisieren
+            asteroid_field.update(dt)
+            
+            # Vorhandener Code für updatable
             updatable.update(dt)
 
             # Im Spielzustand "playing", bei der Asteroidenkollision

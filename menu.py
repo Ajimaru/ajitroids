@@ -186,9 +186,6 @@ class Menu:
             position = (SCREEN_WIDTH / 2, start_y + i * MENU_ITEM_SPACING)
             item.draw(screen, position, self.item_font)
             
-        # Debug: Anzahl der Menüpunkte ausgeben
-        print(f"Menüpunkte gezeichnet: {len(self.items)}")
-
 
 class MainMenu(Menu):
     def __init__(self):

@@ -4,7 +4,7 @@ from asteroid import Asteroid
 from constants import *
 
 
-class AsteroidField(pygame.sprite.Sprite):
+class AsteroidField:
     edges = [
         [
             pygame.Vector2(1, 0),
@@ -29,23 +29,48 @@ class AsteroidField(pygame.sprite.Sprite):
     ]
 
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self, self.containers)
-        self.spawn_timer = 0.0
+        self.spawn_timer = 0
+        self.asteroid_count = 5  # Standardwert
+        self.spawn_interval = 5.0  # Sekunden
 
     def spawn(self, radius, position, velocity):
         asteroid = Asteroid(position.x, position.y, radius)
         asteroid.velocity = velocity
 
     def update(self, dt):
+        """Aktualisiert das Asteroidenfeld und spawnt neue Asteroiden nach Bedarf"""
         self.spawn_timer += dt
-        if self.spawn_timer > ASTEROID_SPAWN_RATE:
+
+        # Wenn der Timer abgelaufen ist und weniger Asteroiden als vorgegeben vorhanden sind
+        if self.spawn_timer >= self.spawn_interval:
+            from asteroid import Asteroid  # Vermeidet Zirkelimport
+            asteroid_count = len([obj for obj in Asteroid.containers[0]])
+
+            # Nur spawnen wenn weniger als die vorgegebene Anzahl
+            if asteroid_count < self.asteroid_count:
+                self.spawn_random()
+                print(f"Neuer Asteroid gespawnt. Aktuelle Anzahl: {asteroid_count + 1}/{self.asteroid_count}")
+
+            # Timer zurücksetzen, unabhängig davon, ob ein Asteroid gespawnt wurde
             self.spawn_timer = 0
 
-            # spawn a new asteroid at a random edge
-            edge = random.choice(self.edges)
-            speed = random.randint(40, 100)
-            velocity = edge[0] * speed
-            velocity = velocity.rotate(random.randint(-30, 30))
-            position = edge[1](random.uniform(0, 1))
-            kind = random.randint(1, ASTEROID_KINDS)
-            self.spawn(ASTEROID_MIN_RADIUS * kind, position, velocity)
+    def spawn_random(self):
+        """Spawnt einen zufälligen Asteroiden am Rand des Bildschirms"""
+        # Zufällige Seite wählen (0-3: links, rechts, oben, unten)
+        edge_index = random.randint(0, 3)
+
+        # Zufällige Position entlang der gewählten Kante
+        rand_pos = random.random()
+
+        # Velocity-Richtung (von der Kante weg)
+        direction = self.edges[edge_index][0]
+
+        # Position berechnen (entlang der Kante)
+        position = self.edges[edge_index][1](rand_pos)
+
+        # Geschwindigkeit berechnen (von der Kante weg mit zufälliger Variation)
+        velocity = direction.rotate(random.uniform(-45, 45)) * random.uniform(30, 70)
+
+        # Großen Asteroiden erstellen
+        self.spawn(ASTEROID_MAX_RADIUS, position, velocity)
+        print(f"Asteroid gespawnt bei {position} mit Geschwindigkeit {velocity}")
