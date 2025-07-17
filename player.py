@@ -9,6 +9,7 @@ class Player(CircleShape):
     def __init__(self, x, y):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
+        self.velocity = pygame.Vector2(0, 0)
         self.shoot_timer = 0  # Neuer Timer startet bei 0
         self.invincible = False
         self.invincible_timer = 0
@@ -28,6 +29,31 @@ class Player(CircleShape):
         return [a, b, c]
 
     def update(self, dt):
+        keys = pygame.key.get_pressed()
+        
+        # Rotation
+        if keys[pygame.K_a]:
+            self.rotation += PLAYER_ROTATION_SPEED * dt
+        if keys[pygame.K_d]:
+            self.rotation -= PLAYER_ROTATION_SPEED * dt
+            
+        # Beschleunigung
+        if keys[pygame.K_w]:
+            # Richtungsvektor basierend auf Rotation
+            direction = pygame.Vector2(0, -1).rotate(-self.rotation)
+            # Beschleunigung in Blickrichtung
+            self.velocity += direction * PLAYER_ACCELERATION * dt
+        
+        # Geschwindigkeitsbegrenzung
+        if self.velocity.length() > PLAYER_MAX_SPEED:
+            self.velocity.scale_to_length(PLAYER_MAX_SPEED)
+            
+        # Reibung
+        self.velocity *= (1 - PLAYER_FRICTION)
+        
+        # Position aktualisieren
+        self.position += self.velocity * dt
+
         # Timer reduzieren
         if self.shoot_timer > 0:
             self.shoot_timer -= dt
@@ -37,16 +63,6 @@ class Player(CircleShape):
             if self.invincible_timer <= 0:
                 self.invincible = False
 
-        keys = pygame.key.get_pressed()
-
-        if keys[pygame.K_w]:
-            self.move(dt)
-        if keys[pygame.K_s]:
-            self.move(-dt)
-        if keys[pygame.K_a]:
-            self.rotate(-dt)
-        if keys[pygame.K_d]:
-            self.rotate(dt)
         if keys[pygame.K_SPACE] and self.shoot_timer <= 0:
             self.shoot()
 
@@ -56,13 +72,6 @@ class Player(CircleShape):
             shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
             self.shoot_timer = PLAYER_SHOOT_COOLDOWN  # Timer zurücksetzen
             self.sounds.play_shoot()  # Schuss-Sound
-
-    def rotate(self, dt):
-        self.rotation += PLAYER_TURN_SPEED * dt
-
-    def move(self, dt):
-        forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        self.position += forward * PLAYER_SPEED * dt
 
     def make_invincible(self):
         self.invincible = True
