@@ -140,3 +140,23 @@ WEAPON_COLORS = {
 LASER_AMMO = 15
 MISSILE_AMMO = 8
 SHOTGUN_AMMO = 12
+
+# Boss-Konstanten
+BOSS_LEVEL_INTERVAL = 10          # Alle 10 Level ein Boss
+BOSS_RADIUS = 50                  # Größe des Bosses
+BOSS_COLOR = (128, 0, 128)        # Lila
+BOSS_BASE_HEALTH = 20             # Grundgesundheit
+BOSS_HEALTH_PER_LEVEL = 10        # Zusätzliche Gesundheit pro Boss-Level
+BOSS_MOVE_SPEED = 70             # Bewegungsgeschwindigkeit
+BOSS_ATTACK_INTERVAL = 2.0        # Sekunden zwischen Angriffen
+BOSS_DEATH_DURATION = 3.0         # Sekunden für die Sterbeanimation
+BOSS_SCORE = 500                 # Punkte für das Besiegen eines Bosses
+
+# Boss-Projektil-Konstanten
+BOSS_PROJECTILE_RADIUS = 8
+BOSS_PROJECTILE_SPEED = 200
+BOSS_PROJECTILE_COLORS = {
+    "normal": (200, 0, 200),      # Lila
+    "homing": (255, 0, 0),        # Rot
+    "explosive": (255, 128, 0)    # Orange
+}

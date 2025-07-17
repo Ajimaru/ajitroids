@@ -34,6 +34,8 @@ class Sounds:
             print(f"Aktuelles Verzeichnis: {os.getcwd()}")
             print(f"Datei existiert: {os.path.exists('assets/background.mp3')}")
 
+        self.sound_on = True  # Standard-Einstellung
+
     def load_sounds(self):
         # Bestehende Sound-Lade-Logik...
         
@@ -122,3 +124,50 @@ class Sounds:
         pygame.time.delay(1000)
         pygame.mixer.music.load(f"assets/{track_name}")
         pygame.mixer.music.play(-1)
+
+    def play_boss_music(self):
+        """Spielt die Boss-Kampf-Musik"""
+        try:
+            # Überprüfe, ob Sound aktiviert ist (ohne auf sound_on zuzugreifen)
+            if pygame.mixer.get_init() is not None:
+                # Normale Musik pausieren
+                pygame.mixer.music.pause()
+                
+                try:
+                    # Alternativ: Direkt zur Boss-Musik wechseln
+                    pygame.mixer.music.load("assets/boss_music.mp3")
+                    pygame.mixer.music.set_volume(0.3)  # Etwas lauter als normale Hintergrundmusik
+                    pygame.mixer.music.play(-1)
+                    print("Boss-Musik gestartet")
+                except:
+                    # Fallback: Nur ein Level-Up-Sound abspielen
+                    print("Boss-Musik konnte nicht geladen werden, verwende normalen Sound")
+                    self.play_explosion()  # Alternativ einen dramatischeren Sound verwenden
+        except Exception as e:
+            print(f"Fehler beim Starten der Boss-Musik: {e}")
+
+    def play_hit(self):
+        """Spielt den Sound ab, wenn der Boss getroffen wird"""
+        try:
+            if pygame.mixer.get_init() is not None:
+                # Vorhandenen Sound verwenden, oder einen neuen laden
+                self.play_explosion()  # Vorhandenen Sound wiederverwenden
+        except Exception as e:
+            print(f"Fehler beim Abspielen des Hit-Sounds: {e}")
+
+    def play_extra_life(self):
+        """Spielt einen Sound ab, wenn der Spieler ein extra Leben bekommt"""
+        try:
+            if pygame.mixer.get_init() is not None:
+                # Da wir keinen eigenen Sound haben, verwenden wir einen vorhandenen Sound
+                # Spielen wir den Level-Up-Sound etwas länger oder wiederhole ihn für Effekt
+                self.play_player_death()  # Ironischerweise, aber ein markanter Sound
+                
+                # Optional: Mit kurzer Verzögerung einen weiteren Sound spielen
+                # für einen spezielleren Effekt
+                pygame.time.delay(200)  # 200ms warten
+                self.play_explosion()
+                
+                print("Extra-Leben-Sound abgespielt")
+        except Exception as e:
+            print(f"Fehler beim Abspielen des Extra-Leben-Sounds: {e}")

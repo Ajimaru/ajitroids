@@ -14,9 +14,16 @@ from powerup import PowerUp  # PowerUp-Klasse importieren
 from highscore import HighscoreManager, HighscoreInput, HighscoreDisplay  # Highscore-Klassen importieren
 from menu import MainMenu, PauseMenu, TutorialScreen, OptionsMenu, CreditsScreen, GameOverScreen, DifficultyMenu  # Menü-Klassen importieren
 from settings import Settings
+from boss import Boss
+from bossprojectile import BossProjectile
 
 
 def main():
+    global game_state, score, lives, level
+    
+    # Auch für Boss-Variablen hinzufügen
+    global boss_active, boss_defeated_timer, boss_defeated_message
+    
     # Existierende Variablen
     pygame.init()
     
@@ -89,6 +96,8 @@ def main():
     PowerUp.containers = powerups, updatable, drawable
     Player.containers = updatable, drawable
     AsteroidField.containers = updatable  # AsteroidField nur zur Update-Gruppe hinzufügen
+    Boss.containers = updatable, drawable
+    BossProjectile.containers = updatable, drawable
 
     # Asteroiden-Referenz an Shot übergeben für das Raketen-Tracking
     Shot.set_asteroids(asteroids)
@@ -135,6 +144,11 @@ def main():
     # Anfangszustand ist das Hauptmenü
     game_state = "main_menu"
     main_menu.activate()
+    
+    # Boss-Variablen initialisieren
+    boss_active = False
+    boss_defeated_timer = 0
+    boss_defeated_message = ""
     
     # Hauptspielschleife
     while True:
@@ -520,7 +534,21 @@ def main():
             
             # Level-Up erkennen
             if current_level > level:
-                # Level erhöhen
+                # Prüfen ob ein Boss erscheinen soll
+                if current_level % BOSS_LEVEL_INTERVAL == 0:
+                    # Boss-Kampf starten!
+                    boss = Boss(current_level)
+                    boss_active = True
+                    boss_projectiles = pygame.sprite.Group()
+                    level_up_text = "BOSS FIGHT!"
+                    level_up_timer = LEVEL_UP_DISPLAY_TIME * 2  # Länger anzeigen
+                    # Keine Asteroiden während des Boss-Kampfes
+                    for asteroid in list(asteroids):
+                        asteroid.kill()
+                    print(f"Boss-Kampf bei Level {current_level} gestartet!")
+                    sounds.play_boss_music()  # Optionale Boss-Musik
+                
+                # Level erhöhen (nach der Boss-Check)
                 level = current_level
                 
                 # Ab Level 10 die Schwierigkeit nicht mehr erhöhen, um das Spiel spielbar zu halten
@@ -528,9 +556,10 @@ def main():
                     asteroid_field.asteroid_count = min(BASE_ASTEROID_COUNT + (level - 1) * ASTEROID_COUNT_PER_LEVEL, 12)
                     asteroid_field.spawn_interval = max(BASE_SPAWN_INTERVAL - (level - 1) * SPAWN_INTERVAL_REDUCTION, 1.0)
                 
-                # Level-Up-Anzeige aktivieren
-                level_up_timer = LEVEL_UP_DISPLAY_TIME
-                level_up_text = f"LEVEL {level}!"
+                # Level-Up-Anzeige aktivieren (falls nicht bereits durch Boss überschrieben)
+                if level_up_timer <= 0:
+                    level_up_timer = LEVEL_UP_DISPLAY_TIME
+                    level_up_text = f"LEVEL {level}!"
                 
                 # Sound für Level-Up
                 sounds.play_level_up()
@@ -560,6 +589,79 @@ def main():
                 if powerup.collides_with(player):
                     player.activate_powerup(powerup.type)
                     powerup.kill()
+        
+            # Nach dem Level-Up: Boss-Kampf prüfen
+            if current_level > level and current_level % BOSS_LEVEL_INTERVAL == 0:
+                # Boss-Kampf starten!
+                boss = Boss(current_level)
+                boss_active = True
+                boss_projectiles = pygame.sprite.Group()
+                level_message = "BOSS FIGHT!"
+                level_message_timer = LEVEL_UP_DISPLAY_TIME
+                # Keine Asteroiden während des Boss-Kampfes
+                for asteroid in list(asteroids):
+                    asteroid.kill()
+
+            # Boss-Update und Angriffe
+            if boss_active and boss in updatable:
+                # Boss Update mit Spielerposition
+                boss_attack = boss.update(dt, player.position)
+                
+                # Boss-Angriffe verarbeiten
+                if boss_attack:
+                    if boss_attack["type"] == "circle":
+                        # Kreis-Angriff: Projektile in alle Richtungen
+                        for i in range(boss_attack["count"]):
+                            angle = math.radians(i * (360 / boss_attack["count"]))
+                            velocity = pygame.Vector2(math.cos(angle), math.sin(angle)) * BOSS_PROJECTILE_SPEED
+                            BossProjectile(boss.position.x, boss.position.y, velocity, "normal")
+                            sounds.play_enemy_shoot()
+                    
+                    elif boss_attack["type"] == "spiral":
+                        # Spiralen-Angriff: Projektile in Spiralform
+                        base_angle = pygame.time.get_ticks() % 360
+                        for i in range(boss_attack["count"]):
+                            angle = math.radians(base_angle + i * (360 / boss_attack["count"]))
+                            velocity = pygame.Vector2(math.cos(angle), math.sin(angle)) * BOSS_PROJECTILE_SPEED
+                            BossProjectile(boss.position.x, boss.position.y, velocity, "normal")
+                            sounds.play_enemy_shoot()
+                    
+                    elif boss_attack["type"] == "targeted":
+                        # Zielgerichteter Angriff: Projektile auf den Spieler
+                        if player in updatable:
+                            direction = (player.position - boss.position).normalize()
+                            
+                            # Hauptschuss direkt auf Spieler
+                            velocity = direction * BOSS_PROJECTILE_SPEED
+                            BossProjectile(boss.position.x, boss.position.y, velocity, "homing")
+                            
+                            # Zusätzliche Schüsse leicht versetzt
+                            for i in range(1, boss_attack["count"]):
+                                offset = 10 * i if i % 2 == 0 else -10 * i
+                                offset_dir = direction.rotate(offset)
+                                BossProjectile(boss.position.x, boss.position.y, 
+                                             offset_dir * BOSS_PROJECTILE_SPEED, "normal")
+                        sounds.play_enemy_shoot()
+
+                # Kollisionen zwischen Spielerschüssen und Boss
+                for shot in shots:
+                    if boss.collides_with(shot):
+                        boss_defeated = boss.take_damage(shot.damage)
+                        shot.kill()  # Schuss entfernen
+                        sounds.play_hit()
+                        
+                        if boss_defeated:
+                            # Boss besiegt!
+                            score += BOSS_SCORE
+                            boss_active = False
+                            
+                            # Extra Leben!
+                            lives += 1
+                            sounds.play_extra_life()
+                            
+                            # Benachrichtigung anzeigen
+                            boss_defeated_timer = 3.0
+                            boss_defeated_message = "BOSS BESIEGT! +1 LEBEN!"
         
         # ====== HIGHSCORE EINGABE ======
         elif game_state == "highscore_input":
@@ -616,6 +718,32 @@ def main():
         
         # Delta-Zeit für konstante Geschwindigkeit
         dt = clock.tick(60) / 1000.0
+
+
+# Spieler wurde getroffen Funktion (falls noch nicht vorhanden)
+def player_hit():
+    global lives
+    
+    # Leben abziehen
+    lives -= 1
+    sounds.play_explosion()
+    
+    # Explosion am Spieler erzeugen
+    Particle.create_player_explosion(player.position.x, player.position.y)
+    
+    # Wenn noch Leben übrig
+    if lives > 0:
+        # Spieler mit Unverwundbarkeit neu spawnen
+        player.position = pygame.Vector2(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+        player.velocity = pygame.Vector2(0, 0)
+        player.invincible = True
+        player.invincible_timer = PLAYER_INVINCIBLE_TIME
+        print(f"Spieler respawnt mit {PLAYER_INVINCIBLE_TIME} Sekunden Unverwundbarkeit")
+    else:
+        # Game Over
+        player.kill()
+        game_state = "game_over"
+        sounds.play_game_over()
 
 
 if __name__ == "__main__":
