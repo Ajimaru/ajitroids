@@ -16,11 +16,12 @@ class Sounds:
         
         try:
             pygame.mixer.music.load("assets/background.mp3")
-            pygame.mixer.music.set_volume(0.2)           # ...existing code...
+            pygame.mixer.music.set_volume(0.2)
+            # Diese Konstanten sollten nicht hier sein:
             PLAYER_ACCELERATION = 300  # Beschleunigung pro Sekunde
             PLAYER_MAX_SPEED = 400    # Maximale Geschwindigkeit
             PLAYER_FRICTION = 0.02    # Reibung im Weltraum (sehr gering)
-            PLAYER_ROTATION_SPEED = 180  # Grad pro Sekunde)  # Noch etwas leiser
+            PLAYER_ROTATION_SPEED = 180  # Grad pro Sekunde)
             pygame.mixer.music.play(-1)
         except Exception as e:
             print(f"Fehler beim Laden der Hintergrundmusik: {e}")

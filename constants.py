@@ -55,3 +55,10 @@ POWERUP_COLORS = {
 RAPID_FIRE_COOLDOWN = 0.1    # Cooldown während Rapid-Fire
 RAPID_FIRE_DURATION = 5.0    # Sekunden
 TRIPLE_SHOT_DURATION = 8.0   # Sekunden
+
+# Highscore-Konstanten
+HIGHSCORE_FILE = "highscores.json"  # Datei zum Speichern
+HIGHSCORE_MAX_ENTRIES = 10          # 10 Einträge
+HIGHSCORE_NAME_LENGTH = 3           # 3 Buchstaben
+HIGHSCORE_DEFAULT_NAME = "AAA"      # Standardname
+HIGHSCORE_ALLOWED_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"  # Erlaubte Zeichen

@@ -10,6 +10,7 @@ from particle import Particle
 from sounds import Sounds
 from starfield import Starfield
 from powerup import PowerUp  # PowerUp-Klasse importieren
+from highscore import HighscoreManager, HighscoreInput, HighscoreDisplay  # Highscore-Klassen importieren
 
 
 # Power-up Konstanten
@@ -60,93 +61,143 @@ def main():
 
     starfield = Starfield()
 
+    highscore_manager = HighscoreManager()
+    game_state = "playing"  # "playing", "highscore_input", "highscore_display"
+    highscore_input = None
+    highscore_display = HighscoreDisplay(highscore_manager)
+    
     while True:
-        for event in pygame.event.get():
+        events = pygame.event.get()
+        for event in events:
             if event.type == pygame.QUIT:
                 return
-
-        updatable.update(dt)
-
-        for asteroid in asteroids:
-            # Schiffskollision
-            if asteroid.collides_with(player) and not player.invincible:
-                lives -= 1
-                sounds.play_player_death()  # Spieler-Tod Sound
-                Particle.create_ship_explosion(player.position.x, player.position.y)
                 
-                if lives <= 0:
-                    print(f"Game Over! Final Score: {score}")
-                    sys.exit()
-                else:
-                    player.respawn()
-
-            # Asteroidenkollision
-            for shot in shots:
-                if asteroid.collides_with(shot):
-                    sounds.play_explosion()  # Explosions-Sound
-                    # Punktevergabe basierend auf Asteroidengröße
-                    if asteroid.radius > ASTEROID_MIN_RADIUS * 2:
-                        score += SCORE_LARGE
-                    elif asteroid.radius > ASTEROID_MIN_RADIUS:
-                        score += SCORE_MEDIUM
-                    else:
-                        score += SCORE_SMALL
-                    print(f"Score: {score}")
-
-                    # Asteroidenexplosion
-                    Particle.create_asteroid_explosion(asteroid.position.x, asteroid.position.y)
+            if game_state == "highscore_display" and event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    # Zurück zum Spiel
+                    game_state = "playing"
                     
-                    asteroid.split()
-                    shot.kill()
-                    break
-
-        # Bildschirm-Wrapping und Bullet-Handling
-        for obj in updatable:
-            if not hasattr(obj, 'position'):
-                continue
-                
-            # Schüsse entfernen, wenn sie den Bildschirm verlassen
-            if isinstance(obj, Shot):
-                if (obj.position.x < 0 or obj.position.x > SCREEN_WIDTH or
-                    obj.position.y < 0 or obj.position.y > SCREEN_HEIGHT):
-                    obj.kill()
-                continue
-            
-            # Wrapping für alle anderen Objekte
-            if obj.position.x < 0:
-                obj.position.x = SCREEN_WIDTH
-            elif obj.position.x > SCREEN_WIDTH:
-                obj.position.x = 0
-            if obj.position.y < 0:
-                obj.position.y = SCREEN_HEIGHT
-            elif obj.position.y > SCREEN_HEIGHT:
-                obj.position.y = 0
-
-        screen.fill("black")
-        starfield.update(dt)
-        starfield.draw(screen)  # Zeichne Sterne vor allen anderen Objekten
+                    # Spiel zurücksetzen
+                    score = 0
+                    lives = PLAYER_LIVES
+                    
+                    # Alle vorhandenen Objekte löschen
+                    for asteroid in asteroids:
+                        asteroid.kill()
+                    for powerup in powerups:
+                        powerup.kill()
+                    for shot in shots:
+                        shot.kill()
+                    for particle in particles:
+                        particle.kill()
+                        
+                    # Spieler zurücksetzen
+                    player.position.x = RESPAWN_POSITION_X
+                    player.position.y = RESPAWN_POSITION_Y
+                    player.velocity = pygame.Vector2(0, 0)
+                    player.rotation = 0
+                    player.respawn()  # Unverwundbarkeit aktivieren
         
-        for obj in drawable:
-            obj.draw(screen)
+        if game_state == "playing":
+            updatable.update(dt)
 
-        # Score anzeigen
-        score_text = font.render(f"Score: {score}", True, "white")
-        screen.blit(score_text, (10, 10))
+            for asteroid in asteroids:
+                # Schiffskollision
+                if asteroid.collides_with(player) and not player.invincible:
+                    lives -= 1
+                    sounds.play_player_death()  # Spieler-Tod Sound
+                    Particle.create_ship_explosion(player.position.x, player.position.y)
+                    
+                    if lives <= 0:
+                        print(f"Game Over! Final Score: {score}")
+                        if highscore_manager.is_highscore(score):
+                            game_state = "highscore_input"
+                            highscore_input = HighscoreInput(score)
+                        else:
+                            # Direkt Highscores anzeigen
+                            game_state = "highscore_display"
+                    else:
+                        player.respawn()
 
-        # Leben anzeigen
-        lives_text = font.render(f"Lives: {lives}", True, "white")
-        screen.blit(lives_text, (10, 50))
+                # Asteroidenkollision
+                for shot in shots:
+                    if asteroid.collides_with(shot):
+                        sounds.play_explosion()  # Explosions-Sound
+                        # Punktevergabe basierend auf Asteroidengröße
+                        if asteroid.radius > ASTEROID_MIN_RADIUS * 2:
+                            score += SCORE_LARGE
+                        elif asteroid.radius > ASTEROID_MIN_RADIUS:
+                            score += SCORE_MEDIUM
+                        else:
+                            score += SCORE_SMALL
+                        print(f"Score: {score}")
 
-        # Power-up Kollisionen
-        for powerup in powerups:
-            if powerup.collides_with(player):
-                player.activate_powerup(powerup.type)
-                powerup.kill()
+                        # Asteroidenexplosion
+                        Particle.create_asteroid_explosion(asteroid.position.x, asteroid.position.y)
+                        
+                        asteroid.split()
+                        shot.kill()
+                        break
 
+            # Bildschirm-Wrapping und Bullet-Handling
+            for obj in updatable:
+                if not hasattr(obj, 'position'):
+                    continue
+                    
+                # Schüsse entfernen, wenn sie den Bildschirm verlassen
+                if isinstance(obj, Shot):
+                    if (obj.position.x < 0 or obj.position.x > SCREEN_WIDTH or
+                        obj.position.y < 0 or obj.position.y > SCREEN_HEIGHT):
+                        obj.kill()
+                    continue
+                
+                # Wrapping für alle anderen Objekte
+                if obj.position.x < 0:
+                    obj.position.x = SCREEN_WIDTH
+                elif obj.position.x > SCREEN_WIDTH:
+                    obj.position.x = 0
+                if obj.position.y < 0:
+                    obj.position.y = SCREEN_HEIGHT
+                elif obj.position.y > SCREEN_HEIGHT:
+                    obj.position.y = 0
+
+            screen.fill("black")
+            starfield.update(dt)
+            starfield.draw(screen)  # Zeichne Sterne vor allen anderen Objekten
+            
+            for obj in drawable:
+                obj.draw(screen)
+
+            # Score anzeigen
+            score_text = font.render(f"Score: {score}", True, "white")
+            screen.blit(score_text, (10, 10))
+
+            # Leben anzeigen
+            lives_text = font.render(f"Lives: {lives}", True, "white")
+            screen.blit(lives_text, (10, 50))
+
+            # Power-up Kollisionen
+            for powerup in powerups:
+                if powerup.collides_with(player):
+                    player.activate_powerup(powerup.type)
+                    powerup.kill()
+
+        elif game_state == "highscore_input":
+            name = highscore_input.update(events)
+            if name:
+                # Highscore speichern und zur Anzeige wechseln
+                highscore_manager.add_highscore(name, score)
+                game_state = "highscore_display"
+            
+            screen.fill("black")
+            highscore_input.draw(screen)
+        
+        elif game_state == "highscore_display":
+            screen.fill("black")
+            highscore_display.draw(screen)
+        
         pygame.display.flip()
-
-        # limit the framerate to 60 FPS
-        dt = clock.tick(60) / 1000
+        dt = clock.tick(60) / 1000.0
 
 
 if __name__ == "__main__":
