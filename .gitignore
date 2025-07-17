@@ -8,3 +8,18 @@ wheels/
 
 # Virtual environments
 .venv
+
+# VSCode settings
+.vscode/
+.settings/
+.code-workspace
+
+# miscellaneous
+*.log
+*.tmp
+*.bak
+*.swp
+*.DS_Store
+*.idea/
+*.iml
+*.lock

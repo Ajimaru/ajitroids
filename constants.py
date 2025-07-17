@@ -9,6 +9,9 @@ ASTEROID_MAX_RADIUS = ASTEROID_MIN_RADIUS * ASTEROID_KINDS
 PLAYER_RADIUS = 20
 PLAYER_TURN_SPEED = 300
 PLAYER_SPEED = 200
+PLAYER_ACCELERATION = 300
+PLAYER_MAX_SPEED = 400
+PLAYER_FRICTION = 0.02  # Kleine Reibung im Weltraum
 
 PLAYER_SHOOT_SPEED = 500
 PLAYER_SHOOT_COOLDOWN = 0.3
@@ -18,3 +21,11 @@ SHOT_RADIUS = 5
 SCORE_LARGE = 20    # Punkte für große Asteroiden
 SCORE_MEDIUM = 50   # Punkte für mittlere Asteroiden
 SCORE_SMALL = 100   # Punkte für kleine Asteroiden
+
+PLAYER_LIVES = 3
+INVINCIBILITY_TIME = 3.0  # Sekunden Unverwundbarkeit nach Respawn
+RESPAWN_POSITION_X = SCREEN_WIDTH / 2
+RESPAWN_POSITION_Y = SCREEN_HEIGHT / 2
+
+EXPLOSION_PARTICLES = 15  # Anzahl der Partikel pro Explosion
+PARTICLE_COLORS = ["white", "yellow", "red"]  # Verschiedene Farben für Partikel
