@@ -12,7 +12,7 @@ from sounds import Sounds
 from starfield import Starfield, MenuStarfield  # MenuStarfield hinzufügen
 from powerup import PowerUp  # PowerUp-Klasse importieren
 from highscore import HighscoreManager, HighscoreInput, HighscoreDisplay  # Highscore-Klassen importieren
-from menu import MainMenu, PauseMenu, OptionsMenu, CreditsScreen, GameOverScreen, DifficultyMenu  # TutorialScreen entfernen
+from menu import MainMenu, PauseMenu, OptionsMenu, CreditsScreen, GameOverScreen, DifficultyMenu, SoundTestMenu  # TutorialScreen entfernen
 from tutorial import Tutorial  # Neue Tutorial-Klasse importieren
 from settings import Settings
 from boss import Boss
@@ -147,6 +147,8 @@ def main():
     main_menu = MainMenu()
     pause_menu = PauseMenu()
     options_menu = OptionsMenu(game_settings)  # Settings übergeben
+    sound_test_menu = SoundTestMenu()  # NEU: Sound Test Menü
+    sound_test_menu.set_sounds(sounds)  # Sounds-Objekt setzen
     credits_screen = CreditsScreen()
     game_over_screen = GameOverScreen()
     difficulty_menu = DifficultyMenu()  # Neu hinzufügen
@@ -403,7 +405,31 @@ def main():
             if action == "main_menu":
                 game_state = "main_menu"
                 main_menu.activate()
-                
+            elif action == "sound_test":  # NEU: Sound Test
+                game_state = "sound_test"
+                sound_test_menu.activate()
+    
+        # ====== SOUND TEST ====== (NEU)
+        elif game_state == "sound_test":
+            # Menü-Starfield auch hier anzeigen
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+
+            action = sound_test_menu.update(dt, events)
+            if action:
+                result = sound_test_menu.handle_action(action)
+                if result == "options":
+                    game_state = "options"
+                    options_menu.activate()
+        
+            sound_test_menu.draw(screen)
+            
+            # Leertaste zurück zu Optionen
+            for event in events:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    game_state = "options"
+                    options_menu.activate()
+    
         # ====== CREDITS ======
         elif game_state == "credits":
             # Menü-Starfield auch hier anzeigen

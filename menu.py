@@ -278,59 +278,45 @@ class TutorialScreen:
 
 class OptionsMenu(Menu):
     def __init__(self, settings):
-        super().__init__("OPTIONEN")
-        self.settings = settings  # Einstellungen speichern
+        super().__init__("OPTIONS")
+        self.settings = settings
+        self.add_item("Music: ON" if settings.music_on else "Music: OFF", "toggle_music")
+        self.add_item("Sound: ON" if settings.sound_on else "Sound: OFF", "toggle_sound") 
+        self.add_item("Fullscreen: ON" if settings.fullscreen else "Fullscreen: OFF", "toggle_fullscreen")
+        self.add_item("Sound Test", "sound_test")  # NEU: Sound Test hinzufügen
+        self.add_item("Back", "back")
         
-        # Menüpunkte basierend auf aktuellen Einstellungen
-        self.add_item(f"Musik: {'An' if settings.music_on else 'Aus'}", "toggle_music")
-        self.add_item(f"Soundeffekte: {'An' if settings.sound_on else 'Aus'}", "toggle_sound")
-        self.add_item(f"Vollbild: {'An' if settings.fullscreen else 'Aus'}", "toggle_fullscreen")
-        self.add_item("Zurück", "main_menu")
-    
-    def handle_action(self, action, sounds=None):
+    def handle_action(self, action, sounds):
         if action == "toggle_music":
             self.settings.music_on = not self.settings.music_on
-            self.items[0].text = f"Musik: {'An' if self.settings.music_on else 'Aus'}"
-            
-            # Musik ein-/ausschalten
-            if sounds:
-                sounds.toggle_music(self.settings.music_on)
-                
-            # Einstellungen sofort speichern
             self.settings.save()
+            sounds.toggle_music(self.settings.music_on)
+            # Menütext aktualisieren
+            self.items[0] = ("Music: ON" if self.settings.music_on else "Music: OFF", "toggle_music")
             return None
             
         elif action == "toggle_sound":
             self.settings.sound_on = not self.settings.sound_on
-            self.items[1].text = f"Soundeffekte: {'An' if self.settings.sound_on else 'Aus'}"
-            # Soundeffekte ein-/ausschalten
-            if sounds:
-                sounds.toggle_sound(self.settings.sound_on)
-            # Einstellungen speichern
             self.settings.save()
+            sounds.toggle_sound(self.settings.sound_on)
+            # Menütext aktualisieren
+            self.items[1] = ("Sound: ON" if self.settings.sound_on else "Sound: OFF", "toggle_sound")
             return None
             
         elif action == "toggle_fullscreen":
             self.settings.fullscreen = not self.settings.fullscreen
-            self.items[2].text = f"Vollbild: {'An' if self.settings.fullscreen else 'Aus'}"
-            
-            # Vollbildmodus umschalten
-            try:
-                if self.settings.fullscreen:
-                    pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
-                else:
-                    pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-                # Einstellungen speichern
-                self.settings.save()
-            except Exception as e:
-                print(f"Fehler beim Umschalten des Vollbildmodus: {e}")
-                # Zurücksetzen bei Fehler
-                self.settings.fullscreen = not self.settings.fullscreen
-                self.items[2].text = f"Vollbild: {'An' if self.settings.fullscreen else 'Aus'}"
-                
+            self.settings.save()
+            # Menütext aktualisieren
+            self.items[2] = ("Fullscreen: ON" if self.settings.fullscreen else "Fullscreen: OFF", "toggle_fullscreen")
             return None
-        else:
-            return action
+            
+        elif action == "sound_test":
+            return "sound_test"  # NEU: Sound Test zurückgeben
+            
+        elif action == "back":
+            return "main_menu"
+            
+        return None
 
 
 class CreditsScreen:
@@ -469,7 +455,7 @@ class GameOverScreen:
         screen.blit(instruction2, instruction2_rect)
 
 
-# Neue Klasse am Ende der Datei ergänzen
+# Neue Klasse am Ende der Datei ergännen
 class DifficultyMenu(Menu):
     def __init__(self):
         super().__init__("SCHWIERIGKEIT")
@@ -477,3 +463,353 @@ class DifficultyMenu(Menu):
         self.add_item("Normal", "difficulty_normal", "N")
         self.add_item("Schwer", "difficulty_hard", "S")
         self.add_item("Zurück", "main_menu", "Z")
+
+# Neue Klasse am Ende der Datei hinzufügen:
+
+class SoundTestMenu(Menu):
+    def __init__(self):
+        super().__init__("SOUND TEST")
+        self.sounds = None  # Wird später gesetzt
+        self.last_played = ""
+        self.last_played_timer = 0
+        
+        # Scroll-Variablen
+        self.scroll_offset = 0
+        self.max_visible_items = 12  # Anzahl der sichtbaren Items
+        self.current_selection = 0   # WICHTIG: Hier initialisieren!
+        
+        # Sound-Test-Items (vollständige Liste)
+        self.sound_items = [
+            ("Standard Shoot", "test_shoot"),
+            ("Laser Shoot", "test_laser_shoot"),
+            ("Rocket Shoot", "test_rocket_shoot"),
+            ("Shotgun Shoot", "test_shotgun_shoot"),
+            ("Triple Shoot", "test_triple_shoot"),
+            ("", ""),  # Leerzeile
+            ("Explosion", "test_explosion"),
+            ("Player Hit", "test_player_hit"),
+            ("PowerUp", "test_powerup"),
+            ("Shield Activate", "test_shield_activate"),
+            ("Weapon Pickup", "test_weapon_pickup"),
+            ("", ""),  # Leerzeile
+            ("Boss Spawn", "test_boss_spawn"),
+            ("Boss Death", "test_boss_death"),
+            ("Boss Attack", "test_boss_attack"),
+            ("", ""),  # Leerzeile
+            ("Level Up", "test_level_up"),
+            ("Game Over", "test_game_over"),
+            ("Menu Select", "test_menu_select"),
+            ("Menu Confirm", "test_menu_confirm"),
+            ("", ""),  # Leerzeile
+            ("Test All Sounds", "test_all"),
+            ("", ""),  # Leerzeile
+            ("Back", "back")
+        ]
+        
+        # Basis-Menu mit den sichtbaren Items initialisieren
+        self.update_visible_items()
+        
+        # Fade-in Animation (wie andere Menüs)
+        self.background_alpha = 0
+        self.fade_in = False
+    
+    def activate(self):
+        """Aktiviert das Sound Test Menü (überschreibt Menu.activate())"""
+        self.fade_in = True
+        self.background_alpha = 0
+        # Keine Item-Animation da wir Tuples statt MenuItem-Objekte verwenden
+        # Scroll-Position zurücksetzen
+        self.scroll_offset = 0
+        self.current_selection = 0
+        self.update_visible_items()
+    
+    def set_sounds(self, sounds):
+        """Sounds-Objekt setzen"""
+        self.sounds = sounds
+    
+    def update_visible_items(self):
+        """Aktualisiert die sichtbaren Menu-Items basierend auf scroll_offset"""
+        self.items = []
+        start_index = self.scroll_offset
+        end_index = min(start_index + self.max_visible_items, len(self.sound_items))
+        
+        for i in range(start_index, end_index):
+            self.items.append(self.sound_items[i])
+        
+        # Current selection innerhalb der sichtbaren Items halten
+        if self.current_selection >= len(self.items):
+            self.current_selection = max(0, len(self.items) - 1)
+        if self.current_selection < 0:
+            self.current_selection = 0
+    
+    def update(self, dt, events):
+        """Update-Methode mit Scroll-Funktionalität"""
+        # Fade-in Animation (wie Menu-Klasse)
+        if self.fade_in:
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
+            if self.background_alpha >= MENU_BACKGROUND_ALPHA:
+                self.fade_in = False
+                self.background_alpha = MENU_BACKGROUND_ALPHA
+        
+        # Timer für "zuletzt gespielt" reduzieren
+        if self.last_played_timer > 0:
+            self.last_played_timer -= dt
+            if self.last_played_timer <= 0:
+                self.last_played = ""
+        
+        # Scroll-Eingaben verarbeiten
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    self.current_selection -= 1
+                    
+                    # Scrollen nach oben wenn am oberen Rand
+                    if self.current_selection < 0:
+                        if self.scroll_offset > 0:
+                            self.scroll_offset -= 1
+                            self.current_selection = 0
+                            self.update_visible_items()
+                        else:
+                            # Am Anfang der Liste - wrap to bottom
+                            self.scroll_offset = max(0, len(self.sound_items) - self.max_visible_items)
+                            self.current_selection = min(self.max_visible_items - 1, len(self.sound_items) - 1 - self.scroll_offset)
+                            self.update_visible_items()
+                
+                elif event.key == pygame.K_DOWN:
+                    self.current_selection += 1
+                    
+                    # Scrollen nach unten wenn am unteren Rand
+                    if self.current_selection >= len(self.items):
+                        if self.scroll_offset + self.max_visible_items < len(self.sound_items):
+                            self.scroll_offset += 1
+                            self.current_selection = len(self.items) - 1
+                            self.update_visible_items()
+                        else:
+                            # Am Ende der Liste - wrap to top
+                            self.scroll_offset = 0
+                            self.current_selection = 0
+                            self.update_visible_items()
+                
+                elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+                    if 0 <= self.current_selection < len(self.items):
+                        return self.items[self.current_selection][1]  # Return action
+                
+                elif event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE:
+                    return "back"
+        
+        return None
+    
+    def handle_action(self, action):
+        """Sound-Test-Aktionen verarbeiten"""
+        if not self.sounds:
+            return None
+            
+        # Sound-Tests
+        if action == "test_shoot":
+            self.sounds.play_shoot()
+            self.last_played = "Standard Shoot played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_laser_shoot":
+            if hasattr(self.sounds, 'play_laser_shoot'):
+                self.sounds.play_laser_shoot()
+            else:
+                self.sounds.play_shoot()  # Fallback
+            self.last_played = "Laser Shoot played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_rocket_shoot":
+            if hasattr(self.sounds, 'play_rocket_shoot'):
+                self.sounds.play_rocket_shoot()
+            else:
+                self.sounds.play_shoot()  # Fallback
+            self.last_played = "Rocket Shoot played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_shotgun_shoot":
+            if hasattr(self.sounds, 'play_shotgun_shoot'):
+                self.sounds.play_shotgun_shoot()
+            else:
+                self.sounds.play_shoot()  # Fallback
+            self.last_played = "Shotgun Shoot played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_triple_shoot":
+            if hasattr(self.sounds, 'play_triple_shoot'):
+                self.sounds.play_triple_shoot()
+            else:
+                self.sounds.play_shoot()  # Fallback
+            self.last_played = "Triple Shoot played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_explosion":
+            self.sounds.play_explosion()
+            self.last_played = "Explosion played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_player_hit":
+            self.sounds.play_player_hit()
+            self.last_played = "Player Hit played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_powerup":
+            self.sounds.play_powerup()
+            self.last_played = "PowerUp played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_shield_activate":
+            self.sounds.play_shield_activate()
+            self.last_played = "Shield Activate played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_weapon_pickup":
+            if hasattr(self.sounds, 'play_weapon_pickup'):
+                self.sounds.play_weapon_pickup()
+            else:
+                self.sounds.play_powerup()  # Fallback
+            self.last_played = "Weapon Pickup played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_boss_spawn":
+            self.sounds.play_boss_spawn()
+            self.last_played = "Boss Spawn played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_boss_death":
+            self.sounds.play_boss_death()
+            self.last_played = "Boss Death played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_boss_attack":
+            if hasattr(self.sounds, 'play_boss_attack'):
+                self.sounds.play_boss_attack()
+            else:
+                self.sounds.play_explosion()  # Fallback
+            self.last_played = "Boss Attack played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_level_up":
+            self.sounds.play_level_up()
+            self.last_played = "Level Up played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_game_over":
+            self.sounds.play_game_over()
+            self.last_played = "Game Over played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_menu_select":
+            self.sounds.play_menu_move()
+            self.last_played = "Menu Select played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_menu_confirm":
+            self.sounds.play_menu_select()
+            self.last_played = "Menu Confirm played"
+            self.last_played_timer = 2.0
+            
+        elif action == "test_all":
+            # Alle Sounds nacheinander abspielen
+            import threading
+            import time
+            
+            def play_all_sounds():
+                sound_list = [
+                    ("Standard Shoot", self.sounds.play_shoot),
+                    ("Explosion", self.sounds.play_explosion),
+                    ("Player Hit", self.sounds.play_player_hit),
+                    ("PowerUp", self.sounds.play_powerup),
+                    ("Level Up", self.sounds.play_level_up),
+                    ("Game Over", self.sounds.play_game_over),
+                ]
+                
+                for name, sound_func in sound_list:
+                    try:
+                        sound_func()
+                        time.sleep(0.8)  # Pause zwischen Sounds
+                    except:
+                        pass  # Fehler ignorieren
+            
+            threading.Thread(target=play_all_sounds, daemon=True).start()
+            self.last_played = "Playing all sounds..."
+            self.last_played_timer = 8.0
+            
+        elif action == "back":
+            return "options"
+            
+        return None
+
+    def draw(self, screen):
+        """Sound-Test-Menü mit Scroll-Indikatoren zeichnen"""
+        # Halbtransparenten Hintergrund zeichnen (wie Menu-Klasse)
+        background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+        background.fill((0, 0, 0, self.background_alpha))
+        screen.blit(background, (0, 0))
+        
+        # Titel zeichnen
+        title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
+        title_surface = title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
+        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH/2, 80))
+        screen.blit(title_surface, title_rect)
+        
+        # Scroll-Indikatoren
+        indicator_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.8))
+        
+        # Nach oben scrollen möglich?
+        if self.scroll_offset > 0:
+            up_text = indicator_font.render("▲ Scroll UP", True, pygame.Color("yellow"))
+            up_rect = up_text.get_rect(center=(SCREEN_WIDTH/2, 120))
+            screen.blit(up_text, up_rect)
+        
+        # Nach unten scrollen möglich?
+        if self.scroll_offset + self.max_visible_items < len(self.sound_items):
+            down_text = indicator_font.render("▼ Scroll DOWN", True, pygame.Color("yellow"))
+            down_rect = down_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 200))
+            screen.blit(down_text, down_rect)
+        
+        # Menu-Items zeichnen
+        font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
+        start_y = 160
+        
+        for i, (text, action) in enumerate(self.items):
+            if text == "":  # Leerzeile überspringen
+                continue
+                
+            # Farbe basierend auf Auswahl
+            color = MENU_SELECTED_COLOR if i == self.current_selection else MENU_UNSELECTED_COLOR
+            
+            # Größe für ausgewähltes Item
+            if i == self.current_selection:
+                scaled_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 1.2))
+                surface = scaled_font.render(text, True, pygame.Color(color))
+            else:
+                surface = font.render(text, True, pygame.Color(color))
+            
+            rect = surface.get_rect(center=(SCREEN_WIDTH/2, start_y + i * MENU_ITEM_SPACING))
+            screen.blit(surface, rect)
+        
+        # "Zuletzt gespielt" Anzeige
+        if self.last_played:
+            played_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.8))
+            played_text = played_font.render(self.last_played, True, pygame.Color("green"))
+            played_rect = played_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 120))
+            screen.blit(played_text, played_rect)
+        
+        # Anweisungen
+        instructions = [
+            "Use UP/DOWN arrows to scroll and navigate",
+            "Press ENTER to test sound",
+            "Press SPACE to go back"
+        ]
+        
+        instruction_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.6))
+        for i, instruction in enumerate(instructions):
+            text = instruction_font.render(instruction, True, pygame.Color(MENU_UNSELECTED_COLOR))
+            text_rect = text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 80 + i * 20))
+            screen.blit(text, text_rect)
+        
+        # Scroll-Info anzeigen
+        scroll_info = f"Items {self.scroll_offset + 1}-{min(self.scroll_offset + self.max_visible_items, len(self.sound_items))} of {len(self.sound_items)}"
+        info_text = instruction_font.render(scroll_info, True, pygame.Color("gray"))
+        info_rect = info_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 20))
+        screen.blit(info_text, info_rect)
