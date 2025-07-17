@@ -21,12 +21,12 @@ class Tutorial:
             {
                 "title": "PowerUps",
                 "content": [
-                    "🔵 Schild - Schutz vor einem Treffer (3 Sek.)",
-                    "🟣 Dreifachschuss - Drei Schüsse gleichzeitig",
-                    "🟡 Schnellfeuer - Erhöhte Feuerrate",
-                    "🟢 Laser - Durchdringt mehrere Asteroiden",
-                    "🔴 Raketen - Verfolgen nahe Asteroiden",
-                    "🟠 Schrotflinte - Mehrere Schüsse in einem Winkel",
+                    "[SCHILD] - Schutz vor einem Treffer (3 Sek.)",
+                    "[3-SHOT] - Drei Schüsse gleichzeitig",
+                    "[SPEED] - Erhöhte Feuerrate",
+                    "[LASER] - Durchdringt mehrere Asteroiden",
+                    "[ROCKET] - Verfolgen nahe Asteroiden",
+                    "[SHOTGUN] - Mehrere Schüsse in einem Winkel",
                     "",
                     "PowerUps erscheinen nur von großen Asteroiden!",
                     "Sie verschwinden nach 10 Sekunden"
@@ -39,7 +39,7 @@ class Tutorial:
                     "Höhere Level = mehr und schnellere Asteroiden",
                     "Maximales Level: 999",
                     "",
-                    "🎯 BOSS-KÄMPFE:",
+                    "*** BOSS-KÄMPFE ***",
                     "Alle 10 Level erscheint ein Boss!",
                     "Bosse haben viel Gesundheit und Angriffsmuster",
                     "Belohnung: +1 Leben und 500 Punkte",
@@ -50,25 +50,25 @@ class Tutorial:
             {
                 "title": "Waffen-System",
                 "content": [
-                    "🔸 Standard: Unbegrenzte Munition",
-                    "🟢 Laser: 15 Schuss, durchdringt Asteroiden",
-                    "🔴 Raketen: 8 Schuss, verfolgen Ziele automatisch",
-                    "🟠 Schrotflinte: 12 Schuss, Streufeuer",
+                    "STANDARD: Unbegrenzte Munition",
+                    "LASER: 15 Schuss, durchdringt Asteroiden",
+                    "RAKETEN: 8 Schuss, verfolgen Ziele automatisch",
+                    "SCHROTFLINTE: 12 Schuss, Streufeuer",
                     "",
                     "Munition wird im HUD angezeigt",
                     "Sammle die gleiche Waffe für mehr Munition",
-                    "Wechsle mit Q/E zwischen Waffen"
+                    "Waffen wechseln automatisch zurück zur Standard-Waffe"
                 ]
             },
             {
                 "title": "Boss-Kampf Strategien",
                 "content": [
-                    "🎯 Boss-Verhalten:",
+                    "*** Boss-Verhalten ***",
                     "• Bewegt sich in verschiedenen Phasen",
                     "• Wechselt zwischen Angriffsmuster",
                     "• Wird mit höherem Level gefährlicher",
                     "",
-                    "💡 Tipps:",
+                    "### Tipps ###",
                     "• Nutze Bewegung um Projektilen auszuweichen",
                     "• Sammle PowerUps vor dem Boss-Kampf",
                     "• Konzentriere dich auf den Boss-Kern",
@@ -78,12 +78,13 @@ class Tutorial:
             {
                 "title": "Erweiterte Tipps",
                 "content": [
-                    "🎮 Steuerung:",
+                    "*** Steuerung ***",
                     "• ESC für Pause",
                     "• F11 für Vollbild",
-                    "• Q/E zum Waffenwechsel",
+                    "• Pfeiltasten für Bewegung",
+                    "• Leertaste zum Schießen",
                     "",
-                    "🎯 Strategie:",
+                    "*** Strategie ***",
                     "• Große Asteroiden geben mehr Punkte",
                     "• PowerUPs pulsieren in den letzten 3 Sekunden",
                     "• Unverwundbarkeit nach Respawn nutzen",
@@ -93,16 +94,16 @@ class Tutorial:
             {
                 "title": "Schwierigkeitsgrade",
                 "content": [
-                    "🟢 Leicht:",
+                    "[LEICHT]:",
                     "• Langsamere Asteroiden",
                     "• Weniger Asteroiden pro Level",
                     "• Mehr PowerUp-Chancen",
                     "",
-                    "🟡 Normal:",
+                    "[NORMAL]:",
                     "• Ausgewogenes Gameplay",
                     "• Standard-Einstellungen",
                     "",
-                    "🔴 Schwer:",
+                    "[SCHWER]:",
                     "• Schnellere Asteroiden",
                     "• Mehr Asteroiden pro Level",
                     "• Weniger PowerUp-Chancen",
@@ -185,29 +186,47 @@ class Tutorial:
         
         y_offset += 80
         
-        # Content
+        # Content - VERWENDE draw_colored_line() für PowerUps und Waffen
         for line in page["content"]:
             if line == "":
                 y_offset += 15
                 continue
+            
+            # Prüfe ob es sich um PowerUp- oder Waffen-Zeilen handelt
+            if (line.startswith("[") and "]" in line) or ":" in line and any(weapon in line for weapon in ["STANDARD", "LASER", "RAKETEN", "SCHROTFLINTE"]):
+                # Verwende die spezielle Färbungs-Methode
+                self.draw_colored_line(screen, line, SCREEN_WIDTH//2, y_offset)
+            else:
+                # Normale Zeilen mit einfacher Formatierung
+                color = (255, 255, 255)  # Standard weiß
                 
-            # Spezielle Formatierung für verschiedene Arten von Zeilen
-            color = (255, 255, 255)
-            if line.startswith("🎯") or line.startswith("💡"):
-                color = (255, 215, 0)  # Gold für wichtige Hinweise
-            elif line.startswith("•"):
-                color = (200, 200, 200)  # Grau für Unterpunkte
-            elif any(line.startswith(emoji) for emoji in ["🔵", "🟣", "🟡", "🟢", "🔴", "🟠"]):
-                color = (150, 255, 150)  # Hellgrün für PowerUps
-            elif line.startswith("🟢") or line.startswith("🟡") or line.startswith("🔴"):
-                color = (255, 200, 100)  # Orange für Schwierigkeitsgrade
+                # Schwierigkeitsgrade-Namen
+                if line.startswith("[LEICHT]:"):
+                    color = (0, 255, 0)  # Grün für Leicht
+                elif line.startswith("[NORMAL]:"):
+                    color = (255, 255, 0)  # Gelb für Normal
+                elif line.startswith("[SCHWER]:"):
+                    color = (255, 0, 0)  # Rot für Schwer
                 
-            content_surface = self.font_content.render(line, True, color)
-            if alpha < 255:
-                content_surface.set_alpha(alpha)
+                # Boss-bezogene Hervorhebungen
+                elif line.startswith("*** BOSS-KÄMPFE ***") or line.startswith("*** Boss-Verhalten ***"):
+                    color = (128, 0, 128)  # Lila - wie Boss-Farbe
+                elif line.startswith("### Tipps ###"):
+                    color = (255, 215, 0)  # Gold für wichtige Tipps
+                elif line.startswith("*** Steuerung ***") or line.startswith("*** Strategie ***"):
+                    color = (100, 200, 255)  # Hellblau für Kategorien
                 
-            content_rect = content_surface.get_rect(center=(SCREEN_WIDTH/2, y_offset))
-            screen.blit(content_surface, content_rect)
+                # Unterpunkte
+                elif line.startswith("•"):
+                    color = (200, 200, 200)  # Grau für Unterpunkte
+                
+                content_surface = self.font_content.render(line, True, color)
+                if alpha < 255:
+                    content_surface.set_alpha(alpha)
+                    
+                content_rect = content_surface.get_rect(center=(SCREEN_WIDTH/2, y_offset))
+                screen.blit(content_surface, content_rect)
+            
             y_offset += 35
         
         # Navigation
@@ -240,3 +259,76 @@ class Tutorial:
         progress_fill_width = int(progress_width * current_progress)
         pygame.draw.rect(screen, (100, 200, 255), 
                         (progress_x, progress_y, progress_fill_width, progress_height))
+    
+    def draw_colored_line(self, screen, line, x, y):
+        """Zeichnet eine Zeile mit farbigem Name-Teil und weißem Beschreibungs-Teil"""
+        
+        # PowerUp-Namen extrahieren und färben
+        if line.startswith("[") and "]" in line:
+            bracket_end = line.find("]") + 1
+            name_part = line[:bracket_end]
+            desc_part = line[bracket_end:]
+            
+            # Name-Farbe bestimmen
+            name_color = (255, 255, 255)  # Standard
+            if "[SCHILD]" in name_part:
+                name_color = (0, 255, 255)
+            elif "[LASER]" in name_part:
+                name_color = (0, 255, 0)
+            elif "[ROCKET]" in name_part:
+                name_color = (255, 0, 0)
+            elif "[SHOTGUN]" in name_part:
+                name_color = (255, 165, 0)
+            elif "[3-SHOT]" in name_part or "[SPEED]" in name_part:
+                name_color = (255, 255, 0)
+            
+            # Name zeichnen
+            name_surface = self.font_content.render(name_part, True, name_color)
+            name_width = name_surface.get_width()
+            
+            # Beschreibung zeichnen (weiß)
+            desc_surface = self.font_content.render(desc_part, True, (255, 255, 255))
+            
+            # Beide Teile zentriert zeichnen
+            total_width = name_width + desc_surface.get_width()
+            start_x = x - total_width // 2
+            
+            screen.blit(name_surface, (start_x, y))
+            screen.blit(desc_surface, (start_x + name_width, y))
+    
+        # Waffen-Namen (mit Doppelpunkt) 
+        elif ":" in line:
+            colon_pos = line.find(":") + 1
+            name_part = line[:colon_pos]
+            desc_part = line[colon_pos:]
+            
+            # Waffen-Farbe bestimmen
+            name_color = (255, 255, 255)  # Standard
+            if "STANDARD:" in name_part:
+                name_color = (255, 255, 255)
+            elif "LASER:" in name_part:
+                name_color = (0, 255, 0)
+            elif "RAKETEN:" in name_part:
+                name_color = (255, 0, 0)
+            elif "SCHROTFLINTE:" in name_part:
+                name_color = (255, 165, 0)
+            
+            # Name zeichnen
+            name_surface = self.font_content.render(name_part, True, name_color)
+            name_width = name_surface.get_width()
+            
+            # Beschreibung zeichnen (weiß)
+            desc_surface = self.font_content.render(desc_part, True, (255, 255, 255))
+            
+            # Beide Teile zentriert zeichnen
+            total_width = name_width + desc_surface.get_width()
+            start_x = x - total_width // 2
+            
+            screen.blit(name_surface, (start_x, y))
+            screen.blit(desc_surface, (start_x + name_width, y))
+            
+        else:
+            # Normale Zeile
+            content_surface = self.font_content.render(line, True, (255, 255, 255))
+            content_rect = content_surface.get_rect(center=(x, y))
+            screen.blit(content_surface, content_rect)
