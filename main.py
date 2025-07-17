@@ -17,11 +17,19 @@ from tutorial import Tutorial  # Neue Tutorial-Klasse importieren
 from settings import Settings
 from boss import Boss
 from bossprojectile import BossProjectile
+from achievements import AchievementSystem
 
 
 def main():
     global game_state, score, lives, level
     
+    # Achievement-System initialisieren
+    achievement_system = AchievementSystem()
+
+    # Beispiel-Achievements hinzufügen
+    achievement_system.add_achievement("First Blood", "Destroy your first asteroid.")
+    achievement_system.add_achievement("Survivor", "Survive for 5 minutes.")
+
     # Auch für Boss-Variablen hinzufügen
     global boss_active, boss_defeated_timer, boss_defeated_message
     
