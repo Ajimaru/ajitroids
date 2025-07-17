@@ -431,10 +431,15 @@ def main():
                 for shot in shots:
                     if asteroid.collides_with(shot):
                         sounds.play_explosion()  # Explosions-Sound
+        
                         # Punktevergabe basierend auf Asteroidengröße
-                        if asteroid.radius > ASTEROID_MIN_RADIUS * 2:
+                        original_size = asteroid.radius
+                        is_large_asteroid = original_size >= ASTEROID_MIN_RADIUS * 2
+                        is_medium_asteroid = ASTEROID_MIN_RADIUS < original_size < ASTEROID_MIN_RADIUS * 2
+        
+                        if is_large_asteroid:
                             score += SCORE_LARGE
-                        elif asteroid.radius > ASTEROID_MIN_RADIUS:
+                        elif is_medium_asteroid:
                             score += SCORE_MEDIUM
                         else:
                             score += SCORE_SMALL
@@ -442,6 +447,16 @@ def main():
                         # Asteroidenexplosion
                         Particle.create_asteroid_explosion(asteroid.position.x, asteroid.position.y)
                         
+                        # Power-Up Chance nur bei großen Asteroiden
+                        if is_large_asteroid and random.random() < POWERUP_SPAWN_CHANCE:
+                            # Nur ein Power-Up pro Asteroid und maximal POWERUP_MAX_COUNT auf dem Bildschirm
+                            if len(powerups) < POWERUP_MAX_COUNT:
+                                # Zufälliges Power-Up wählen
+                                powerup_type = random.choice(POWERUP_TYPES)
+                                PowerUp(asteroid.position.x, asteroid.position.y, powerup_type)
+                                print(f"Power-Up {powerup_type} erscheint von großem Asteroid!")
+        
+                        # Asteroiden aufteilen oder zerstören
                         asteroid.split()
                         shot.kill()
                         break
@@ -489,6 +504,17 @@ def main():
             level_rect = level_text.get_rect(topleft=(20, 80))
             screen.blit(level_text, level_rect)
 
+            # Schwierigkeitsstufe oben links, unter dem Level
+            difficulty_color = {
+                "easy": (0, 255, 0),    # Grün für leicht
+                "normal": (255, 255, 0), # Gelb für normal
+                "hard": (255, 0, 0)      # Rot für schwer
+            }.get(difficulty, (200, 200, 200))
+
+            difficulty_text = font.render(f"Difficulty: {difficulty.capitalize()}", True, difficulty_color)
+            difficulty_rect = difficulty_text.get_rect(topleft=(20, 110))
+            screen.blit(difficulty_text, difficulty_rect)
+
             # Level-System aktualisieren
             current_level = min(score // POINTS_PER_LEVEL + 1, MAX_LEVEL)
             
@@ -497,9 +523,10 @@ def main():
                 # Level erhöhen
                 level = current_level
                 
-                # Schwierigkeit anpassen
-                asteroid_field.asteroid_count = min(BASE_ASTEROID_COUNT + (level - 1) * ASTEROID_COUNT_PER_LEVEL, 12)
-                asteroid_field.spawn_interval = max(BASE_SPAWN_INTERVAL - (level - 1) * SPAWN_INTERVAL_REDUCTION, 0.8)
+                # Ab Level 10 die Schwierigkeit nicht mehr erhöhen, um das Spiel spielbar zu halten
+                if level <= 10:
+                    asteroid_field.asteroid_count = min(BASE_ASTEROID_COUNT + (level - 1) * ASTEROID_COUNT_PER_LEVEL, 12)
+                    asteroid_field.spawn_interval = max(BASE_SPAWN_INTERVAL - (level - 1) * SPAWN_INTERVAL_REDUCTION, 1.0)
                 
                 # Level-Up-Anzeige aktivieren
                 level_up_timer = LEVEL_UP_DISPLAY_TIME

@@ -46,7 +46,7 @@ POWERUP_RADIUS = 15
 POWERUP_SPAWN_CHANCE = 0.3  # Erhöht von 0.1 auf 0.3 für häufigere Spawns
 POWERUP_MAX_COUNT = 3  # Maximal 3 Power-ups gleichzeitig
 POWERUP_LIFETIME = 15.0  # Sekunden bis ein Power-up verschwindet
-SHIELD_DURATION = 10.0  # Sekunden
+SHIELD_DURATION = 3.0  # Sekunden für Schildaktivierung (vorher 10)
 POWERUP_TYPES = ["shield", "triple_shot", "rapid_fire", "laser_weapon", "missile_weapon", "shotgun_weapon"]
 POWERUP_COLORS = {
     "shield": "#00FFFF",           # Cyan
@@ -57,8 +57,8 @@ POWERUP_COLORS = {
     "shotgun_weapon": "#FFAA00"    # Orange
 }
 RAPID_FIRE_COOLDOWN = 0.1    # Cooldown während Rapid-Fire
-RAPID_FIRE_DURATION = 5.0    # Sekunden
-TRIPLE_SHOT_DURATION = 8.0   # Sekunden
+RAPID_FIRE_DURATION = 8.0    # Sekunden
+TRIPLE_SHOT_DURATION = 10.0   # Sekunden
 
 # Highscore-Konstanten
 HIGHSCORE_FILE = "highscores.json"  # Datei zum Speichern
@@ -102,7 +102,7 @@ CREDITS_TITLE = "CREDITS"
 CREDITS_GAME_NAME = "AJITROIDS"
 CREDITS_DEVELOPER = "Ajimaru"
 CREDITS_GRAPHICS = "GitHub Copilot"
-CREDITS_SOUND = "Freie Soundeffekte von OpenGameArt.org"
+CREDITS_SOUND = "Command Line"
 CREDITS_SPECIAL_THANKS = [
     "Boot.dev für die Python-Tutorials",
     "Pygame Community",
@@ -115,9 +115,9 @@ CREDITS_WEBSITE = "https://ajimaru.github.io"
 GAME_VERSION = "v0.7.0"  # Aktuelle Spielversion
 
 # Level-Konstanten
-POINTS_PER_LEVEL = 1000           # Punkte für Level-Up
-MAX_LEVEL = 10                     # Höchstes Level
-LEVEL_UP_DISPLAY_TIME = 2.0        # Anzeigezeit in Sekunden
+POINTS_PER_LEVEL = 2500            # Punkte für Level-Up
+MAX_LEVEL = 999                    # Höchstes Level auf 999 erhöht
+LEVEL_UP_DISPLAY_TIME = 1.5        # Anzeigezeit in Sekunden
 BASE_ASTEROID_COUNT = 3            # Grundwert für Asteroiden-Anzahl
 BASE_SPAWN_INTERVAL = 5.0          # Grundwert für Spawn-Interval
 ASTEROID_COUNT_PER_LEVEL = 1       # Zusätzliche Asteroiden pro Level

@@ -81,13 +81,13 @@ class Player(CircleShape):
             self.rotation -= PLAYER_ROTATION_SPEED * dt
             
         # Beschleunigung - jetzt mit passendem Vektor
-        if keys[pygame.K_w]:
+        if keys[pygame.K_s]:
             # Verwende den gleichen Vektor wie für die Dreiecksspitze
             direction = pygame.Vector2(0, 1).rotate(self.rotation)
             self.velocity += direction * PLAYER_ACCELERATION * dt
         
         # Rückwärts - jetzt mit passendem Vektor
-        if keys[pygame.K_s]:
+        if keys[pygame.K_w]:
             # Entgegengesetzt zur Dreiecksspitze
             direction = pygame.Vector2(0, -1).rotate(self.rotation)
             self.velocity += direction * (PLAYER_ACCELERATION * 0.5) * dt  # Langsamer rückwärts

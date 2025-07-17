@@ -185,7 +185,7 @@ class Menu:
         for i, item in enumerate(self.items):
             position = (SCREEN_WIDTH / 2, start_y + i * MENU_ITEM_SPACING)
             item.draw(screen, position, self.item_font)
-            
+
 
 class MainMenu(Menu):
     def __init__(self):
@@ -291,9 +291,6 @@ class OptionsMenu(Menu):
         if action == "toggle_music":
             self.settings.music_on = not self.settings.music_on
             self.items[0].text = f"Musik: {'An' if self.settings.music_on else 'Aus'}"
-            
-            # Debug-Ausgabe
-            print(f"Musik umgeschaltet auf: {self.settings.music_on}")
             
             # Musik ein-/ausschalten
             if sounds:
