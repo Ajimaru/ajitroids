@@ -4,6 +4,7 @@ import os
 class Sounds:
     def __init__(self):
         pygame.mixer.init(44100, -16, 2, 2048)
+            # print("Boss-Death-Sound konnte nicht geladen werden") # Debug entfernt0, -16, 2, 2048)
         
         # Alle Attribute ZUERST auf None setzen (defensive Programmierung)
         self.shoot = None
@@ -49,7 +50,7 @@ class Sounds:
         try:
             pygame.mixer.music.load("assets/background.mp3")
             pygame.mixer.music.set_volume(0.6)  # Lautstärke von 0.2 auf 0.6 erhöht
-            print("Hintergrundmusik geladen (aber noch nicht gestartet)")
+            # print("Hintergrundmusik geladen (aber noch nicht gestartet)") # Debug-Ausgabe entfernt
         except Exception as e:
             print(f"Fehler beim Laden der Hintergrundmusik: {e}")
             print(f"Aktuelles Verzeichnis: {os.getcwd()}")
@@ -90,7 +91,7 @@ class Sounds:
             self.boss_death.set_volume(0.5)
         except:
             self.boss_death = None
-            print("Boss-Death-Sound konnte nicht geladen werden")
+            # print("Boss-Death-Sound konnte nicht geladen werden") # Debug entfernt
             
         try:
             # PowerUp-Sounds
@@ -101,11 +102,11 @@ class Sounds:
             print("PowerUp-Sound konnte nicht geladen werden")
             
         try:
-            self.shield_activate = pygame.mixer.Sound("assets/shield_activate.wav")
+            self.shield_activate = pygame.mixer.Sound("assets/shield_hit.wav")  # shield_activate.wav existiert nicht
             self.shield_activate.set_volume(0.3)
         except:
             self.shield_activate = None
-            print("Shield-Activate-Sound konnte nicht geladen werden")
+            # print("Shield-Activate-Sound konnte nicht geladen werden") # Debug entfernt
             
         try:
             # UI-Sounds

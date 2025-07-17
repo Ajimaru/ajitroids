@@ -85,13 +85,7 @@ def main():
     pygame.time.delay(200)  # Längere Verzögerung
 
     # Sound-Einstellungen anwenden
-    print(f"Wende Musik-Einstellung an: {game_settings.music_on}")
-
-    # Debug: Musik-Status überprüfen
-    print(f"🎵 Musik-Debug:")
-    print(f"   - music_on: {game_settings.music_on}")
-    print(f"   - mixer initialized: {pygame.mixer.get_init() is not None}")
-    print(f"   - mixer frequency: {pygame.mixer.get_init()}")
+    # print(f"Wende Musik-Einstellung an: {game_settings.music_on}") # Debug entfernt
 
     # Musik vollständig neu laden und starten
     if game_settings.music_on:
@@ -103,9 +97,7 @@ def main():
             
             # Sofort nach dem Start prüfen
             pygame.time.delay(100)  # Kurz warten
-            print(f"   - music busy after start: {pygame.mixer.music.get_busy()}")
-            print(f"   - music volume: {pygame.mixer.music.get_volume()}")
-            print("✅ Musik beim Start explizit neu geladen und gestartet")
+            # print("✅ Musik beim Start explizit neu geladen und gestartet") # Debug entfernt
         except Exception as e:
             print(f"❌ Fehler beim Starten der Musik: {e}")
             # Debug: Prüfe ob Datei existiert
@@ -196,9 +188,6 @@ def main():
     if 'player' not in globals() or not player:
         player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 
-    if 'sounds' not in globals() or not sounds:
-        sounds = Sounds()
-
     if 'PLAYER_INVINCIBLE_TIME' not in globals() or not PLAYER_INVINCIBLE_TIME:
         PLAYER_INVINCIBLE_TIME = 3  # Beispielwert für Unverwundbarkeit
 
@@ -243,7 +232,7 @@ def main():
                     pygame.mixer.music.load("assets/background.mp3")
                     pygame.mixer.music.set_volume(0.8)
                     pygame.mixer.music.play(-1)
-                    print("🎵 Musik im Hauptmenü neu gestartet")
+                    # print("🎵 Musik im Hauptmenü neu gestartet") # Debug entfernt
                 except Exception as e:
                     print(f"❌ Musik-Fehler im Hauptmenü: {e}")
             
