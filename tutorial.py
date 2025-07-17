@@ -121,12 +121,10 @@ class Tutorial:
         self.transition_timer = 0
         self.transition_duration = 0.3
         
-        # Schriftarten
         self.font_title = pygame.font.Font(None, 48)
         self.font_content = pygame.font.Font(None, 28)
         self.font_navigation = pygame.font.Font(None, 24)
         
-        # NEU: Starfield für Hintergrund hinzufügen
         try:
             from starfield import MenuStarfield
             self.starfield = MenuStarfield(num_stars=80)
@@ -151,11 +149,9 @@ class Tutorial:
         self.transition_timer = 0
     
     def update(self, dt, events):
-        # Starfield aktualisieren
         if hasattr(self, 'starfield') and self.starfield:
             self.starfield.update(dt)
         
-        # Transition-Animation
         if self.transitioning:
             self.transition_timer += dt
             if self.transition_timer >= self.transition_duration:
@@ -164,7 +160,6 @@ class Tutorial:
                 self.transition_timer = 0
                 return None
     
-        # Event-Handling
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE or event.key == pygame.K_SPACE:
@@ -181,24 +176,19 @@ class Tutorial:
         return None
     
     def draw(self, screen):
-        # Schwarzer Hintergrund
         screen.fill((0, 0, 0))
         
-        # NEU: Starfield zeichnen (falls vorhanden)
         if hasattr(self, 'starfield') and self.starfield:
             self.starfield.draw(screen)
         
-        # Transition-Effekt
         alpha = 255
         if self.transitioning:
             progress = self.transition_timer / self.transition_duration
             alpha = int(255 * (1 - abs(progress - 0.5) * 2))
         
-        # Aktueller Content
         page = self.pages[self.current_page]
         y_offset = 80
         
-        # Titel
         title_color = (100, 200, 255) if alpha == 255 else (100, 200, 255, alpha)
         title_surface = self.font_title.render(page["title"], True, title_color)
         title_rect = title_surface.get_rect(center=(SCREEN_WIDTH/2, y_offset))
@@ -209,32 +199,26 @@ class Tutorial:
         
         y_offset += 80
         
-        # Content - VERWENDE draw_colored_line() für PowerUps, Waffen UND Schwierigkeitsgrade
         for line in page["content"]:
             if line == "":
                 y_offset += 15
                 continue
             
-            # Prüfe ob es sich um PowerUp-, Waffen- oder Schwierigkeitsgrad-Zeilen handelt
             if ((line.startswith("[") and "]" in line) or 
                 (":" in line and any(weapon in line for weapon in ["STANDARD", "LASER", "RAKETEN", "SCHROTFLINTE"]))):
-                # Verwende die spezielle Färbungs-Methode
                 self.draw_colored_line(screen, line, SCREEN_WIDTH//2, y_offset)
             else:
-                # Normale Zeilen mit einfacher Formatierung
-                color = (255, 255, 255)  # Standard weiß
+                color = (255, 255, 255)
                 
-                # Boss-bezogene Hervorhebungen
                 if line.startswith("*** BOSS-KÄMPFE ***") or line.startswith("*** Boss-Verhalten ***"):
-                    color = (128, 0, 128)  # Lila - wie Boss-Farbe
+                    color = (128, 0, 128)
                 elif line.startswith("### Tipps ###"):
-                    color = (255, 215, 0)  # Gold für wichtige Tipps
+                    color = (255, 215, 0)
                 elif line.startswith("*** Steuerung ***") or line.startswith("*** Strategie ***"):
-                    color = (100, 200, 255)  # Hellblau für Kategorien
+                    color = (100, 200, 255)
                 
-                # Unterpunkte
                 elif line.startswith("•"):
-                    color = (200, 200, 200)  # Grau für Unterpunkte
+                    color = (200, 200, 200)
                 
                 content_surface = self.font_content.render(line, True, color)
                 if alpha < 255:
@@ -245,32 +229,26 @@ class Tutorial:
             
             y_offset += 35
         
-        # Navigation
         nav_y = SCREEN_HEIGHT - 80
         
-        # Seitenanzeige
         page_info = f"Seite {self.current_page + 1} von {len(self.pages)}"
         page_surface = self.font_navigation.render(page_info, True, (150, 150, 150))
         page_rect = page_surface.get_rect(center=(SCREEN_WIDTH/2, nav_y))
         screen.blit(page_surface, page_rect)
         
-        # Navigation-Hinweise
         nav_text = "← A/D/Pfeiltasten zum Navigieren →    ESC/Leertaste: Zurück"
         nav_surface = self.font_navigation.render(nav_text, True, (100, 100, 100))
         nav_rect = nav_surface.get_rect(center=(SCREEN_WIDTH/2, nav_y + 30))
         screen.blit(nav_surface, nav_rect)
         
-        # Fortschrittsbalken
         progress_width = 300
         progress_height = 4
         progress_x = (SCREEN_WIDTH - progress_width) // 2
         progress_y = nav_y - 30
         
-        # Hintergrund des Fortschrittsbalkens
         pygame.draw.rect(screen, (50, 50, 50), 
                         (progress_x, progress_y, progress_width, progress_height))
         
-        # Aktueller Fortschritt
         current_progress = (self.current_page + 1) / len(self.pages)
         progress_fill_width = int(progress_width * current_progress)
         pygame.draw.rect(screen, (100, 200, 255), 
@@ -279,14 +257,12 @@ class Tutorial:
     def draw_colored_line(self, screen, line, x, y):
         """Zeichnet eine Zeile mit farbigem Name-Teil und weißem Beschreibungs-Teil"""
         
-        # PowerUp-Namen extrahieren und färben
         if line.startswith("[") and "]" in line:
             bracket_end = line.find("]") + 1
             name_part = line[:bracket_end]
             desc_part = line[bracket_end:]
             
-            # Name-Farbe bestimmen
-            name_color = (255, 255, 255)  # Standard
+            name_color = (255, 255, 255)
             if "[SCHILD]" in name_part:
                 name_color = (0, 255, 255)
             elif "[LASER]" in name_part:
@@ -297,7 +273,6 @@ class Tutorial:
                 name_color = (255, 165, 0)
             elif "[3-SHOT]" in name_part or "[SPEED]" in name_part:
                 name_color = (255, 255, 0)
-            # NEU: Schwierigkeitsgrade hinzufügen
             elif "[LEICHT]" in name_part:
                 name_color = (0, 255, 0)  # Grün
             elif "[NORMAL]" in name_part:

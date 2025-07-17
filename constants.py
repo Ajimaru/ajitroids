@@ -1,90 +1,74 @@
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
-
 ASTEROID_MIN_RADIUS = 20
 ASTEROID_KINDS = 3
-ASTEROID_SPAWN_RATE = 0.8  # seconds
+ASTEROID_SPAWN_RATE = 0.8
 ASTEROID_MAX_RADIUS = ASTEROID_MIN_RADIUS * ASTEROID_KINDS
-
-ASTEROID_VERTICES = 12  # Anzahl der Eckpunkte
-ASTEROID_IRREGULARITY = 0.4  # Maximale Abweichung vom perfekten Kreis (0-1)
-
+ASTEROID_VERTICES = 12
+ASTEROID_IRREGULARITY = 0.4
 PLAYER_RADIUS = 20
 PLAYER_TURN_SPEED = 300
 PLAYER_SPEED = 200
-PLAYER_ACCELERATION = 300  # Beschleunigung pro Sekunde
-PLAYER_MAX_SPEED = 400    # Maximale Geschwindigkeit
-PLAYER_FRICTION = 0.02    # Reibung im Weltraum (sehr gering)
-PLAYER_ROTATION_SPEED = 180  # Grad pro Sekunde
-
+PLAYER_ACCELERATION = 300
+PLAYER_MAX_SPEED = 400
+PLAYER_FRICTION = 0.02
+PLAYER_ROTATION_SPEED = 180
 PLAYER_SHOOT_SPEED = 500
 PLAYER_SHOOT_COOLDOWN = 0.3
-
 SHOT_RADIUS = 5
-
-SCORE_LARGE = 20    # Punkte für große Asteroiden
-SCORE_MEDIUM = 50   # Punkte für mittlere Asteroiden
-SCORE_SMALL = 100   # Punkte für kleine Asteroiden
-
-# Spieler-Konstanten
-PLAYER_LIVES = 3  # Anzahl der Leben zu Spielbeginn
-INVINCIBILITY_TIME = 3.0  # Sekunden Unverwundbarkeit nach Respawn
+SCORE_LARGE = 20
+SCORE_MEDIUM = 50
+SCORE_SMALL = 100
+PLAYER_LIVES = 3
+INVINCIBILITY_TIME = 3.0
 RESPAWN_POSITION_X = SCREEN_WIDTH / 2
 RESPAWN_POSITION_Y = SCREEN_HEIGHT / 2
-
-EXPLOSION_PARTICLES = 15  # Anzahl der Partikel pro Explosion
-PARTICLE_COLORS = ["white", "yellow", "red"]  # Verschiedene Farben für Partikel
-
+EXPLOSION_PARTICLES = 15
+PARTICLE_COLORS = ["white", "yellow", "red"]
 STAR_COUNT = 100
-STAR_SIZES = [1, 2, 3]  # Verschiedene Sterngrößen
-STAR_COLORS = ["white", "#ADD8E6", "#FFD700"]  # Weiß, Hellblau, Gold
+STAR_SIZES = [1, 2, 3]
+STAR_COLORS = ["white", "#ADD8E6", "#FFD700"]
+COLLISION_DEBUG = False
 
-COLLISION_DEBUG = False  # Zum Debuggen der Hitboxen
-
-# Power-up Konstanten
 POWERUP_RADIUS = 15
-POWERUP_SPAWN_CHANCE = 0.3  # Erhöht von 0.1 auf 0.3 für häufigere Spawns
-POWERUP_MAX_COUNT = 3  # Maximal 3 Power-ups gleichzeitig
-POWERUP_LIFETIME = 15.0  # Sekunden bis ein Power-up verschwindet
-SHIELD_DURATION = 3.0  # Sekunden für Schildaktivierung (vorher 10)
+POWERUP_SPAWN_CHANCE = 0.3
+POWERUP_MAX_COUNT = 3
+POWERUP_LIFETIME = 15.0
+SHIELD_DURATION = 3.0
 POWERUP_TYPES = ["shield", "triple_shot", "rapid_fire", "laser_weapon", "missile_weapon", "shotgun_weapon"]
 POWERUP_COLORS = {
-    "shield": "#00FFFF",           # Cyan
-    "triple_shot": "#FF00FF",      # Magenta
-    "rapid_fire": "#FFFF00",       # Gelb
-    "laser_weapon": "#00FF00",     # Grün
-    "missile_weapon": "#FF0000",   # Rot
-    "shotgun_weapon": "#FFAA00"    # Orange
+    "shield": "#00FFFF",
+    "triple_shot": "#FF00FF",
+    "rapid_fire": "#FFFF00",
+    "laser_weapon": "#00FF00",
+    "missile_weapon": "#FF0000",
+    "shotgun_weapon": "#FFAA00"
 }
-RAPID_FIRE_COOLDOWN = 0.1    # Cooldown während Rapid-Fire
-RAPID_FIRE_DURATION = 8.0    # Sekunden
-TRIPLE_SHOT_DURATION = 10.0   # Sekunden
+RAPID_FIRE_COOLDOWN = 0.1
+RAPID_FIRE_DURATION = 8.0
+TRIPLE_SHOT_DURATION = 10.0
 
-# Highscore-Konstanten
-HIGHSCORE_FILE = "highscores.json"  # Datei zum Speichern
-HIGHSCORE_MAX_ENTRIES = 10          # 10 Einträge
-HIGHSCORE_NAME_LENGTH = 3           # 3 Buchstaben
-HIGHSCORE_DEFAULT_NAME = "AAA"      # Standardname
-HIGHSCORE_ALLOWED_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"  # Erlaubte Zeichen
+HIGHSCORE_FILE = "highscores.json"
+HIGHSCORE_MAX_ENTRIES = 10
+HIGHSCORE_NAME_LENGTH = 3
+HIGHSCORE_DEFAULT_NAME = "AAA"
+HIGHSCORE_ALLOWED_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-# Menü-Konstanten
 MENU_TITLE_FONT_SIZE = 72
 MENU_ITEM_FONT_SIZE = 36
-MENU_SELECTED_COLOR = "#FFFFFF"  # Weiß
-MENU_UNSELECTED_COLOR = "#888888"  # Grau
-MENU_TITLE_COLOR = "#FFAA00"  # Orange
+MENU_SELECTED_COLOR = "#FFFFFF"
+MENU_UNSELECTED_COLOR = "#888888"
+MENU_TITLE_COLOR = "#FFAA00"
 MENU_ITEM_SPACING = 50
-MENU_TRANSITION_SPEED = 0.5  # Sekunden für Übergangsanimationen
-MENU_BACKGROUND_ALPHA = 180  # Hintergrund-Transparenz (0-255)
+MENU_TRANSITION_SPEED = 0.5
+MENU_BACKGROUND_ALPHA = 180
 
-# Zusätzliche Menü-Konstanten
 MENU_BUTTON_WIDTH = 300
 MENU_BUTTON_HEIGHT = 50
 MENU_BUTTON_PADDING = 10
 MENU_BUTTON_RADIUS = 5
-MENU_FADE_SPEED = 2.0  # Geschwindigkeit der Überblend-Effekte
+MENU_FADE_SPEED = 2.0
 
-# Schwierigkeitsgrad-Konstanten
 DIFFICULTY_EASY_ASTEROIDS = 3
 DIFFICULTY_NORMAL_ASTEROIDS = 5
 DIFFICULTY_HARD_ASTEROIDS = 8
@@ -93,11 +77,9 @@ DIFFICULTY_EASY_INTERVAL = 8.0
 DIFFICULTY_NORMAL_INTERVAL = 5.0
 DIFFICULTY_HARD_INTERVAL = 3.0
 
-# Arcade-Modus-Konstanten
-ARCADE_MODE_TIME = 180  # Sekunden für Arcade-Modus
-ARCADE_MODE_BONUS_TIME = 5  # Bonus-Sekunden pro zerstörtem Asteroid
+ARCADE_MODE_TIME = 180
+ARCADE_MODE_BONUS_TIME = 5
 
-# Credits-Konstanten hinzufügen (nach den Arcade-Modus-Konstanten)
 CREDITS_TITLE = "CREDITS"
 CREDITS_GAME_NAME = "AJITROIDS"
 CREDITS_DEVELOPER = "Ajimaru"
@@ -108,55 +90,49 @@ CREDITS_SPECIAL_THANKS = [
     "Pygame Community",
 
 ]
-CREDITS_SCROLL_SPEED = 50  # Pixel pro Sekunde
-CREDITS_LINE_SPACING = 40  # Pixel zwischen Zeilen
-# Nach den Credits-Konstanten hinzufügen
+CREDITS_SCROLL_SPEED = 50
+CREDITS_LINE_SPACING = 40
 CREDITS_WEBSITE = "https://ajimaru.github.io"
-GAME_VERSION = "v0.7.0"  # Aktuelle Spielversion
+GAME_VERSION = "v0.13.4"
 
-# Level-Konstanten
-POINTS_PER_LEVEL = 2500            # Punkte für Level-Up
-MAX_LEVEL = 999                    # Höchstes Level auf 999 erhöht
-LEVEL_UP_DISPLAY_TIME = 1.5        # Anzeigezeit in Sekunden
-BASE_ASTEROID_COUNT = 3            # Grundwert für Asteroiden-Anzahl
-BASE_SPAWN_INTERVAL = 5.0          # Grundwert für Spawn-Interval
-ASTEROID_COUNT_PER_LEVEL = 1       # Zusätzliche Asteroiden pro Level
-SPAWN_INTERVAL_REDUCTION = 0.4     # Verkürzung des Intervalls pro Level
+POINTS_PER_LEVEL = 2500
+MAX_LEVEL = 999
+LEVEL_UP_DISPLAY_TIME = 1.5
+BASE_ASTEROID_COUNT = 3
+BASE_SPAWN_INTERVAL = 5.0
+ASTEROID_COUNT_PER_LEVEL = 1
+SPAWN_INTERVAL_REDUCTION = 0.4
 
-# Waffen-Konstanten
 WEAPON_STANDARD = "standard"
-WEAPON_LASER = "laser"       # Durchdringt mehrere Asteroiden
-WEAPON_MISSILE = "missile"   # Verfolgt nahe Asteroiden
-WEAPON_SHOTGUN = "shotgun"   # Mehrere Schüsse in einem Winkel
+WEAPON_LASER = "laser"
+WEAPON_MISSILE = "missile"
+WEAPON_SHOTGUN = "shotgun"
 
 WEAPON_COLORS = {
-    WEAPON_STANDARD: "#FFFFFF",  # Weiß
-    WEAPON_LASER: "#00FF00",     # Grün
-    WEAPON_MISSILE: "#FF0000",   # Rot
-    WEAPON_SHOTGUN: "#FFAA00"    # Orange
+    WEAPON_STANDARD: "#FFFFFF",
+    WEAPON_LASER: "#00FF00",
+    WEAPON_MISSILE: "#FF0000",
+    WEAPON_SHOTGUN: "#FFAA00"
 }
 
-# Munition für Spezialwaffen
 LASER_AMMO = 15
 MISSILE_AMMO = 8
 SHOTGUN_AMMO = 12
 
-# Boss-Konstanten
-BOSS_LEVEL_INTERVAL = 10          # Alle 10 Level ein Boss
-BOSS_RADIUS = 50                  # Größe des Bosses
-BOSS_COLOR = (128, 0, 128)        # Lila
-BOSS_BASE_HEALTH = 20             # Grundgesundheit
-BOSS_HEALTH_PER_LEVEL = 10        # Zusätzliche Gesundheit pro Boss-Level
-BOSS_MOVE_SPEED = 70             # Bewegungsgeschwindigkeit
-BOSS_ATTACK_INTERVAL = 2.0        # Sekunden zwischen Angriffen
-BOSS_DEATH_DURATION = 3.0         # Sekunden für die Sterbeanimation
-BOSS_SCORE = 500                 # Punkte für das Besiegen eines Bosses
+BOSS_LEVEL_INTERVAL = 10
+BOSS_RADIUS = 50
+BOSS_COLOR = (128, 0, 128)
+BOSS_BASE_HEALTH = 20
+BOSS_HEALTH_PER_LEVEL = 10
+BOSS_MOVE_SPEED = 70
+BOSS_ATTACK_INTERVAL = 2.0
+BOSS_DEATH_DURATION = 3.0
+BOSS_SCORE = 500
 
-# Boss-Projektil-Konstanten
 BOSS_PROJECTILE_RADIUS = 8
 BOSS_PROJECTILE_SPEED = 200
 BOSS_PROJECTILE_COLORS = {
-    "normal": (200, 0, 200),      # Lila
-    "homing": (255, 0, 0),        # Rot
-    "explosive": (255, 128, 0)    # Orange
+    "normal": (200, 0, 200),
+    "homing": (255, 0, 0),
+    "explosive": (255, 128, 0)
 }
