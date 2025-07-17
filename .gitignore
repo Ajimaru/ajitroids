@@ -23,3 +23,7 @@ wheels/
 *.idea/
 *.iml
 *.lock
+
+# user files
+settings.json
+highscores.json

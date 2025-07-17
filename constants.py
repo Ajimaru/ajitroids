@@ -62,3 +62,50 @@ HIGHSCORE_MAX_ENTRIES = 10          # 10 Einträge
 HIGHSCORE_NAME_LENGTH = 3           # 3 Buchstaben
 HIGHSCORE_DEFAULT_NAME = "AAA"      # Standardname
 HIGHSCORE_ALLOWED_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"  # Erlaubte Zeichen
+
+# Menü-Konstanten
+MENU_TITLE_FONT_SIZE = 72
+MENU_ITEM_FONT_SIZE = 36
+MENU_SELECTED_COLOR = "#FFFFFF"  # Weiß
+MENU_UNSELECTED_COLOR = "#888888"  # Grau
+MENU_TITLE_COLOR = "#FFAA00"  # Orange
+MENU_ITEM_SPACING = 50
+MENU_TRANSITION_SPEED = 0.5  # Sekunden für Übergangsanimationen
+MENU_BACKGROUND_ALPHA = 180  # Hintergrund-Transparenz (0-255)
+
+# Zusätzliche Menü-Konstanten
+MENU_BUTTON_WIDTH = 300
+MENU_BUTTON_HEIGHT = 50
+MENU_BUTTON_PADDING = 10
+MENU_BUTTON_RADIUS = 5
+MENU_FADE_SPEED = 2.0  # Geschwindigkeit der Überblend-Effekte
+
+# Schwierigkeitsgrad-Konstanten
+DIFFICULTY_EASY_ASTEROIDS = 3
+DIFFICULTY_NORMAL_ASTEROIDS = 5
+DIFFICULTY_HARD_ASTEROIDS = 8
+
+DIFFICULTY_EASY_INTERVAL = 8.0
+DIFFICULTY_NORMAL_INTERVAL = 5.0
+DIFFICULTY_HARD_INTERVAL = 3.0
+
+# Arcade-Modus-Konstanten
+ARCADE_MODE_TIME = 180  # Sekunden für Arcade-Modus
+ARCADE_MODE_BONUS_TIME = 5  # Bonus-Sekunden pro zerstörtem Asteroid
+
+# Credits-Konstanten hinzufügen (nach den Arcade-Modus-Konstanten)
+CREDITS_TITLE = "CREDITS"
+CREDITS_GAME_NAME = "AJITROIDS"
+CREDITS_DEVELOPER = "Ajimaru"
+CREDITS_GRAPHICS = "GitHub Copilot"
+CREDITS_SOUND = "Freie Soundeffekte von OpenGameArt.org"
+CREDITS_SPECIAL_THANKS = [
+    "Boot.dev für die Python-Tutorials",
+    "Pygame Community",
+
+]
+CREDITS_SCROLL_SPEED = 50  # Pixel pro Sekunde
+CREDITS_LINE_SPACING = 40  # Pixel zwischen Zeilen
+# Nach den Credits-Konstanten hinzufügen
+CREDITS_WEBSITE = "https://ajimaru.github.io"
+GAME_VERSION = "v0.7.0"  # Aktuelle Spielversion

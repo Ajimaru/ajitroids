@@ -25,14 +25,14 @@ class Player(CircleShape):
 
     def draw(self, screen):
         # Blinken während Unverwundbarkeit
-        if not self.invincible or pygame.time.get_ticks() % 200 < 100:
+        if (not self.invincible or pygame.time.get_ticks() % 200 < 100) or self.shield_active:
             pygame.draw.polygon(screen, "white", self.triangle(), 2)
-
+            
         # Schild zeichnen wenn aktiv
         if self.shield_active:
-            shield_color = "#00FFFF"  # Cyan
             # Pulsierender Effekt
             alpha = int(128 + 127 * abs(math.sin(pygame.time.get_ticks() * 0.005)))
+            shield_color = POWERUP_COLORS["shield"]
             shield_surf = pygame.Surface((self.radius * 3, self.radius * 3), pygame.SRCALPHA)
             
             # Korrigierte Zeile - Farbe und Alpha richtig setzen
@@ -40,7 +40,7 @@ class Player(CircleShape):
             rgba_color = (color_obj.r, color_obj.g, color_obj.b, alpha)
             
             pygame.draw.circle(shield_surf, rgba_color, 
-                             (self.radius * 1.5, self.radius * 1.5), self.radius * 1.4, 2)
+                            (self.radius * 1.5, self.radius * 1.5), self.radius * 1.4, 2)
             screen.blit(shield_surf, (self.position.x - self.radius * 1.5, 
                                     self.position.y - self.radius * 1.5))
 
@@ -142,11 +142,23 @@ class Player(CircleShape):
         self.invincible_timer = INVINCIBILITY_TIME
 
     def respawn(self):
-        self.position.x = RESPAWN_POSITION_X
+        # Unverwundbarkeit aktivieren
+        self.invincible = True
+        self.respawn_timer = 0
+        
+        # Position und Geschwindigkeit zurücksetzen
+        self.position.x = RESPAWN_POSITION_X 
         self.position.y = RESPAWN_POSITION_Y
         self.velocity = pygame.Vector2(0, 0)
-        self.rotation = 0
-        self.make_invincible()
+        
+        # Alle Powerups deaktivieren
+        self.shield_active = False
+        self.shield_timer = 0
+        self.triple_shot_active = False  
+        self.triple_shot_timer = 0
+        self.rapid_fire_active = False
+        self.rapid_fire_timer = 0
+        self.shot_cooldown = 0
 
     def activate_powerup(self, powerup_type):
         if powerup_type == "shield":
