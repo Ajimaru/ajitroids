@@ -1,6 +1,6 @@
 import pygame
 import time
-from constants import *
+from modul.constants import *
 
 class AchievementNotification:
     def __init__(self, achievement_name, achievement_description):

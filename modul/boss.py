@@ -1,9 +1,9 @@
 import pygame
 import math
 import random
-from constants import *
-from circleshape import CircleShape
-from particle import Particle
+from modul.constants import *
+from modul.circleshape import CircleShape
+from modul.particle import Particle
 
 class Boss(CircleShape):
     def __init__(self, level):

@@ -1,10 +1,10 @@
 import random
 import math
 import pygame
-from circleshape import CircleShape
-from constants import *
-from shot import Shot
-from powerup import PowerUp
+from modul.circleshape import CircleShape
+from modul.constants import *
+from modul.shot import Shot
+from modul.powerup import PowerUp
 
 class Asteroid(CircleShape):
     def __init__(self, x, y, radius):

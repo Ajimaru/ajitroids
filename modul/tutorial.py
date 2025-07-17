@@ -1,10 +1,7 @@
 import pygame
 import math
-from constants import *
-try:
-    from starfield import MenuStarfield
-except ImportError:
-    MenuStarfield = None
+from modul.constants import *
+from modul.starfield import MenuStarfield
 
 class Tutorial:
     def __init__(self):

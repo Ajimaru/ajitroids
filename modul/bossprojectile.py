@@ -1,7 +1,7 @@
 import pygame
 import math
-from constants import *
-from circleshape import CircleShape
+from modul.constants import *
+from modul.circleshape import CircleShape
 
 class BossProjectile(CircleShape):
     def __init__(self, x, y, velocity, projectile_type="normal"):

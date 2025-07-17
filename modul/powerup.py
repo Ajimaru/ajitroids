@@ -1,8 +1,8 @@
 import pygame
 import random
 import math
-from constants import *
-from circleshape import CircleShape
+from modul.constants import *
+from modul.circleshape import CircleShape
 
 class PowerUp(CircleShape):
     def __init__(self, x, y, powerup_type=None):

@@ -1,7 +1,7 @@
 import json
 import os
 import pygame
-from constants import *
+from modul.constants import *
 
 class HighscoreManager:
     def __init__(self):

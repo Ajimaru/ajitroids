@@ -1,6 +1,6 @@
 import pygame
 import random
-from constants import *
+from modul.constants import *
 
 class Particle(pygame.sprite.Sprite):
     def __init__(self, x, y, color):

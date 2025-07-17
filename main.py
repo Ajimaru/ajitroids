@@ -2,23 +2,23 @@ import sys
 import pygame
 import math
 import random
-from constants import *
-from player import Player
-from asteroid import Asteroid
-from asteroidfield import AsteroidField
-from shot import Shot
-from particle import Particle
-from sounds import Sounds
-from starfield import Starfield, MenuStarfield
-from powerup import PowerUp
-from highscore import HighscoreManager, HighscoreInput, HighscoreDisplay
-from menu import MainMenu, PauseMenu, OptionsMenu, CreditsScreen, GameOverScreen, DifficultyMenu, SoundTestMenu, AchievementsMenu
-from tutorial import Tutorial
-from settings import Settings
-from boss import Boss
-from bossprojectile import BossProjectile
-from achievements import AchievementSystem
-from achievement_notification import AchievementNotificationManager
+from modul.constants import *
+from modul.player import Player
+from modul.asteroid import Asteroid
+from modul.asteroidfield import AsteroidField
+from modul.shot import Shot
+from modul.particle import Particle
+from modul.sounds import Sounds
+from modul.starfield import Starfield, MenuStarfield
+from modul.powerup import PowerUp
+from modul.highscore import HighscoreManager, HighscoreInput, HighscoreDisplay
+from modul.menu import MainMenu, PauseMenu, OptionsMenu, CreditsScreen, GameOverScreen, DifficultyMenu, SoundTestMenu, AchievementsMenu
+from modul.tutorial import Tutorial
+from modul.settings import Settings
+from modul.boss import Boss
+from modul.bossprojectile import BossProjectile
+from modul.achievements import AchievementSystem
+from modul.achievement_notification import AchievementNotificationManager
 
 
 def main():

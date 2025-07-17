@@ -1,8 +1,8 @@
 import pygame
-from constants import *
-from circleshape import CircleShape
-from shot import Shot
-from sounds import Sounds
+from modul.constants import *
+from modul.circleshape import CircleShape
+from modul.shot import Shot
+from modul.sounds import Sounds
 import math
 
 class Player(CircleShape):

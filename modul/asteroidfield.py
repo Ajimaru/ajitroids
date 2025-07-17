@@ -1,7 +1,7 @@
 import pygame
 import random
-from asteroid import Asteroid
-from constants import *
+from modul.asteroid import Asteroid
+from modul.constants import *
 
 
 class AsteroidField:
@@ -41,7 +41,7 @@ class AsteroidField:
         self.spawn_timer += dt
 
         if self.spawn_timer >= self.spawn_interval:
-            from asteroid import Asteroid
+            from modul.asteroid import Asteroid
             asteroid_count = len([obj for obj in Asteroid.containers[0]])
 
             if asteroid_count < self.asteroid_count:

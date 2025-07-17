@@ -1,7 +1,7 @@
 import random
 import pygame
 import math
-from constants import *
+from modul.constants import *
 
 class Star:
     def __init__(self):

@@ -1,5 +1,5 @@
 import pygame
-from constants import *
+from modul.constants import *
 import math
 sounds = None
 class MenuItem:
