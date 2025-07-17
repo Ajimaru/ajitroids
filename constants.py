@@ -26,7 +26,8 @@ SCORE_LARGE = 20    # Punkte für große Asteroiden
 SCORE_MEDIUM = 50   # Punkte für mittlere Asteroiden
 SCORE_SMALL = 100   # Punkte für kleine Asteroiden
 
-PLAYER_LIVES = 3
+# Spieler-Konstanten
+PLAYER_LIVES = 3  # Anzahl der Leben zu Spielbeginn
 INVINCIBILITY_TIME = 3.0  # Sekunden Unverwundbarkeit nach Respawn
 RESPAWN_POSITION_X = SCREEN_WIDTH / 2
 RESPAWN_POSITION_Y = SCREEN_HEIGHT / 2

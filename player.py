@@ -44,6 +44,15 @@ class Player(CircleShape):
             screen.blit(shield_surf, (self.position.x - self.radius * 1.5, 
                                     self.position.y - self.radius * 1.5))
 
+        # Blinken bei Unverwundbarkeit
+        if self.invincible and pygame.time.get_ticks() % 300 < 150:
+            color = (100, 100, 255)  # Blau für Unverwundbarkeit
+        else:
+            color = (255, 255, 255)  # Normal weiß
+
+        # Raumschiff mit dieser Farbe zeichnen
+        pygame.draw.polygon(screen, color, self.triangle(), 2)
+
     def triangle(self):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
@@ -142,16 +151,17 @@ class Player(CircleShape):
         self.invincible_timer = INVINCIBILITY_TIME
 
     def respawn(self):
-        # Unverwundbarkeit aktivieren
-        self.invincible = True
-        self.respawn_timer = 0
-        
-        # Position und Geschwindigkeit zurücksetzen
-        self.position.x = RESPAWN_POSITION_X 
-        self.position.y = RESPAWN_POSITION_Y
+        """Setzt den Spieler zurück und macht ihn vorübergehend unverwundbar"""
+        self.position.x = SCREEN_WIDTH / 2
+        self.position.y = SCREEN_HEIGHT / 2
         self.velocity = pygame.Vector2(0, 0)
+        self.rotation = 0
         
-        # Alle Powerups deaktivieren
+        # Drei Sekunden unverwundbar machen
+        self.invincible = True
+        self.invincible_timer = 3.0  # 3 Sekunden Unverwundbarkeit
+        
+        # Powerups zurücksetzen
         self.shield_active = False
         self.shield_timer = 0
         self.triple_shot_active = False  
@@ -159,6 +169,8 @@ class Player(CircleShape):
         self.rapid_fire_active = False
         self.rapid_fire_timer = 0
         self.shot_cooldown = 0
+        
+        print("Spieler respawnt mit 3 Sekunden Unverwundbarkeit")
 
     def activate_powerup(self, powerup_type):
         if powerup_type == "shield":

@@ -198,6 +198,10 @@ def main():
             
         # ====== SCHWIERIGKEITSWAHL ======
         elif game_state == "difficulty_select":
+            # Menü-Starfield auch hier anzeigen
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+    
             action = difficulty_menu.update(dt, events)
             difficulty_menu.draw(screen)
             
@@ -205,25 +209,82 @@ def main():
                 difficulty = "easy"
                 game_state = "playing"
                 score = 0  # Score zurücksetzen
-                lives = 3  # Leben zurücksetzen
+                lives = PLAYER_LIVES  # Konstante PLAYER_LIVES verwenden oder direkt z.B. 3
                 level = 1  # Level zurücksetzen
+                
+                # Alle vorhandenen Objekte löschen
+                for asteroid in list(asteroids):
+                    asteroid.kill()
+                for powerup in list(powerups):
+                    powerup.kill()
+                for shot in list(shots):
+                    shot.kill()
+                for particle in list(particles):
+                    particle.kill()
+                
+                # Spieler neu erstellen und an Startposition setzen
+                if player in updatable:
+                    player.kill()
+                player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+                player.sounds = sounds  # Sounds wieder setzen
+
                 # Spiel starten mit leichter Schwierigkeit
                 asteroid_field.asteroid_count = 3  # Weniger Asteroiden
                 asteroid_field.spawn_interval = 8.0  # Langsameres Spawnen
-                
+
             elif action == "difficulty_normal":
                 difficulty = "normal"
                 game_state = "playing"
-                # Spiel mit Standardwerten starten
+                score = 0  # Score zurücksetzen
+                lives = PLAYER_LIVES  # Konstante verwenden
+                level = 1  # Level zurücksetzen
+                
+                # Alle vorhandenen Objekte löschen
+                for asteroid in list(asteroids):
+                    asteroid.kill()
+                for powerup in list(powerups):
+                    powerup.kill()
+                for shot in list(shots):
+                    shot.kill()
+                for particle in list(particles):
+                    particle.kill()
+                
+                # Spieler neu erstellen
+                if player in updatable:
+                    player.kill()
+                player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+                player.sounds = sounds
+                
+                # Normaler Schwierigkeitsgrad
                 asteroid_field.asteroid_count = 5
                 asteroid_field.spawn_interval = 5.0
                 
             elif action == "difficulty_hard":
                 difficulty = "hard"
                 game_state = "playing"
-                # Spiel mit höherer Schwierigkeit starten
-                asteroid_field.asteroid_count = 8  # Mehr Asteroiden
-                asteroid_field.spawn_interval = 3.0  # Schnelleres Spawnen
+                score = 0
+                lives = PLAYER_LIVES
+                level = 1
+                
+                # Alle Objekte löschen
+                for asteroid in list(asteroids):
+                    asteroid.kill()
+                for powerup in list(powerups):
+                    powerup.kill()
+                for shot in list(shots):
+                    shot.kill()
+                for particle in list(particles):
+                    particle.kill()
+                
+                # Spieler neu erstellen
+                if player in updatable:
+                    player.kill()
+                player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+                player.sounds = sounds
+                
+                # Schwere Schwierigkeit
+                asteroid_field.asteroid_count = 7
+                asteroid_field.spawn_interval = 3.0
                 
             elif action == "main_menu":
                 game_state = "main_menu"
@@ -237,6 +298,10 @@ def main():
     
         # ====== TUTORIAL ======
         elif game_state == "tutorial":
+            # Menü-Starfield auch hier anzeigen
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+    
             action = tutorial_screen.update(dt, events)
             tutorial_screen.draw(screen)
             
@@ -296,6 +361,10 @@ def main():
         
         # ====== OPTIONS ======
         elif game_state == "options":
+            # Menü-Starfield auch hier anzeigen
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+    
             action = options_menu.handle_action(options_menu.update(dt, events), sounds)
             options_menu.draw(screen)
             
@@ -311,6 +380,10 @@ def main():
                 
         # ====== CREDITS ======
         elif game_state == "credits":
+            # Menü-Starfield auch hier anzeigen
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+    
             action = credits_screen.update(dt, events)
             credits_screen.draw(screen)
             
@@ -452,6 +525,10 @@ def main():
         
         # ====== HIGHSCORE EINGABE ======
         elif game_state == "highscore_input":
+            # Menü-Starfield auch hier anzeigen
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+    
             name = highscore_input.update(events)
             if name:
                 # Highscore speichern und zur Anzeige wechseln
@@ -463,6 +540,10 @@ def main():
         
         # ====== HIGHSCORE ANZEIGE ======
         elif game_state == "highscore_display":
+            # Menü-Starfield auch hier anzeigen
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+    
             highscore_display.draw(screen)
             
             # Zurück zum Hauptmenü mit Leertaste oder ESC
@@ -474,6 +555,10 @@ def main():
         
         # ====== GAME OVER ======
         elif game_state == "game_over":
+            # Menü-Starfield auch hier anzeigen
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+    
             action = game_over_screen.update(dt, events)
             game_over_screen.draw(screen)
             
