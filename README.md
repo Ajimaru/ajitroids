@@ -83,9 +83,9 @@ python main.py
 - Contributions are welcome! If you'd like to contribute to the project:
 
 - Fork the repository
-- Create a feature branch ```Bash (git checkout -b feature/amazing-feature) ```
-- Commit your changes ```Bash (git commit -m 'Add amazing feature') ```
-- Push to the branch ```Bash (git push origin feature/amazing-feature) ```
+- Create a feature branch ```(git checkout -b feature/amazing-feature)```
+- Commit your changes ```(git commit -m 'Add amazing feature')```
+- Push to the branch ```(git push origin feature/amazing-feature)```
 - Open a Pull Request
 
 ## 📜 License
@@ -97,8 +97,8 @@ This project is licensed under the MIT License with Commons Clause - see the LIC
 
 ### 🙏 Acknowledgements
 - Inspiration from the classic Atari game Asteroids
-- Thanks to the Pygame community for the great library
-- Boot.dev for support and inspiration
+- Thanks to the [Pygame](https://www.pygame.org/ "Pygame Homepage") community for the great library
+- [Boot.dev](https://www.boot.dev/ "Boot.dev Homepage") for support and inspiration
 - GitHub Copilot for assistance with code development
 - Developed with ❤️ and Pygame
 
