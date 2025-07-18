@@ -10,6 +10,8 @@ class Asteroid(CircleShape):
     def __init__(self, x, y, radius):
         super().__init__(x, y, radius)
         self.vertices = self._generate_vertices()
+        self.rotation_speed = 0
+        self.rotation = 0
         
     def _generate_vertices(self):
         vertices = []
@@ -78,47 +80,59 @@ class Asteroid(CircleShape):
         return super().collides_with(other)
 
     def draw(self, screen):
-        points = [(self.position.x + x, self.position.y + y) 
-                 for x, y in self.vertices]
+        rotated_vertices = [
+            (
+                math.cos(self.rotation) * x - math.sin(self.rotation) * y,
+                math.sin(self.rotation) * x + math.cos(self.rotation) * y
+            )
+            for x, y in self.vertices
+        ]
+        points = [(self.position.x + x, self.position.y + y) for x, y in rotated_vertices]
         pygame.draw.polygon(screen, "white", points, 2)
         if COLLISION_DEBUG:
             pygame.draw.circle(screen, "red", self.position, self.radius, 1)
-            for point in [(self.position.x + x, self.position.y + y) 
-                         for x, y in self.vertices]:
+            for point in points:
                 pygame.draw.circle(screen, "yellow", point, 2)
-
-    def update(self, dt):
-        self.position += self.velocity * dt
 
     def split(self):
         self.kill()
-    
+
         powerup_group = None
         for container in PowerUp.containers:
             if isinstance(container, pygame.sprite.Group):
                 powerup_group = container
                 break
-        
+
         powerups_count = len(powerup_group) if powerup_group else 0
-        
+
         if random.random() < POWERUP_SPAWN_CHANCE and powerups_count < POWERUP_MAX_COUNT:
             PowerUp(self.position.x, self.position.y)
-        
+
         if self.radius <= ASTEROID_MIN_RADIUS:
             return
-            
+
         new_radius = self.radius - ASTEROID_MIN_RADIUS
-        
+
         random_angle = random.uniform(20, 50)
-        
+
         velocity1 = self.velocity.rotate(random_angle) * 1.2
         velocity2 = self.velocity.rotate(-random_angle) * 1.2
-        
+
+        rotation_speed1 = (random.uniform(-0.25, 0.25) + self.velocity.length() * math.sin(math.radians(random_angle))) * 0.1
+        rotation_speed2 = (random.uniform(-0.25, 0.25) + self.velocity.length() * math.sin(math.radians(-random_angle))) * 0.1
+
         new_asteroid1 = Asteroid(self.position.x, self.position.y, new_radius)
         new_asteroid2 = Asteroid(self.position.x, self.position.y, new_radius)
-        
+
         new_asteroid1.velocity = velocity1
         new_asteroid2.velocity = velocity2
 
+        new_asteroid1.rotation_speed = rotation_speed1
+        new_asteroid2.rotation_speed = rotation_speed2
+
         new_asteroid1.vertices = new_asteroid1._generate_vertices()
         new_asteroid2.vertices = new_asteroid2._generate_vertices()
+
+    def update(self, dt):
+        self.position += self.velocity * dt
+        self.rotation += self.rotation_speed * dt  # Rotation der Asteroiden
