@@ -301,7 +301,7 @@ def main():
                 main_menu.activate()
                 
             for event in events:
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE):
                     game_state = "main_menu"
                     main_menu.activate()
     
@@ -358,7 +358,7 @@ def main():
             options_menu.draw(screen)
             
             for event in events:
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE):
                     game_state = "main_menu"
                     main_menu.activate()
                     

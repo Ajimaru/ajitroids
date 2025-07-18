@@ -288,6 +288,20 @@ class OptionsMenu(Menu):
             
         return None
 
+    def update(self, dt, events):
+        # ESC-Taste abfangen für direkten Rücksprung zum Hauptmenü (vor der Standard-Logik)
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return "main_menu"
+        
+        # Dann die Standard-Menu-Update-Logik ausführen
+        result = super().update(dt, events)
+        if result:
+            return result
+        
+        return None
+
 
 class CreditsScreen:
     def __init__(self):
@@ -426,8 +440,11 @@ class SoundTestMenu(Menu):
         self.last_played_timer = 0
         
         self.scroll_offset = 0
-        self.max_visible_items = 12
+        self.max_visible_items = 16
         self.current_selection = 0   
+        
+        self.playing_all_sounds = False
+        self.stop_all_sounds_thread = False   
         
         self.sound_items = [
             ("Standard Shoot", "test_shoot"),
@@ -466,6 +483,8 @@ class SoundTestMenu(Menu):
         self.background_alpha = 0
         self.scroll_offset = 0
         self.current_selection = 0
+        self.stop_all_sounds_thread = False
+        self.playing_all_sounds = False
         self.update_visible_items()
     
     def set_sounds(self, sounds):
@@ -529,6 +548,11 @@ class SoundTestMenu(Menu):
                         return self.items[self.current_selection][1]
                 
                 elif event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE:
+                    # Stoppe "Test All Sounds" wenn es läuft
+                    if self.playing_all_sounds:
+                        self.stop_all_sounds_thread = True
+                        self.playing_all_sounds = False
+                        self.last_played = ""
                     return "back"
         
         return None
@@ -655,17 +679,29 @@ class SoundTestMenu(Menu):
                 ]
                 
                 for name, sound_func in sound_list:
+                    if self.stop_all_sounds_thread:
+                        break
                     try:
                         sound_func()
                         time.sleep(0.8)
                     except:
                         pass
+                
+                self.playing_all_sounds = False
             
-            threading.Thread(target=play_all_sounds, daemon=True).start()
-            self.last_played = "Playing all sounds..."
-            self.last_played_timer = 8.0
+            if not self.playing_all_sounds:
+                self.playing_all_sounds = True
+                self.stop_all_sounds_thread = False
+                threading.Thread(target=play_all_sounds, daemon=True).start()
+                self.last_played = "Playing all sounds..."
+                self.last_played_timer = 8.0
             
         elif action == "back":
+            # Stoppe "Test All Sounds" wenn es läuft
+            if self.playing_all_sounds:
+                self.stop_all_sounds_thread = True
+                self.playing_all_sounds = False
+                self.last_played = ""
             return "options"
             
         return None
@@ -689,7 +725,7 @@ class SoundTestMenu(Menu):
     
         if self.scroll_offset + self.max_visible_items < len(self.sound_items):
             down_text = indicator_font.render("▼ Scroll DOWN", True, pygame.Color("yellow"))
-            down_rect = down_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 180))
+            down_rect = down_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 100))
             screen.blit(down_text, down_rect)
     
         font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
@@ -706,38 +742,30 @@ class SoundTestMenu(Menu):
                 continue
     
             is_selected = (i == self.current_selection)
+            
+            # Bestimme die Farbe basierend auf der Kategorie
+            base_color = MENU_UNSELECTED_COLOR
+            if "Shoot" in text:
+                base_color = "lightblue"
+            elif text in ["Explosion", "Player Hit", "PowerUp", "Shield Activate", "Weapon Pickup"]:
+                base_color = "lightgreen"
+            elif "Boss" in text:
+                base_color = "orange"
+            elif text in ["Level Up", "Game Over", "Menu Select", "Menu Confirm"]:
+                base_color = "yellow"
+            elif text == "Test All Sounds":
+                base_color = "magenta"
+            elif text == "Back":
+                base_color = "white"
     
             if is_selected:
                 color = MENU_SELECTED_COLOR
                 scaled_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 1.1))
                 surface = scaled_font.render(f"► {text}", True, pygame.Color(color))
-    
-                bg_rect = pygame.Rect(SCREEN_WIDTH/2 - 200, current_y - 15, 400, 30)
-                pygame.draw.rect(screen, (30, 30, 50, 100), bg_rect, border_radius=5)
             else:
-                color = MENU_UNSELECTED_COLOR
+                color = base_color
                 surface = small_font.render(f"  {text}", True, pygame.Color(color))
-    
-            if "Shoot" in text:
-                category_color = (150, 255, 150)
-            elif text in ["Explosion", "Player Hit"]:
-                category_color = (255, 150, 150)
-            elif text in ["PowerUp", "Shield Activate", "Weapon Pickup"]:
-                category_color = (150, 150, 255)
-            elif "Boss" in text:
-                category_color = (255, 200, 100)
-            elif text in ["Level Up", "Game Over"]:
-                category_color = (255, 255, 150)
-            elif "Menu" in text:
-                category_color = (200, 200, 200)
-            elif text in ["Test All Sounds", "Back"]:
-                category_color = (255, 150, 255)
-            else:
-                category_color = (255, 255, 255)
-    
-            if not is_selected:
-                surface = small_font.render(f"  {text}", True, category_color)
-    
+
             rect = surface.get_rect(center=(SCREEN_WIDTH/2, current_y))
             screen.blit(surface, rect)
     
@@ -765,29 +793,6 @@ class SoundTestMenu(Menu):
             text = instruction_font.render(instruction, True, pygame.Color("lightgray"))
             text_rect = text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 70 + i * 25))
             screen.blit(text, text_rect)
-    
-        scroll_info = f"Page {(self.scroll_offset // self.max_visible_items) + 1} | Items {self.scroll_offset + 1}-{min(self.scroll_offset + self.max_visible_items, len(self.sound_items))} of {len(self.sound_items)}"
-        info_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.6))
-        info_text = info_font.render(scroll_info, True, pygame.Color("gray"))
-        info_rect = info_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 25))
-        screen.blit(info_text, info_rect)
-    
-        if self.scroll_offset == 0:
-            legend_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.5))
-            legend_y = SCREEN_HEIGHT - 50
-    
-            legend_items = [
-                ("Weapons", (150, 255, 150)),
-                ("Combat", (255, 150, 150)),
-                ("PowerUps", (150, 150, 255)),
-                ("Boss", (255, 200, 100))
-            ]
-    
-            legend_x = 50
-            for legend_text, legend_color in legend_items:
-                legend_surface = legend_font.render(legend_text, True, legend_color)
-                screen.blit(legend_surface, (legend_x, legend_y))
-                legend_x += 120
 
 
 class AchievementsMenu(Menu):
