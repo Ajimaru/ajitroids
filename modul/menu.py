@@ -238,15 +238,18 @@ class TutorialScreen:
 
 
 class OptionsMenu(Menu):
-    def __init__(self, settings):
+    def __init__(self, settings, sounds):
         super().__init__("OPTIONS")
         self.settings = settings
+        self.sounds = sounds
         self.add_item("Music: ON" if settings.music_on else "Music: OFF", "toggle_music")
-        self.add_item("Sound: ON" if settings.sound_on else "Sound: OFF", "toggle_sound") 
+        self.add_item("Sound: ON" if settings.sound_on else "Sound: OFF", "toggle_sound")
+        self.add_item(f"Music Volume: {settings.music_volume * 100:.0f}%", "adjust_music_volume")
+        self.add_item(f"Sound Volume: {settings.sound_volume * 100:.0f}%", "adjust_sound_volume")
         self.add_item("Fullscreen: ON" if settings.fullscreen else "Fullscreen: OFF", "toggle_fullscreen")
         self.add_item("Sound Test", "sound_test")
         self.add_item("Back", "back")
-        
+
     def handle_action(self, action, sounds):
         if action == "toggle_music":
             self.settings.music_on = not self.settings.music_on
@@ -254,18 +257,33 @@ class OptionsMenu(Menu):
             sounds.toggle_music(self.settings.music_on)
             self.items[0].text = "Music: ON" if self.settings.music_on else "Music: OFF"
             return None
-            
+
         elif action == "toggle_sound":
             self.settings.sound_on = not self.settings.sound_on
             self.settings.save()
             sounds.toggle_sound(self.settings.sound_on)
             self.items[1].text = "Sound: ON" if self.settings.sound_on else "Sound: OFF"
             return None
-            
+
+        elif action == "adjust_music_volume":
+            self.settings.music_volume = min(1.0, max(0.0, self.settings.music_volume + 0.1))
+            self.settings.save()
+            pygame.mixer.music.set_volume(self.settings.music_volume)
+            self.items[2].text = f"Music Volume: {self.settings.music_volume * 100:.0f}%"
+            return None
+
+        elif action == "adjust_sound_volume":
+            self.settings.sound_volume = min(1.0, max(0.0, self.settings.sound_volume + 0.1))
+            self.settings.save()
+            if self.sounds:
+                self.sounds.set_effects_volume(self.settings.sound_volume)
+            self.items[3].text = f"Sound Volume: {self.settings.sound_volume * 100:.0f}%"
+            return None
+
         elif action == "toggle_fullscreen":
             self.settings.fullscreen = not self.settings.fullscreen
             self.settings.save()
-            
+
             try:
                 if self.settings.fullscreen:
                     pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
@@ -277,16 +295,16 @@ class OptionsMenu(Menu):
                 print(f"Error switching screen mode: {e}")
                 self.settings.fullscreen = not self.settings.fullscreen
                 self.settings.save()
-            
-            self.items[2].text = "Fullscreen: ON" if self.settings.fullscreen else "Fullscreen: OFF"
+
+            self.items[4].text = "Fullscreen: ON" if self.settings.fullscreen else "Fullscreen: OFF"
             return None
-            
+
         elif action == "sound_test":
             return "sound_test"
-            
+
         elif action == "back":
             return "main_menu"
-            
+
         return None
 
     def update(self, dt, events):
@@ -294,11 +312,33 @@ class OptionsMenu(Menu):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return "main_menu"
-        
+                elif event.key == pygame.K_LEFT:
+                    if self.items[self.selected_index].action == "adjust_music_volume":
+                        self.settings.music_volume = max(0.0, self.settings.music_volume - 0.1)
+                        self.settings.save()
+                        pygame.mixer.music.set_volume(self.settings.music_volume)
+                        self.items[self.selected_index].text = f"Music Volume: {self.settings.music_volume * 100:.0f}%"
+                    elif self.items[self.selected_index].action == "adjust_sound_volume":
+                        self.settings.sound_volume = max(0.0, self.settings.sound_volume - 0.1)
+                        self.settings.save()
+                        if self.sounds:
+                            self.sounds.set_effects_volume(self.settings.sound_volume)
+                        self.items[self.selected_index].text = f"Sound Volume: {self.settings.sound_volume * 100:.0f}%"
+                elif event.key == pygame.K_RIGHT:
+                    if self.items[self.selected_index].action == "adjust_music_volume":
+                        self.settings.music_volume = min(1.0, self.settings.music_volume + 0.1)
+                        self.settings.save()
+                        pygame.mixer.music.set_volume(self.settings.music_volume)
+                        self.items[self.selected_index].text = f"Music Volume: {self.settings.music_volume * 100:.0f}%"
+                    elif self.items[self.selected_index].action == "adjust_sound_volume":
+                        self.settings.sound_volume = min(1.0, self.settings.sound_volume + 0.1)
+                        self.settings.save()
+                        if self.sounds:
+                            self.sounds.set_effects_volume(self.settings.sound_volume)
+                        self.items[self.selected_index].text = f"Sound Volume: {self.settings.sound_volume * 100:.0f}%"
         result = super().update(dt, events)
         if result:
             return result
-        
         return None
 
 

@@ -76,7 +76,6 @@ def main():
             pygame.mixer.music.load("assets/background.mp3")
             pygame.mixer.music.set_volume(1.0)
             pygame.mixer.music.play(-1)
-            
             pygame.time.delay(100)
         except Exception as e:
             print(f"❌ Error starting music: {e}")
@@ -85,7 +84,7 @@ def main():
             if os.path.exists('assets/background.mp3'):
                 print(f"Background.mp3 size: {os.path.getsize('assets/background.mp3')} bytes")
     else:
-        pygame.mixer.music.set_volume(0.0)
+        pygame.mixer.music.set_volume(1.0)
         pygame.mixer.music.stop()
         print("Music disabled at startup")
 
@@ -127,7 +126,7 @@ def main():
     
     main_menu = MainMenu()
     pause_menu = PauseMenu()
-    options_menu = OptionsMenu(game_settings)
+    options_menu = OptionsMenu(game_settings, sounds)
     sound_test_menu = SoundTestMenu()
     sound_test_menu.set_sounds(sounds)
     credits_screen = CreditsScreen()
@@ -156,6 +155,9 @@ def main():
 
     print(f"Initialized variables: player={player}, sounds={sounds}, PLAYER_INVINCIBLE_TIME={PLAYER_INVINCIBLE_TIME}, game_settings={game_settings}")
 
+    toggle_message = None
+    toggle_message_timer = 0
+
     while True:
         events = pygame.event.get()
         for event in events:
@@ -165,11 +167,46 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F11:
                     toggle_fullscreen()
+                if event.key == pygame.K_F10:
+                    game_settings.music_on = not game_settings.music_on
+                    game_settings.save()
+                    if game_settings.music_on:
+                        pygame.mixer.music.set_volume(game_settings.music_volume)
+                        pygame.mixer.music.play(-1)
+                        toggle_message = "Music Enabled"
+                    else:
+                        pygame.mixer.music.stop()
+                        toggle_message = "Music Disabled"
+                    toggle_message_timer = 2
+                elif event.key == pygame.K_F9:
+                    game_settings.sound_on = not game_settings.sound_on
+                    game_settings.save()
+                    sounds.toggle_sound(game_settings.sound_on)
+                    toggle_message = "Sound Effects Enabled" if game_settings.sound_on else "Sound Effects Disabled"
+                    toggle_message_timer = 2
 
-            if game_state == "playing" and event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    game_state = "pause"
-                    pause_menu.activate()
+        if toggle_message and toggle_message_timer > 0:
+            font = pygame.font.Font(None, 36)
+            message_surface = font.render(toggle_message, True, (255, 255, 255))
+            message_rect = message_surface.get_rect(center=(SCREEN_WIDTH / 2, 50))
+            screen.blit(message_surface, message_rect)
+            toggle_message_timer -= dt
+            if toggle_message_timer <= 0:
+                toggle_message = None
+
+        if toggle_message and toggle_message_timer > 0:
+            font = pygame.font.Font(None, 36)
+            message_surface = font.render(toggle_message, True, (255, 255, 255))
+            message_rect = message_surface.get_rect(center=(SCREEN_WIDTH / 2, 50))
+            screen.blit(message_surface, message_rect)
+            toggle_message_timer -= dt
+            if toggle_message_timer <= 0:
+                toggle_message = None
+
+        if game_state == "playing" and event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                game_state = "pause"
+                pause_menu.activate()
         
         screen.fill("black")
 

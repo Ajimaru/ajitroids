@@ -81,6 +81,8 @@ class Tutorial:
                     "*** Controls ***",
                     "• ESC for pause",
                     "• F11 for fullscreen",
+                    "• F10 to toggle music",
+                    "• F9 to toggle sound",
                     "• Arrow keys for movement",
                     "• Spacebar to shoot",
                     "",

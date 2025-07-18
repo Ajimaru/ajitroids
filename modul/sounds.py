@@ -12,33 +12,33 @@ class Sounds:
         self.level_up = None
         try:
             self.shoot = pygame.mixer.Sound("assets/shoot.wav")
-            self.shoot.set_volume(0.05)
+            self.shoot.set_volume(1.0)
         except:
             print("Shoot sound could not be loaded")
         try:
             self.explosion = pygame.mixer.Sound("assets/explosion.wav")
-            self.explosion.set_volume(0.4)
+            self.explosion.set_volume(1.0)
         except:
             print("Explosion sound could not be loaded")
         try:
             self.player_death = pygame.mixer.Sound("assets/player_hit.wav")
-            self.player_death.set_volume(0.5)
+            self.player_death.set_volume(1.0)
         except:
             print("Player-Death sound could not be loaded")
         try:
             self.menu_move = pygame.mixer.Sound("assets/menu_select.wav")
             self.menu_select = pygame.mixer.Sound("assets/menu_confirm.wav")
             if self.menu_move:
-                self.menu_move.set_volume(0.3)
+                self.menu_move.set_volume(1.0)
             if self.menu_select:
-                self.menu_select.set_volume(0.4)
+                self.menu_select.set_volume(1.0)
         except:
             self.menu_move = None
             self.menu_select = None
             print("Menu sounds could not be loaded")
         try:
             pygame.mixer.music.load("assets/background.mp3")
-            pygame.mixer.music.set_volume(0.6)
+            pygame.mixer.music.set_volume(1.0)
         except Exception as e:
             print(f"Error loading background music: {e}")
             print(f"Current directory: {os.getcwd()}")
@@ -210,3 +210,32 @@ class Sounds:
             print("Player Hit Sound not available - using fallback")
             if self.sound_on and hasattr(self, 'explosion') and self.explosion:
                 self.explosion.play()
+    def set_effects_volume(self, volume):
+        if self.shoot:
+            self.shoot.set_volume(volume)
+        if self.explosion:
+            self.explosion.set_volume(volume)
+        if self.player_death:
+            self.player_death.set_volume(volume)
+        if self.menu_move:
+            self.menu_move.set_volume(volume)
+        if self.menu_select:
+            self.menu_select.set_volume(volume)
+        if self.laser_shoot:
+            self.laser_shoot.set_volume(volume)
+        if self.rocket_shoot:
+            self.rocket_shoot.set_volume(volume)
+        if self.boss_spawn:
+            self.boss_spawn.set_volume(volume)
+        if self.boss_death:
+            self.boss_death.set_volume(volume)
+        if self.powerup:
+            self.powerup.set_volume(volume)
+        if self.shield_activate:
+            self.shield_activate.set_volume(volume)
+        if self.level_up:
+            self.level_up.set_volume(volume)
+        if self.game_over:
+            self.game_over.set_volume(volume)
+        if self.player_hit:
+            self.player_hit.set_volume(volume)
