@@ -1,10 +1,10 @@
+from modul._version import __version__
 import sys
 import pygame
 import math
 import random
 import time
 from modul.constants import *
-from modul._version import __version__
 from modul.player import Player
 from modul.asteroid import Asteroid, EnemyShip
 from modul.asteroidfield import AsteroidField
@@ -101,12 +101,10 @@ def main():
         except Exception as e:
             print(f"❌ Error starting music: {e}")
             import os
-
-            print(f"Background.mp3 exists: {
-                  os.path.exists('assets/background.mp3')}")
+            print(f"Background.mp3 exists: {os.path.exists('assets/background.mp3')}")
             if os.path.exists("assets/background.mp3"):
-                print(f"Background.mp3 size: {
-                      os.path.getsize('assets/background.mp3')} bytes")
+                print(f"Background.mp3 size: {os.path.getsize('assets/background.mp3')} bytes")
+
     else:
         pygame.mixer.music.set_volume(1.0)
         pygame.mixer.music.stop()
@@ -178,8 +176,8 @@ def main():
         game_settings = Settings()
 
     print(
-        f"Initialized variables: player={player}, sounds={sounds}, PLAYER_INVINCIBLE_TIME={
-            PLAYER_INVINCIBLE_TIME}, game_settings={game_settings}"
+       print(f"Initialized variables: player={player}, sounds={sounds}, PLAYER_INVINCIBLE_TIME={PLAYER_INVINCIBLE_TIME}, game_settings={game_settings}")
+
     )
 
     toggle_message = None
@@ -506,8 +504,7 @@ def main():
                     current_enemy_ships.append(enemy_ship)
                     last_spawn_time = time.time()
                     spawn_interval = random.uniform(10, 30)
-                    print(f"EnemyShip spawned! Current count: {
-                          len(current_enemy_ships)}, Max: {max_enemy_ships[difficulty]}")
+                    print(f"EnemyShip spawned! Current count: {len(current_enemy_ships)}, Max: {max_enemy_ships[difficulty]}")
 
             current_enemy_ships = [
                 ship for ship in current_enemy_ships if ship in updatable]
@@ -631,8 +628,7 @@ def main():
 
                             if obj in current_enemy_ships:
                                 current_enemy_ships.remove(obj)
-                            print(f"EnemyShip destroyed! Remaining count: {
-                                  len(current_enemy_ships)}")
+                            print(f"EnemyShip destroyed! Remaining count: {len(current_enemy_ships)}")
                             break
 
             for enemy_ship in current_enemy_ships:
@@ -736,10 +732,7 @@ def main():
 
                 sounds.play_level_up()
 
-                print(
-                    f"Level up! Now level {level}, asteroids: {
-                        asteroid_field.asteroid_count}, interval: {asteroid_field.spawn_interval}"
-                )
+                print(f"Level up! Now level {level}, asteroids: {asteroid_field.asteroid_count}, interval: {asteroid_field.spawn_interval}")
 
             if level_up_timer > 0:
                 level_up_timer -= dt
@@ -926,8 +919,8 @@ def player_hit():
         player.velocity = pygame.Vector2(0, 0)
         player.invincible = True
         player.invincible_timer = PLAYER_INVINCIBLE_TIME
-        print(f"Player respawned with {
-              PLAYER_INVINCIBLE_TIME} seconds of invincibility")
+        print(f"Player respawned with {PLAYER_INVINCIBLE_TIME} seconds of invincibility")
+
     else:
         player.kill()
         game_state = "game_over"

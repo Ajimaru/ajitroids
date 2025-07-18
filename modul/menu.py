@@ -1,6 +1,6 @@
+from modul._version import __version__
 import pygame
 from modul.constants import *
-from modul._version import __version__
 from modul.ships import ship_manager, ShipRenderer
 import math
 
