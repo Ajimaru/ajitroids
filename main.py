@@ -12,7 +12,8 @@ from modul.sounds import Sounds
 from modul.starfield import Starfield, MenuStarfield
 from modul.powerup import PowerUp
 from modul.highscore import HighscoreManager, HighscoreInput, HighscoreDisplay
-from modul.menu import MainMenu, PauseMenu, OptionsMenu, CreditsScreen, GameOverScreen, DifficultyMenu, SoundTestMenu, AchievementsMenu
+from modul.menu import MainMenu, PauseMenu, OptionsMenu, CreditsScreen, GameOverScreen, DifficultyMenu, SoundTestMenu, AchievementsMenu, ShipSelectionMenu
+from modul.ships import ship_manager
 from modul.tutorial import Tutorial
 from modul.settings import Settings
 from modul.boss import Boss
@@ -132,6 +133,7 @@ def main():
     credits_screen = CreditsScreen()
     game_over_screen = GameOverScreen()
     difficulty_menu = DifficultyMenu()
+    ship_selection_menu = ShipSelectionMenu()
     tutorial = Tutorial()
 
     difficulty = "normal"
@@ -160,9 +162,10 @@ def main():
             if event.type == pygame.QUIT:
                 return
             
-            if game_state == "playing" and event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                game_state = "pause"
-                pause_menu.activate()
+            if game_state == "playing" and event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    game_state = "pause"
+                    pause_menu.activate()
         
         screen.fill("black")
 
@@ -223,78 +226,18 @@ def main():
             
             if action == "difficulty_easy":
                 difficulty = "easy"
-                game_state = "playing"
-                score = 0
-                lives = PLAYER_LIVES
-                level = 1
+                game_state = "ship_selection"
+                ship_selection_menu.activate()
                 
-                for asteroid in list(asteroids):
-                    asteroid.kill()
-                for powerup in list(powerups):
-                    powerup.kill()
-                for shot in list(shots):
-                    shot.kill()
-                for particle in list(particles):
-                    particle.kill()
-                
-                if player in updatable:
-                    player.kill()
-                player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-                player.sounds = sounds
-
-                asteroid_field.asteroid_count = 3
-                asteroid_field.spawn_interval = 8.0
-
-                for _ in range(3):
-                    asteroid_field.spawn_random()
-
             elif action == "difficulty_normal":
                 difficulty = "normal"
-                game_state = "playing"
-                score = 0
-                lives = PLAYER_LIVES
-                level = 1
-                
-                for asteroid in list(asteroids):
-                    asteroid.kill()
-                for powerup in list(powerups):
-                    powerup.kill()
-                for shot in list(shots):
-                    shot.kill()
-                for particle in list(particles):
-                    particle.kill()
-                
-                if player in updatable:
-                    player.kill()
-                player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-                player.sounds = sounds
-                
-                asteroid_field.asteroid_count = 5
-                asteroid_field.spawn_interval = 5.0
+                game_state = "ship_selection"
+                ship_selection_menu.activate()
                 
             elif action == "difficulty_hard":
                 difficulty = "hard"
-                game_state = "playing"
-                score = 0
-                lives = PLAYER_LIVES
-                level = 1
-                
-                for asteroid in list(asteroids):
-                    asteroid.kill()
-                for powerup in list(powerups):
-                    powerup.kill()
-                for shot in list(shots):
-                    shot.kill()
-                for particle in list(particles):
-                    particle.kill()
-                
-                if player in updatable:
-                    player.kill()
-                player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-                player.sounds = sounds
-                
-                asteroid_field.asteroid_count = 7
-                asteroid_field.spawn_interval = 3.0
+                game_state = "ship_selection"
+                ship_selection_menu.activate()
                 
             elif action == "main_menu":
                 game_state = "main_menu"
@@ -305,6 +248,52 @@ def main():
                     game_state = "main_menu"
                     main_menu.activate()
     
+        elif game_state == "ship_selection":
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+            
+            action = ship_selection_menu.update(dt, events)
+            ship_selection_menu.draw(screen)
+            
+            if action == "start_game":
+                selected_ship = ship_manager.current_ship
+                
+                game_state = "playing"
+                score = 0
+                lives = PLAYER_LIVES
+                level = 1
+                
+                for asteroid in list(asteroids):
+                    asteroid.kill()
+                for powerup in list(powerups):
+                    powerup.kill()
+                for shot in list(shots):
+                    shot.kill()
+                for particle in list(particles):
+                    particle.kill()
+                
+                if player in updatable:
+                    player.kill()
+                player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, selected_ship)
+                player.sounds = sounds
+                
+                if difficulty == "easy":
+                    asteroid_field.asteroid_count = 3
+                    asteroid_field.spawn_interval = 8.0
+                elif difficulty == "normal":
+                    asteroid_field.asteroid_count = 5
+                    asteroid_field.spawn_interval = 5.0
+                elif difficulty == "hard":
+                    asteroid_field.asteroid_count = 7
+                    asteroid_field.spawn_interval = 3.0
+                
+                for _ in range(3):
+                    asteroid_field.spawn_random()
+                    
+            elif action == "difficulty_select":
+                game_state = "difficulty_select"
+                difficulty_menu.activate()
+                
         elif game_state == "tutorial":
             action = tutorial.update(dt, events)
             tutorial.draw(screen)
@@ -519,6 +508,14 @@ def main():
                     sounds.play_boss_music()
                 
                 level = current_level
+                
+                if level == 50:
+                    if difficulty == "easy" and not ship_manager.is_ship_unlocked("speedster"):
+                        ship_manager.unlock_ship_with_notification("speedster", achievement_notifications.add_notification)
+                    elif difficulty == "normal" and not ship_manager.is_ship_unlocked("tank"):
+                        ship_manager.unlock_ship_with_notification("tank", achievement_notifications.add_notification)
+                    elif difficulty == "hard" and not ship_manager.is_ship_unlocked("destroyer"):
+                        ship_manager.unlock_ship_with_notification("destroyer", achievement_notifications.add_notification)
                 
                 if level >= 666 and not achievement_system.is_unlocked("Level Master"):
                     achievement_system.unlock("Level Master")

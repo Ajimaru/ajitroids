@@ -3,10 +3,11 @@ from modul.constants import *
 from modul.circleshape import CircleShape
 from modul.shot import Shot
 from modul.sounds import Sounds
+from modul.ships import ship_manager, ShipRenderer
 import math
 
 class Player(CircleShape):
-    def __init__(self, x, y):
+    def __init__(self, x, y, ship_type="standard"):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.velocity = pygame.Vector2(0, 0)
@@ -28,10 +29,42 @@ class Player(CircleShape):
             WEAPON_MISSILE: 0,
             WEAPON_SHOTGUN: 0
         }
+        
+        self.ship_type = ship_type
+        self.ship_data = ship_manager.get_ship_data(ship_type)
+        self.apply_ship_modifiers()
+
+    def apply_ship_modifiers(self):
+        self.base_speed = PLAYER_SPEED * self.ship_data["speed_multiplier"]
+        self.base_turn_speed = PLAYER_TURN_SPEED * self.ship_data["turn_speed_multiplier"]
+        
+        special = self.ship_data["special_ability"]
+        if special == "rear_shot":
+            self.shield_duration_multiplier = 1.0
+            self.damage_multiplier = 1.0
+            self.has_rear_shot = True
+        elif special == "speed_boost":
+            self.base_speed *= 1.2
+            self.shield_duration_multiplier = 1.0
+            self.damage_multiplier = 1.0
+            self.has_rear_shot = False
+        elif special == "double_damage":
+            self.damage_multiplier = 2.0
+            self.shield_duration_multiplier = 1.0
+            self.has_rear_shot = False
+        else:
+            self.shield_duration_multiplier = 1.0
+            self.damage_multiplier = 1.0
+            self.has_rear_shot = False
 
     def draw(self, screen):
         if (not self.invincible or pygame.time.get_ticks() % 200 < 100) or self.shield_active:
-            pygame.draw.polygon(screen, "white", self.triangle(), 2)
+            if self.shield_active:
+                ship_color = POWERUP_COLORS.get("shield", "cyan")
+            else:
+                ship_color = self.ship_data.get("color", (255, 255, 255))
+            ShipRenderer.draw_ship(screen, self.position.x, self.position.y, 
+                                 self.rotation, self.ship_data["shape"], 1.0, ship_color)
         
         if self.shield_active:
             alpha = int(128 + 127 * abs(math.sin(pygame.time.get_ticks() * 0.005)))
@@ -46,13 +79,6 @@ class Player(CircleShape):
             screen.blit(shield_surf, (self.position.x - self.radius * 1.5, 
                                     self.position.y - self.radius * 1.5))
 
-        if self.invincible and pygame.time.get_ticks() % 300 < 150:
-            color = (100, 100, 255)
-        else:
-            color = (255, 255, 255)
-
-        pygame.draw.polygon(screen, color, self.triangle(), 2)
-
     def triangle(self):
         forward = pygame.Vector2(0, -1).rotate(self.rotation)
         right = pygame.Vector2(1, 0).rotate(self.rotation) * self.radius / 1.5
@@ -63,53 +89,54 @@ class Player(CircleShape):
 
     def update(self, dt):
         keys = pygame.key.get_pressed()
-        
-        if keys[pygame.K_LEFT]:
-            self.rotation -= PLAYER_ROTATION_SPEED * dt
-        if keys[pygame.K_RIGHT]:
-            self.rotation += PLAYER_ROTATION_SPEED * dt
-        
-        if keys[pygame.K_UP]:
-            direction = pygame.Vector2(0, -1).rotate(self.rotation)
-            self.velocity += direction * (PLAYER_ACCELERATION * 0.85) * dt
-        
-        if keys[pygame.K_DOWN]:
-            direction = pygame.Vector2(0, 1).rotate(self.rotation)
-            self.velocity += direction * (PLAYER_ACCELERATION * 0.5) * dt
-        
-        if self.velocity.length() > PLAYER_MAX_SPEED:
-            self.velocity.scale_to_length(PLAYER_MAX_SPEED)
-        
-        self.velocity *= (1 - PLAYER_FRICTION)
-        
-        self.position += self.velocity * dt
 
+        current_speed = self.base_speed
+        current_turn_speed = self.base_turn_speed
+
+        if keys[pygame.K_LEFT]:
+            self.rotate(-current_turn_speed * dt)
+        if keys[pygame.K_RIGHT]:
+            self.rotate(current_turn_speed * dt)
+        if keys[pygame.K_UP]:
+            self.velocity += self.forward() * current_speed * dt
+        if keys[pygame.K_DOWN]:
+            self.velocity -= self.forward() * current_speed * dt
+            
+        if keys[pygame.K_SPACE]:
+            self.shoot()
+
+        max_speed = getattr(self, 'max_speed', 400)
+        if self.velocity.length() > max_speed:
+            self.velocity = self.velocity.normalize() * max_speed
+            
+        friction = 0.98
+        self.velocity *= friction
+
+        self.position += self.velocity * dt
+        
         if self.shoot_timer > 0:
             self.shoot_timer -= dt
-
-        if self.invincible:
+        
+        if self.invincible_timer > 0:
             self.invincible_timer -= dt
             if self.invincible_timer <= 0:
                 self.invincible = False
-
-        if self.shield_active:
+                
+        if self.shield_timer > 0:
             self.shield_timer -= dt
             if self.shield_timer <= 0:
                 self.shield_active = False
-        
-        if self.triple_shot_active:
+                self.invincible = False
+                
+        if self.triple_shot_timer > 0:
             self.triple_shot_timer -= dt
             if self.triple_shot_timer <= 0:
                 self.triple_shot_active = False
-        
-        if self.rapid_fire_active:
+                
+        if self.rapid_fire_timer > 0:
             self.rapid_fire_timer -= dt
             if self.rapid_fire_timer <= 0:
                 self.rapid_fire_active = False
-                self.shoot_timer = self.original_cooldown
-
-        if keys[pygame.K_SPACE] and self.shoot_timer <= 0:
-            self.shoot()
 
     def shoot(self):
         if self.shoot_timer <= 0:
@@ -122,16 +149,28 @@ class Player(CircleShape):
                 else:
                     shot = Shot(self.position.x, self.position.y)
                     shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+                    
+                    if hasattr(self, 'has_rear_shot') and self.has_rear_shot:
+                        rear_shot = Shot(self.position.x, self.position.y)
+                        rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 0.8
             
             elif self.current_weapon == WEAPON_LASER:
                 shot = Shot(self.position.x, self.position.y, WEAPON_LASER)
                 shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 1.5
                 self.weapons[WEAPON_LASER] -= 1
                 
+                if hasattr(self, 'has_rear_shot') and self.has_rear_shot:
+                    rear_shot = Shot(self.position.x, self.position.y)
+                    rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 0.8
+                
             elif self.current_weapon == WEAPON_MISSILE:
                 shot = Shot(self.position.x, self.position.y, WEAPON_MISSILE)
                 shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 0.8
                 self.weapons[WEAPON_MISSILE] -= 1
+                
+                if hasattr(self, 'has_rear_shot') and self.has_rear_shot:
+                    rear_shot = Shot(self.position.x, self.position.y)
+                    rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 0.8
                 
             elif self.current_weapon == WEAPON_SHOTGUN:
                 spread = 30
@@ -140,6 +179,10 @@ class Player(CircleShape):
                     shot = Shot(self.position.x, self.position.y, WEAPON_SHOTGUN)
                     shot.velocity = pygame.Vector2(0, -1).rotate(angle) * PLAYER_SHOOT_SPEED
                 self.weapons[WEAPON_SHOTGUN] -= 1
+                
+                if hasattr(self, 'has_rear_shot') and self.has_rear_shot:
+                    rear_shot = Shot(self.position.x, self.position.y)
+                    rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 0.8
             
             if hasattr(self, 'sounds') and self.sounds:
                 self.sounds.play_shoot()
@@ -158,6 +201,10 @@ class Player(CircleShape):
         
         shot3 = Shot(self.position.x, self.position.y)
         shot3.velocity = pygame.Vector2(0, -1).rotate(self.rotation + 15) * PLAYER_SHOOT_SPEED
+        
+        if hasattr(self, 'has_rear_shot') and self.has_rear_shot:
+            rear_shot = Shot(self.position.x, self.position.y)
+            rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 0.8
 
     def make_invincible(self):
         self.invincible = True
@@ -178,7 +225,7 @@ class Player(CircleShape):
         self.triple_shot_timer = 0
         self.rapid_fire_active = False
         self.rapid_fire_timer = 0
-        self.shot_cooldown = 0
+        self.shoot_timer = 0
         
         print("Player respawned with 3 seconds of invincibility")
 

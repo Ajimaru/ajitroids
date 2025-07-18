@@ -6,9 +6,9 @@ ASTEROID_SPAWN_RATE = 0.8
 ASTEROID_MAX_RADIUS = ASTEROID_MIN_RADIUS * ASTEROID_KINDS
 ASTEROID_VERTICES = 12
 ASTEROID_IRREGULARITY = 0.4
-PLAYER_RADIUS = 20
-PLAYER_TURN_SPEED = 300
-PLAYER_SPEED = 200
+PLAYER_RADIUS = 25
+PLAYER_TURN_SPEED = 250
+PLAYER_SPEED = 160
 PLAYER_ACCELERATION = 300
 PLAYER_MAX_SPEED = 400
 PLAYER_FRICTION = 0.02
@@ -27,7 +27,7 @@ EXPLOSION_PARTICLES = 15
 PARTICLE_COLORS = ["white", "yellow", "red"]
 STAR_COUNT = 100
 STAR_SIZES = [1, 2, 3]
-STAR_COLORS = ["white", "#ADD8E6", "#FFD700"]
+STAR_COLORS = ["white", "lightblue", "yellow"]
 COLLISION_DEBUG = False
 
 POWERUP_RADIUS = 15
@@ -37,12 +37,12 @@ POWERUP_LIFETIME = 15.0
 SHIELD_DURATION = 3.0
 POWERUP_TYPES = ["shield", "triple_shot", "rapid_fire", "laser_weapon", "missile_weapon", "shotgun_weapon"]
 POWERUP_COLORS = {
-    "shield": "#00FFFF",
-    "triple_shot": "#FF00FF",
-    "rapid_fire": "#FFFF00",
-    "laser_weapon": "#00FF00",
-    "missile_weapon": "#FF0000",
-    "shotgun_weapon": "#FFAA00"
+    "shield": "blue",
+    "triple_shot": "magenta",
+    "rapid_fire": "yellow",
+    "laser_weapon": "red",
+    "missile_weapon": "orange",
+    "shotgun_weapon": "green"
 }
 RAPID_FIRE_COOLDOWN = 0.1
 RAPID_FIRE_DURATION = 8.0
@@ -56,9 +56,9 @@ HIGHSCORE_ALLOWED_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 MENU_TITLE_FONT_SIZE = 72
 MENU_ITEM_FONT_SIZE = 36
-MENU_SELECTED_COLOR = "#FFFFFF"
-MENU_UNSELECTED_COLOR = "#888888"
-MENU_TITLE_COLOR = "#FFAA00"
+MENU_SELECTED_COLOR = "yellow"
+MENU_UNSELECTED_COLOR = "white"
+MENU_TITLE_COLOR = "cyan"
 MENU_ITEM_SPACING = 50
 MENU_TRANSITION_SPEED = 0.5
 MENU_BACKGROUND_ALPHA = 180
@@ -79,6 +79,8 @@ DIFFICULTY_HARD_INTERVAL = 3.0
 
 ARCADE_MODE_TIME = 180
 ARCADE_MODE_BONUS_TIME = 5
+
+GAME_VERSION = "v1.0"
 
 CREDITS_TITLE = "CREDITS"
 CREDITS_GAME_NAME = "AJITROIDS"
@@ -109,10 +111,10 @@ WEAPON_MISSILE = "missile"
 WEAPON_SHOTGUN = "shotgun"
 
 WEAPON_COLORS = {
-    WEAPON_STANDARD: "#FFFFFF",
-    WEAPON_LASER: "#00FF00",
-    WEAPON_MISSILE: "#FF0000",
-    WEAPON_SHOTGUN: "#FFAA00"
+    WEAPON_STANDARD: "white",
+    WEAPON_LASER: "red",
+    WEAPON_MISSILE: "orange",
+    WEAPON_SHOTGUN: "green"
 }
 
 LASER_AMMO = 15

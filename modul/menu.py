@@ -1,5 +1,6 @@
 import pygame
 from modul.constants import *
+from modul.ships import ship_manager, ShipRenderer
 import math
 sounds = None
 class MenuItem:
@@ -289,13 +290,11 @@ class OptionsMenu(Menu):
         return None
 
     def update(self, dt, events):
-        # ESC-Taste abfangen für direkten Rücksprung zum Hauptmenü (vor der Standard-Logik)
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return "main_menu"
         
-        # Dann die Standard-Menu-Update-Logik ausführen
         result = super().update(dt, events)
         if result:
             return result
@@ -432,9 +431,9 @@ class DifficultyMenu(Menu):
         self.add_item("Hard", "difficulty_hard", "S")
         self.add_item("Back", "main_menu", "Z")
 
-class SoundTestMenu(Menu):
+class SoundTestMenu:
     def __init__(self):
-        super().__init__("SOUND TEST")
+        self.title = "SOUND TEST"
         self.sounds = None
         self.last_played = ""
         self.last_played_timer = 0
@@ -491,15 +490,15 @@ class SoundTestMenu(Menu):
         self.sounds = sounds
     
     def update_visible_items(self):
-        self.items = []
+        self.visible_items = []
         start_index = self.scroll_offset
         end_index = min(start_index + self.max_visible_items, len(self.sound_items))
         
         for i in range(start_index, end_index):
-            self.items.append(self.sound_items[i])
+            self.visible_items.append(self.sound_items[i])
         
-        if self.current_selection >= len(self.items):
-            self.current_selection = max(0, len(self.items) - 1)
+        if self.current_selection >= len(self.visible_items):
+            self.current_selection = max(0, len(self.visible_items) - 1)
         if self.current_selection < 0:
             self.current_selection = 0
     
@@ -533,10 +532,10 @@ class SoundTestMenu(Menu):
                 elif event.key == pygame.K_DOWN:
                     self.current_selection += 1
                     
-                    if self.current_selection >= len(self.items):
+                    if self.current_selection >= len(self.visible_items):
                         if self.scroll_offset + self.max_visible_items < len(self.sound_items):
                             self.scroll_offset += 1
-                            self.current_selection = len(self.items) - 1
+                            self.current_selection = len(self.visible_items) - 1
                             self.update_visible_items()
                         else:
                             self.scroll_offset = 0
@@ -544,11 +543,11 @@ class SoundTestMenu(Menu):
                             self.update_visible_items()
                 
                 elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
-                    if 0 <= self.current_selection < len(self.items):
-                        return self.items[self.current_selection][1]
+                    if 0 <= self.current_selection < len(self.visible_items):
+                        return self.visible_items[self.current_selection][1]
                 
                 elif event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE:
-                    # Stoppe "Test All Sounds" wenn es läuft
+                    
                     if self.playing_all_sounds:
                         self.stop_all_sounds_thread = True
                         self.playing_all_sounds = False
@@ -697,7 +696,7 @@ class SoundTestMenu(Menu):
                 self.last_played_timer = 8.0
             
         elif action == "back":
-            # Stoppe "Test All Sounds" wenn es läuft
+            
             if self.playing_all_sounds:
                 self.stop_all_sounds_thread = True
                 self.playing_all_sounds = False
@@ -719,12 +718,12 @@ class SoundTestMenu(Menu):
         indicator_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.7))
         
         if self.scroll_offset > 0:
-            up_text = indicator_font.render("▲ Scroll UP", True, pygame.Color("yellow"))
+            up_text = indicator_font.render("Scroll UP", True, pygame.Color("yellow"))
             up_rect = up_text.get_rect(center=(SCREEN_WIDTH/2, 100))
             screen.blit(up_text, up_rect)
     
         if self.scroll_offset + self.max_visible_items < len(self.sound_items):
-            down_text = indicator_font.render("▼ Scroll DOWN", True, pygame.Color("yellow"))
+            down_text = indicator_font.render("Scroll DOWN", True, pygame.Color("yellow"))
             down_rect = down_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 100))
             screen.blit(down_text, down_rect)
     
@@ -734,7 +733,7 @@ class SoundTestMenu(Menu):
     
         visible_item_count = 0  
     
-        for i, (text, action) in enumerate(self.items):
+        for i, (text, action) in enumerate(self.visible_items):
             current_y = start_y + visible_item_count * 35  
     
             if text == "":
@@ -743,7 +742,7 @@ class SoundTestMenu(Menu):
     
             is_selected = (i == self.current_selection)
             
-            # Bestimme die Farbe basierend auf der Kategorie
+            
             base_color = MENU_UNSELECTED_COLOR
             if "Shoot" in text:
                 base_color = "lightblue"
@@ -766,17 +765,14 @@ class SoundTestMenu(Menu):
                 color = base_color
                 surface = small_font.render(f"  {text}", True, pygame.Color(color))
 
-            rect = surface.get_rect(center=(SCREEN_WIDTH/2, current_y))
-            screen.blit(surface, rect)
+            text_rect = surface.get_rect(center=(SCREEN_WIDTH/2, current_y))
+            screen.blit(surface, text_rect)
     
             visible_item_count += 1
     
         if self.last_played:
             played_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.8))
-    
-            feedback_bg = pygame.Rect(SCREEN_WIDTH/2 - 150, SCREEN_HEIGHT - 140, 300, 25)
-            pygame.draw.rect(screen, (0, 100, 0, 150), feedback_bg, border_radius=10)
-    
+            
             played_text = played_font.render(self.last_played, True, pygame.Color("lightgreen"))
             played_rect = played_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 128))
             screen.blit(played_text, played_rect)
@@ -787,9 +783,6 @@ class SoundTestMenu(Menu):
     
         instruction_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.65))
         for i, instruction in enumerate(instructions):
-            instr_bg = pygame.Rect(20, SCREEN_HEIGHT - 80 + i * 25, SCREEN_WIDTH - 40, 20)
-            pygame.draw.rect(screen, (20, 20, 20, 180), instr_bg, border_radius=5)
-    
             text = instruction_font.render(instruction, True, pygame.Color("lightgray"))
             text_rect = text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 70 + i * 25))
             screen.blit(text, text_rect)
@@ -817,22 +810,22 @@ class AchievementsMenu(Menu):
                 " *** "
             ],
             "Asteroid Hunter": [
-                " *##* ",
-                "*.**.*",
-                "*####*",
-                "*.**.*",
-                " *##* "
+                " *** ",
+                "*...*",
+                "*.*.*",
+                "*...*",
+                " *** "
             ],
             "Power User": [
-                " *#* ",
+                " *** ",
                 "*.*.*",
-                "*###*",
+                "*...*",
                 "*.*.*",
-                " *#* "
+                " *** "
             ],
             "Boss Slayer": [
                 " **** ",
-                "*.##.*",
+                "*....*",
                 "*.--.*",
                 "*.**.*",
                 " *** "
@@ -847,7 +840,7 @@ class AchievementsMenu(Menu):
             "High Scorer": [
                 " *** ",
                 "*.*.*",
-                "*#*#*",
+                "*...*",
                 "*.*.*",
                 " *** "
             ],
@@ -956,3 +949,136 @@ class AchievementsMenu(Menu):
                     return "back"
 
         return None
+
+class ShipSelectionMenu(Menu):
+    def __init__(self):
+        super().__init__("SHIP SELECTION")
+        self.selected_ship_index = 0
+        self.ships = ship_manager.get_available_ships()
+        self.animation_time = 0
+        
+    def activate(self):
+        super().activate()
+        self.selected_ship_index = 0
+        self.ships = ship_manager.get_available_ships()
+        
+        try:
+            self.selected_ship_index = self.ships.index(ship_manager.current_ship)
+        except ValueError:
+            self.selected_ship_index = 0
+    
+    def update(self, dt, events):
+        self.animation_time += dt
+        
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                    self.selected_ship_index = (self.selected_ship_index - 1) % len(self.ships)
+                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    self.selected_ship_index = (self.selected_ship_index + 1) % len(self.ships)
+                elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
+                    selected_ship = self.ships[self.selected_ship_index]
+                    ship_data = ship_manager.get_ship_data(selected_ship)
+                    if ship_data["unlocked"]:
+                        ship_manager.set_current_ship(selected_ship)
+                        return "start_game"
+                elif event.key == pygame.K_ESCAPE:
+                    return "difficulty_select"
+        
+        return None
+    
+    def draw(self, screen):
+        background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+        background.fill((0, 0, 0, self.background_alpha))
+        screen.blit(background, (0, 0))
+        
+        
+        title_surf = self.title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
+        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH/2, 80))
+        screen.blit(title_surf, title_rect)
+        
+        
+        ship_y = SCREEN_HEIGHT / 2 - 50
+        ship_spacing = 200
+        start_x = SCREEN_WIDTH / 2 - (len(self.ships) - 1) * ship_spacing / 2
+        
+        for i, ship_id in enumerate(self.ships):
+            ship_data = ship_manager.get_ship_data(ship_id)
+            x = start_x + i * ship_spacing
+            
+            
+            if i == self.selected_ship_index:
+                highlight_size = 80 + 10 * math.sin(self.animation_time * 4)
+                pygame.draw.circle(screen, (100, 100, 100, 100), (int(x), int(ship_y)), int(highlight_size), 3)
+            
+            
+            if ship_data["unlocked"]:
+                
+                base_color = ship_data.get("color", (255, 255, 255))
+                if i == self.selected_ship_index:
+                    
+                    ship_color = tuple(min(255, int(c * 1.3)) for c in base_color)
+                else:
+                    ship_color = base_color
+                ShipRenderer.draw_ship(screen, x, ship_y, 0, ship_data["shape"], 2.0, ship_color)
+            else:
+                
+                lock_color = (100, 100, 100) if i != self.selected_ship_index else (150, 150, 150)
+                ShipRenderer.draw_question_mark(screen, x, ship_y, 2.0, lock_color)
+            
+            
+            name_font = pygame.font.Font(None, 24)
+            if ship_data["unlocked"]:
+                
+                base_color = ship_data.get("color", (255, 255, 255))
+                if i == self.selected_ship_index:
+                    name_color = tuple(min(255, int(c * 1.3)) for c in base_color)
+                else:
+                    name_color = base_color
+                name_text = ship_data["name"]
+            else:
+                name_color = (100, 100, 100)
+                name_text = "LOCKED"
+            
+            name_surf = name_font.render(name_text, True, name_color)
+            name_rect = name_surf.get_rect(center=(x, ship_y + 60))
+            screen.blit(name_surf, name_rect)
+        
+        
+        selected_ship = self.ships[self.selected_ship_index]
+        ship_data = ship_manager.get_ship_data(selected_ship)
+        
+        detail_y = SCREEN_HEIGHT - 200
+        detail_font = pygame.font.Font(None, 28)
+        small_font = pygame.font.Font(None, 24)
+        
+        if ship_data["unlocked"]:
+            
+            desc_surf = detail_font.render(ship_data["description"], True, (255, 255, 255))
+            desc_rect = desc_surf.get_rect(center=(SCREEN_WIDTH/2, detail_y))
+            screen.blit(desc_surf, desc_rect)
+            
+            
+            props = [
+                f"Speed: {ship_data['speed_multiplier']:.1f}x",
+                f"Agility: {ship_data['turn_speed_multiplier']:.1f}x",
+                f"Special: {ship_data['special_ability'].replace('_', ' ').title()}"
+            ]
+            
+            for i, prop in enumerate(props):
+                prop_surf = small_font.render(prop, True, (200, 200, 200))
+                prop_rect = prop_surf.get_rect(center=(SCREEN_WIDTH/2, detail_y + 40 + i * 25))
+                screen.blit(prop_surf, prop_rect)
+        
+        
+        instruction_font = pygame.font.Font(None, 20)
+        instructions = [
+            "LEFT/RIGHT: Select Ship",
+            "ENTER/SPACE: Confirm Selection", 
+            "ESC: Back to Difficulty"
+        ]
+        
+        for i, instruction in enumerate(instructions):
+            instr_surf = instruction_font.render(instruction, True, (150, 150, 150))
+            instr_rect = instr_surf.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 60 + i * 20))
+            screen.blit(instr_surf, instr_rect)

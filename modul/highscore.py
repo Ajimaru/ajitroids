@@ -42,7 +42,7 @@ class HighscoreManager:
         self.highscores = self.highscores[:HIGHSCORE_MAX_ENTRIES]
         self.save_highscores()
         
-        # Position in the list returned
+        
         for i, entry in enumerate(self.highscores):
             if entry["name"] == name and entry["score"] == score:
                 return i
@@ -91,23 +91,23 @@ class HighscoreInput:
         overlay.fill((0, 0, 0, 200))
         screen.blit(overlay, (0, 0))
         
-        title_text = self.font.render("NEW HIGHSCORE!", True, "white")
+        title_text = self.font.render("NEW HIGHSCORE!", True, pygame.Color("white"))
         screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, 
                                 SCREEN_HEIGHT // 3 - title_text.get_height()))
                                 
-        score_text = self.font.render(f"Score: {self.score}", True, "white")
+        score_text = self.font.render(f"Score: {self.score}", True, pygame.Color("white"))
         screen.blit(score_text, (SCREEN_WIDTH // 2 - score_text.get_width() // 2, 
                                 SCREEN_HEIGHT // 3))
         
         for i in range(HIGHSCORE_NAME_LENGTH):
-            color = "yellow" if i == self.current_pos else "white"
+            color = pygame.Color("yellow") if i == self.current_pos else pygame.Color("white")
             char_text = self.font.render(self.name[i], True, color)
             
             x = SCREEN_WIDTH // 2 - (HIGHSCORE_NAME_LENGTH * 40) // 2 + i * 40
             y = SCREEN_HEIGHT // 2
             
             if i == self.current_pos:
-                pygame.draw.rect(screen, "yellow", 
+                pygame.draw.rect(screen, pygame.Color("yellow"), 
                                (x - 5, y - 5, 
                                 char_text.get_width() + 10, 
                                 char_text.get_height() + 10), 2)
@@ -115,8 +115,8 @@ class HighscoreInput:
             screen.blit(char_text, (x, y))
         
         hint_font = pygame.font.Font(None, 30)
-        hint1 = hint_font.render("UP / DOWN Change letters", True, "white")
-        hint2 = hint_font.render("ENTER Confirm", True, "white")
+        hint1 = hint_font.render("UP / DOWN Change letters", True, pygame.Color("white"))
+        hint2 = hint_font.render("ENTER Confirm", True, pygame.Color("white"))
         
         screen.blit(hint1, (SCREEN_WIDTH // 2 - hint1.get_width() // 2, 
                           SCREEN_HEIGHT * 2 // 3))
@@ -134,11 +134,18 @@ class HighscoreDisplay:
         overlay.fill((0, 0, 0, 200))
         screen.blit(overlay, (0, 0))
         
-        title_text = self.font_title.render("HIGHSCORES", True, "white")
+        title_text = self.font_title.render("HIGHSCORES", True, pygame.Color("white"))
         screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, 50))
         
         for i, entry in enumerate(self.highscore_manager.highscores):
-            color = "gold" if i == 0 else "silver" if i == 1 else "#CD7F32" if i == 2 else "white"
+            if i == 0:
+                color = pygame.Color("gold")
+            elif i == 1:
+                color = pygame.Color(192, 192, 192)
+            elif i == 2:
+                color = pygame.Color(205, 127, 50)
+            else:
+                color = pygame.Color("white")
             rank_text = self.font_entry.render(f"{i+1}.", True, color)
             name_text = self.font_entry.render(f"{entry['name']}", True, color)
             score_text = self.font_entry.render(f"{entry['score']}", True, color)
@@ -152,6 +159,6 @@ class HighscoreDisplay:
             screen.blit(name_text, (x_name, y))
             screen.blit(score_text, (x_score, y))
         
-        hint_text = self.font_entry.render("SPACE to go back", True, "white")
+        hint_text = self.font_entry.render("SPACE to go back", True, pygame.Color("white"))
         screen.blit(hint_text, (SCREEN_WIDTH // 2 - hint_text.get_width() // 2, 
                              SCREEN_HEIGHT - 100))
