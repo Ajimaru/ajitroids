@@ -138,3 +138,20 @@ BOSS_PROJECTILE_COLORS = {
     "homing": (255, 0, 0),
     "explosive": (255, 128, 0)
 }
+
+import random
+
+def generate_default_highscores():
+    allowed_chars = HIGHSCORE_ALLOWED_CHARS
+    max_entries = HIGHSCORE_MAX_ENTRIES
+    name_length = HIGHSCORE_NAME_LENGTH
+
+    highscores = []
+    for i in range(max_entries):
+        name = ''.join(random.choice(allowed_chars) for _ in range(name_length))
+        score = (max_entries - i) * 1000  # Higher, rounded scores
+        highscores.append({"name": name, "score": score})
+
+    return highscores
+
+DEFAULT_HIGHSCORES = generate_default_highscores()

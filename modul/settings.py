@@ -14,10 +14,9 @@ class Settings:
         settings_data = {
             "music_on": self.music_on,
             "sound_on": self.sound_on,
-            "fullscreen": self.fullscreen,
-            "difficulty": self.difficulty
+            "fullscreen": self.fullscreen
         }
-        
+
         try:
             with open("settings.json", "w") as f:
                 json.dump(settings_data, f)

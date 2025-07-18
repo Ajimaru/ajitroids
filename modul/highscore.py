@@ -1,6 +1,7 @@
 import json
 import os
 import pygame
+import random
 from modul.constants import *
 
 class HighscoreManager:
@@ -14,7 +15,13 @@ class HighscoreManager:
                 with open(HIGHSCORE_FILE, 'r') as f:
                     self.highscores = json.load(f)
             else:
-                self.highscores = [{"name": "AAA", "score": 1000 - i * 100} for i in range(HIGHSCORE_MAX_ENTRIES)]
+                self.highscores = [
+                    {
+                        "name": ''.join(random.choice(HIGHSCORE_ALLOWED_CHARS) for _ in range(HIGHSCORE_NAME_LENGTH)),
+                        "score": (HIGHSCORE_MAX_ENTRIES - i) * 1000
+                    }
+                    for i in range(HIGHSCORE_MAX_ENTRIES)
+                ]
                 self.save_highscores()
         except Exception as e:
             print(f"Error loading highscores: {e}")
