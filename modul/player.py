@@ -71,14 +71,10 @@ class Player(CircleShape):
         
         if keys[pygame.K_UP]:
             direction = pygame.Vector2(0, -1).rotate(self.rotation)
-            self.velocity += direction * (PLAYER_ACCELERATION * 0.5) * dt
+            self.velocity += direction * (PLAYER_ACCELERATION * 0.85) * dt
         
         if keys[pygame.K_DOWN]:
             direction = pygame.Vector2(0, 1).rotate(self.rotation)
-            self.velocity += direction * PLAYER_ACCELERATION * dt
-    
-        if keys[pygame.K_w]:
-            direction = pygame.Vector2(0, -1).rotate(self.rotation)
             self.velocity += direction * (PLAYER_ACCELERATION * 0.5) * dt
         
         if self.velocity.length() > PLAYER_MAX_SPEED:
