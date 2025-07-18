@@ -162,6 +162,10 @@ def main():
             if event.type == pygame.QUIT:
                 return
             
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_F11:
+                    toggle_fullscreen()
+
             if game_state == "playing" and event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     game_state = "pause"
@@ -718,6 +722,16 @@ def debug_music_status():
     print(f"   - Volume: {pygame.mixer.music.get_volume()}")
     print(f"   - Mixer Init: {pygame.mixer.get_init()}")
     print(f"   - Settings Music: {game_settings.music_on}")
+
+def toggle_fullscreen():
+    global screen, game_settings
+    game_settings.fullscreen = not game_settings.fullscreen
+    if game_settings.fullscreen:
+        screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+        print("Switched to fullscreen mode")
+    else:
+        screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        print("Switched to windowed mode")
 
 if __name__ == "__main__":
     main()
