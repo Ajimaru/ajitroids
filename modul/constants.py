@@ -40,9 +40,9 @@ POWERUP_COLORS = {
     "shield": "blue",
     "triple_shot": "magenta",
     "rapid_fire": "yellow",
-    "laser_weapon": "red",
-    "missile_weapon": "orange",
-    "shotgun_weapon": "green"
+    "laser_weapon": "green",
+    "missile_weapon": "red",
+    "shotgun_weapon": "orange"
 }
 RAPID_FIRE_COOLDOWN = 0.1
 RAPID_FIRE_DURATION = 8.0
@@ -112,9 +112,9 @@ WEAPON_SHOTGUN = "shotgun"
 
 WEAPON_COLORS = {
     WEAPON_STANDARD: "white",
-    WEAPON_LASER: "red",
-    WEAPON_MISSILE: "orange",
-    WEAPON_SHOTGUN: "green"
+    WEAPON_LASER: "green",
+    WEAPON_MISSILE: "red",
+    WEAPON_SHOTGUN: "orange"
 }
 
 LASER_AMMO = 15
