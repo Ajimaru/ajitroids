@@ -1,9 +1,55 @@
+[tool.black]
+line-length = 127
+target-version = ["py39"]
+
+[tool.flake8]
+max-line-length = 127
+exclude = ["build", "venv", "__pycache__"]
+ignore = ["E128", "F405"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-v"
+testpaths = ["tests"]
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"
+write_to = "modul/_version.py"
+
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "flake8>=7.0",
+    "black>=24.0",
+]
+
 [project]
 name = "ajitroids"
-version = "0.14.0"
+dynamic = ["version"]
 description = "Another Asteroids"
-readme = "README.md"
+readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.9"
 dependencies = [
     "pygame==2.6.1",
 ]
+authors = [
+  { name = "Ajimaru", email = "ajitroids@noreply.github.com" }
+]
+license = { text = "MIT" }
+keywords = ["asteroids", "pygame", "space", "game"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+  "Topic :: Games/Entertainment",
+  "License :: OSI Approved :: MIT License"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Ajimaru/ajitroids"
+"Bug Tracker" = "https://github.com/Ajimaru/ajitroids/issues"
+

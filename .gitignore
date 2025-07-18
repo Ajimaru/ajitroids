@@ -27,3 +27,7 @@ wheels/
 # user files
 *.json
 *.sh
+
+# Git files
+.git/
+.github/
