@@ -438,6 +438,30 @@ def main():
             
             updatable.update(dt)
 
+            # Asteroiden-Kollisionen untereinander verhindern
+            asteroid_list = list(asteroids)
+            for i in range(len(asteroid_list)):
+                a1 = asteroid_list[i]
+                for j in range(i + 1, len(asteroid_list)):
+                    a2 = asteroid_list[j]
+                    dx = a2.position.x - a1.position.x
+                    dy = a2.position.y - a1.position.y
+                    dist = math.hypot(dx, dy)
+                    min_dist = a1.radius + a2.radius
+                    if dist < min_dist and dist > 0:
+                        # Überlappung: auseinander schieben
+                        overlap = min_dist - dist
+                        nx = dx / dist
+                        ny = dy / dist
+                        a1.position.x -= nx * overlap / 2
+                        a1.position.y -= ny * overlap / 2
+                        a2.position.x += nx * overlap / 2
+                        a2.position.y += ny * overlap / 2
+                        # Optional: Richtungen tauschen (elastischer Stoß)
+                        v1 = a1.velocity
+                        v2 = a2.velocity
+                        a1.velocity, a2.velocity = v2, v1
+
             for asteroid in asteroids:
                 if asteroid.collides_with(player) and not player.invincible and not player.shield_active:
                     lives -= 1
