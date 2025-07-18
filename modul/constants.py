@@ -89,13 +89,13 @@ CREDITS_GRAPHICS = "GitHub Copilot"
 CREDITS_SOUND = "Command Line"
 CREDITS_SPECIAL_THANKS = [
     "Boot.dev for the Python-Tutorials",
-    "Pygame Community",
-
+    "Pygame Community for the awesome library",
 ]
+
 CREDITS_SCROLL_SPEED = 50
 CREDITS_LINE_SPACING = 40
 CREDITS_WEBSITE = "https://ajimaru.github.io"
-GAME_VERSION = "v0.14.0"
+GAME_VERSION = "beta 0.17.1 - 2025-07-18"
 
 POINTS_PER_LEVEL = 2500
 MAX_LEVEL = 666

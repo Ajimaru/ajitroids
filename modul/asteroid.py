@@ -143,6 +143,7 @@ class Asteroid(CircleShape):
 class EnemyShip(CircleShape):
     def __init__(self, x, y, radius):
         super().__init__(x, y, radius)
+        self.radius = PLAYER_RADIUS  # Setze den Radius auf die Größe des Player-Sprites
         self.rotation_speed = random.uniform(-0.1, 0.1)
         self.rotation = 0
         self.velocity = pygame.Vector2(random.uniform(-50, 50), random.uniform(-50, 50))
