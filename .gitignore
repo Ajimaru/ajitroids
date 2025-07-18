@@ -12,7 +12,6 @@ wheels/
 # VSCode settings
 .vscode/
 .settings/
-.code-workspace
 *.code-workspace
 
 # miscellaneous

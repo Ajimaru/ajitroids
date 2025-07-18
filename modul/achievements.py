@@ -47,11 +47,11 @@ class AchievementSystem:
                             if achievement.name == item['name']:
                                 achievement.unlocked = True
                                 break
-                print(f"Freigeschaltete Achievements geladen: {len([a for a in self.achievements if a.unlocked])} von {len(self.achievements)}")
+                print(f"Unlocked achievements loaded: {len([a for a in self.achievements if a.unlocked])} of {len(self.achievements)}")
         except FileNotFoundError:
-            print("Achievements-Datei nicht gefunden - alle Achievements sind gesperrt")
+            print("Achievements file not found - all achievements are locked")
         except json.JSONDecodeError as e:
-            print(f"Fehler beim Laden der Achievements-Datei: {e}")
+            print(f"Error loading achievements file: {e}")
 
     def save_unlocked_achievements(self):
         unlocked_achievements = [
@@ -64,9 +64,9 @@ class AchievementSystem:
         if unlocked_achievements:
             with open(self.achievements_file, 'w') as file:
                 json.dump(unlocked_achievements, file, indent=4)
-            print(f"Freigeschaltete Achievements gespeichert: {len(unlocked_achievements)} Einträge")
+            print(f"Unlocked achievements saved: {len(unlocked_achievements)} entries")
         else:
-            print("Keine freigeschalteten Achievements zum Speichern")
+            print("No unlocked achievements to save")
 
     def load_achievements(self):
         pass

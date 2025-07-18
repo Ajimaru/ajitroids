@@ -17,7 +17,7 @@ class HighscoreManager:
                 self.highscores = [{"name": "AAA", "score": 1000 - i * 100} for i in range(HIGHSCORE_MAX_ENTRIES)]
                 self.save_highscores()
         except Exception as e:
-            print(f"Fehler beim Laden der Highscores: {e}")
+            print(f"Error loading highscores: {e}")
             self.highscores = [{"name": "AAA", "score": 1000 - i * 100} for i in range(HIGHSCORE_MAX_ENTRIES)]
     
     def save_highscores(self):
@@ -25,16 +25,16 @@ class HighscoreManager:
             with open(HIGHSCORE_FILE, 'w') as f:
                 json.dump(self.highscores, f)
         except Exception as e:
-            print(f"Fehler beim Speichern der Highscores: {e}")
+            print(f"Error saving highscores: {e}")
     
     def is_highscore(self, score):
-        """Prüft, ob der Score ein neuer Highscore ist"""
+        """Checks if the score is a new highscore"""
         if len(self.highscores) < HIGHSCORE_MAX_ENTRIES:
             return True
         return score > self.highscores[-1]["score"]
     
     def add_highscore(self, name, score):
-        """Fügt einen neuen Highscore hinzu und sortiert die Liste"""
+        """Adds a new highscore and sorts the list"""
         name = name.upper()[:HIGHSCORE_NAME_LENGTH]
         name = ''.join(c for c in name if c in HIGHSCORE_ALLOWED_CHARS)
         name = name.ljust(HIGHSCORE_NAME_LENGTH, 'A')
@@ -44,7 +44,7 @@ class HighscoreManager:
         self.highscores = self.highscores[:HIGHSCORE_MAX_ENTRIES]
         self.save_highscores()
         
-        # Position in der Liste zurückgeben
+        # Position in the list returned
         for i, entry in enumerate(self.highscores):
             if entry["name"] == name and entry["score"] == score:
                 return i
@@ -93,7 +93,7 @@ class HighscoreInput:
         overlay.fill((0, 0, 0, 200))
         screen.blit(overlay, (0, 0))
         
-        title_text = self.font.render("NEUER HIGHSCORE!", True, "white")
+        title_text = self.font.render("NEW HIGHSCORE!", True, "white")
         screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, 
                                 SCREEN_HEIGHT // 3 - title_text.get_height()))
                                 
@@ -117,8 +117,8 @@ class HighscoreInput:
             screen.blit(char_text, (x, y))
         
         hint_font = pygame.font.Font(None, 30)
-        hint1 = hint_font.render("Pfeiltasten: Buchstaben ändern", True, "white")
-        hint2 = hint_font.render("Enter: Bestätigen", True, "white")
+        hint1 = hint_font.render("Arrow keys: Change letters", True, "white")
+        hint2 = hint_font.render("Enter: Confirm", True, "white")
         
         screen.blit(hint1, (SCREEN_WIDTH // 2 - hint1.get_width() // 2, 
                           SCREEN_HEIGHT * 2 // 3))
@@ -154,6 +154,6 @@ class HighscoreDisplay:
             screen.blit(name_text, (x_name, y))
             screen.blit(score_text, (x_score, y))
         
-        hint_text = self.font_entry.render("Drücke LEERTASTE zum Fortfahren", True, "white")
+        hint_text = self.font_entry.render("Press SPACE to continue", True, "white")
         screen.blit(hint_text, (SCREEN_WIDTH // 2 - hint_text.get_width() // 2, 
                              SCREEN_HEIGHT - 100))

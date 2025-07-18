@@ -7,108 +7,107 @@ class Tutorial:
     def __init__(self):
         self.pages = [
             {
-                "title": "Grundlagen",
+                "title": "Basics",
                 "content": [
-                    "Bewege dein Raumschiff mit den Pfeiltasten",
-                    "Schieße mit der Leertaste",
-                    "Drehe dich mit Links/Rechts-Pfeiltasten", 
-                    "Bewege dich vor/zurück mit Hoch/Runter-Pfeiltasten",
-                    "Zerstöre Asteroiden für Punkte!",
+                    "Move your spaceship with the arrow keys",
+                    "Shoot with the spacebar",
+                    "Rotate with left/right arrow keys", 
+                    "Move forward/backward with up/down arrow keys",
+                    "Destroy asteroids for points!",
                     "",
-                    "Große Asteroiden zerfallen in kleinere Teile",
-                    "Sammle PowerUps für spezielle Fähigkeiten"
+                    "Large asteroids break into smaller pieces",
+                    "Collect power-ups for special abilities"
                 ]
             },
             {
-                "title": "PowerUps",
+                "title": "Power-Ups",
                 "content": [
-                    "[SCHILD] - Schutz vor einem Treffer (3 Sek.)",
-                    "[3-SHOT] - Drei Schüsse gleichzeitig",
-                    "[SPEED] - Erhöhte Feuerrate",
-                    "[LASER] - Durchdringt mehrere Asteroiden",
-                    "[ROCKET] - Verfolgen nahe Asteroiden",
-                    "[SHOTGUN] - Mehrere Schüsse in einem Winkel",
+                    "[SHIELD] - Protection from one hit (3 sec.)",
+                    "[3-SHOT] - Three shots simultaneously",
+                    "[SPEED] - Increased fire rate",
+                    "[LASER] - Increased damage",
+                    "[ROCKET] - Tracks nearby asteroids",
+                    "[SHOTGUN] - Multiple shots in a spread",
                     "",
-                    "PowerUps erscheinen nur von großen Asteroiden!",
-                    "Sie verschwinden nach 10 Sekunden"
+                    "Power-ups only appear from large asteroids!",
+                    "They disappear after 10 seconds"
                 ]
             },
             {
-                "title": "Level-System",
+                "title": "Level System",
                 "content": [
-                    "Sammle 2500 Punkte für ein Level-Up",
-                    "Höhere Level = mehr und schnellere Asteroiden",
-                    "Maximales Level: 999",
+                    "Collect 2500 points for a level-up",
+                    "Higher levels = more and faster asteroids",
+                    "Maximum level: 999",
                     "",
-                    "*** BOSS-KÄMPFE ***",
-                    "Alle 10 Level erscheint ein Boss!",
-                    "Bosse haben viel Gesundheit und Angriffsmuster",
-                    "Belohnung: +1 Leben und 500 Punkte",
+                    "*** BOSS FIGHTS ***",
+                    "A boss appears every 10 levels!",
+                    "Bosses have high health and attack patterns",
+                    "Reward: +1 life and 500 points",
                     "",
-                    "Bosse werden mit jedem Level stärker!"
+                    "Bosses get stronger with each level!"
                 ]
             },
             {
-                "title": "Waffen-System",
+                "title": "Weapon System",
                 "content": [
-                    "STANDARD: Unbegrenzte Munition",
-                    "LASER: 15 Schuss, durchdringt Asteroiden",
-                    "RAKETEN: 8 Schuss, verfolgen Ziele automatisch",
-                    "SCHROTFLINTE: 12 Schuss, Streufeuer",
+                    "STANDARD: Unlimited ammo",
+                    "LASER: 15 shots, penetrates asteroids",
+                    "ROCKETS: 8 shots, automatically track targets",
+                    "SHOTGUN: 12 shots, spread fire",
                     "",
-                    "Munition wird im HUD angezeigt",
-                    "Sammle die gleiche Waffe für mehr Munition",
-                    "Waffen wechseln automatisch zurück zur Standard-Waffe"
+                    "Collect the same weapon for more ammo",
+                    "Weapons automatically switch back to the standard weapon"
                 ]
             },
             {
-                "title": "Boss-Kampf Strategien",
+                "title": "Boss Fight Strategies",
                 "content": [
-                    "*** Boss-Verhalten ***",
-                    "• Bewegt sich in verschiedenen Phasen",
-                    "• Wechselt zwischen Angriffsmuster",
-                    "• Wird mit höherem Level gefährlicher",
+                    "*** Boss Behavior ***",
+                    "• Moves in different phases",
+                    "• Switches between attack patterns",
+                    "• Becomes more dangerous at higher levels",
                     "",
-                    "### Tipps ###",
-                    "• Nutze Bewegung um Projektilen auszuweichen",
-                    "• Sammle PowerUps vor dem Boss-Kampf",
-                    "• Konzentriere dich auf den Boss-Kern",
-                    "• Die Gesundheitsleiste zeigt den Fortschritt"
+                    "### Tips ###",
+                    "• Use movement to dodge projectiles",
+                    "• Collect power-ups before the boss fight",
+                    "• Focus on the boss core",
+                    "• The health bar shows progress"
                 ]
             },
             {
-                "title": "Erweiterte Tipps",
+                "title": "Advanced Tips",
                 "content": [
-                    "*** Steuerung ***",
-                    "• ESC für Pause",
-                    "• F11 für Vollbild",
-                    "• Pfeiltasten für Bewegung",
-                    "• Leertaste zum Schießen",
+                    "*** Controls ***",
+                    "• ESC for pause",
+                    "• F11 for fullscreen",
+                    "• Arrow keys for movement",
+                    "• Spacebar to shoot",
                     "",
-                    "*** Strategie ***",
-                    "• Große Asteroiden geben mehr Punkte",
-                    "• PowerUPs pulsieren in den letzten 3 Sekunden",
-                    "• Unverwundbarkeit nach Respawn nutzen",
-                    "• Boss-Kämpfe sind optional - aber lohnend!"
+                    "*** Strategy ***",
+                    "• Large asteroids give more points",
+                    "• Power-ups pulse in the last 3 seconds",
+                    "• Use invulnerability after respawn",
+                    "• Boss fights are optional - but rewarding!"
                 ]
             },
             {
-                "title": "Schwierigkeitsgrade",
+                "title": "Difficulty Levels",
                 "content": [
-                    "[LEICHT]:",
-                    "• Langsamere Asteroiden",
-                    "• Weniger Asteroiden pro Level",
-                    "• Mehr PowerUp-Chancen",
+                    "[EASY]:",
+                    "• Slower asteroids",
+                    "• Fewer asteroids per level",
+                    "• More power-up chances",
                     "",
                     "[NORMAL]:",
-                    "• Ausgewogenes Gameplay",
-                    "• Standard-Einstellungen",
+                    "• Balanced gameplay",
+                    "• Standard settings",
                     "",
-                    "[SCHWER]:",
-                    "• Schnellere Asteroiden",
-                    "• Mehr Asteroiden pro Level",
-                    "• Weniger PowerUp-Chancen",
-                    "• Härtere Boss-Kämpfe"
+                    "[HARD]:",
+                    "• Faster asteroids",
+                    "• More asteroids per level",
+                    "• Fewer power-up chances",
+                    "• Tougher boss fights"
                 ]
             }
         ]
@@ -127,20 +126,17 @@ class Tutorial:
             self.starfield = MenuStarfield(num_stars=80)
         except ImportError:
             self.starfield = None
-            print("Starfield konnte nicht importiert werden")
+            print("Could not import starfield")
 
     def next_page(self):
-        """Wechselt zur nächsten Seite"""
         if self.current_page < len(self.pages) - 1:
             self.start_transition(self.current_page + 1)
     
     def previous_page(self):
-        """Wechselt zur vorherigen Seite"""
         if self.current_page > 0:
             self.start_transition(self.current_page - 1)
     
     def start_transition(self, target_page):
-        """Startet eine animierte Transition zur Zielseite"""
         self.transitioning = True
         self.target_page = target_page
         self.transition_timer = 0
@@ -202,16 +198,16 @@ class Tutorial:
                 continue
             
             if ((line.startswith("[") and "]" in line) or 
-                (":" in line and any(weapon in line for weapon in ["STANDARD", "LASER", "RAKETEN", "SCHROTFLINTE"]))):
+                (":" in line and any(weapon in line for weapon in ["STANDARD", "LASER", "ROCKET", "SHOTGUN"]))):
                 self.draw_colored_line(screen, line, SCREEN_WIDTH//2, y_offset)
             else:
                 color = (255, 255, 255)
                 
-                if line.startswith("*** BOSS-KÄMPFE ***") or line.startswith("*** Boss-Verhalten ***"):
+                if line.startswith("*** Boss Fight ***") or line.startswith("*** Boss Fight Strategies ***"):
                     color = (128, 0, 128)
-                elif line.startswith("### Tipps ###"):
+                elif line.startswith("### Tips ###"):
                     color = (255, 215, 0)
-                elif line.startswith("*** Steuerung ***") or line.startswith("*** Strategie ***"):
+                elif line.startswith("*** Controls ***") or line.startswith("*** Strategy ***"):
                     color = (100, 200, 255)
                 
                 elif line.startswith("•"):
@@ -228,12 +224,12 @@ class Tutorial:
         
         nav_y = SCREEN_HEIGHT - 80
         
-        page_info = f"Seite {self.current_page + 1} von {len(self.pages)}"
+        page_info = f"Page {self.current_page + 1} of {len(self.pages)}"
         page_surface = self.font_navigation.render(page_info, True, (150, 150, 150))
         page_rect = page_surface.get_rect(center=(SCREEN_WIDTH/2, nav_y))
         screen.blit(page_surface, page_rect)
         
-        nav_text = "← A/D/Pfeiltasten zum Navigieren →    ESC/Leertaste: Zurück"
+        nav_text = "← A/D/Arrow keys to navigate →    ESC/Space: Back"
         nav_surface = self.font_navigation.render(nav_text, True, (100, 100, 100))
         nav_rect = nav_surface.get_rect(center=(SCREEN_WIDTH/2, nav_y + 30))
         screen.blit(nav_surface, nav_rect)
@@ -252,7 +248,6 @@ class Tutorial:
                         (progress_x, progress_y, progress_fill_width, progress_height))
     
     def draw_colored_line(self, screen, line, x, y):
-        """Zeichnet eine Zeile mit farbigem Name-Teil und weißem Beschreibungs-Teil"""
         
         if line.startswith("[") and "]" in line:
             bracket_end = line.find("]") + 1
@@ -260,7 +255,7 @@ class Tutorial:
             desc_part = line[bracket_end:]
             
             name_color = (255, 255, 255)
-            if "[SCHILD]" in name_part:
+            if "[SHIELD]" in name_part:
                 name_color = (0, 255, 255)
             elif "[LASER]" in name_part:
                 name_color = (0, 255, 0)
@@ -270,52 +265,44 @@ class Tutorial:
                 name_color = (255, 165, 0)
             elif "[3-SHOT]" in name_part or "[SPEED]" in name_part:
                 name_color = (255, 255, 0)
-            elif "[LEICHT]" in name_part:
-                name_color = (0, 255, 0)  # Grün
+            elif "[LEASY]" in name_part:
+                name_color = (0, 255, 0)
             elif "[NORMAL]" in name_part:
-                name_color = (255, 255, 0)  # Gelb
-            elif "[SCHWER]" in name_part:
-                name_color = (255, 0, 0)  # Rot
-            
-            # Name zeichnen
+                name_color = (255, 255, 0)
+            elif "[HARD]" in name_part:
+                name_color = (255, 0, 0)
+
             name_surface = self.font_content.render(name_part, True, name_color)
             name_width = name_surface.get_width()
-            
-            # Beschreibung zeichnen (weiß)
+ 
             desc_surface = self.font_content.render(desc_part, True, (255, 255, 255))
-            
-            # Beide Teile zentriert zeichnen
+
             total_width = name_width + desc_surface.get_width()
             start_x = x - total_width // 2
             
             screen.blit(name_surface, (start_x, y))
             screen.blit(desc_surface, (start_x + name_width, y))
 
-        # Waffen-Namen (mit Doppelpunkt) 
         elif ":" in line:
             colon_pos = line.find(":") + 1
             name_part = line[:colon_pos]
             desc_part = line[colon_pos:]
-            
-            # Waffen-Farbe bestimmen
-            name_color = (255, 255, 255)  # Standard
+
+            name_color = (255, 255, 255)
             if "STANDARD:" in name_part:
                 name_color = (255, 255, 255)
             elif "LASER:" in name_part:
                 name_color = (0, 255, 0)
-            elif "RAKETEN:" in name_part:
+            elif "ROCKET:" in name_part:
                 name_color = (255, 0, 0)
-            elif "SCHROTFLINTE:" in name_part:
+            elif "SHOTGUN:" in name_part:
                 name_color = (255, 165, 0)
-            
-            # Name zeichnen
+
             name_surface = self.font_content.render(name_part, True, name_color)
             name_width = name_surface.get_width()
-            
-            # Beschreibung zeichnen (weiß)
+
             desc_surface = self.font_content.render(desc_part, True, (255, 255, 255))
-            
-            # Beide Teile zentriert zeichnen
+
             total_width = name_width + desc_surface.get_width()
             start_x = x - total_width // 2
             
@@ -323,7 +310,7 @@ class Tutorial:
             screen.blit(desc_surface, (start_x + name_width, y))
             
         else:
-            # Normale Zeile
+
             content_surface = self.font_content.render(line, True, (255, 255, 255))
             content_rect = content_surface.get_rect(center=(x, y))
             screen.blit(content_surface, content_rect)

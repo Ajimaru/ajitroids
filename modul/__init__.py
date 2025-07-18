@@ -1,1 +1,1 @@
-# Modul-Init für pip-Distribution
+# Module initialization for pip distribution
