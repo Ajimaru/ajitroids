@@ -145,6 +145,10 @@ class ShipManager:
     
     def is_ship_unlocked(self, ship_id):
         return ship_id in self.ships and self.ships[ship_id]["unlocked"]
+    
+    def check_all_ships_unlocked(self, achievement_system):
+        if len(self.unlocked_ships) == len(self.ships):
+            achievement_system.unlock("Fleet Commander")
 
 
 class ShipRenderer:

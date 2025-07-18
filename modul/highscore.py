@@ -135,10 +135,44 @@ class HighscoreDisplay:
         self.highscore_manager = highscore_manager
         self.font_title = pygame.font.Font(None, 64)
         self.font_entry = pygame.font.Font(None, 36)
+        self.font_button = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
+        self.background_alpha = 0
+        self.fade_in = True
+
+        self.back_button = {
+            'text': 'Back',
+            'selected': True,
+            'hover_animation': 0,
+            'y': SCREEN_HEIGHT - 60
+        }
+        self.input_cooldown = 0
+        
+    def update(self, dt, events):
+        if self.fade_in:
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / 0.5)
+            if self.background_alpha >= 200:
+                self.fade_in = False
+                self.background_alpha = 200
+
+        target = 1.0 if self.back_button['selected'] else 0.0
+        animation_speed = 12.0
+        self.back_button['hover_animation'] = self.back_button['hover_animation'] + (target - self.back_button['hover_animation']) * dt * animation_speed
+        
+        if self.input_cooldown > 0:
+            self.input_cooldown -= dt
+        
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if self.input_cooldown <= 0:
+                    if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN or event.key == pygame.K_ESCAPE:
+                        self.input_cooldown = 0.15
+                        return "main_menu"
+        
+        return None
         
     def draw(self, screen):
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 200))
+        overlay.fill((0, 0, 0, self.background_alpha))
         screen.blit(overlay, (0, 0))
         
         title_text = self.font_title.render("HIGHSCORES", True, pygame.Color("white"))
@@ -165,7 +199,16 @@ class HighscoreDisplay:
             screen.blit(rank_text, (x_rank, y))
             screen.blit(name_text, (x_name, y))
             screen.blit(score_text, (x_score, y))
+
+        button = self.back_button
+        color = pygame.Color(MENU_UNSELECTED_COLOR)
+        selected_color = pygame.Color(MENU_SELECTED_COLOR)
+        r = max(0, min(255, int(color.r + (selected_color.r - color.r) * button['hover_animation'])))
+        g = max(0, min(255, int(color.g + (selected_color.g - color.g) * button['hover_animation'])))
+        b = max(0, min(255, int(color.b + (selected_color.b - color.b) * button['hover_animation'])))
+        size_multiplier = 1.0 + 0.2 * button['hover_animation']
+        scaled_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * size_multiplier))
         
-        hint_text = self.font_entry.render("SPACE to go back", True, pygame.Color("white"))
-        screen.blit(hint_text, (SCREEN_WIDTH // 2 - hint_text.get_width() // 2, 
-                             SCREEN_HEIGHT - 100))
+        button_text = scaled_font.render(button['text'], True, (r, g, b))
+        button_rect = button_text.get_rect(center=(SCREEN_WIDTH // 2, button['y']))
+        screen.blit(button_text, button_rect)

@@ -138,21 +138,20 @@ class Asteroid(CircleShape):
 
     def update(self, dt):
         self.position += self.velocity * dt
-        self.rotation += self.rotation_speed * dt  # Rotation der Asteroiden
+        self.rotation += self.rotation_speed * dt
 
 class EnemyShip(CircleShape):
     def __init__(self, x, y, radius):
         super().__init__(x, y, radius)
-        self.radius = PLAYER_RADIUS  # Setze den Radius auf die Größe des Player-Sprites
+        self.radius = PLAYER_RADIUS
         self.rotation_speed = random.uniform(-0.1, 0.1)
         self.rotation = 0
         self.velocity = pygame.Vector2(random.uniform(-50, 50), random.uniform(-50, 50))
 
-    def update(self, dt):
+    def update(self, dt, player_position=None):
         self.position += self.velocity * dt
         self.rotation += self.rotation_speed * dt
 
-        # Bildschirmgrenzen überprüfen und Wrap-around anwenden
         if self.position.x < 0:
             self.position.x = SCREEN_WIDTH
         elif self.position.x > SCREEN_WIDTH:
@@ -162,6 +161,22 @@ class EnemyShip(CircleShape):
             self.position.y = SCREEN_HEIGHT
         elif self.position.y > SCREEN_HEIGHT:
             self.position.y = 0
+
+        if player_position:
+            detection_radius = SCREEN_WIDTH * 0.45
+            direction_vector = player_position - self.position
+            distance_to_player = direction_vector.length()
+            if distance_to_player < detection_radius:
+                if distance_to_player != 0:
+                    direction_to_player = direction_vector.normalize()
+                else:
+                    direction_to_player = pygame.Vector2(0, 0)
+                self.velocity = direction_to_player * 100
+                print(f"EnemyShip moving towards player! Distance: {distance_to_player}")
+            else:
+                self.velocity *= 0.8
+
+        print(f"EnemyShip Position: {self.position}, Velocity: {self.velocity}")
 
     def collides_with(self, other):
         distance = (self.position - other.position).length()
@@ -175,8 +190,10 @@ class EnemyShip(CircleShape):
     def draw(self, screen):
         points = [
             (0, -self.radius),
-            (-self.radius, self.radius),
-            (self.radius, self.radius)
+            (-self.radius * 0.8, self.radius * 0.5),
+            (-self.radius * 0.4, self.radius * 0.8),
+            (self.radius * 0.4, self.radius * 0.8),
+            (self.radius * 0.8, self.radius * 0.5)
         ]
 
         rotated_points = [
@@ -189,21 +206,6 @@ class EnemyShip(CircleShape):
 
         points = [(self.position.x + x, self.position.y + y) for x, y in rotated_points]
         pygame.draw.polygon(screen, "red", points, 2)
-
-    def update(self, dt):
-        self.position += self.velocity * dt
-        self.rotation += self.rotation_speed * dt
-
-        # Bildschirmgrenzen überprüfen und Wrap-around anwenden
-        if self.position.x < 0:
-            self.position.x = SCREEN_WIDTH
-        elif self.position.x > SCREEN_WIDTH:
-            self.position.x = 0
-
-        if self.position.y < 0:
-            self.position.y = SCREEN_HEIGHT
-        elif self.position.y > SCREEN_HEIGHT:
-            self.position.y = 0
 
     def kill(self):
         super().kill()

@@ -147,9 +147,9 @@ class Player(CircleShape):
 
     def shoot(self):
         if self.shoot_timer <= 0:
-            # Check if current weapon is out of ammo
+ 
             if self.current_weapon != WEAPON_STANDARD and self.weapons[self.current_weapon] <= 0:
-                # Try to find another special weapon with ammo before falling back to standard
+
                 found_alternative = False
                 for weapon_type, ammo in self.weapons.items():
                     if weapon_type != WEAPON_STANDARD and weapon_type != self.current_weapon and ammo > 0:
@@ -157,8 +157,7 @@ class Player(CircleShape):
                         print(f"Auto-switched to {weapon_type} (Ammo: {ammo})")
                         found_alternative = True
                         break
-                
-                # Only fall back to standard weapon if no special weapon has ammo
+
                 if not found_alternative:
                     self.current_weapon = WEAPON_STANDARD
                     print("Auto-switched to standard weapon (no special weapons with ammo)")

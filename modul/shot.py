@@ -6,10 +6,15 @@ from modul.circleshape import CircleShape
 
 class Shot(CircleShape):
     asteroids_group = None
+    enemy_ships_group = None
     
     @classmethod
     def set_asteroids(cls, asteroids):
         cls.asteroids_group = asteroids
+
+    @classmethod
+    def set_enemy_ships(cls, enemy_ships):
+        cls.enemy_ships_group = enemy_ships
     
     def __init__(self, x, y, shot_type=WEAPON_STANDARD):
         pygame.sprite.Sprite.__init__(self, self.containers)
@@ -44,7 +49,7 @@ class Shot(CircleShape):
         self.color = WEAPON_COLORS[shot_type]
 
     def update(self, dt):
-        if self.shot_type == WEAPON_MISSILE and self.homing_power > 0 and Shot.asteroids_group:
+        if self.shot_type == WEAPON_MISSILE and self.homing_power > 0 and (Shot.asteroids_group or Shot.enemy_ships_group):
             self.seek_target(dt)
 
         self.position += self.velocity * dt
@@ -72,34 +77,24 @@ class Shot(CircleShape):
                               (int(self.position.x), int(self.position.y)), self.radius)
 
     def seek_target(self, dt):
-        if not Shot.asteroids_group:
+        if not Shot.asteroids_group and not Shot.enemy_ships_group:
             return
 
         if not self.target or not self.target.alive():
             closest_dist = float('inf')
             self.target = None
 
-            for asteroid in Shot.asteroids_group:
-                dist = (asteroid.position - self.position).length()
-                if dist < closest_dist:
-                    closest_dist = dist
-                    self.target = asteroid
+            for group in [Shot.asteroids_group, Shot.enemy_ships_group]:
+                if group:
+                    for obj in group:
+                        dist = (obj.position - self.position).length()
+                        if dist < closest_dist:
+                            closest_dist = dist
+                            self.target = obj
 
         if self.target and self.target.alive():
             target_dir = (self.target.position - self.position).normalize()
             current_dir = self.velocity.normalize()
-
-            dot = current_dir.x * target_dir.x + current_dir.y * target_dir.y
-            dot = max(-1.0, min(1.0, dot))
-            angle = math.degrees(math.acos(dot))
-
-            cross = current_dir.x * target_dir.y - current_dir.y * target_dir.x
-
-            turn_amount = min(angle, self.max_turn_rate)
-
-            if cross < 0:
-                turn_amount = -turn_amount
-
-            speed = self.velocity.length()
-            self.velocity.rotate_ip(turn_amount)
-            self.velocity.scale_to_length(speed)
+            turn_rate = min(self.max_turn_rate * dt, 1.0)
+            new_dir = current_dir.lerp(target_dir, turn_rate).normalize()
+            self.velocity = new_dir * self.velocity.length()

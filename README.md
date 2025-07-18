@@ -8,6 +8,9 @@
 
 Ajitroids is an exciting remake of the classic arcade game Asteroids with modern features and gameplay elements. Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destroy enemies and collect power-ups while trying to achieve the highest score.
 
+![Ajitroids Screenshot](screenshots/Ajitroids_gameplay.gif)
+
+
 ## ✨ Features
 
 - **Classic Gameplay**: Control your ship with precise rotation and thrust
@@ -19,13 +22,6 @@ Ajitroids is an exciting remake of the classic arcade game Asteroids with modern
 - **Customizable Settings**: Fullscreen mode, sound options and more
 - **Smooth Animations**: Fluid ship movements and asteroid rotations
 
-## 🎯 Controls
-
-- **Arrow Keys**: Control ship (rotation and thrust)
-- **Space**: Shoot
-- **ESC**: Pause game
-- **W/A/S/D**: Alternative controls
-- **TAB**: Switch weapons (when available)
 
 ## 🚀 Installation
 
@@ -62,7 +58,8 @@ pip install -r requirements.txt
 python main.py
 ```
 
-### 🌟 Gameplay
+
+## 🌟 Gameplay
 
 - **Main Menu:** Choose from different game modes or adjust settings
 - **Tutorial:** Learn the basics of the game (recommended for beginners)
@@ -70,18 +67,32 @@ python main.py
 - **Power-Ups:** Collect special power-ups for unique abilities
 - **Boss Enemies:** Powerful boss enemies appear after certain levels
 - **Highscores:** Save your best performances and compare them with others
+- **Achievements:** Unlock achievements for completing special challenges
+
+## 🎯 Controls
+
+- **Arrow Keys**: Control ship (rotation and thrust)
+- **Space**: Shoot
+- **ESC**: Pause game
+- **B**: Switch weapons (when available)
 
 ## 🚀 Spaceships
 
 Ajitroids features unlockable spaceships with unique abilities:
 
 - **Speedster**: A fast and agile ship, perfect for dodging asteroids.
-- **Tank**: A heavily armored ship that can withstand more damage.
+- **Tank**: A heavily armored ship that can fire on two directions.
 - **Destroyer**: A powerful ship equipped with advanced weaponry.
 
 Unlock these ships by progressing through the game and achieving milestones!
 
-### 🛠️ Technical Details
+## 🛡️ Enemies
+
+- **Enemy Ships**: Hostile ships that chase the player and add challenge to the gameplay
+- **Interaction**: Enemies can collide with the player and be destroyed by weapons
+- **Dynamic Movement**: Enemies actively pursue the player within a detection radius
+
+## 🛠️ Technical Details
 
 - Developed with Pygame
 - Object-oriented design with separate classes for game elements

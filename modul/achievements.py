@@ -30,7 +30,8 @@ class AchievementSystem:
             ("High Scorer", "Score 250,000 points."),
             ("Shield Expert", "Use shield 50 times."),
             ("Speed Demon", "Use speed boost 25 times."),
-            ("Triple Threat", "Use triple shot 20 times.")
+            ("Triple Threat", "Use triple shot 20 times."),
+            ("Fleet Commander", "Unlock all four spaceships.")
         ]
         for name, description in standard_achievements:
             achievement = Achievement(name, description)
@@ -81,7 +82,15 @@ class AchievementSystem:
                 self.save_unlocked_achievements()
                 print(f"Achievement unlocked: {achievement.name} - {achievement.description}")
                 if self.notification_callback:
-                    self.notification_callback(achievement.name, achievement.description)
+                    ascii_art = """
+                    ███████╗██╗     ███████╗████████╗
+                    ██╔════╝██║     ██╔════╝╚══██╔══╝
+                    █████╗  ██║     █████╗     ██║   
+                    ██╔══╝  ██║     ██╔══╝     ██║   
+                    ███████╗███████╗███████╗   ██║   
+                    ╚══════╝╚══════╝╚══════╝   ╚═╝   
+                    """
+                    self.notification_callback(achievement.name, ascii_art)
                 break
 
     def unlock(self, name):
@@ -100,3 +109,7 @@ class AchievementSystem:
             if achievement.name == name:
                 return achievement.unlocked
         return False
+
+    def check_fleet_commander(self, ships):
+        if len(ships.unlocked_ships) == len(ships.ships):
+            self.unlock("Fleet Commander")

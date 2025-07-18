@@ -80,11 +80,10 @@ DIFFICULTY_HARD_INTERVAL = 3.0
 ARCADE_MODE_TIME = 180
 ARCADE_MODE_BONUS_TIME = 5
 
-GAME_VERSION = "v1.0"
-
+CREDITS_MASTERMIND = "Ajimaru"
 CREDITS_TITLE = "CREDITS"
 CREDITS_GAME_NAME = "AJITROIDS"
-CREDITS_DEVELOPER = "Ajimaru"
+CREDITS_DEVELOPER = "GitHub Copilot"
 CREDITS_GRAPHICS = "GitHub Copilot"
 CREDITS_SOUND = "Command Line"
 CREDITS_SPECIAL_THANKS = [
@@ -95,7 +94,7 @@ CREDITS_SPECIAL_THANKS = [
 CREDITS_SCROLL_SPEED = 50
 CREDITS_LINE_SPACING = 40
 CREDITS_WEBSITE = "https://ajimaru.github.io"
-GAME_VERSION = "beta 0.17.1 - 2025-07-18"
+GAME_VERSION = "beta 0.17.3 - 2025-07-18"
 
 POINTS_PER_LEVEL = 2500
 MAX_LEVEL = 666
@@ -149,7 +148,7 @@ def generate_default_highscores():
     highscores = []
     for i in range(max_entries):
         name = ''.join(random.choice(allowed_chars) for _ in range(name_length))
-        score = (max_entries - i) * 1000  # Higher, rounded scores
+        score = (max_entries - i) * 1000 
         highscores.append({"name": name, "score": score})
 
     return highscores

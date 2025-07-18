@@ -348,7 +348,7 @@ class CreditsScreen:
         self.text_font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE - 8)
         self.background_alpha = 0
         self.fade_in = True
-        self.scroll_position = SCREEN_HEIGHT
+        self.scroll_position = 250
     
     def update(self, dt, events):
         if self.fade_in:
@@ -378,7 +378,7 @@ class CreditsScreen:
         credits = [
             CREDITS_GAME_NAME,
             "",
-            f"A game by {CREDITS_DEVELOPER}",
+            f"A game by {CREDITS_MASTERMIND}",
             "",
             "Programming",
             CREDITS_DEVELOPER,
@@ -399,15 +399,15 @@ class CreditsScreen:
             f"Download & Updates: {CREDITS_WEBSITE}",
             "",
             "Thank you for playing!",
-            "",
-            "Press SPACE to return"
+           
         ])
         
         y = self.scroll_position
         for line in credits:
             text_surf = self.text_font.render(line, True, (255, 255, 255))
             text_rect = text_surf.get_rect(center=(SCREEN_WIDTH/2, y))
-            screen.blit(text_surf, text_rect)
+            if y >= SCREEN_HEIGHT / 4:
+                screen.blit(text_surf, text_rect)
             y += CREDITS_LINE_SPACING
             
         if y < 0:
@@ -830,7 +830,7 @@ class SoundTestMenu:
 
 class AchievementsMenu(Menu):
     def __init__(self, achievement_system):
-        super().__init__("ACHIEVEMENTS")
+        super().__init__("AJITROIDS - ACHIEVEMENTS")
         self.achievement_system = achievement_system
         self.add_item("Back", "back")
         
@@ -904,6 +904,13 @@ class AchievementsMenu(Menu):
                 "* * *",
                 "* * *",
                 " * * "
+            ],
+            "Fleet Commander": [
+                "  *  ",
+                " *** ",
+                "*****",
+                " *** ",
+                "  *  "
             ]
         }
 
@@ -917,17 +924,17 @@ class AchievementsMenu(Menu):
         screen.blit(title_surf, title_rect)
 
         start_y = SCREEN_HEIGHT / 5
-        achievement_spacing = 70
+        achievement_spacing = 80
         graphics_font = pygame.font.Font(None, 18)
         name_font = pygame.font.Font(None, 28)
         
-        achievements_per_column = 5
+        achievements_per_column = 6
         column_width = SCREEN_WIDTH / 2
         left_column_x = column_width / 2
         right_column_x = column_width + column_width / 2
         
         for i, achievement in enumerate(self.achievement_system.achievements):
-            if i >= 10:
+            if i >= 12:
                 break
                 
             column = i // achievements_per_column
@@ -1113,8 +1120,8 @@ class ShipSelectionMenu(Menu):
         
         instruction_font = pygame.font.Font(None, 20)
         instructions = [
-            "LEFT/RIGHT: Select Ship",
-            "ENTER/SPACE: Confirm Selection", 
+            "LEFT / RIGHT: Select Ship",
+            "ENTER / SPACE: Confirm Selection", 
             "ESC: Back to Difficulty"
         ]
         
