@@ -184,6 +184,8 @@ def main():
                     sounds.toggle_sound(game_settings.sound_on)
                     toggle_message = "Sound Effects Enabled" if game_settings.sound_on else "Sound Effects Disabled"
                     toggle_message_timer = 2
+                elif event.key == pygame.K_b and player:
+                    player.cycle_weapon()
 
         if toggle_message and toggle_message_timer > 0:
             font = pygame.font.Font(None, 36)
@@ -533,6 +535,9 @@ def main():
             difficulty_text = font.render(f"Difficulty: {difficulty.capitalize()}", True, difficulty_color)
             difficulty_rect = difficulty_text.get_rect(topleft=(20, 110))
             screen.blit(difficulty_text, difficulty_rect)
+
+            if player:
+                player.draw_weapon_hud(screen)
 
             current_level = min(score // POINTS_PER_LEVEL + 1, MAX_LEVEL)
             

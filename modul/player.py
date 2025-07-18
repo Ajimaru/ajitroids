@@ -23,6 +23,7 @@ class Player(CircleShape):
         self.rapid_fire_timer = 0
         self.original_cooldown = PLAYER_SHOOT_COOLDOWN
         self.current_weapon = WEAPON_STANDARD
+        self.weapon_switch_timer = 0
         self.weapons = {
             WEAPON_STANDARD: -1,
             WEAPON_LASER: 0,
@@ -105,6 +106,9 @@ class Player(CircleShape):
         if keys[pygame.K_SPACE]:
             self.shoot()
 
+        if keys[pygame.K_b]:
+            self.cycle_weapon()
+
         max_speed = getattr(self, 'max_speed', 400)
         if self.velocity.length() > max_speed:
             self.velocity = self.velocity.normalize() * max_speed
@@ -137,11 +141,27 @@ class Player(CircleShape):
             self.rapid_fire_timer -= dt
             if self.rapid_fire_timer <= 0:
                 self.rapid_fire_active = False
+                
+        if self.weapon_switch_timer > 0:
+            self.weapon_switch_timer -= dt
 
     def shoot(self):
         if self.shoot_timer <= 0:
+            # Check if current weapon is out of ammo
             if self.current_weapon != WEAPON_STANDARD and self.weapons[self.current_weapon] <= 0:
-                self.current_weapon = WEAPON_STANDARD
+                # Try to find another special weapon with ammo before falling back to standard
+                found_alternative = False
+                for weapon_type, ammo in self.weapons.items():
+                    if weapon_type != WEAPON_STANDARD and weapon_type != self.current_weapon and ammo > 0:
+                        self.current_weapon = weapon_type
+                        print(f"Auto-switched to {weapon_type} (Ammo: {ammo})")
+                        found_alternative = True
+                        break
+                
+                # Only fall back to standard weapon if no special weapon has ammo
+                if not found_alternative:
+                    self.current_weapon = WEAPON_STANDARD
+                    print("Auto-switched to standard weapon (no special weapons with ammo)")
             
             if self.current_weapon == WEAPON_STANDARD:
                 if self.triple_shot_active:
@@ -244,42 +264,113 @@ class Player(CircleShape):
             self.rapid_fire_timer = RAPID_FIRE_DURATION
             
         elif powerup_type == "laser_weapon":
-            self.weapons[WEAPON_LASER] += LASER_AMMO
+            self.weapons[WEAPON_LASER] = min(self.weapons[WEAPON_LASER] + LASER_AMMO, LASER_AMMO)
             self.current_weapon = WEAPON_LASER
             print(f"Laser weapon activated! Ammo: {self.weapons[WEAPON_LASER]}")
             
         elif powerup_type == "missile_weapon":
-            self.weapons[WEAPON_MISSILE] += MISSILE_AMMO
+            self.weapons[WEAPON_MISSILE] = min(self.weapons[WEAPON_MISSILE] + MISSILE_AMMO, MISSILE_AMMO)
             self.current_weapon = WEAPON_MISSILE
             print(f"Missile weapon activated! Ammo: {self.weapons[WEAPON_MISSILE]}")
             
         elif powerup_type == "shotgun_weapon":
-            self.weapons[WEAPON_SHOTGUN] += SHOTGUN_AMMO
+            self.weapons[WEAPON_SHOTGUN] = min(self.weapons[WEAPON_SHOTGUN] + SHOTGUN_AMMO, SHOTGUN_AMMO)
             self.current_weapon = WEAPON_SHOTGUN
             print(f"Shotgun activated! Ammo: {self.weapons[WEAPON_SHOTGUN]}")
 
     def cycle_weapon(self):
+        if self.weapon_switch_timer > 0:
+            return
+
+        self.weapon_switch_timer = 0.2
+
         weapon_list = list(self.weapons.keys())
         current_index = weapon_list.index(self.current_weapon)
-        
+
         for i in range(1, len(weapon_list)):
             next_index = (current_index + i) % len(weapon_list)
             next_weapon = weapon_list[next_index]
-            
+
             if next_weapon == WEAPON_STANDARD or self.weapons[next_weapon] > 0:
                 self.current_weapon = next_weapon
-                print(f"Weapon switched to: {self.current_weapon}, Ammo: {self.weapons[self.current_weapon]}")
+                if next_weapon == WEAPON_STANDARD:
+                    print(f"Switched to standard weapon: {self.current_weapon}")
+                else:
+                    print(f"Weapon switched to: {self.current_weapon}, Ammo: {self.weapons[self.current_weapon]}")
                 return
-        
+
         self.current_weapon = WEAPON_STANDARD
+        print(f"Fallback to standard weapon: {self.current_weapon}")
 
     def draw_weapon_hud(self, screen):
-        font = pygame.font.Font(None, 24)
+        font = pygame.font.Font(None, 22)
+        font_small = pygame.font.Font(None, 18)
+
+        weapons_panel_x = SCREEN_WIDTH - 120
+        weapons_panel_y = 10
+        panel_width = 100
+        panel_height = len(self.weapons) * 28 + 15
+
+        panel_surface = pygame.Surface((panel_width, panel_height), pygame.SRCALPHA)
+        panel_surface.fill((0, 0, 0, 120))
+        pygame.draw.rect(panel_surface, (60, 60, 60), (0, 0, panel_width, panel_height), 1)
+        screen.blit(panel_surface, (weapons_panel_x, weapons_panel_y))
+
+        title_text = font_small.render("WEAPONS", True, (200, 200, 200))
+        screen.blit(title_text, (weapons_panel_x + 5, weapons_panel_y + 5))
+ 
+        y_offset = 35
+        max_ammo = {
+            WEAPON_STANDARD: -1,
+            WEAPON_LASER: LASER_AMMO,
+            WEAPON_MISSILE: MISSILE_AMMO,
+            WEAPON_SHOTGUN: SHOTGUN_AMMO
+        }
         
-        weapon_radius = 8
-        weapon_pos = (SCREEN_WIDTH - 50, SCREEN_HEIGHT - 30)
-        pygame.draw.circle(screen, WEAPON_COLORS[self.current_weapon], weapon_pos, weapon_radius)
-        
-        if self.current_weapon != WEAPON_STANDARD:
-            ammo_text = font.render(f"{self.weapons[self.current_weapon]}", True, WEAPON_COLORS[self.current_weapon])
-            screen.blit(ammo_text, (SCREEN_WIDTH - 30, SCREEN_HEIGHT - 35))
+        for weapon_type, ammo in self.weapons.items():
+            weapon_y = weapons_panel_y + y_offset
+
+            weapon_radius = 5
+            weapon_icon_x = weapons_panel_x + 15
+
+            if weapon_type == self.current_weapon:
+                icon_color = WEAPON_COLORS[weapon_type]
+                text_color = (255, 255, 255)
+                pygame.draw.rect(screen, (255, 255, 0), 
+                               (weapons_panel_x + 3, weapon_y - 9, panel_width - 6, 20), 1)
+            elif weapon_type == WEAPON_STANDARD or ammo > 0:
+                icon_color = WEAPON_COLORS[weapon_type]
+                text_color = (200, 200, 200)
+            else:
+                icon_color = (80, 80, 80)
+                text_color = (100, 100, 100)
+            
+            pygame.draw.circle(screen, icon_color, (weapon_icon_x, weapon_y), weapon_radius)
+
+            weapon_name = weapon_type.replace("_", " ").title()
+            if weapon_name == "Standard":
+                weapon_name = "STD"
+            elif weapon_name == "Laser":
+                weapon_name = "LSR"
+            elif weapon_name == "Missile":
+                weapon_name = "MSL"
+            elif weapon_name == "Shotgun":
+                weapon_name = "SHG"
+                
+            name_text = font_small.render(weapon_name, True, text_color)
+            screen.blit(name_text, (weapons_panel_x + 28, weapon_y - 5))
+
+            if weapon_type == WEAPON_STANDARD:
+                ammo_display = "99 / 99"
+            else:
+                max_ammo_val = max_ammo[weapon_type]
+                ammo_display = f"{ammo}/{max_ammo_val}"
+            
+            ammo_text = font_small.render(ammo_display, True, text_color)
+            ammo_rect = ammo_text.get_rect()
+            screen.blit(ammo_text, (weapons_panel_x + panel_width - ammo_rect.width - 5, weapon_y - 5))
+            
+            y_offset += 25
+
+        hint_text = font_small.render("B to Switch", True, (120, 120, 120))
+        screen.blit(hint_text, (weapons_panel_x + 5, weapons_panel_y + panel_height + 3))

@@ -9,14 +9,15 @@ class Tutorial:
             {
                 "title": "Basics",
                 "content": [
-                    "Move your spaceship with the arrow keys",
-                    "Shoot with the spacebar",
-                    "Rotate with left/right arrow keys", 
-                    "Move forward/backward with up/down arrow keys",
-                    "Destroy asteroids for points!",
+                    "• Move your spaceship with the arrow keys",
+                    "• Shoot with the spacebar",
+                    "• Rotate with left / right arrow keys",
+                    "• Move forward / backward with up / down arrow keys",
+                    "• Destroy asteroids for points!",
+                    "• Press B to switch weapons",
                     "",
-                    "Large asteroids break into smaller pieces",
-                    "Collect power-ups for special abilities"
+                    "• Large asteroids break into smaller pieces",
+                    "• Collect power-ups for special abilities"
                 ]
             },
             {
@@ -29,35 +30,35 @@ class Tutorial:
                     "[ROCKET] - Tracks nearby asteroids",
                     "[SHOTGUN] - Multiple shots in a spread",
                     "",
-                    "Power-ups only appear from large asteroids!",
-                    "They disappear after 10 seconds"
+                    "• Power-ups only appear from large asteroids!",
+                    "• They disappear after 10 seconds"
                 ]
             },
             {
                 "title": "Level System",
                 "content": [
-                    "Collect 2500 points for a level-up",
-                    "Higher levels = more and faster asteroids",
-                    "Maximum level: 999",
+                    "• Collect 2500 points for a level-up",
+                    "• Higher levels = more and faster asteroids",
+                    "• Maximum level: 666",
                     "",
                     "*** Boss Fights ***",
-                    "A boss appears every 10 levels!",
-                    "Bosses have high health and attack patterns",
-                    "Reward: +1 life and 500 points",
+                    "• A boss appears every 10 levels!",
+                    "• Bosses have high health and attack patterns",
+                    "• Reward: +1 life and 500 points",
                     "",
-                    "Bosses get stronger with each level!"
+                    "• Bosses get stronger with each level!"
                 ]
             },
             {
                 "title": "Weapon System",
                 "content": [
                     "STANDARD: Unlimited ammo",
-                    "LASER: 15 shots, penetrates asteroids",
+                    "LASER: 15 shots, makes more damage",
                     "ROCKETS: 8 shots, automatically track targets",
                     "SHOTGUN: 12 shots, spread fire",
                     "",
-                    "Collect the same weapon for more ammo",
-                    "Weapons automatically switch back to the standard weapon"
+                    "• Collect the same weapon to refill ammo",
+                    "• Weapons automatically switch back to the standard weapon"
                 ]
             },
             {
