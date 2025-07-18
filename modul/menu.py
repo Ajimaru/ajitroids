@@ -213,10 +213,10 @@ class TutorialScreen:
         screen.blit(title_surf, title_rect)
         
         instructions = [
-            "W / Arrow Up: Accelerate",
-            "A / Arrow Left: Turn left",
-            "D / Arrow Right: Turn right",
-            "S / Arrow Down: Reverse",
+            "Arrow Up: Accelerate",
+            "Arrow Left: Turn left",
+            "Arrow Right: Turn right",
+            "Arrow Down: Reverse",
             "Spacebar: Shoot / In menu: Return to main menu",
             "ESC: Pause",
             "",
@@ -225,7 +225,7 @@ class TutorialScreen:
             "Triple Shot (Magenta): Three shots at once",
             "Rapid Fire (Yellow): Increased fire rate",
             "",
-            "Press SPACEBAR to return to the main menu"
+            "SPACEBAR to go back"
         ]
         
         y = 180
@@ -754,7 +754,7 @@ class SoundTestMenu(Menu):
             screen.blit(played_text, played_rect)
     
         instructions = [
-            "Navigation: ▲ / ▼ | Test: ENTER | Back: SPACE"
+            "UP / DOWN to Navigate - ENTER to play sound - SPACE to go back"
         ]
     
         instruction_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.65))
@@ -766,7 +766,7 @@ class SoundTestMenu(Menu):
             text_rect = text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 70 + i * 25))
             screen.blit(text, text_rect)
     
-        scroll_info = f"Seite {(self.scroll_offset // self.max_visible_items) + 1} | Items {self.scroll_offset + 1}-{min(self.scroll_offset + self.max_visible_items, len(self.sound_items))} von {len(self.sound_items)}"
+        scroll_info = f"Page {(self.scroll_offset // self.max_visible_items) + 1} | Items {self.scroll_offset + 1}-{min(self.scroll_offset + self.max_visible_items, len(self.sound_items))} of {len(self.sound_items)}"
         info_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.6))
         info_text = info_font.render(scroll_info, True, pygame.Color("gray"))
         info_rect = info_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT - 25))
@@ -922,7 +922,7 @@ class AchievementsMenu(Menu):
             item_rect = item.draw(screen, (SCREEN_WIDTH / 2, back_button_y + i * MENU_ITEM_SPACING), self.item_font)
 
         instruction_font = pygame.font.Font(None, 24)
-        instruction_surf = instruction_font.render("Press ESC or SPACE to go back", True, pygame.Color(MENU_UNSELECTED_COLOR))
+        instruction_surf = instruction_font.render("", True, pygame.Color(MENU_UNSELECTED_COLOR))
         instruction_rect = instruction_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 40))
         screen.blit(instruction_surf, instruction_rect)
         

@@ -22,7 +22,7 @@ class Tutorial:
             {
                 "title": "Power-Ups",
                 "content": [
-                    "[SHIELD] - Protection from one hit (3 sec.)",
+                    "[SHIELD] - Immune for 3 sec.",
                     "[3-SHOT] - Three shots simultaneously",
                     "[SPEED] - Increased fire rate",
                     "[LASER] - Increased damage",
@@ -40,7 +40,7 @@ class Tutorial:
                     "Higher levels = more and faster asteroids",
                     "Maximum level: 999",
                     "",
-                    "*** BOSS FIGHTS ***",
+                    "*** Boss Fights ***",
                     "A boss appears every 10 levels!",
                     "Bosses have high health and attack patterns",
                     "Reward: +1 life and 500 points",
@@ -68,7 +68,7 @@ class Tutorial:
                     "• Switches between attack patterns",
                     "• Becomes more dangerous at higher levels",
                     "",
-                    "### Tips ###",
+                    "*** Tips ***",
                     "• Use movement to dodge projectiles",
                     "• Collect power-ups before the boss fight",
                     "• Focus on the boss core",
@@ -203,9 +203,9 @@ class Tutorial:
             else:
                 color = (255, 255, 255)
                 
-                if line.startswith("*** Boss Fight ***") or line.startswith("*** Boss Fight Strategies ***"):
+                if line.startswith("*** Boss Fights ***") or line.startswith("*** Boss Behavior ***"):
                     color = (128, 0, 128)
-                elif line.startswith("### Tips ###"):
+                elif line.startswith("*** Tips ***"):
                     color = (255, 215, 0)
                 elif line.startswith("*** Controls ***") or line.startswith("*** Strategy ***"):
                     color = (100, 200, 255)
@@ -228,8 +228,8 @@ class Tutorial:
         page_surface = self.font_navigation.render(page_info, True, (150, 150, 150))
         page_rect = page_surface.get_rect(center=(SCREEN_WIDTH/2, nav_y))
         screen.blit(page_surface, page_rect)
-        
-        nav_text = "← A/D/Arrow keys to navigate →    ESC/Space: Back"
+
+        nav_text = "LEFT / RIGHT to navigate or SPACE to go Back"
         nav_surface = self.font_navigation.render(nav_text, True, (100, 100, 100))
         nav_rect = nav_surface.get_rect(center=(SCREEN_WIDTH/2, nav_y + 30))
         screen.blit(nav_surface, nav_rect)
@@ -262,8 +262,10 @@ class Tutorial:
             elif "[ROCKET]" in name_part:
                 name_color = (255, 0, 0)
             elif "[SHOTGUN]" in name_part:
-                name_color = (255, 165, 0)
-            elif "[3-SHOT]" in name_part or "[SPEED]" in name_part:
+                name_color = (255, 170, 0)
+            elif "[3-SHOT]" in name_part:
+                name_color = (255, 0, 255)
+            elif "[SPEED]" in name_part:
                 name_color = (255, 255, 0)
             elif "[LEASY]" in name_part:
                 name_color = (0, 255, 0)
@@ -293,7 +295,7 @@ class Tutorial:
                 name_color = (255, 255, 255)
             elif "LASER:" in name_part:
                 name_color = (0, 255, 0)
-            elif "ROCKET:" in name_part:
+            elif "ROCKETS:" in name_part:
                 name_color = (255, 0, 0)
             elif "SHOTGUN:" in name_part:
                 name_color = (255, 165, 0)

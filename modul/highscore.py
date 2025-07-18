@@ -28,13 +28,11 @@ class HighscoreManager:
             print(f"Error saving highscores: {e}")
     
     def is_highscore(self, score):
-        """Checks if the score is a new highscore"""
         if len(self.highscores) < HIGHSCORE_MAX_ENTRIES:
             return True
         return score > self.highscores[-1]["score"]
     
     def add_highscore(self, name, score):
-        """Adds a new highscore and sorts the list"""
         name = name.upper()[:HIGHSCORE_NAME_LENGTH]
         name = ''.join(c for c in name if c in HIGHSCORE_ALLOWED_CHARS)
         name = name.ljust(HIGHSCORE_NAME_LENGTH, 'A')
@@ -117,8 +115,8 @@ class HighscoreInput:
             screen.blit(char_text, (x, y))
         
         hint_font = pygame.font.Font(None, 30)
-        hint1 = hint_font.render("Arrow keys: Change letters", True, "white")
-        hint2 = hint_font.render("Enter: Confirm", True, "white")
+        hint1 = hint_font.render("UP / DOWN Change letters", True, "white")
+        hint2 = hint_font.render("ENTER Confirm", True, "white")
         
         screen.blit(hint1, (SCREEN_WIDTH // 2 - hint1.get_width() // 2, 
                           SCREEN_HEIGHT * 2 // 3))
@@ -154,6 +152,6 @@ class HighscoreDisplay:
             screen.blit(name_text, (x_name, y))
             screen.blit(score_text, (x_score, y))
         
-        hint_text = self.font_entry.render("Press SPACE to continue", True, "white")
+        hint_text = self.font_entry.render("SPACE to go back", True, "white")
         screen.blit(hint_text, (SCREEN_WIDTH // 2 - hint_text.get_width() // 2, 
                              SCREEN_HEIGHT - 100))
