@@ -12,9 +12,7 @@ class AsteroidField:
         ],
         [
             pygame.Vector2(-1, 0),
-            lambda y: pygame.Vector2(
-                SCREEN_WIDTH + ASTEROID_MAX_RADIUS, y * SCREEN_HEIGHT
-            ),
+            lambda y: pygame.Vector2(SCREEN_WIDTH + ASTEROID_MAX_RADIUS, y * SCREEN_HEIGHT),
         ],
         [
             pygame.Vector2(0, 1),
@@ -22,9 +20,7 @@ class AsteroidField:
         ],
         [
             pygame.Vector2(0, -1),
-            lambda x: pygame.Vector2(
-                x * SCREEN_WIDTH, SCREEN_HEIGHT + ASTEROID_MAX_RADIUS
-            ),
+            lambda x: pygame.Vector2(x * SCREEN_WIDTH, SCREEN_HEIGHT + ASTEROID_MAX_RADIUS),
         ],
     ]
 
@@ -42,6 +38,7 @@ class AsteroidField:
 
         if self.spawn_timer >= self.spawn_interval:
             from modul.asteroid import Asteroid
+
             asteroid_count = len([obj for obj in Asteroid.containers[0]])
 
             if asteroid_count < self.asteroid_count:

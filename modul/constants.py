@@ -42,7 +42,7 @@ POWERUP_COLORS = {
     "rapid_fire": "yellow",
     "laser_weapon": "green",
     "missile_weapon": "red",
-    "shotgun_weapon": "orange"
+    "shotgun_weapon": "orange",
 }
 RAPID_FIRE_COOLDOWN = 0.1
 RAPID_FIRE_DURATION = 8.0
@@ -94,7 +94,6 @@ CREDITS_SPECIAL_THANKS = [
 CREDITS_SCROLL_SPEED = 50
 CREDITS_LINE_SPACING = 40
 CREDITS_WEBSITE = "https://ajimaru.github.io"
-#GAME_VERSION = "beta 0.17.6 - 2025-07-18"
 
 POINTS_PER_LEVEL = 2500
 MAX_LEVEL = 666
@@ -109,12 +108,7 @@ WEAPON_LASER = "laser"
 WEAPON_MISSILE = "missile"
 WEAPON_SHOTGUN = "shotgun"
 
-WEAPON_COLORS = {
-    WEAPON_STANDARD: "white",
-    WEAPON_LASER: "green",
-    WEAPON_MISSILE: "red",
-    WEAPON_SHOTGUN: "orange"
-}
+WEAPON_COLORS = {WEAPON_STANDARD: "white", WEAPON_LASER: "green", WEAPON_MISSILE: "red", WEAPON_SHOTGUN: "orange"}
 
 LASER_AMMO = 15
 MISSILE_AMMO = 8
@@ -132,13 +126,10 @@ BOSS_SCORE = 500
 
 BOSS_PROJECTILE_RADIUS = 8
 BOSS_PROJECTILE_SPEED = 200
-BOSS_PROJECTILE_COLORS = {
-    "normal": (200, 0, 200),
-    "homing": (255, 0, 0),
-    "explosive": (255, 128, 0)
-}
+BOSS_PROJECTILE_COLORS = {"normal": (200, 0, 200), "homing": (255, 0, 0), "explosive": (255, 128, 0)}
 
 import random
+
 
 def generate_default_highscores():
     allowed_chars = HIGHSCORE_ALLOWED_CHARS
@@ -147,10 +138,11 @@ def generate_default_highscores():
 
     highscores = []
     for i in range(max_entries):
-        name = ''.join(random.choice(allowed_chars) for _ in range(name_length))
-        score = (max_entries - i) * 1000 
+        name = "".join(random.choice(allowed_chars) for _ in range(name_length))
+        score = (max_entries - i) * 1000
         highscores.append({"name": name, "score": score})
 
     return highscores
+
 
 DEFAULT_HIGHSCORES = generate_default_highscores()

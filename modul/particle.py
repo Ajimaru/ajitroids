@@ -2,6 +2,7 @@ import pygame
 import random
 from modul.constants import *
 
+
 class Particle(pygame.sprite.Sprite):
     def __init__(self, x, y, color):
         if hasattr(self, "containers"):

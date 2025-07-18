@@ -9,19 +9,19 @@ from modul.player import Player
 import modul.particle as Particle
 from modul.groups import collidable, drawable, updatable
 
+
 class Asteroid(CircleShape):
     def __init__(self, x, y, radius):
         super().__init__(x, y, radius)
         self.vertices = self._generate_vertices()
         self.rotation_speed = 0
         self.rotation = 0
-        
+
     def _generate_vertices(self):
         vertices = []
         for i in range(ASTEROID_VERTICES):
             angle = (i / ASTEROID_VERTICES) * 2 * math.pi
-            distance = self.radius * (1 - ASTEROID_IRREGULARITY + 
-                                   random.random() * ASTEROID_IRREGULARITY * 2)
+            distance = self.radius * (1 - ASTEROID_IRREGULARITY + random.random() * ASTEROID_IRREGULARITY * 2)
             x = math.cos(angle) * distance
             y = math.sin(angle) * distance
             vertices.append((x, y))
@@ -29,64 +29,61 @@ class Asteroid(CircleShape):
 
     def point_in_polygon(self, point):
         px, py = point
-        vertices = [(self.position.x + vx, self.position.y + vy) 
-                    for vx, vy in self.vertices]
-        
+        vertices = [(self.position.x + vx, self.position.y + vy) for vx, vy in self.vertices]
+
         crosses = 0
         for i in range(len(vertices)):
             j = (i + 1) % len(vertices)
-            
+
             xi, yi = vertices[i]
             xj, yj = vertices[j]
-            
-            if ((yi > py) != (yj > py) and
-                px < xi + (xj - xi) * (py - yi) / (yj - yi)):
+
+            if (yi > py) != (yj > py) and px < xi + (xj - xi) * (py - yi) / (yj - yi):
                 crosses += 1
-        
+
         return crosses % 2 == 1
 
     def collides_with(self, other):
         if (self.position - other.position).length() > (self.radius + other.radius):
             return False
-        
+
         if isinstance(other, Shot):
             shot_pos = other.position
             shot_radius = other.radius
-            
-            points = [(self.position.x + vx, self.position.y + vy) 
-                     for vx, vy in self.vertices]
-            
+
+            points = [(self.position.x + vx, self.position.y + vy) for vx, vy in self.vertices]
+
             for i in range(len(points)):
                 j = (i + 1) % len(points)
-                
+
                 p1 = pygame.Vector2(points[i])
                 p2 = pygame.Vector2(points[j])
-                
+
                 line_vec = p2 - p1
                 line_len = line_vec.length()
                 if line_len == 0:
                     continue
-                
+
                 line_vec_normalized = line_vec / line_len
-                
+
                 point_vec = shot_pos - p1
-                
+
                 projection = point_vec.dot(line_vec_normalized)
-                
+
                 projection = max(0, min(line_len, projection))
-                
+
                 closest_point = p1 + line_vec_normalized * projection
-                
+
                 if (closest_point - shot_pos).length() <= shot_radius:
                     return True
-        
+
         return super().collides_with(other)
 
     def draw(self, screen):
         rotated_vertices = [
             (
                 math.cos(self.rotation) * x - math.sin(self.rotation) * y,
-                math.sin(self.rotation) * x + math.cos(self.rotation) * y
+                math.sin(self.rotation) * x + math.cos(self.rotation) * y,
             )
             for x, y in self.vertices
         ]
@@ -140,6 +137,7 @@ class Asteroid(CircleShape):
         self.position += self.velocity * dt
         self.rotation += self.rotation_speed * dt
 
+
 class EnemyShip(CircleShape):
     def __init__(self, x, y, radius):
         super().__init__(x, y, radius)
@@ -184,6 +182,7 @@ class EnemyShip(CircleShape):
 
     def split(self):
         from modul.particle import Particle
+
         Particle.create_ship_explosion(self.position.x, self.position.y)
         self.kill()
 
@@ -193,13 +192,13 @@ class EnemyShip(CircleShape):
             (-self.radius * 0.8, self.radius * 0.5),
             (-self.radius * 0.4, self.radius * 0.8),
             (self.radius * 0.4, self.radius * 0.8),
-            (self.radius * 0.8, self.radius * 0.5)
+            (self.radius * 0.8, self.radius * 0.5),
         ]
 
         rotated_points = [
             (
                 math.cos(self.rotation) * x - math.sin(self.rotation) * y,
-                math.sin(self.rotation) * x + math.cos(self.rotation) * y
+                math.sin(self.rotation) * x + math.cos(self.rotation) * y,
             )
             for x, y in points
         ]
@@ -210,6 +209,7 @@ class EnemyShip(CircleShape):
     def kill(self):
         super().kill()
         from modul.particle import Particle
+
         Particle.create_ship_explosion(self.position.x, self.position.y)
         if self in collidable:
             collidable.remove(self)

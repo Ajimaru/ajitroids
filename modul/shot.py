@@ -7,7 +7,7 @@ from modul.circleshape import CircleShape
 class Shot(CircleShape):
     asteroids_group = None
     enemy_ships_group = None
-    
+
     @classmethod
     def set_asteroids(cls, asteroids):
         cls.asteroids_group = asteroids
@@ -15,7 +15,7 @@ class Shot(CircleShape):
     @classmethod
     def set_enemy_ships(cls, enemy_ships):
         cls.enemy_ships_group = enemy_ships
-    
+
     def __init__(self, x, y, shot_type=WEAPON_STANDARD):
         pygame.sprite.Sprite.__init__(self, self.containers)
         self.position = pygame.Vector2(x, y)
@@ -61,27 +61,25 @@ class Shot(CircleShape):
     def draw(self, screen):
         if self.shot_type == WEAPON_LASER:
             end_pos = self.position + self.velocity.normalize() * 20
-            pygame.draw.line(screen, self.color,
-                            (int(self.position.x), int(self.position.y)),
-                            (int(end_pos.x), int(end_pos.y)), 3)
+            pygame.draw.line(
+                screen, self.color, (int(self.position.x), int(self.position.y)), (int(end_pos.x), int(end_pos.y)), 3
+            )
         elif self.shot_type == WEAPON_MISSILE:
-            pygame.draw.circle(screen, self.color,
-                              (int(self.position.x), int(self.position.y)), self.radius)
+            pygame.draw.circle(screen, self.color, (int(self.position.x), int(self.position.y)), self.radius)
 
             tail_end = self.position - self.velocity.normalize() * 8
-            pygame.draw.line(screen, (255, 128, 0),
-                            (int(self.position.x), int(self.position.y)),
-                            (int(tail_end.x), int(tail_end.y)), 2)
+            pygame.draw.line(
+                screen, (255, 128, 0), (int(self.position.x), int(self.position.y)), (int(tail_end.x), int(tail_end.y)), 2
+            )
         else:
-            pygame.draw.circle(screen, self.color,
-                              (int(self.position.x), int(self.position.y)), self.radius)
+            pygame.draw.circle(screen, self.color, (int(self.position.x), int(self.position.y)), self.radius)
 
     def seek_target(self, dt):
         if not Shot.asteroids_group and not Shot.enemy_ships_group:
             return
 
         if not self.target or not self.target.alive():
-            closest_dist = float('inf')
+            closest_dist = float("inf")
             self.target = None
 
             for group in [Shot.asteroids_group, Shot.enemy_ships_group]:

@@ -1,5 +1,6 @@
 import json
 
+
 class Achievement:
     def __init__(self, name, description):
         self.name = name
@@ -9,13 +10,15 @@ class Achievement:
     def unlock(self):
         self.unlocked = True
 
+
 class AchievementSystem:
-    def __init__(self, achievements_file='achievements.json'):
+    def __init__(self, achievements_file="achievements.json"):
         self.achievements_file = achievements_file
         self.achievements = []
         self.notification_callback = None
         self.initialize_standard_achievements()
         self.load_unlocked_achievements()
+
     def set_notification_callback(self, callback):
         self.notification_callback = callback
 
@@ -31,7 +34,7 @@ class AchievementSystem:
             ("Shield Expert", "Use shield 50 times."),
             ("Speed Demon", "Use speed boost 25 times."),
             ("Triple Threat", "Use triple shot 20 times."),
-            ("Fleet Commander", "Unlock all four spaceships.")
+            ("Fleet Commander", "Unlock all four spaceships."),
         ]
         for name, description in standard_achievements:
             achievement = Achievement(name, description)
@@ -40,15 +43,17 @@ class AchievementSystem:
 
     def load_unlocked_achievements(self):
         try:
-            with open(self.achievements_file, 'r') as file:
+            with open(self.achievements_file, "r") as file:
                 data = json.load(file)
                 for item in data:
-                    if item.get('unlocked', False):
+                    if item.get("unlocked", False):
                         for achievement in self.achievements:
-                            if achievement.name == item['name']:
+                            if achievement.name == item["name"]:
                                 achievement.unlocked = True
                                 break
-                print(f"Unlocked achievements loaded: {len([a for a in self.achievements if a.unlocked])} of {len(self.achievements)}")
+                print(
+                    f"Unlocked achievements loaded: {len([a for a in self.achievements if a.unlocked])} of {len(self.achievements)}"
+                )
         except FileNotFoundError:
             print("Achievements file not found - all achievements are locked")
         except json.JSONDecodeError as e:
@@ -56,14 +61,12 @@ class AchievementSystem:
 
     def save_unlocked_achievements(self):
         unlocked_achievements = [
-            {
-                'name': achievement.name,
-                'description': achievement.description,
-                'unlocked': True
-            } for achievement in self.achievements if achievement.unlocked
+            {"name": achievement.name, "description": achievement.description, "unlocked": True}
+            for achievement in self.achievements
+            if achievement.unlocked
         ]
         if unlocked_achievements:
-            with open(self.achievements_file, 'w') as file:
+            with open(self.achievements_file, "w") as file:
                 json.dump(unlocked_achievements, file, indent=4)
             print(f"Unlocked achievements saved: {len(unlocked_achievements)} entries")
         else:
