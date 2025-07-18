@@ -71,6 +71,16 @@ python main.py
 - **Boss Enemies:** Powerful boss enemies appear after certain levels
 - **Highscores:** Save your best performances and compare them with others
 
+## 🚀 Spaceships
+
+Ajitroids features unlockable spaceships with unique abilities:
+
+- **Speedster**: A fast and agile ship, perfect for dodging asteroids.
+- **Tank**: A heavily armored ship that can withstand more damage.
+- **Destroyer**: A powerful ship equipped with advanced weaponry.
+
+Unlock these ships by progressing through the game and achieving milestones!
+
 ### 🛠️ Technical Details
 
 - Developed with Pygame
