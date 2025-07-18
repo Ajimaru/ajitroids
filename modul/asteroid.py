@@ -5,6 +5,9 @@ from modul.circleshape import CircleShape
 from modul.constants import *
 from modul.shot import Shot
 from modul.powerup import PowerUp
+from modul.player import Player
+import modul.particle as Particle
+from modul.groups import collidable, drawable, updatable
 
 class Asteroid(CircleShape):
     def __init__(self, x, y, radius):
@@ -136,3 +139,78 @@ class Asteroid(CircleShape):
     def update(self, dt):
         self.position += self.velocity * dt
         self.rotation += self.rotation_speed * dt  # Rotation der Asteroiden
+
+class EnemyShip(CircleShape):
+    def __init__(self, x, y, radius):
+        super().__init__(x, y, radius)
+        self.rotation_speed = random.uniform(-0.1, 0.1)
+        self.rotation = 0
+        self.velocity = pygame.Vector2(random.uniform(-50, 50), random.uniform(-50, 50))
+
+    def update(self, dt):
+        self.position += self.velocity * dt
+        self.rotation += self.rotation_speed * dt
+
+        # Bildschirmgrenzen überprüfen und Wrap-around anwenden
+        if self.position.x < 0:
+            self.position.x = SCREEN_WIDTH
+        elif self.position.x > SCREEN_WIDTH:
+            self.position.x = 0
+
+        if self.position.y < 0:
+            self.position.y = SCREEN_HEIGHT
+        elif self.position.y > SCREEN_HEIGHT:
+            self.position.y = 0
+
+    def collides_with(self, other):
+        distance = (self.position - other.position).length()
+        return distance < (self.radius + other.radius)
+
+    def split(self):
+        from modul.particle import Particle
+        Particle.create_ship_explosion(self.position.x, self.position.y)
+        self.kill()
+
+    def draw(self, screen):
+        points = [
+            (0, -self.radius),
+            (-self.radius, self.radius),
+            (self.radius, self.radius)
+        ]
+
+        rotated_points = [
+            (
+                math.cos(self.rotation) * x - math.sin(self.rotation) * y,
+                math.sin(self.rotation) * x + math.cos(self.rotation) * y
+            )
+            for x, y in points
+        ]
+
+        points = [(self.position.x + x, self.position.y + y) for x, y in rotated_points]
+        pygame.draw.polygon(screen, "red", points, 2)
+
+    def update(self, dt):
+        self.position += self.velocity * dt
+        self.rotation += self.rotation_speed * dt
+
+        # Bildschirmgrenzen überprüfen und Wrap-around anwenden
+        if self.position.x < 0:
+            self.position.x = SCREEN_WIDTH
+        elif self.position.x > SCREEN_WIDTH:
+            self.position.x = 0
+
+        if self.position.y < 0:
+            self.position.y = SCREEN_HEIGHT
+        elif self.position.y > SCREEN_HEIGHT:
+            self.position.y = 0
+
+    def kill(self):
+        super().kill()
+        from modul.particle import Particle
+        Particle.create_ship_explosion(self.position.x, self.position.y)
+        if self in collidable:
+            collidable.remove(self)
+        if self in drawable:
+            drawable.remove(self)
+        if self in updatable:
+            updatable.remove(self)

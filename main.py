@@ -4,7 +4,7 @@ import math
 import random
 from modul.constants import *
 from modul.player import Player
-from modul.asteroid import Asteroid
+from modul.asteroid import Asteroid, EnemyShip
 from modul.asteroidfield import AsteroidField
 from modul.shot import Shot
 from modul.particle import Particle
@@ -20,7 +20,7 @@ from modul.boss import Boss
 from modul.bossprojectile import BossProjectile
 from modul.achievements import AchievementSystem
 from modul.achievement_notification import AchievementNotificationManager
-
+from modul.groups import collidable, drawable, updatable
 
 def main():
     
@@ -332,7 +332,12 @@ def main():
                 
                 for _ in range(3):
                     asteroid_field.spawn_random()
-                    
+
+                # Spawn EnemyShip
+                enemy_ship = EnemyShip(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 30)
+                updatable.add(enemy_ship)
+                drawable.add(enemy_ship)
+                collidable.add(enemy_ship)
             elif action == "difficulty_select":
                 game_state = "difficulty_select"
                 difficulty_menu.activate()
@@ -515,6 +520,35 @@ def main():
                         asteroid.split()
                         shot.kill()
                         break
+
+            # EnemyShip collision detection
+            for obj in list(collidable):
+                if isinstance(obj, EnemyShip):
+                    # EnemyShip vs Player collision
+                    if obj.collides_with(player) and not player.invincible and not player.shield_active:
+                        lives -= 1
+                        sounds.play_player_hit()
+                        Particle.create_ship_explosion(player.position.x, player.position.y)
+                        obj.split()
+                        
+                        if lives <= 0:
+                            print(f"Game Over! Final Score: {score}")
+                            sounds.play_game_over()
+                            game_over_screen.set_score(score)
+                            game_over_screen.fade_in = True
+                            game_over_screen.background_alpha = 0
+                            game_state = "game_over"
+                        else:
+                            player.respawn()
+                    
+                    # EnemyShip vs Shot collision
+                    for shot in shots:
+                        if obj.collides_with(shot):
+                            sounds.play_explosion()
+                            score += SCORE_MEDIUM  # EnemyShip gives medium score
+                            obj.split()
+                            shot.kill()
+                            break
 
             for obj in updatable:
                 if not hasattr(obj, 'position'):
