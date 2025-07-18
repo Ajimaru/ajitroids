@@ -23,7 +23,11 @@ from modul.achievements import AchievementSystem
 from modul.achievement_notification import AchievementNotificationManager
 from modul.groups import collidable, drawable, updatable
 
-game_settings = None
+class GameSettings:
+    def __init__(self):
+        self.fullscreen = False
+
+game_settings = GameSettings()
 
 def main():
     
@@ -872,7 +876,7 @@ def debug_music_status():
     print(f"   - Settings Music: {game_settings.music_on}")
 
 def toggle_fullscreen():
-    global screen, game_settings
+    global screen
     game_settings.fullscreen = not game_settings.fullscreen
     if game_settings.fullscreen:
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
