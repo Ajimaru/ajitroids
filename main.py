@@ -4,6 +4,7 @@ import math
 import random
 import time
 from modul.constants import *
+from modul._version import __version__
 from modul.player import Player
 from modul.asteroid import Asteroid, EnemyShip
 from modul.asteroidfield import AsteroidField
@@ -58,7 +59,7 @@ def main():
     except Exception as e:
         print(f"Error during mixer initialization: {e}")
     
-    pygame.display.set_caption("Ajitroids")
+    pygame.display.set_caption(f"Ajitroids v{__version__}")
 
     clock = pygame.time.Clock()
 
@@ -232,7 +233,7 @@ def main():
             main_menu.draw(screen)
             
             version_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE / 1.5))
-            version_text = version_font.render(GAME_VERSION, True, pygame.Color(MENU_UNSELECTED_COLOR))
+            version_text = version_font.render(__version__, True, pygame.Color(MENU_UNSELECTED_COLOR))
             version_rect = version_text.get_rect(bottomright=(SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20))
             screen.blit(version_text, version_rect)
             

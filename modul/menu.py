@@ -1,5 +1,6 @@
 import pygame
 from modul.constants import *
+from modul._version import __version__
 from modul.ships import ship_manager, ShipRenderer
 import math
 sounds = None
@@ -170,7 +171,7 @@ class MainMenu(Menu):
         super().draw(screen)
         
         version_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE / 1.5))
-        version_text = version_font.render(GAME_VERSION, True, pygame.Color(MENU_UNSELECTED_COLOR))
+        version_text = version_font.render(__version__, True, pygame.Color(MENU_UNSELECTED_COLOR))
         version_rect = version_text.get_rect(bottomright=(SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20))
         screen.blit(version_text, version_rect)
 
