@@ -2,6 +2,7 @@ import sys
 import pygame
 import math
 import random
+import time
 from modul.constants import *
 from modul.player import Player
 from modul.asteroid import Asteroid, EnemyShip
@@ -158,6 +159,12 @@ def main():
     toggle_message = None
     toggle_message_timer = 0
 
+    # EnemyShip Spawn Logik
+    last_spawn_time = time.time()
+    spawn_interval = random.uniform(10, 30)  # Zufällige Zeitintervalle zwischen 5 und 15 Sekunden
+    max_enemy_ships = {"easy": 1, "normal": 2, "hard": 3}
+    current_enemy_ships = []
+
     while True:
         events = pygame.event.get()
         for event in events:
@@ -306,6 +313,11 @@ def main():
                 lives = PLAYER_LIVES
                 level = 1
                 
+                # Reset EnemyShip spawn system
+                last_spawn_time = time.time()
+                spawn_interval = random.uniform(10, 30)
+                current_enemy_ships = []
+                
                 for asteroid in list(asteroids):
                     asteroid.kill()
                 for powerup in list(powerups):
@@ -314,6 +326,11 @@ def main():
                     shot.kill()
                 for particle in list(particles):
                     particle.kill()
+                
+                # Entferne alle EnemyShips
+                for obj in list(collidable):
+                    if isinstance(obj, EnemyShip):
+                        obj.kill()
                 
                 if player in updatable:
                     player.kill()
@@ -333,11 +350,6 @@ def main():
                 for _ in range(3):
                     asteroid_field.spawn_random()
 
-                # Spawn EnemyShip
-                enemy_ship = EnemyShip(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 30)
-                updatable.add(enemy_ship)
-                drawable.add(enemy_ship)
-                collidable.add(enemy_ship)
             elif action == "difficulty_select":
                 game_state = "difficulty_select"
                 difficulty_menu.activate()
@@ -369,6 +381,12 @@ def main():
                 game_state = "playing"
                 score = 0
                 lives = PLAYER_LIVES
+                
+                # Reset EnemyShip spawn system
+                last_spawn_time = time.time()
+                spawn_interval = random.uniform(10, 30)
+                current_enemy_ships = []
+                
                 for asteroid in asteroids:
                     asteroid.kill()
                 for powerup in powerups:
@@ -377,6 +395,12 @@ def main():
                     shot.kill()
                 for particle in particles:
                     particle.kill()
+                
+                # Entferne alle EnemyShips
+                for obj in list(collidable):
+                    if isinstance(obj, EnemyShip):
+                        obj.kill()
+                
                 player.position.x = RESPAWN_POSITION_X
                 player.position.y = RESPAWN_POSITION_Y
                 player.velocity = pygame.Vector2(0, 0)
@@ -440,6 +464,21 @@ def main():
             starfield.draw(screen)
             
             asteroid_field.update(dt)
+            
+            # EnemyShip Spawn Logik
+            if time.time() - last_spawn_time > spawn_interval:
+                if len(current_enemy_ships) < max_enemy_ships[difficulty]:
+                    enemy_ship = EnemyShip(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 30)
+                    updatable.add(enemy_ship)
+                    drawable.add(enemy_ship)
+                    collidable.add(enemy_ship)
+                    current_enemy_ships.append(enemy_ship)
+                    last_spawn_time = time.time()
+                    spawn_interval = random.uniform(10, 30)  # Neues zufälliges Intervall zwischen 10-30 Sekunden
+                    print(f"EnemyShip spawned! Current count: {len(current_enemy_ships)}, Max: {max_enemy_ships[difficulty]}")
+
+            # Entferne zerstörte EnemyShips aus der Liste
+            current_enemy_ships = [ship for ship in current_enemy_ships if ship in updatable]
             
             updatable.update(dt)
 
@@ -530,6 +569,9 @@ def main():
                         sounds.play_player_hit()
                         Particle.create_ship_explosion(player.position.x, player.position.y)
                         obj.split()
+                        # Entferne das zerstörte EnemyShip aus der Liste
+                        if obj in current_enemy_ships:
+                            current_enemy_ships.remove(obj)
                         
                         if lives <= 0:
                             print(f"Game Over! Final Score: {score}")
@@ -548,6 +590,10 @@ def main():
                             score += SCORE_MEDIUM  # EnemyShip gives medium score
                             obj.split()
                             shot.kill()
+                            # Entferne das zerstörte EnemyShip aus der Liste
+                            if obj in current_enemy_ships:
+                                current_enemy_ships.remove(obj)
+                            print(f"EnemyShip destroyed! Remaining count: {len(current_enemy_ships)}")
                             break
 
             for obj in updatable:
