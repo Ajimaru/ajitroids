@@ -798,74 +798,74 @@ class AchievementsMenu(Menu):
         
         self.achievement_graphics = {
             "First Blood": [
-                " ▄▄▄ ",
-                "█░█░█",
-                "░█▄█░",
-                "█░█░█",
-                " ▀▀▀ "
+                " *** ",
+                "*.*.*",
+                ".***.",
+                "*.*.*",
+                " *** "
             ],
             "Survivor": [
-                " ▄▄▄ ",
-                "█░░░█",
-                "█░█░█",
-                "█░░░█",
-                " ▀▀▀ "
+                " *** ",
+                "*...*",
+                "*.*.*",
+                "*...*",
+                " *** "
             ],
             "Asteroid Hunter": [
-                " ▄██▄ ",
-                "█░▄▄░█",
-                "█▄██▄█",
-                "█░▀▀░█",
-                " ▀██▀ "
+                " *##* ",
+                "*.**.*",
+                "*####*",
+                "*.**.*",
+                " *##* "
             ],
             "Power User": [
-                " ▄█▄ ",
-                "█░█░█",
-                "█▄█▄█",
-                "█░█░█",
-                " ▀█▀ "
+                " *#* ",
+                "*.*.*",
+                "*###*",
+                "*.*.*",
+                " *#* "
             ],
             "Boss Slayer": [
-                " ▄▄▄▄ ",
-                "█░██░█",
-                "█░▀▀░█",
-                "█░▄▄░█",
-                " ▀▀▀ "
+                " **** ",
+                "*.##.*",
+                "*.--.*",
+                "*.**.*",
+                " *** "
             ],
             "Level Master": [
-                " ▄▄▄ ",
-                "█▀▀▀█",
-                "█░█░█",
-                "█▄▄▄█",
-                " ▀▀▀ "
+                " *** ",
+                "*---*",
+                "*.*.*",
+                "*---*",
+                " *** "
             ],
             "High Scorer": [
-                " ▄▄▄ ",
-                "█░█░█",
-                "█▄█▄█",
-                "█░█░█",
-                " ▀▀▀ "
+                " *** ",
+                "*.*.*",
+                "*#*#*",
+                "*.*.*",
+                " *** "
             ],
             "Shield Expert": [
-                " ▄▄▄ ",
-                "█░░░█",
-                "█░▄░█",
-                "█░▀░█",
-                " ▀▀▀ "
+                " *** ",
+                "*...*",
+                "*.*.*",
+                "*.^.*",
+                " *** "
             ],
             "Speed Demon": [
-                " ▄▄▄ ",
-                "█▄▄▄█",
-                "█▀▀▀█",
-                "█▄▄▄█",
-                " ▀▀▀ "
+                " *** ",
+                "*---*",
+                "*===*",
+                "*---*",
+                " *** "
             ],
             "Triple Threat": [
-                " ▄ ▄ ",
-                "█ █ █",
-                "█ █ █",
-                "█ █ █",
-                " ▀ ▀ "
+                " * * ",
+                "* * *",
+                "* * *",
+                "* * *",
+                " * * "
             ]
         }
 
@@ -879,65 +879,72 @@ class AchievementsMenu(Menu):
         screen.blit(title_surf, title_rect)
 
         start_y = SCREEN_HEIGHT / 5
-        achievement_spacing = 45
-        graphics_font = pygame.font.Font(None, 20)
+        achievement_spacing = 70
+        graphics_font = pygame.font.Font(None, 18)
         name_font = pygame.font.Font(None, 28)
         
+        achievements_per_column = 5
+        column_width = SCREEN_WIDTH / 2
+        left_column_x = column_width / 2
+        right_column_x = column_width + column_width / 2
+        
         for i, achievement in enumerate(self.achievement_system.achievements):
-            current_y = start_y + i * achievement_spacing
+            if i >= 10:
+                break
+                
+            column = i // achievements_per_column
+            row = i % achievements_per_column
             
-            is_unlocked = achievement.unlocked
-            
-            if is_unlocked:
-                name_color = pygame.Color("gold")
-                graphic_color = pygame.Color("yellow")
-                status_color = pygame.Color("lightgreen")
+            if column == 0:
+                center_x = left_column_x
             else:
-                name_color = pygame.Color("darkgray")
-                graphic_color = pygame.Color("darkred")
-                status_color = pygame.Color("gray")
-            
+                center_x = right_column_x
+                
+            current_y = start_y + row * achievement_spacing
+            is_unlocked = achievement.unlocked
+ 
+            if is_unlocked:
+                name_color = pygame.Color("green")
+                graphic_color = pygame.Color("lightgreen")
+            else:
+                name_color = pygame.Color("gray")
+
             if is_unlocked and achievement.name in self.achievement_graphics:
                 graphics = self.achievement_graphics[achievement.name]
-                graphic_x = 80  
+                
+                ascii_start_x = center_x - 120
                 
                 for line_idx, line in enumerate(graphics):
                     graphic_surf = graphics_font.render(line, True, graphic_color)
-                    graphic_rect = graphic_surf.get_rect(topleft=(graphic_x, current_y - 8 + line_idx * 8))
+                    graphic_rect = graphic_surf.get_rect(topleft=(ascii_start_x, current_y - 8 + line_idx * 10))
                     screen.blit(graphic_surf, graphic_rect)
+                
+                name_x = center_x - 20
+            else:
+                name_surf_temp = name_font.render(achievement.name, True, name_color)
+                name_x = center_x - name_surf_temp.get_width() / 2
             
             name_surf = name_font.render(achievement.name, True, name_color)
-            name_rect = name_surf.get_rect(topleft=(200, current_y + 5))
+            name_rect = name_surf.get_rect(topleft=(name_x, current_y))
             screen.blit(name_surf, name_rect)
-            
-            if is_unlocked:
-                status_surf = name_font.render("✓", True, status_color)
-            else:
-                status_surf = name_font.render("🔒", True, status_color)
-            status_rect = status_surf.get_rect(topleft=(520, current_y + 5))
-            screen.blit(status_surf, status_rect)
 
-        back_button_y = SCREEN_HEIGHT - 100
+        back_button_y = SCREEN_HEIGHT - 80
         for i, item in enumerate(self.items):
             item_rect = item.draw(screen, (SCREEN_WIDTH / 2, back_button_y + i * MENU_ITEM_SPACING), self.item_font)
 
-        instruction_font = pygame.font.Font(None, 24)
-        instruction_surf = instruction_font.render("", True, pygame.Color(MENU_UNSELECTED_COLOR))
-        instruction_rect = instruction_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 40))
-        screen.blit(instruction_surf, instruction_rect)
-        
         unlocked_count = sum(1 for achievement in self.achievement_system.achievements if achievement.unlocked)
         total_count = len(self.achievement_system.achievements)
         progress_text = f"Progress: {unlocked_count}/{total_count} Achievements unlocked"
-        progress_surf = instruction_font.render(progress_text, True, pygame.Color("lightblue"))
-        progress_rect = progress_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 12 + 40))
+        progress_font = pygame.font.Font(None, 20)
+        progress_surf = progress_font.render(progress_text, True, pygame.Color("lightblue"))
+        progress_rect = progress_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 12 + 35))
         screen.blit(progress_surf, progress_rect)
 
     def update(self, dt, events):
         result = super().update(dt, events)
         if result:
             return result
-
+        
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE or event.key == pygame.K_SPACE:
