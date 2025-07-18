@@ -25,7 +25,8 @@ class Player(CircleShape):
         self.original_cooldown = PLAYER_SHOOT_COOLDOWN
         self.current_weapon = WEAPON_STANDARD
         self.weapon_switch_timer = 0
-        self.weapons = {WEAPON_STANDARD: -1, WEAPON_LASER: 0, WEAPON_MISSILE: 0, WEAPON_SHOTGUN: 0}
+        self.weapons = {WEAPON_STANDARD: -1, WEAPON_LASER: 0,
+                        WEAPON_MISSILE: 0, WEAPON_SHOTGUN: 0}
 
         self.ship_type = ship_type
         self.ship_data = ship_manager.get_ship_data(ship_type)
@@ -33,7 +34,8 @@ class Player(CircleShape):
 
     def apply_ship_modifiers(self):
         self.base_speed = PLAYER_SPEED * self.ship_data["speed_multiplier"]
-        self.base_turn_speed = PLAYER_TURN_SPEED * self.ship_data["turn_speed_multiplier"]
+        self.base_turn_speed = PLAYER_TURN_SPEED * \
+            self.ship_data["turn_speed_multiplier"]
 
         special = self.ship_data["special_ability"]
         if special == "rear_shot":
@@ -61,19 +63,24 @@ class Player(CircleShape):
             else:
                 ship_color = self.ship_data.get("color", (255, 255, 255))
             ShipRenderer.draw_ship(
-                screen, self.position.x, self.position.y, self.rotation, self.ship_data["shape"], 1.0, ship_color
+                screen, self.position.x, self.position.y, self.rotation, self.ship_data[
+                    "shape"], 1.0, ship_color
             )
 
         if self.shield_active:
-            alpha = int(128 + 127 * abs(math.sin(pygame.time.get_ticks() * 0.005)))
+            alpha = int(
+                128 + 127 * abs(math.sin(pygame.time.get_ticks() * 0.005)))
             shield_color = POWERUP_COLORS["shield"]
-            shield_surf = pygame.Surface((self.radius * 3, self.radius * 3), pygame.SRCALPHA)
+            shield_surf = pygame.Surface(
+                (self.radius * 3, self.radius * 3), pygame.SRCALPHA)
 
             color_obj = pygame.Color(shield_color)
             rgba_color = (color_obj.r, color_obj.g, color_obj.b, alpha)
 
-            pygame.draw.circle(shield_surf, rgba_color, (self.radius * 1.5, self.radius * 1.5), self.radius * 1.4, 2)
-            screen.blit(shield_surf, (self.position.x - self.radius * 1.5, self.position.y - self.radius * 1.5))
+            pygame.draw.circle(shield_surf, rgba_color, (self.radius *
+                               1.5, self.radius * 1.5), self.radius * 1.4, 2)
+            screen.blit(shield_surf, (self.position.x - self.radius *
+                        1.5, self.position.y - self.radius * 1.5))
 
     def triangle(self):
         forward = pygame.Vector2(0, -1).rotate(self.rotation)
@@ -155,48 +162,58 @@ class Player(CircleShape):
 
                 if not found_alternative:
                     self.current_weapon = WEAPON_STANDARD
-                    print("Auto-switched to standard weapon (no special weapons with ammo)")
+                    print(
+                        "Auto-switched to standard weapon (no special weapons with ammo)")
 
             if self.current_weapon == WEAPON_STANDARD:
                 if self.triple_shot_active:
                     self.fire_triple_shot()
                 else:
                     shot = Shot(self.position.x, self.position.y)
-                    shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+                    shot.velocity = pygame.Vector2(
+                        0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
 
                     if hasattr(self, "has_rear_shot") and self.has_rear_shot:
                         rear_shot = Shot(self.position.x, self.position.y)
-                        rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 0.8
+                        rear_shot.velocity = pygame.Vector2(0, 1).rotate(
+                            self.rotation) * PLAYER_SHOOT_SPEED * 0.8
 
             elif self.current_weapon == WEAPON_LASER:
                 shot = Shot(self.position.x, self.position.y, WEAPON_LASER)
-                shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 1.5
+                shot.velocity = pygame.Vector2(
+                    0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 1.5
                 self.weapons[WEAPON_LASER] -= 1
 
                 if hasattr(self, "has_rear_shot") and self.has_rear_shot:
                     rear_shot = Shot(self.position.x, self.position.y)
-                    rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 0.8
+                    rear_shot.velocity = pygame.Vector2(0, 1).rotate(
+                        self.rotation) * PLAYER_SHOOT_SPEED * 0.8
 
             elif self.current_weapon == WEAPON_MISSILE:
                 shot = Shot(self.position.x, self.position.y, WEAPON_MISSILE)
-                shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 0.8
+                shot.velocity = pygame.Vector2(
+                    0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 0.8
                 self.weapons[WEAPON_MISSILE] -= 1
 
                 if hasattr(self, "has_rear_shot") and self.has_rear_shot:
                     rear_shot = Shot(self.position.x, self.position.y)
-                    rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 0.8
+                    rear_shot.velocity = pygame.Vector2(0, 1).rotate(
+                        self.rotation) * PLAYER_SHOOT_SPEED * 0.8
 
             elif self.current_weapon == WEAPON_SHOTGUN:
                 spread = 30
                 for i in range(5):
                     angle = self.rotation + (i - 2) * (spread / 4)
-                    shot = Shot(self.position.x, self.position.y, WEAPON_SHOTGUN)
-                    shot.velocity = pygame.Vector2(0, -1).rotate(angle) * PLAYER_SHOOT_SPEED
+                    shot = Shot(self.position.x,
+                                self.position.y, WEAPON_SHOTGUN)
+                    shot.velocity = pygame.Vector2(
+                        0, -1).rotate(angle) * PLAYER_SHOOT_SPEED
                 self.weapons[WEAPON_SHOTGUN] -= 1
 
                 if hasattr(self, "has_rear_shot") and self.has_rear_shot:
                     rear_shot = Shot(self.position.x, self.position.y)
-                    rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 0.8
+                    rear_shot.velocity = pygame.Vector2(0, 1).rotate(
+                        self.rotation) * PLAYER_SHOOT_SPEED * 0.8
 
             if hasattr(self, "sounds") and self.sounds:
                 self.sounds.play_shoot()
@@ -208,17 +225,21 @@ class Player(CircleShape):
 
     def fire_triple_shot(self):
         shot1 = Shot(self.position.x, self.position.y)
-        shot1.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+        shot1.velocity = pygame.Vector2(
+            0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
 
         shot2 = Shot(self.position.x, self.position.y)
-        shot2.velocity = pygame.Vector2(0, -1).rotate(self.rotation - 15) * PLAYER_SHOOT_SPEED
+        shot2.velocity = pygame.Vector2(
+            0, -1).rotate(self.rotation - 15) * PLAYER_SHOOT_SPEED
 
         shot3 = Shot(self.position.x, self.position.y)
-        shot3.velocity = pygame.Vector2(0, -1).rotate(self.rotation + 15) * PLAYER_SHOOT_SPEED
+        shot3.velocity = pygame.Vector2(
+            0, -1).rotate(self.rotation + 15) * PLAYER_SHOOT_SPEED
 
         if hasattr(self, "has_rear_shot") and self.has_rear_shot:
             rear_shot = Shot(self.position.x, self.position.y)
-            rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 0.8
+            rear_shot.velocity = pygame.Vector2(0, 1).rotate(
+                self.rotation) * PLAYER_SHOOT_SPEED * 0.8
 
     def make_invincible(self):
         self.invincible = True
@@ -258,17 +279,22 @@ class Player(CircleShape):
             self.rapid_fire_timer = RAPID_FIRE_DURATION
 
         elif powerup_type == "laser_weapon":
-            self.weapons[WEAPON_LASER] = min(self.weapons[WEAPON_LASER] + LASER_AMMO, LASER_AMMO)
+            self.weapons[WEAPON_LASER] = min(
+                self.weapons[WEAPON_LASER] + LASER_AMMO, LASER_AMMO)
             self.current_weapon = WEAPON_LASER
-            print(f"Laser weapon activated! Ammo: {self.weapons[WEAPON_LASER]}")
+            print(f"Laser weapon activated! Ammo: {
+                  self.weapons[WEAPON_LASER]}")
 
         elif powerup_type == "missile_weapon":
-            self.weapons[WEAPON_MISSILE] = min(self.weapons[WEAPON_MISSILE] + MISSILE_AMMO, MISSILE_AMMO)
+            self.weapons[WEAPON_MISSILE] = min(
+                self.weapons[WEAPON_MISSILE] + MISSILE_AMMO, MISSILE_AMMO)
             self.current_weapon = WEAPON_MISSILE
-            print(f"Missile weapon activated! Ammo: {self.weapons[WEAPON_MISSILE]}")
+            print(f"Missile weapon activated! Ammo: {
+                  self.weapons[WEAPON_MISSILE]}")
 
         elif powerup_type == "shotgun_weapon":
-            self.weapons[WEAPON_SHOTGUN] = min(self.weapons[WEAPON_SHOTGUN] + SHOTGUN_AMMO, SHOTGUN_AMMO)
+            self.weapons[WEAPON_SHOTGUN] = min(
+                self.weapons[WEAPON_SHOTGUN] + SHOTGUN_AMMO, SHOTGUN_AMMO)
             self.current_weapon = WEAPON_SHOTGUN
             print(f"Shotgun activated! Ammo: {self.weapons[WEAPON_SHOTGUN]}")
 
@@ -288,9 +314,11 @@ class Player(CircleShape):
             if next_weapon == WEAPON_STANDARD or self.weapons[next_weapon] > 0:
                 self.current_weapon = next_weapon
                 if next_weapon == WEAPON_STANDARD:
-                    print(f"Switched to standard weapon: {self.current_weapon}")
+                    print(f"Switched to standard weapon: {
+                          self.current_weapon}")
                 else:
-                    print(f"Weapon switched to: {self.current_weapon}, Ammo: {self.weapons[self.current_weapon]}")
+                    print(f"Weapon switched to: {self.current_weapon}, Ammo: {
+                          self.weapons[self.current_weapon]}")
                 return
 
         self.current_weapon = WEAPON_STANDARD
@@ -305,16 +333,19 @@ class Player(CircleShape):
         panel_width = 100
         panel_height = len(self.weapons) * 28 + 15
 
-        panel_surface = pygame.Surface((panel_width, panel_height), pygame.SRCALPHA)
+        panel_surface = pygame.Surface(
+            (panel_width, panel_height), pygame.SRCALPHA)
         panel_surface.fill((0, 0, 0, 120))
-        pygame.draw.rect(panel_surface, (60, 60, 60), (0, 0, panel_width, panel_height), 1)
+        pygame.draw.rect(panel_surface, (60, 60, 60),
+                         (0, 0, panel_width, panel_height), 1)
         screen.blit(panel_surface, (weapons_panel_x, weapons_panel_y))
 
         title_text = font_small.render("WEAPONS", True, (200, 200, 200))
         screen.blit(title_text, (weapons_panel_x + 5, weapons_panel_y + 5))
 
         y_offset = 35
-        max_ammo = {WEAPON_STANDARD: -1, WEAPON_LASER: LASER_AMMO, WEAPON_MISSILE: MISSILE_AMMO, WEAPON_SHOTGUN: SHOTGUN_AMMO}
+        max_ammo = {WEAPON_STANDARD: -1, WEAPON_LASER: LASER_AMMO,
+                    WEAPON_MISSILE: MISSILE_AMMO, WEAPON_SHOTGUN: SHOTGUN_AMMO}
 
         for weapon_type, ammo in self.weapons.items():
             weapon_y = weapons_panel_y + y_offset
@@ -325,7 +356,8 @@ class Player(CircleShape):
             if weapon_type == self.current_weapon:
                 icon_color = WEAPON_COLORS[weapon_type]
                 text_color = (255, 255, 255)
-                pygame.draw.rect(screen, (255, 255, 0), (weapons_panel_x + 3, weapon_y - 9, panel_width - 6, 20), 1)
+                pygame.draw.rect(
+                    screen, (255, 255, 0), (weapons_panel_x + 3, weapon_y - 9, panel_width - 6, 20), 1)
             elif weapon_type == WEAPON_STANDARD or ammo > 0:
                 icon_color = WEAPON_COLORS[weapon_type]
                 text_color = (200, 200, 200)
@@ -333,7 +365,8 @@ class Player(CircleShape):
                 icon_color = (80, 80, 80)
                 text_color = (100, 100, 100)
 
-            pygame.draw.circle(screen, icon_color, (weapon_icon_x, weapon_y), weapon_radius)
+            pygame.draw.circle(screen, icon_color,
+                               (weapon_icon_x, weapon_y), weapon_radius)
 
             weapon_name = weapon_type.replace("_", " ").title()
             if weapon_name == "Standard":
@@ -356,9 +389,11 @@ class Player(CircleShape):
 
             ammo_text = font_small.render(ammo_display, True, text_color)
             ammo_rect = ammo_text.get_rect()
-            screen.blit(ammo_text, (weapons_panel_x + panel_width - ammo_rect.width - 5, weapon_y - 5))
+            screen.blit(ammo_text, (weapons_panel_x +
+                        panel_width - ammo_rect.width - 5, weapon_y - 5))
 
             y_offset += 25
 
         hint_text = font_small.render("B to Switch", True, (120, 120, 120))
-        screen.blit(hint_text, (weapons_panel_x + 5, weapons_panel_y + panel_height + 3))
+        screen.blit(hint_text, (weapons_panel_x + 5,
+                    weapons_panel_y + panel_height + 3))

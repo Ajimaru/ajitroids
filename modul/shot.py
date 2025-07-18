@@ -62,17 +62,21 @@ class Shot(CircleShape):
         if self.shot_type == WEAPON_LASER:
             end_pos = self.position + self.velocity.normalize() * 20
             pygame.draw.line(
-                screen, self.color, (int(self.position.x), int(self.position.y)), (int(end_pos.x), int(end_pos.y)), 3
+                screen, self.color, (int(self.position.x), int(
+                    self.position.y)), (int(end_pos.x), int(end_pos.y)), 3
             )
         elif self.shot_type == WEAPON_MISSILE:
-            pygame.draw.circle(screen, self.color, (int(self.position.x), int(self.position.y)), self.radius)
+            pygame.draw.circle(screen, self.color, (int(
+                self.position.x), int(self.position.y)), self.radius)
 
             tail_end = self.position - self.velocity.normalize() * 8
             pygame.draw.line(
-                screen, (255, 128, 0), (int(self.position.x), int(self.position.y)), (int(tail_end.x), int(tail_end.y)), 2
+                screen, (255, 128, 0), (int(self.position.x), int(
+                    self.position.y)), (int(tail_end.x), int(tail_end.y)), 2
             )
         else:
-            pygame.draw.circle(screen, self.color, (int(self.position.x), int(self.position.y)), self.radius)
+            pygame.draw.circle(screen, self.color, (int(
+                self.position.x), int(self.position.y)), self.radius)
 
     def seek_target(self, dt):
         if not Shot.asteroids_group and not Shot.enemy_ships_group:

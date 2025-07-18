@@ -10,13 +10,15 @@ class Boss(CircleShape):
     def __init__(self, level):
         super().__init__(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, BOSS_RADIUS)
         self.boss_level = level // 10
-        self.max_health = BOSS_BASE_HEALTH + (self.boss_level - 1) * BOSS_HEALTH_PER_LEVEL
+        self.max_health = BOSS_BASE_HEALTH + \
+            (self.boss_level - 1) * BOSS_HEALTH_PER_LEVEL
         self.health = self.max_health
         self.color = BOSS_COLOR
         self.pulse_timer = 0
         self.rotation = 0
         self.velocity = pygame.Vector2(0, 0)
-        self.target_position = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+        self.target_position = pygame.Vector2(
+            SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
         self.movement_timer = 0
         self.movement_phase = "center"
         self.attack_timer = 0
@@ -34,7 +36,8 @@ class Boss(CircleShape):
                 return
             if not self.death_particles_emitted:
                 for _ in range(50):
-                    Particle.create_asteroid_explosion(self.position.x, self.position.y)
+                    Particle.create_asteroid_explosion(
+                        self.position.x, self.position.y)
                 self.death_particles_emitted = True
             return
         self.rotation += 20 * dt
@@ -64,7 +67,8 @@ class Boss(CircleShape):
             if self.movement_timer % 1.5 < dt:
                 margin = 100
                 self.target_position = pygame.Vector2(
-                    random.randint(margin, SCREEN_WIDTH - margin), random.randint(margin, SCREEN_HEIGHT - margin)
+                    random.randint(
+                        margin, SCREEN_WIDTH - margin), random.randint(margin, SCREEN_HEIGHT - margin)
                 )
             self._move_towards(self.target_position, BOSS_MOVE_SPEED * 0.7, dt)
         elif self.movement_phase == "chase" and player_position:
@@ -115,7 +119,8 @@ class Boss(CircleShape):
             angle = random.uniform(0, 2 * math.pi)
             speed = random.uniform(50, 150)
             velocity = pygame.Vector2(math.cos(angle), math.sin(angle)) * speed
-            Particle.create_asteroid_explosion(self.position.x, self.position.y)
+            Particle.create_asteroid_explosion(
+                self.position.x, self.position.y)
         if self.health <= 0 and self.death_timer < 0:
             self.death_timer = 0
             return True
@@ -131,10 +136,14 @@ class Boss(CircleShape):
     def _draw_boss_shape(self, screen, color):
         if self.death_timer >= 0:
             alpha = int(255 * (1 - self.death_timer / BOSS_DEATH_DURATION))
-            pulsating_radius = self.radius * (1 + 0.5 * math.sin(self.death_timer * 10))
-            temp_surface = pygame.Surface((pulsating_radius * 2, pulsating_radius * 2), pygame.SRCALPHA)
-            pygame.draw.circle(temp_surface, (*color, alpha), (pulsating_radius, pulsating_radius), pulsating_radius)
-            screen.blit(temp_surface, (self.position.x - pulsating_radius, self.position.y - pulsating_radius))
+            pulsating_radius = self.radius * \
+                (1 + 0.5 * math.sin(self.death_timer * 10))
+            temp_surface = pygame.Surface(
+                (pulsating_radius * 2, pulsating_radius * 2), pygame.SRCALPHA)
+            pygame.draw.circle(temp_surface, (*color, alpha),
+                               (pulsating_radius, pulsating_radius), pulsating_radius)
+            screen.blit(temp_surface, (self.position.x -
+                        pulsating_radius, self.position.y - pulsating_radius))
             return
         pulse = 1 + 0.1 * math.sin(self.pulse_timer * 3)
         main_radius = self.radius * pulse
@@ -170,4 +179,5 @@ class Boss(CircleShape):
             health_color = (255, 255, 0)
         else:
             health_color = (255, 0, 0)
-        pygame.draw.rect(screen, health_color, (x, y, current_width, bar_height))
+        pygame.draw.rect(screen, health_color,
+                         (x, y, current_width, bar_height))

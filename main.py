@@ -59,7 +59,8 @@ def main():
     shields_used = 0
     triple_shots_used = 0
     speed_boosts_used = 0
-    achievement_system.set_notification_callback(achievement_notifications.add_notification)
+    achievement_system.set_notification_callback(
+        achievement_notifications.add_notification)
     global boss_active, boss_defeated_timer, boss_defeated_message
 
     pygame.init()
@@ -77,7 +78,8 @@ def main():
     game_settings = Settings()
 
     if game_settings.fullscreen:
-        screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+        screen = pygame.display.set_mode(
+            (SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
         print("Fullscreen mode activated")
     else:
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -100,9 +102,11 @@ def main():
             print(f"❌ Error starting music: {e}")
             import os
 
-            print(f"Background.mp3 exists: {os.path.exists('assets/background.mp3')}")
+            print(f"Background.mp3 exists: {
+                  os.path.exists('assets/background.mp3')}")
             if os.path.exists("assets/background.mp3"):
-                print(f"Background.mp3 size: {os.path.getsize('assets/background.mp3')} bytes")
+                print(f"Background.mp3 size: {
+                      os.path.getsize('assets/background.mp3')} bytes")
     else:
         pygame.mixer.music.set_volume(1.0)
         pygame.mixer.music.stop()
@@ -174,7 +178,8 @@ def main():
         game_settings = Settings()
 
     print(
-        f"Initialized variables: player={player}, sounds={sounds}, PLAYER_INVINCIBLE_TIME={PLAYER_INVINCIBLE_TIME}, game_settings={game_settings}"
+        f"Initialized variables: player={player}, sounds={sounds}, PLAYER_INVINCIBLE_TIME={
+            PLAYER_INVINCIBLE_TIME}, game_settings={game_settings}"
     )
 
     toggle_message = None
@@ -198,7 +203,8 @@ def main():
                     game_settings.music_on = not game_settings.music_on
                     game_settings.save()
                     if game_settings.music_on:
-                        pygame.mixer.music.set_volume(game_settings.music_volume)
+                        pygame.mixer.music.set_volume(
+                            game_settings.music_volume)
                         pygame.mixer.music.play(-1)
                         toggle_message = "Music Enabled"
                     else:
@@ -216,8 +222,10 @@ def main():
 
         if toggle_message and toggle_message_timer > 0:
             font = pygame.font.Font(None, 36)
-            message_surface = font.render(toggle_message, True, (255, 255, 255))
-            message_rect = message_surface.get_rect(center=(SCREEN_WIDTH / 2, 50))
+            message_surface = font.render(
+                toggle_message, True, (255, 255, 255))
+            message_rect = message_surface.get_rect(
+                center=(SCREEN_WIDTH / 2, 50))
             screen.blit(message_surface, message_rect)
             toggle_message_timer -= dt
             if toggle_message_timer <= 0:
@@ -225,8 +233,10 @@ def main():
 
         if toggle_message and toggle_message_timer > 0:
             font = pygame.font.Font(None, 36)
-            message_surface = font.render(toggle_message, True, (255, 255, 255))
-            message_rect = message_surface.get_rect(center=(SCREEN_WIDTH / 2, 50))
+            message_surface = font.render(
+                toggle_message, True, (255, 255, 255))
+            message_rect = message_surface.get_rect(
+                center=(SCREEN_WIDTH / 2, 50))
             screen.blit(message_surface, message_rect)
             toggle_message_timer -= dt
             if toggle_message_timer <= 0:
@@ -246,9 +256,12 @@ def main():
             action = main_menu.update(dt, events)
             main_menu.draw(screen)
 
-            version_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE / 1.5))
-            version_text = version_font.render(__version__, True, pygame.Color(MENU_UNSELECTED_COLOR))
-            version_rect = version_text.get_rect(bottomright=(SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20))
+            version_font = pygame.font.Font(
+                None, int(MENU_ITEM_FONT_SIZE / 1.5))
+            version_text = version_font.render(
+                __version__, True, pygame.Color(MENU_UNSELECTED_COLOR))
+            version_rect = version_text.get_rect(
+                bottomright=(SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20))
             screen.blit(version_text, version_rect)
 
             if game_settings.music_on and not pygame.mixer.music.get_busy():
@@ -352,7 +365,8 @@ def main():
 
                 if player in updatable:
                     player.kill()
-                player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, selected_ship)
+                player = Player(SCREEN_WIDTH / 2,
+                                SCREEN_HEIGHT / 2, selected_ship)
                 player.sounds = sounds
 
                 if difficulty == "easy":
@@ -431,7 +445,8 @@ def main():
             menu_starfield.update(dt)
             menu_starfield.draw(screen)
 
-            action = options_menu.handle_action(options_menu.update(dt, events), sounds)
+            action = options_menu.handle_action(
+                options_menu.update(dt, events), sounds)
             options_menu.draw(screen)
 
             for event in events:
@@ -483,16 +498,19 @@ def main():
 
             if time.time() - last_spawn_time > spawn_interval:
                 if len(current_enemy_ships) < max_enemy_ships[difficulty]:
-                    enemy_ship = EnemyShip(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 30)
+                    enemy_ship = EnemyShip(random.randint(
+                        0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 30)
                     updatable.add(enemy_ship)
                     drawable.add(enemy_ship)
                     collidable.add(enemy_ship)
                     current_enemy_ships.append(enemy_ship)
                     last_spawn_time = time.time()
                     spawn_interval = random.uniform(10, 30)
-                    print(f"EnemyShip spawned! Current count: {len(current_enemy_ships)}, Max: {max_enemy_ships[difficulty]}")
+                    print(f"EnemyShip spawned! Current count: {
+                          len(current_enemy_ships)}, Max: {max_enemy_ships[difficulty]}")
 
-            current_enemy_ships = [ship for ship in current_enemy_ships if ship in updatable]
+            current_enemy_ships = [
+                ship for ship in current_enemy_ships if ship in updatable]
 
             for obj in updatable:
                 if isinstance(obj, EnemyShip):
@@ -527,7 +545,8 @@ def main():
                 if asteroid.collides_with(player) and not player.invincible and not player.shield_active:
                     lives -= 1
                     sounds.play_player_hit()
-                    Particle.create_ship_explosion(player.position.x, player.position.y)
+                    Particle.create_ship_explosion(
+                        player.position.x, player.position.y)
 
                     if lives <= 0:
                         print(f"Game Over! Final Score: {score}")
@@ -554,7 +573,8 @@ def main():
                         else:
                             score += SCORE_SMALL
 
-                        Particle.create_asteroid_explosion(asteroid.position.x, asteroid.position.y)
+                        Particle.create_asteroid_explosion(
+                            asteroid.position.x, asteroid.position.y)
 
                         if not achievement_system.is_unlocked("First Blood"):
                             achievement_system.unlock("First Blood")
@@ -570,8 +590,10 @@ def main():
                         if is_large_asteroid and random.random() < POWERUP_SPAWN_CHANCE:
                             if len(powerups) < POWERUP_MAX_COUNT:
                                 powerup_type = random.choice(POWERUP_TYPES)
-                                PowerUp(asteroid.position.x, asteroid.position.y, powerup_type)
-                                print(f"Power-Up {powerup_type} appears from large asteroid!")
+                                PowerUp(asteroid.position.x,
+                                        asteroid.position.y, powerup_type)
+                                print(
+                                    f"Power-Up {powerup_type} appears from large asteroid!")
 
                         asteroid.split()
                         shot.kill()
@@ -583,7 +605,8 @@ def main():
                     if obj.collides_with(player) and not player.invincible and not player.shield_active:
                         lives -= 1
                         sounds.play_player_hit()
-                        Particle.create_ship_explosion(player.position.x, player.position.y)
+                        Particle.create_ship_explosion(
+                            player.position.x, player.position.y)
                         obj.split()
 
                         if obj in current_enemy_ships:
@@ -608,15 +631,18 @@ def main():
 
                             if obj in current_enemy_ships:
                                 current_enemy_ships.remove(obj)
-                            print(f"EnemyShip destroyed! Remaining count: {len(current_enemy_ships)}")
+                            print(f"EnemyShip destroyed! Remaining count: {
+                                  len(current_enemy_ships)}")
                             break
 
             for enemy_ship in current_enemy_ships:
                 for asteroid in asteroids:
                     if enemy_ship.collides_with(asteroid):
                         speed = enemy_ship.velocity.length()
-                        enemy_ship.velocity = pygame.Vector2(random.uniform(-1, 1), random.uniform(-1, 1)).normalize() * speed
-                        print(f"EnemyShip changed direction due to asteroid collision.")
+                        enemy_ship.velocity = pygame.Vector2(
+                            random.uniform(-1, 1), random.uniform(-1, 1)).normalize() * speed
+                        print(
+                            f"EnemyShip changed direction due to asteroid collision.")
 
             for obj in updatable:
                 if not hasattr(obj, "position"):
@@ -660,7 +686,8 @@ def main():
                 difficulty, (200, 200, 200)
             )
 
-            difficulty_text = font.render(f"Difficulty: {difficulty.capitalize()}", True, difficulty_color)
+            difficulty_text = font.render(
+                f"Difficulty: {difficulty.capitalize()}", True, difficulty_color)
             difficulty_rect = difficulty_text.get_rect(topleft=(20, 110))
             screen.blit(difficulty_text, difficulty_rect)
 
@@ -685,18 +712,23 @@ def main():
 
                 if level == 50:
                     if difficulty == "easy" and not ship_manager.is_ship_unlocked("speedster"):
-                        ship_manager.unlock_ship_with_notification("speedster", achievement_notifications.add_notification)
+                        ship_manager.unlock_ship_with_notification(
+                            "speedster", achievement_notifications.add_notification)
                     elif difficulty == "normal" and not ship_manager.is_ship_unlocked("tank"):
-                        ship_manager.unlock_ship_with_notification("tank", achievement_notifications.add_notification)
+                        ship_manager.unlock_ship_with_notification(
+                            "tank", achievement_notifications.add_notification)
                     elif difficulty == "hard" and not ship_manager.is_ship_unlocked("destroyer"):
-                        ship_manager.unlock_ship_with_notification("destroyer", achievement_notifications.add_notification)
+                        ship_manager.unlock_ship_with_notification(
+                            "destroyer", achievement_notifications.add_notification)
 
                 if level >= 666 and not achievement_system.is_unlocked("Level Master"):
                     achievement_system.unlock("Level Master")
 
                 if level <= 10:
-                    asteroid_field.asteroid_count = min(BASE_ASTEROID_COUNT + (level - 1) * ASTEROID_COUNT_PER_LEVEL, 12)
-                    asteroid_field.spawn_interval = max(BASE_SPAWN_INTERVAL - (level - 1) * SPAWN_INTERVAL_REDUCTION, 1.0)
+                    asteroid_field.asteroid_count = min(
+                        BASE_ASTEROID_COUNT + (level - 1) * ASTEROID_COUNT_PER_LEVEL, 12)
+                    asteroid_field.spawn_interval = max(
+                        BASE_SPAWN_INTERVAL - (level - 1) * SPAWN_INTERVAL_REDUCTION, 1.0)
 
                 if level_up_timer <= 0:
                     level_up_timer = LEVEL_UP_DISPLAY_TIME
@@ -705,7 +737,8 @@ def main():
                 sounds.play_level_up()
 
                 print(
-                    f"Level up! Now level {level}, asteroids: {asteroid_field.asteroid_count}, interval: {asteroid_field.spawn_interval}"
+                    f"Level up! Now level {level}, asteroids: {
+                        asteroid_field.asteroid_count}, interval: {asteroid_field.spawn_interval}"
                 )
 
             if level_up_timer > 0:
@@ -714,10 +747,13 @@ def main():
                 size = int(72 * (1 + 0.2 * math.sin(level_up_timer * 10)))
 
                 level_font = pygame.font.Font(None, size)
-                level_surf = level_font.render(level_up_text, True, (255, 215, 0))
-                level_rect = level_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3))
+                level_surf = level_font.render(
+                    level_up_text, True, (255, 215, 0))
+                level_rect = level_surf.get_rect(
+                    center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3))
 
-                alpha = int(255 * min(1, level_up_timer / (LEVEL_UP_DISPLAY_TIME / 2)))
+                alpha = int(255 * min(1, level_up_timer /
+                            (LEVEL_UP_DISPLAY_TIME / 2)))
                 if level_up_timer < LEVEL_UP_DISPLAY_TIME / 2:
                     level_surf.set_alpha(alpha)
 
@@ -764,30 +800,39 @@ def main():
                 if boss_attack:
                     if boss_attack["type"] == "circle":
                         for i in range(boss_attack["count"]):
-                            angle = math.radians(i * (360 / boss_attack["count"]))
-                            velocity = pygame.Vector2(math.cos(angle), math.sin(angle)) * BOSS_PROJECTILE_SPEED
-                            BossProjectile(boss.position.x, boss.position.y, velocity, "normal")
+                            angle = math.radians(
+                                i * (360 / boss_attack["count"]))
+                            velocity = pygame.Vector2(
+                                math.cos(angle), math.sin(angle)) * BOSS_PROJECTILE_SPEED
+                            BossProjectile(boss.position.x,
+                                           boss.position.y, velocity, "normal")
                             sounds.play_enemy_shoot()
 
                     elif boss_attack["type"] == "spiral":
                         base_angle = pygame.time.get_ticks() % 360
                         for i in range(boss_attack["count"]):
-                            angle = math.radians(base_angle + i * (360 / boss_attack["count"]))
-                            velocity = pygame.Vector2(math.cos(angle), math.sin(angle)) * BOSS_PROJECTILE_SPEED
-                            BossProjectile(boss.position.x, boss.position.y, velocity, "normal")
+                            angle = math.radians(
+                                base_angle + i * (360 / boss_attack["count"]))
+                            velocity = pygame.Vector2(
+                                math.cos(angle), math.sin(angle)) * BOSS_PROJECTILE_SPEED
+                            BossProjectile(boss.position.x,
+                                           boss.position.y, velocity, "normal")
                             sounds.play_enemy_shoot()
 
                     elif boss_attack["type"] == "targeted":
                         if player in updatable:
-                            direction = (player.position - boss.position).normalize()
+                            direction = (player.position -
+                                         boss.position).normalize()
 
                             velocity = direction * BOSS_PROJECTILE_SPEED
-                            BossProjectile(boss.position.x, boss.position.y, velocity, "homing")
+                            BossProjectile(boss.position.x,
+                                           boss.position.y, velocity, "homing")
 
                             for i in range(1, boss_attack["count"]):
                                 offset = 10 * i if i % 2 == 0 else -10 * i
                                 offset_dir = direction.rotate(offset)
-                                BossProjectile(boss.position.x, boss.position.y, offset_dir * BOSS_PROJECTILE_SPEED, "normal")
+                                BossProjectile(
+                                    boss.position.x, boss.position.y, offset_dir * BOSS_PROJECTILE_SPEED, "normal")
                         sounds.play_enemy_shoot()
 
                 for shot in shots:
@@ -881,7 +926,8 @@ def player_hit():
         player.velocity = pygame.Vector2(0, 0)
         player.invincible = True
         player.invincible_timer = PLAYER_INVINCIBLE_TIME
-        print(f"Player respawned with {PLAYER_INVINCIBLE_TIME} seconds of invincibility")
+        print(f"Player respawned with {
+              PLAYER_INVINCIBLE_TIME} seconds of invincibility")
     else:
         player.kill()
         game_state = "game_over"
@@ -900,7 +946,8 @@ def toggle_fullscreen():
     global screen
     game_settings.fullscreen = not game_settings.fullscreen
     if game_settings.fullscreen:
-        screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+        screen = pygame.display.set_mode(
+            (SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
         print("Switched to fullscreen mode")
     else:
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
