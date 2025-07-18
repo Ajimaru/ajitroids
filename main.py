@@ -23,6 +23,8 @@ from modul.achievements import AchievementSystem
 from modul.achievement_notification import AchievementNotificationManager
 from modul.groups import collidable, drawable, updatable
 
+game_settings = None
+
 def main():
     
     global sounds, player, PLAYER_INVINCIBLE_TIME, game_settings
