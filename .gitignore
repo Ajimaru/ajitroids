@@ -30,6 +30,8 @@ htmlcov/
 # user files
 *.json
 *.sh
+*.yaml
+*.txt
 
 # Git files
 .git/

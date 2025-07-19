@@ -178,13 +178,12 @@ class EnemyShip(CircleShape):
                 else:
                     direction_to_player = pygame.Vector2(0, 0)
                 self.velocity = direction_to_player * 100
-                print(f"EnemyShip moving towards player! Distance: {
-                      distance_to_player}")
+                print(f"EnemyShip moving towards player! Distance: {distance_to_player}")
+
             else:
                 self.velocity *= 0.8
 
-        print(f"EnemyShip Position: {
-              self.position}, Velocity: {self.velocity}")
+        print(f"EnemyShip Position: {self.position}, Velocity: {self.velocity}")
 
     def collides_with(self, other):
         distance = (self.position - other.position).length()
