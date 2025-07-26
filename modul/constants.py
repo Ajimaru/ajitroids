@@ -85,9 +85,9 @@ ARCADE_MODE_BONUS_TIME = 5
 CREDITS_MASTERMIND = "Ajimaru"
 CREDITS_TITLE = "CREDITS"
 CREDITS_GAME_NAME = "AJITROIDS"
-CREDITS_DEVELOPER = "GitHub Copilot"
-CREDITS_GRAPHICS = "GitHub Copilot"
-CREDITS_SOUND = "Command Line"
+CREDITS_DEVELOPER = "Ajimaru"
+CREDITS_GRAPHICS = "Ajimaru"
+CREDITS_SOUND = "Ajimaru"
 CREDITS_SPECIAL_THANKS = [
     "Boot.dev for the Python-Tutorials",
     "Pygame Community for the awesome library",
@@ -95,7 +95,7 @@ CREDITS_SPECIAL_THANKS = [
 
 CREDITS_SCROLL_SPEED = 50
 CREDITS_LINE_SPACING = 40
-CREDITS_WEBSITE = "https://ajimaru.github.io"
+CREDITS_WEBSITE = "https://ajimaru.github.io/ajitroids/"
 
 POINTS_PER_LEVEL = 2500
 MAX_LEVEL = 666
