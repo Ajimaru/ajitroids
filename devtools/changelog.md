@@ -15,3 +15,11 @@
 
 ## v0.17.16 (2025-07-26)
 
+## v0.17.17 (2025-07-26)
+
+### test
+- test(test): v0.17.17 - makefile fix
+
+### chore
+- chore(release): bump to v0.17.16
+
