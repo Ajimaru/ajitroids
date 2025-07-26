@@ -58,3 +58,8 @@
 ### docs
 - docs(docs): LICENSE file added
 
+## v0.18.6 (2025-07-26)
+
+### docs
+- docs(docs): CODE_OF_CONDUCT.md and CONTRIBUTING.md added
+
