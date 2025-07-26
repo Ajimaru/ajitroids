@@ -53,3 +53,8 @@
 ### build
 - build(build): constant.py changed
 
+## v0.18.5 (2025-07-26)
+
+### docs
+- docs(docs): LICENSE file added
+
