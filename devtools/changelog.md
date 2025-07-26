@@ -79,3 +79,21 @@
 ### ci
 - ci(build): pyproject.toml changed
 
+## v0.18.12 (2025-07-26)
+
+### fix
+- fix(build): merged
+
+### test
+- test(test): test
+
+### chore
+- chore(release): bump to v0.18.11
+- chore(release): bump to v0.18.10
+- chore(release): bump to v0.18.9
+- chore(release): bump to v0.18.8
+- chore(release): bump to v0.18.7
+
+### ci
+- ci(build): pyproject.toml changed
+
