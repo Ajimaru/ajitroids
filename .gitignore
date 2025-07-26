@@ -40,4 +40,4 @@ Makefile
 
 # Git files
 .git/
-.github/
+.github/copilot-instructions.md
