@@ -97,3 +97,8 @@
 ### ci
 - ci(build): pyproject.toml changed
 
+## v0.18.13 (2025-07-26)
+
+### fix
+- fix(build): Version suffix removed
+
