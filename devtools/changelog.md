@@ -74,3 +74,8 @@
 
 ## v0.18.10 (2025-07-26)
 
+## v0.18.11 (2025-07-26)
+
+### ci
+- ci(build): pyproject.toml changed
+
