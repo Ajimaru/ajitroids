@@ -28,3 +28,8 @@
 ### test
 - test(test): v0.17.18
 
+## v0.18.0 (2025-07-26)
+
+### build
+- build: RC1
+
