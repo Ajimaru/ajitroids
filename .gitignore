@@ -11,6 +11,7 @@ htmlcov/
 
 # Virtual environments
 .venv
+.envrc
 
 # VSCode settings
 .vscode/
