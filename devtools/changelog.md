@@ -43,3 +43,8 @@
 ### build
 - build(build): tag test
 
+## V0.18.2 (2025-07-26)
+
+### build
+- build(build): version pump
+
