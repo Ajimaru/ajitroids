@@ -104,15 +104,6 @@ Unlock these ships by progressing through the game and achieving milestones!
 - Efficient particle system for visual effects
 - Collision detection with optimized algorithms
 
-## 🤝 Contributing
-- Contributions are welcome! If you'd like to contribute to the project:
-
-- Fork the repository
-- Create a feature branch ```(git checkout -b feature/amazing-feature)```
-- Commit your changes ```(git commit -m 'Add amazing feature')```
-- Push to the branch ```(git push origin feature/amazing-feature)```
-- Open a Pull Request
-
 ## 📜 License
 This project is licensed under the MIT License with Commons Clause - see the LICENSE file for details.
 
