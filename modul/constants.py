@@ -93,7 +93,7 @@ CREDITS_SPECIAL_THANKS = [
     "Pygame Community for the awesome library",
 ]
 
-CREDITS_SCROLL_SPEED = 50
+CREDITS_SCROLL_SPEED = 51
 CREDITS_LINE_SPACING = 40
 CREDITS_WEBSITE = "https://ajimaru.github.io/ajitroids/"
 
