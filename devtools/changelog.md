@@ -112,3 +112,8 @@
 ### fix
 - fix(test): uses: actions/upload-artifact@v4
 
+## v0.18.16 (2025-07-27)
+
+### docs
+- docs(docs): github pages configured
+
