@@ -148,3 +148,8 @@
 ### docs
 - docs(config): actions/upload-artifact@v4
 
+## v0.18.23 (2025-07-27)
+
+### fix
+- fix(build): pages.yaml removed
+
