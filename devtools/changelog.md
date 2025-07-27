@@ -122,3 +122,9 @@
 ### refactor
 - refactor(parser): f-string errors fixed
 
+## v0.18.18 (2025-07-27)
+
+### docs
+- docs(parser): index.html paths fixed
+- docs(docs): index.html updated
+
