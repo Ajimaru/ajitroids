@@ -128,3 +128,8 @@
 - docs(parser): index.html paths fixed
 - docs(docs): index.html updated
 
+## v0.18.19 (2025-07-27)
+
+### build
+- build(build): Beta Release
+
