@@ -143,3 +143,8 @@
 ### docs
 - docs(config): Disable Jekyll processing
 
+## v0.18.22 (2025-07-27)
+
+### docs
+- docs(config): actions/upload-artifact@v4
+
