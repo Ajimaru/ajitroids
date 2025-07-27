@@ -138,3 +138,8 @@
 ### docs
 - docs(docs): release.yml modified
 
+## v0.18.21 (2025-07-27)
+
+### docs
+- docs(config): Disable Jekyll processing
+
