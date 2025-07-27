@@ -28,8 +28,14 @@ def get_releases_url(root: Path) -> str:
         pass
     return ''
 
+import re
 
-def main(): 
+def fix_asset_paths(html: str) -> str:
+
+    html = re.sub(r'(src|href)="docs/assets/', r'\1="assets/', html)
+    return html
+
+def main():
     root = Path(__file__).resolve().parent.parent
     readme_path = root / 'README.md'
     docs_path = root / 'docs'
@@ -67,6 +73,7 @@ def main():
 </html>
 """
 
+    html = fix_asset_paths(html)
     docs_path.mkdir(exist_ok=True)
     html_path.write_text(html, encoding='utf-8')
 
