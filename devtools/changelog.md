@@ -153,3 +153,8 @@
 ### fix
 - fix(build): pages.yaml removed
 
+## v0.19.0 (2025-07-27)
+
+### chore
+- chore(build): Beta Release
+
