@@ -2,7 +2,7 @@ version.txt
 changelog.md
 release-manager.log
 release.log
-markdownlint-log.txt
-black-log.txt
+markdownlint.log
+black.log
 flake8-report/
 htmlcov/

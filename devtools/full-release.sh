@@ -38,7 +38,7 @@ check_clean_state() {
 
 color_msg "$CYAN" "[INFO] Commit creation"
 
-BLACK_LOG="$SCRIPT_DIR/black-logs.txt"
+BLACK_LOG="$SCRIPT_DIR/black.log"
 if ! command -v black >/dev/null 2>&1; then
   color_msg "$YELLOW" "[WARNING] black not found in PATH."
   read -r -p "Install black for your OS? (y/n): " DO_INSTALL_BLACK
@@ -53,7 +53,7 @@ if ! command -v black >/dev/null 2>&1; then
   color_msg "$YELLOW" "[INFO] Continuing without black."
 else
   color_msg "$CYAN" "[LINT] Running black in dry-run mode..."
-  if ! black --check modul/ tests/ | tee "$BLACK_LOG"; then
+  if ! black --check modul/ tests/ 2>&1 | tee "$BLACK_LOG"; then
     color_msg "$YELLOW" "[WARNING] black found formatting issues. See $BLACK_LOG. Release continues."
   else
     color_msg "$GREEN" "[OK] All Python files are properly formatted. Log: $BLACK_LOG"
@@ -75,8 +75,8 @@ if ! command -v markdownlint >/dev/null 2>&1; then
   color_msg "$YELLOW" "[INFO] Continuing without markdownlint."
 else
   color_msg "$CYAN" "[LINT] Running markdownlint on all Markdown files..."
-  MARKDOWNLINT_LOG="$SCRIPT_DIR/markdownlint-log.txt"
-  if ! markdownlint "**/*.md" | tee "$MARKDOWNLINT_LOG"; then
+  MARKDOWNLINT_LOG="$SCRIPT_DIR/markdownlint.log"
+  if ! markdownlint "**/*.md" 2>&1 | tee "$MARKDOWNLINT_LOG"; then
     color_msg "$YELLOW" "[WARNING] markdownlint found issues. See $MARKDOWNLINT_LOG. Release continues."
   else
     color_msg "$GREEN" "[OK] All Markdown files passed linting. Log: $MARKDOWNLINT_LOG"
@@ -84,6 +84,7 @@ else
 fi
 
 FLAKE8_HTML_DIR="$SCRIPT_DIR/flake8-report"
+FLAKE8_HTML_INSTALLED=$(python3 -m pip show flake8-html 2>/dev/null | grep -i "Name: flake8-html" || true)
 if ! command -v flake8 >/dev/null 2>&1; then
   color_msg "$YELLOW" "[WARNING] flake8 not found in PATH."
   read -r -p "Install flake8 for your OS? (y/n): " DO_INSTALL_FLAKE8
@@ -96,6 +97,24 @@ if ! command -v flake8 >/dev/null 2>&1; then
     fi
   fi
   color_msg "$YELLOW" "[INFO] Continuing without flake8."
+elif [ -z "$FLAKE8_HTML_INSTALLED" ]; then
+  color_msg "$YELLOW" "[WARNING] flake8-html not found in Python environment."
+  read -r -p "Install flake8-html via pip? (y/n): " DO_INSTALL_FLAKE8HTML
+  if [[ "$DO_INSTALL_FLAKE8HTML" =~ ^[Yy]$ ]]; then
+    color_msg "$CYAN" "[INFO] Installing flake8-html via pip..."
+    python3 -m pip install flake8-html || color_msg "$YELLOW" "[WARNING] Installation failed. Please install manually."
+
+    FLAKE8_HTML_INSTALLED=$(python3 -m pip show flake8-html 2>/dev/null | grep -i "Name: flake8-html" || true)
+    if [ -n "$FLAKE8_HTML_INSTALLED" ]; then
+      color_msg "$CYAN" "[LINT] Running flake8 with HTML report..."
+      if ! flake8 modul/ tests/ --format=html --htmldir="$FLAKE8_HTML_DIR"; then
+        color_msg "$YELLOW" "[WARNING] flake8 found issues. See $FLAKE8_HTML_DIR/index.html. Release continues."
+      else
+        color_msg "$GREEN" "[OK] flake8 passed. HTML report: $FLAKE8_HTML_DIR/index.html"
+      fi
+    fi
+  fi
+  color_msg "$YELLOW" "[INFO] Continuing without flake8-html."
 else
   color_msg "$CYAN" "[LINT] Running flake8 with HTML report..."
   if ! flake8 modul/ tests/ --format=html --htmldir="$FLAKE8_HTML_DIR"; then
