@@ -12,8 +12,7 @@ class Settings:
         self.sound_volume = 0.5
         self.load()
         print(
-            f"Settings after loading: Music={self.music_on}, Sound={self.sound_on}, Fullscreen={
-                self.fullscreen}, Music Volume={self.music_volume}, Sound Volume={self.sound_volume}"
+            f"Settings after loading: Music={self.music_on}, Sound={self.sound_on}, Fullscreen={self.fullscreen}, Music Volume={self.music_volume}, Sound Volume={self.sound_volume}"
         )
 
     def save(self):

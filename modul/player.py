@@ -282,8 +282,7 @@ class Player(CircleShape):
             self.weapons[WEAPON_LASER] = min(
                 self.weapons[WEAPON_LASER] + LASER_AMMO, LASER_AMMO)
             self.current_weapon = WEAPON_LASER
-            print(f"Laser weapon activated! Ammo: {
-                  self.weapons[WEAPON_LASER]}")
+            print(f"Laser weapon activated! Ammo: {self.weapons[WEAPON_LASER]}")
 
         elif powerup_type == "missile_weapon":
             self.weapons[WEAPON_MISSILE] = min(

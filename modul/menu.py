@@ -265,10 +265,8 @@ class OptionsMenu(Menu):
             "Music: ON" if settings.music_on else "Music: OFF", "toggle_music")
         self.add_item(
             "Sound: ON" if settings.sound_on else "Sound: OFF", "toggle_sound")
-        self.add_item(f"Music Volume: {
-                      settings.music_volume * 100:.0f}%", "adjust_music_volume")
-        self.add_item(f"Sound Volume: {
-                      settings.sound_volume * 100:.0f}%", "adjust_sound_volume")
+        self.add_item(f"Music Volume: {settings.music_volume * 100:.0f}%", "adjust_music_volume")
+        self.add_item(f"Sound Volume: {settings.sound_volume * 100:.0f}%", "adjust_sound_volume")
         self.add_item(
             "Fullscreen: ON" if settings.fullscreen else "Fullscreen: OFF", "toggle_fullscreen")
         self.add_item("Sound Test", "sound_test")
