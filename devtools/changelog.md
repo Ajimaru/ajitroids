@@ -133,3 +133,8 @@
 ### build
 - build(build): Beta Release
 
+## v0.18.20 (2025-07-27)
+
+### docs
+- docs(docs): release.yml modified
+
