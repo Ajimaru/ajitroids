@@ -19,7 +19,7 @@ Examples of unacceptable behavior include:
 - Personal attacks or trolling
 
 ## Enforcement
-Violations may be reported by contacting the project team at [conduct@example.com]. All reports will be reviewed and investigated promptly and fairly.
+Violations may be reported by contacting the project team at [ajitroids@noreply.github.com]. All reports will be reviewed and investigated promptly and fairly.
 
 Maintainers are obligated to respect the privacy of the reporter.
 
