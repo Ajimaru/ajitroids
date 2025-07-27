@@ -6,13 +6,13 @@
 
 **A modern Asteroids remake built with Pygame**
 
-![Ajitroids Screenshot](screenshots/Ajitroids_title.png)
+![Ajitroids Screenshot](assets/screenshots/Ajitroids_title.png)
 
 ## 🎮 Game Description
 
 Ajitroids is an exciting remake of the classic arcade game Asteroids with modern features and gameplay elements. Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destroy enemies and collect power-ups while trying to achieve the highest score.
 
-![Ajitroids Screenshot](screenshots/Ajitroids_gameplay.gif)
+![Ajitroids Screenshot](assets/screenshots/Ajitroids_gameplay.gif)
 
 
 ## ✨ Features

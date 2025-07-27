@@ -33,10 +33,6 @@ htmlcov/
 *.sh
 *.yaml
 /_qpasslogs
-devtools/*
-!devtools/version.txt
-!devtools/changelog.md
-Makefile
 
 # Git files
 .git/

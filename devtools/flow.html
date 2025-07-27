@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Release Workflow – full-release.sh</title>
+  <link rel="stylesheet" href="flow.css" id="theme-stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.4.0/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.body.classList.add("dark");
+      document.getElementById("theme-toggle").textContent = "☀️ Light mode activate";
+      mermaid.initialize({
+        theme: "dark",
+        themeVariables: {
+          primaryColor: "#ffffff",
+          lineColor: "#ffffff",
+          textColor: "#ffffff"
+        }
+      });
+    });
+
+    function toggleTheme() {
+      const body = document.body;
+      const toggleBtn = document.getElementById("theme-toggle");
+      if (body.classList.contains("dark")) {
+        body.classList.remove("dark");
+        body.classList.add("light");
+        toggleBtn.textContent = "🌙 Dark mode activate";
+        mermaid.initialize({ theme: "default" });
+      } else {
+        body.classList.remove("light");
+        body.classList.add("dark");
+        toggleBtn.textContent = "☀️ Light mode activate";
+        mermaid.initialize({
+          theme: "dark",
+          themeVariables: {
+            primaryColor: "#ffffff",
+            lineColor: "#ffffff",
+            textColor: "#ffffff"
+          }
+        });
+      }
+      mermaid.contentLoaded();
+    }
+  </script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "dark",
+      themeVariables: {
+        primaryColor: "#ffffff",
+        lineColor: "#ffffff",
+        textColor: "#ffffff"
+      }
+    });
+  </script>
+</head>
+<body>
+
+  <h1>📦 Release Workflow: <code>full-release.sh</code></h1>
+  <button onclick="toggleTheme()" id="theme-toggle" style="margin-bottom:1rem;">🌙 Dark mode activate</button>
+  <nav>
+    <strong>Navigation:</strong>
+    <a href="#commit">📦 Commit</a>
+    <a href="#checks">🛡️ Checks</a>
+    <a href="#version">🔢 Version</a>
+    <a href="#changelog">📚 Changelog</a>
+    <a href="#tagging">📌 Tag</a>
+    <a href="#push">🌐 Push</a>
+    <a href="#done">🎉 Done</a>
+  </nav>
+
+  <details id="commit" open>
+    <summary>📦 1. Commit-creation</summary>
+    <ul>
+      <li>Commit type selection</li>
+      <li>Scope & description input</li>
+      <li><code>git commit</code> is generated</li>
+      <li><code>release.log</code> is supplemented</li>
+    </ul>
+  </details>
+
+  <details id="checks">
+    <summary>🛡️ 2. Security checks</summary>
+    <ul>
+      <li>Checks for a clean Git working directory</li>
+      <li>Warning for sensitive files</li>
+      <li>Check: New commits since last Git tag?</li>
+    </ul>
+  </details>
+
+  <details id="version">
+    <summary>🔢 3. increase Version</summary>
+    <ul>
+      <li>Version read from <code>version.txt</code></li>
+      <li>choose Patch / Minor / Major</li>
+      <li>write new version to <code>version.txt</code></li>
+    </ul>
+  </details>
+
+  <details id="changelog">
+    <summary>📚 4. create Changelog</summary>
+    <ul>
+      <li>Commits grouped by type</li>
+      <li>Entry in <code>changelog.md</code></li>
+    </ul>
+  </details>
+
+  <details id="tagging">
+    <summary>📌 5. Release-Commit & Tag</summary>
+    <ul>
+      <li>Commit of version & changelog</li>
+      <li><code>git tag</code> is set</li>
+    </ul>
+  </details>
+
+  <details id="push">
+    <summary>🌐 6. Optionaler Push</summary>
+    <ul>
+      <li>Push to <code>origin HEAD</code> + <code>tag</code></li>
+      <li>Log entry: „Pushed …“</li>
+    </ul>
+  </details>
+
+  <details id="done">
+    <summary>🎉 7. Final</summary>
+    <ul>
+      <li>Message „Release completed“</li>
+      <li>Final log entry</li>
+    </ul>
+  </details>
+
+  <h2>📊 Mermaid-Diagramm</h2>
+  <div class="mermaid">
+    graph TD
+      A[📦 Commit] --> B[🛡️ Checks]
+      B --> C[🔢 Version]
+      C --> D[📚 Changelog]
+      D --> E[📌 Tag]
+      E --> F[🌐 Push]
+      F --> G[🎉 Final]
+  </div>
+
+  <footer>
+    Release-Modul · <code>full-release.sh</code> · mit Mermaid & CSS · Ready for Automation ⚙️
+  </footer>
+</body>
+</html>
