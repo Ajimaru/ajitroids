@@ -53,7 +53,7 @@ if ! command -v black >/dev/null 2>&1; then
   color_msg "$YELLOW" "[INFO] Continuing without black."
 else
   color_msg "$CYAN" "[LINT] Running black in dry-run mode..."
-  if ! black --check modul/ tests/ 2>&1 | tee "$BLACK_LOG"; then
+  if ! black --check modul/ tests/ devtools/ 2>&1 | tee "$BLACK_LOG"; then
     color_msg "$YELLOW" "[WARNING] black found formatting issues. See $BLACK_LOG. Release continues."
   else
     color_msg "$GREEN" "[OK] All Python files are properly formatted. Log: $BLACK_LOG"
@@ -75,7 +75,7 @@ if ! command -v markdownlint >/dev/null 2>&1; then
   color_msg "$YELLOW" "[INFO] Continuing without markdownlint."
 else
   color_msg "$CYAN" "[LINT] Running markdownlint on all Markdown files..."
-  MARKDOWNLINT_LOG="$SCRIPT_DIR/markdownlint.log"
+  MARKDOWNLINT_LOG="$SCRIPT_DIR/markdownlint-report/report.log"
   if ! markdownlint "**/*.md" 2>&1 | tee "$MARKDOWNLINT_LOG"; then
     color_msg "$YELLOW" "[WARNING] markdownlint found issues. See $MARKDOWNLINT_LOG. Release continues."
   else

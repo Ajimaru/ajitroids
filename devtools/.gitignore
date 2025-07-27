@@ -6,3 +6,4 @@ markdownlint.log
 black.log
 flake8-report/
 htmlcov/
+markdownlint-report/

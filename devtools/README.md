@@ -41,9 +41,9 @@ The tools are designed to support a clean, maintainable, and reproducible releas
 
 - Bash scripts for release automation and GitHub integration
 - Python scripts for documentation generation
-- Makefile and for easy usage
+- Makefile for easy usage
   
-The flow of the `full-release.sh` script is visualized in the file [`full-releaae-sh-flow.html`](./full-releaae-sh-flow.html). You can open this HTML file to see a step-by-step overview of the release process.
+The flow of the `full-release.sh` script is visualized in the file [`full-release-sh.html`](./full-release-sh.html). You can open this HTML file to see a step-by-step overview of the release process.
 
 All scripts are documented below and can be used independently or in combination for a streamlined workflow.
 
@@ -58,11 +58,11 @@ All scripts are documented below and can be used independently or in combination
 | `changelog.md`              | Change log grouped by commit types                      |
 | `release.log`               | Log of all releases and commits with timestamps         |
 | `release-manager.log`       | Log file for release-manager.sh actions and events      |
-| `markdownlint-log.txt`      | Stores results and warnings from Markdownlint checks    |
 | `black-log.txt`             | Contains Black formatting check output for Python files |
 | `htmlcov/`                  | Directory for Pytest coverage HTML reports              |
 | `flake8-report/`            | Directory for Flake8 HTML linting reports               |
-| `full-releaae-sh-flow.html` | Visualizes the release workflow and process steps       |
+| `markdownlint-report`       | Stores results and warnings from Markdownlint checks    |
+| `full-release-sh.html`      | Visualizes the release workflow and process steps       |
 | `README.md`                 | Documentation for the release module                    |
 
 # Documentation release-manager.sh
@@ -154,7 +154,7 @@ The script `generate_docs.py` generates a modern, responsive HTML documentation 
 
 ## Markdownlint Integration
 
-The release script checks all Markdown files using `markdownlint`. Results are saved in `devtools/markdownlint-log.txt`. Warnings **do not** abort the release process.
+The release script checks all Markdown files using `markdownlint`. Results are saved in `devtools/markdownlint-report` (`report.html`). Warnings **do not** abort the release process.
 
 ## Black Integration
 

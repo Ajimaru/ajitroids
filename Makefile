@@ -1,4 +1,4 @@
-.PHONY: release preview log clean types help
+.PHONY: release preview log clean types help lint test
 
 ## Executes the full Release workflow
 release:
@@ -17,11 +17,30 @@ log:
 	@echo "Release Log:"
 	@cat devtools/release.log
 
+
+## Runs all linters (black, markdownlint, flake8)
+lint:
+	@echo "Running Python formatter (black)..."
+	@black --check modul/ tests/ devtools/ 2>&1 | tee "devtools/black.log"
+	@echo "Running Markdown linter (markdownlint)..."
+	@markdownlint "**/*.md" 2>&1 | tee "devtools/markdownlint-report/report.log"
+	@echo "Running Python linter (flake8)..."
+	@flake8 modul/ tests/ devtools/ --format=html --htmldir="devtools/flake8-report"
+	@echo "Tests and linters completed successfully."
+
+## Runs all tests with pytest
+test:
+	@echo "Running tests with pytest..."
+	@pytest --cov --cov-report=html:devtools/htmlcov --import-mode=importlib
 ## Removes temporary files (optional extendable)
 clean:
-	@echo "🧹 Cleaning up devtools directory..."
+	@echo "Cleaning up devtools directory..."
 	@rm -f devtools/*.bak
 	@rm -f devtools/*.tmp
+	@rm -f devtools/black.log
+	@rm -rf devtools/flake8-report
+	@rm -rf devtools/htmlcov
+	@rm -rf devtools/markdownlint-report
 	@echo "Clean complete."
 
 ## Shows supported commit types
@@ -38,13 +57,15 @@ types:
 	@echo "  ci        CI/CD"
 	@echo "  build     Build System"
 	@echo "  revert    Revert commit"
+	@echo "  wip       Work in Progress"
 
 ## Shows all available targets
 help:
 	@echo "Makefile Help:"
-	@echo "  make release   full-release.sh n"
+	@echo "  make release   execute full-release.sh"
 	@echo "  make preview   Show version & changelog"
 	@echo "  make log       Show release log"
-	@echo "  make clean     Remove temporary files"
 	@echo "  make types     Show commit types"
+	@echo "  make test      Run all tests with pytest"
+	@echo "  make clean     Remove logs and reports"
 	@echo "  make help      Show this help"
