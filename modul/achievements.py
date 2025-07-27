@@ -51,10 +51,7 @@ class AchievementSystem:
                             if achievement.name == item["name"]:
                                 achievement.unlocked = True
                                 break
-                print(
-                    f"Unlocked achievements loaded: {
-                        len([a for a in self.achievements if a.unlocked])} of {len(self.achievements)}"
-                )
+                print(f"Unlocked achievements loaded: {len([a for a in self.achievements if a.unlocked])} of {len(self.achievements)}")
         except FileNotFoundError:
             print("Achievements file not found - all achievements are locked")
         except json.JSONDecodeError as e:
@@ -70,8 +67,7 @@ class AchievementSystem:
         if unlocked_achievements:
             with open(self.achievements_file, "w") as file:
                 json.dump(unlocked_achievements, file, indent=4)
-            print(f"Unlocked achievements saved: {
-                  len(unlocked_achievements)} entries")
+            print(f"Unlocked achievements saved: {len(unlocked_achievements)} entries")
         else:
             print("No unlocked achievements to save")
 
@@ -86,8 +82,7 @@ class AchievementSystem:
             if achievement.name == name and not achievement.unlocked:
                 achievement.unlock()
                 self.save_unlocked_achievements()
-                print(f"Achievement unlocked: {
-                      achievement.name} - {achievement.description}")
+                print(f"Achievement unlocked: {achievement.name} - {achievement.description}")
                 if self.notification_callback:
                     ascii_art = """
                     ███████╗██╗     ███████╗████████╗
@@ -105,8 +100,7 @@ class AchievementSystem:
             if achievement.name == name and not achievement.unlocked:
                 achievement.unlock()
                 self.save_unlocked_achievements()
-                print(f"Achievement unlocked: {
-                      achievement.name} - {achievement.description}")
+                print(f"Achievement unlocked: {achievement.name} - {achievement.description}")
                 if self.notification_callback:
                     self.notification_callback(
                         achievement.name, achievement.description)

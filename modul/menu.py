@@ -292,8 +292,7 @@ class OptionsMenu(Menu):
                 1.0, max(0.0, self.settings.music_volume + 0.1))
             self.settings.save()
             pygame.mixer.music.set_volume(self.settings.music_volume)
-            self.items[2].text = f"Music Volume: {
-                self.settings.music_volume * 100:.0f}%"
+            self.items[2].text = f"Music Volume: {self.settings.music_volume * 100:.0f}%"
             return None
 
         elif action == "adjust_sound_volume":
@@ -302,8 +301,7 @@ class OptionsMenu(Menu):
             self.settings.save()
             if self.sounds:
                 self.sounds.set_effects_volume(self.settings.sound_volume)
-            self.items[3].text = f"Sound Volume: {
-                self.settings.sound_volume * 100:.0f}%"
+            self.items[3].text = f"Sound Volume: {self.settings.sound_volume * 100:.0f}%"
             return None
 
         elif action == "toggle_fullscreen":
@@ -346,8 +344,7 @@ class OptionsMenu(Menu):
                         self.settings.save()
                         pygame.mixer.music.set_volume(
                             self.settings.music_volume)
-                        self.items[self.selected_index].text = f"Music Volume: {
-                            self.settings.music_volume * 100:.0f}%"
+                        self.items[self.selected_index].text = f"Music Volume: {self.settings.music_volume * 100:.0f}%"
                     elif self.items[self.selected_index].action == "adjust_sound_volume":
                         self.settings.sound_volume = max(
                             0.0, self.settings.sound_volume - 0.1)
@@ -355,8 +352,7 @@ class OptionsMenu(Menu):
                         if self.sounds:
                             self.sounds.set_effects_volume(
                                 self.settings.sound_volume)
-                        self.items[self.selected_index].text = f"Sound Volume: {
-                            self.settings.sound_volume * 100:.0f}%"
+                        self.items[self.selected_index].text = f"Sound Volume: {self.settings.sound_volume * 100:.0f}%"
                 elif event.key == pygame.K_RIGHT:
                     if self.items[self.selected_index].action == "adjust_music_volume":
                         self.settings.music_volume = min(
@@ -364,8 +360,7 @@ class OptionsMenu(Menu):
                         self.settings.save()
                         pygame.mixer.music.set_volume(
                             self.settings.music_volume)
-                        self.items[self.selected_index].text = f"Music Volume: {
-                            self.settings.music_volume * 100:.0f}%"
+                        self.items[self.selected_index].text = f"Music Volume: {self.settings.music_volume * 100:.0f}%"
                     elif self.items[self.selected_index].action == "adjust_sound_volume":
                         self.settings.sound_volume = min(
                             1.0, self.settings.sound_volume + 0.1)
@@ -373,8 +368,7 @@ class OptionsMenu(Menu):
                         if self.sounds:
                             self.sounds.set_effects_volume(
                                 self.settings.sound_volume)
-                        self.items[self.selected_index].text = f"Sound Volume: {
-                            self.settings.sound_volume * 100:.0f}%"
+                        self.items[self.selected_index].text = f"Sound Volume: {self.settings.sound_volume * 100:.0f}%"
         result = super().update(dt, events)
         if result:
             return result
@@ -991,8 +985,7 @@ class AchievementsMenu(Menu):
         unlocked_count = sum(
             1 for achievement in self.achievement_system.achievements if achievement.unlocked)
         total_count = len(self.achievement_system.achievements)
-        progress_text = f"Progress: {
-            unlocked_count}/{total_count} Achievements unlocked"
+        progress_text = f"Progress: {unlocked_count}/{total_count} Achievements unlocked"
         progress_font = pygame.font.Font(None, 20)
         progress_surf = progress_font.render(
             progress_text, True, pygame.Color("lightblue"))
@@ -1129,8 +1122,7 @@ class ShipSelectionMenu(Menu):
             props = [
                 f"Speed: {ship_data['speed_multiplier']:.1f}x",
                 f"Agility: {ship_data['turn_speed_multiplier']:.1f}x",
-                f"Special: {ship_data['special_ability'].replace(
-                    '_', ' ').title()}",
+                f"Special: {ship_data['special_ability'].replace('_', ' ').title()}",
             ]
 
             for i, prop in enumerate(props):
