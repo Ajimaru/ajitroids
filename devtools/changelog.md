@@ -117,3 +117,8 @@
 ### docs
 - docs(docs): github pages configured
 
+## v0.18.17 (2025-07-27)
+
+### refactor
+- refactor(parser): f-string errors fixed
+
