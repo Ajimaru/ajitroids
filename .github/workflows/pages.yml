@@ -1,4 +1,4 @@
-name: Build and Deploy GitHub Pages
+name: Deploy Static Site to GitHub Pages
 
 on:
   push:
@@ -15,27 +15,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Python dependencies
-        run: pip install -r requirements.txt
-
-      - name: Generate docs/index.html from README.md
-        run: python devtools/generate_docs.py
-
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v2
         with:
-          source: ./
-          destination: ./_site
-          future: false
-          verbose: true
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          path: ./_site
+          path: ./docs
 
       - name: Deploy to GitHub Pages
         id: deployment
