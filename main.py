@@ -1,5 +1,4 @@
 from modul._version import __version__
-import sys
 import pygame
 import math
 import random
