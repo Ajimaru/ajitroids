@@ -1,8 +1,6 @@
 from pathlib import Path
 import markdown
 import subprocess
-import re
-import shutil
 
 def extract_title(md_text: str) -> str:
     for line in md_text.splitlines():
@@ -30,15 +28,6 @@ def get_releases_url(root: Path) -> str:
         pass
     return ''
 
-def sync_assets(readme_path: Path, target_dir: Path):
-    md_text = readme_path.read_text(encoding='utf-8')
-    asset_paths = re.findall(r'\]\((assets/[^)]+)\)', md_text)
-    for rel_path in set(asset_paths):
-        src = Path(rel_path)
-        dst = target_dir / Path(rel_path).relative_to('assets')
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        if src.exists():
-            shutil.copy2(src, dst)
 
 def main(): 
     root = Path(__file__).resolve().parent.parent
@@ -46,9 +35,6 @@ def main():
     docs_path = root / 'docs'
     html_path = docs_path / 'index.html'
     css_path = 'assets/css/style.css'
-    assets_target = docs_path / 'assets'
-
-    sync_assets(readme_path, assets_target)
 
     md_text = readme_path.read_text(encoding='utf-8')
     project_title = extract_title(md_text)
