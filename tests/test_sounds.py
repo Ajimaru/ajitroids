@@ -1,5 +1,6 @@
 from modul.sounds import Sounds
 
+
 def test_play_sound_function():
     sounds = Sounds()
     try:

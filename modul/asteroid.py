@@ -21,9 +21,7 @@ class Asteroid(CircleShape):
         vertices = []
         for i in range(ASTEROID_VERTICES):
             angle = (i / ASTEROID_VERTICES) * 2 * math.pi
-            distance = self.radius * \
-                (1 - ASTEROID_IRREGULARITY + random.random()
-                 * ASTEROID_IRREGULARITY * 2)
+            distance = self.radius * (1 - ASTEROID_IRREGULARITY + random.random() * ASTEROID_IRREGULARITY * 2)
             x = math.cos(angle) * distance
             y = math.sin(angle) * distance
             vertices.append((x, y))
@@ -31,8 +29,7 @@ class Asteroid(CircleShape):
 
     def point_in_polygon(self, point):
         px, py = point
-        vertices = [(self.position.x + vx, self.position.y + vy)
-                    for vx, vy in self.vertices]
+        vertices = [(self.position.x + vx, self.position.y + vy) for vx, vy in self.vertices]
 
         crosses = 0
         for i in range(len(vertices)):
@@ -54,8 +51,7 @@ class Asteroid(CircleShape):
             shot_pos = other.position
             shot_radius = other.radius
 
-            points = [(self.position.x + vx, self.position.y + vy)
-                      for vx, vy in self.vertices]
+            points = [(self.position.x + vx, self.position.y + vy) for vx, vy in self.vertices]
 
             for i in range(len(points)):
                 j = (i + 1) % len(points)
@@ -91,8 +87,7 @@ class Asteroid(CircleShape):
             )
             for x, y in self.vertices
         ]
-        points = [(self.position.x + x, self.position.y + y)
-                  for x, y in rotated_vertices]
+        points = [(self.position.x + x, self.position.y + y) for x, y in rotated_vertices]
         pygame.draw.polygon(screen, "white", points, 2)
         if COLLISION_DEBUG:
             pygame.draw.circle(screen, "red", self.position, self.radius, 1)
@@ -123,10 +118,8 @@ class Asteroid(CircleShape):
         velocity1 = self.velocity.rotate(random_angle) * 1.2
         velocity2 = self.velocity.rotate(-random_angle) * 1.2
 
-        rotation_speed1 = (random.uniform(-0.25, 0.25) + self.velocity.length()
-                           * math.sin(math.radians(random_angle))) * 0.1
-        rotation_speed2 = (random.uniform(-0.25, 0.25) + self.velocity.length()
-                           * math.sin(math.radians(-random_angle))) * 0.1
+        rotation_speed1 = (random.uniform(-0.25, 0.25) + self.velocity.length() * math.sin(math.radians(random_angle))) * 0.1
+        rotation_speed2 = (random.uniform(-0.25, 0.25) + self.velocity.length() * math.sin(math.radians(-random_angle))) * 0.1
 
         new_asteroid1 = Asteroid(self.position.x, self.position.y, new_radius)
         new_asteroid2 = Asteroid(self.position.x, self.position.y, new_radius)
@@ -151,8 +144,7 @@ class EnemyShip(CircleShape):
         self.radius = PLAYER_RADIUS
         self.rotation_speed = random.uniform(-0.1, 0.1)
         self.rotation = 0
-        self.velocity = pygame.Vector2(
-            random.uniform(-50, 50), random.uniform(-50, 50))
+        self.velocity = pygame.Vector2(random.uniform(-50, 50), random.uniform(-50, 50))
 
     def update(self, dt, player_position=None):
         self.position += self.velocity * dt
@@ -212,8 +204,7 @@ class EnemyShip(CircleShape):
             for x, y in points
         ]
 
-        points = [(self.position.x + x, self.position.y + y)
-                  for x, y in rotated_points]
+        points = [(self.position.x + x, self.position.y + y) for x, y in rotated_points]
         pygame.draw.polygon(screen, "red", points, 2)
 
     def kill(self):

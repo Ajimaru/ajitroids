@@ -19,8 +19,7 @@ class MenuItem:
     def update(self, dt):
         target = 1.0 if self.selected else 0.0
         animation_speed = 12.0
-        self.hover_animation = self.hover_animation + \
-            (target - self.hover_animation) * dt * animation_speed
+        self.hover_animation = self.hover_animation + (target - self.hover_animation) * dt * animation_speed
         if self.delay > 0:
             self.delay -= dt
             if self.delay <= 0:
@@ -30,15 +29,11 @@ class MenuItem:
     def draw(self, screen, position, font):
         color = pygame.Color(MENU_UNSELECTED_COLOR)
         selected_color = pygame.Color(MENU_SELECTED_COLOR)
-        r = max(
-            0, min(255, int(color.r + (selected_color.r - color.r) * self.hover_animation)))
-        g = max(
-            0, min(255, int(color.g + (selected_color.g - color.g) * self.hover_animation)))
-        b = max(
-            0, min(255, int(color.b + (selected_color.b - color.b) * self.hover_animation)))
+        r = max(0, min(255, int(color.r + (selected_color.r - color.r) * self.hover_animation)))
+        g = max(0, min(255, int(color.g + (selected_color.g - color.g) * self.hover_animation)))
+        b = max(0, min(255, int(color.b + (selected_color.b - color.b) * self.hover_animation)))
         size_multiplier = 1.0 + 0.2 * self.hover_animation
-        scaled_font = pygame.font.Font(
-            None, int(MENU_ITEM_FONT_SIZE * size_multiplier))
+        scaled_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * size_multiplier))
         text_surface = scaled_font.render(self.text, True, (r, g, b))
         text_rect = text_surface.get_rect(center=(position[0], position[1]))
         screen.blit(text_surface, text_rect)
@@ -74,8 +69,7 @@ class Menu:
 
     def update(self, dt, events):
         if self.fade_in:
-            self.background_alpha = min(
-                255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
             if self.background_alpha >= MENU_BACKGROUND_ALPHA:
                 self.fade_in = False
                 self.background_alpha = MENU_BACKGROUND_ALPHA
@@ -158,10 +152,8 @@ class Menu:
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_surf = self.title_font.render(
-            self.title, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surf.get_rect(
-            center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4))
+        title_surf = self.title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
+        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4))
         screen.blit(title_surf, title_rect)
 
         start_y = SCREEN_HEIGHT / 2
@@ -185,10 +177,8 @@ class MainMenu(Menu):
         super().draw(screen)
 
         version_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE / 1.5))
-        version_text = version_font.render(
-            __version__, True, pygame.Color(MENU_UNSELECTED_COLOR))
-        version_rect = version_text.get_rect(
-            bottomright=(SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20))
+        version_text = version_font.render(__version__, True, pygame.Color(MENU_UNSELECTED_COLOR))
+        version_rect = version_text.get_rect(bottomright=(SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20))
         screen.blit(version_text, version_rect)
 
 
@@ -209,8 +199,7 @@ class TutorialScreen:
 
     def update(self, dt, events):
         if self.fade_in:
-            self.background_alpha = min(
-                255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
             if self.background_alpha >= MENU_BACKGROUND_ALPHA:
                 self.fade_in = False
                 self.background_alpha = MENU_BACKGROUND_ALPHA
@@ -227,8 +216,7 @@ class TutorialScreen:
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_surf = self.title_font.render(
-            "How to Play", True, pygame.Color(MENU_TITLE_COLOR))
+        title_surf = self.title_font.render("How to Play", True, pygame.Color(MENU_TITLE_COLOR))
         title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, 100))
         screen.blit(title_surf, title_rect)
 
@@ -261,14 +249,11 @@ class OptionsMenu(Menu):
         super().__init__("OPTIONS")
         self.settings = settings
         self.sounds = sounds
-        self.add_item(
-            "Music: ON" if settings.music_on else "Music: OFF", "toggle_music")
-        self.add_item(
-            "Sound: ON" if settings.sound_on else "Sound: OFF", "toggle_sound")
+        self.add_item("Music: ON" if settings.music_on else "Music: OFF", "toggle_music")
+        self.add_item("Sound: ON" if settings.sound_on else "Sound: OFF", "toggle_sound")
         self.add_item(f"Music Volume: {settings.music_volume * 100:.0f}%", "adjust_music_volume")
         self.add_item(f"Sound Volume: {settings.sound_volume * 100:.0f}%", "adjust_sound_volume")
-        self.add_item(
-            "Fullscreen: ON" if settings.fullscreen else "Fullscreen: OFF", "toggle_fullscreen")
+        self.add_item("Fullscreen: ON" if settings.fullscreen else "Fullscreen: OFF", "toggle_fullscreen")
         self.add_item("Sound Test", "sound_test")
         self.add_item("Back", "back")
 
@@ -288,16 +273,14 @@ class OptionsMenu(Menu):
             return None
 
         elif action == "adjust_music_volume":
-            self.settings.music_volume = min(
-                1.0, max(0.0, self.settings.music_volume + 0.1))
+            self.settings.music_volume = min(1.0, max(0.0, self.settings.music_volume + 0.1))
             self.settings.save()
             pygame.mixer.music.set_volume(self.settings.music_volume)
             self.items[2].text = f"Music Volume: {self.settings.music_volume * 100:.0f}%"
             return None
 
         elif action == "adjust_sound_volume":
-            self.settings.sound_volume = min(
-                1.0, max(0.0, self.settings.sound_volume + 0.1))
+            self.settings.sound_volume = min(1.0, max(0.0, self.settings.sound_volume + 0.1))
             self.settings.save()
             if self.sounds:
                 self.sounds.set_effects_volume(self.settings.sound_volume)
@@ -310,8 +293,7 @@ class OptionsMenu(Menu):
 
             try:
                 if self.settings.fullscreen:
-                    pygame.display.set_mode(
-                        (SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+                    pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
                     print("Fullscreen aktiviert")
                 else:
                     pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -339,35 +321,27 @@ class OptionsMenu(Menu):
                     return "main_menu"
                 elif event.key == pygame.K_LEFT:
                     if self.items[self.selected_index].action == "adjust_music_volume":
-                        self.settings.music_volume = max(
-                            0.0, self.settings.music_volume - 0.1)
+                        self.settings.music_volume = max(0.0, self.settings.music_volume - 0.1)
                         self.settings.save()
-                        pygame.mixer.music.set_volume(
-                            self.settings.music_volume)
+                        pygame.mixer.music.set_volume(self.settings.music_volume)
                         self.items[self.selected_index].text = f"Music Volume: {self.settings.music_volume * 100:.0f}%"
                     elif self.items[self.selected_index].action == "adjust_sound_volume":
-                        self.settings.sound_volume = max(
-                            0.0, self.settings.sound_volume - 0.1)
+                        self.settings.sound_volume = max(0.0, self.settings.sound_volume - 0.1)
                         self.settings.save()
                         if self.sounds:
-                            self.sounds.set_effects_volume(
-                                self.settings.sound_volume)
+                            self.sounds.set_effects_volume(self.settings.sound_volume)
                         self.items[self.selected_index].text = f"Sound Volume: {self.settings.sound_volume * 100:.0f}%"
                 elif event.key == pygame.K_RIGHT:
                     if self.items[self.selected_index].action == "adjust_music_volume":
-                        self.settings.music_volume = min(
-                            1.0, self.settings.music_volume + 0.1)
+                        self.settings.music_volume = min(1.0, self.settings.music_volume + 0.1)
                         self.settings.save()
-                        pygame.mixer.music.set_volume(
-                            self.settings.music_volume)
+                        pygame.mixer.music.set_volume(self.settings.music_volume)
                         self.items[self.selected_index].text = f"Music Volume: {self.settings.music_volume * 100:.0f}%"
                     elif self.items[self.selected_index].action == "adjust_sound_volume":
-                        self.settings.sound_volume = min(
-                            1.0, self.settings.sound_volume + 0.1)
+                        self.settings.sound_volume = min(1.0, self.settings.sound_volume + 0.1)
                         self.settings.save()
                         if self.sounds:
-                            self.sounds.set_effects_volume(
-                                self.settings.sound_volume)
+                            self.sounds.set_effects_volume(self.settings.sound_volume)
                         self.items[self.selected_index].text = f"Sound Volume: {self.settings.sound_volume * 100:.0f}%"
         result = super().update(dt, events)
         if result:
@@ -385,8 +359,7 @@ class CreditsScreen:
 
     def update(self, dt, events):
         if self.fade_in:
-            self.background_alpha = min(
-                255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
             if self.background_alpha >= MENU_BACKGROUND_ALPHA:
                 self.fade_in = False
                 self.background_alpha = MENU_BACKGROUND_ALPHA
@@ -405,8 +378,7 @@ class CreditsScreen:
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_surf = self.title_font.render(
-            CREDITS_TITLE, True, pygame.Color(MENU_TITLE_COLOR))
+        title_surf = self.title_font.render(CREDITS_TITLE, True, pygame.Color(MENU_TITLE_COLOR))
         title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, 100))
         screen.blit(title_surf, title_rect)
 
@@ -463,8 +435,7 @@ class GameOverScreen:
 
     def update(self, dt, events):
         if self.fade_in:
-            self.background_alpha = min(
-                255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
             if self.background_alpha >= MENU_BACKGROUND_ALPHA:
                 self.fade_in = False
                 self.background_alpha = MENU_BACKGROUND_ALPHA
@@ -483,28 +454,20 @@ class GameOverScreen:
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_surf = self.title_font.render(
-            "GAME OVER", True, pygame.Color("red"))
-        title_rect = title_surf.get_rect(
-            center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3))
+        title_surf = self.title_font.render("GAME OVER", True, pygame.Color("red"))
+        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3))
         screen.blit(title_surf, title_rect)
 
-        score_surf = self.text_font.render(
-            f"Your Score: {self.final_score}", True, (255, 255, 255))
-        score_rect = score_surf.get_rect(
-            center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
+        score_surf = self.text_font.render(f"Your Score: {self.final_score}", True, (255, 255, 255))
+        score_rect = score_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
         screen.blit(score_surf, score_rect)
 
-        instruction1 = self.text_font.render(
-            "Press SPACE to view the Highscores", True, (200, 200, 200))
-        instruction1_rect = instruction1.get_rect(
-            center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 80))
+        instruction1 = self.text_font.render("Press SPACE to view the Highscores", True, (200, 200, 200))
+        instruction1_rect = instruction1.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 80))
         screen.blit(instruction1, instruction1_rect)
 
-        instruction2 = self.text_font.render(
-            "Press ESC to return to the Main Menu", True, (200, 200, 200))
-        instruction2_rect = instruction2.get_rect(
-            center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 120))
+        instruction2 = self.text_font.render("Press ESC to return to the Main Menu", True, (200, 200, 200))
+        instruction2_rect = instruction2.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 120))
         screen.blit(instruction2, instruction2_rect)
 
 
@@ -578,8 +541,7 @@ class SoundTestMenu:
     def update_visible_items(self):
         self.visible_items = []
         start_index = self.scroll_offset
-        end_index = min(start_index + self.max_visible_items,
-                        len(self.sound_items))
+        end_index = min(start_index + self.max_visible_items, len(self.sound_items))
 
         for i in range(start_index, end_index):
             self.visible_items.append(self.sound_items[i])
@@ -591,8 +553,7 @@ class SoundTestMenu:
 
     def update(self, dt, events):
         if self.fade_in:
-            self.background_alpha = min(
-                255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
             if self.background_alpha >= MENU_BACKGROUND_ALPHA:
                 self.fade_in = False
                 self.background_alpha = MENU_BACKGROUND_ALPHA
@@ -613,12 +574,9 @@ class SoundTestMenu:
                             self.current_selection = 0
                             self.update_visible_items()
                         else:
-                            self.scroll_offset = max(
-                                0, len(self.sound_items) - self.max_visible_items)
+                            self.scroll_offset = max(0, len(self.sound_items) - self.max_visible_items)
                             self.current_selection = min(
-                                self.max_visible_items -
-                                1, len(self.sound_items) -
-                                1 - self.scroll_offset
+                                self.max_visible_items - 1, len(self.sound_items) - 1 - self.scroll_offset
                             )
                             self.update_visible_items()
 
@@ -628,8 +586,7 @@ class SoundTestMenu:
                     if self.current_selection >= len(self.visible_items):
                         if self.scroll_offset + self.max_visible_items < len(self.sound_items):
                             self.scroll_offset += 1
-                            self.current_selection = len(
-                                self.visible_items) - 1
+                            self.current_selection = len(self.visible_items) - 1
                             self.update_visible_items()
                         else:
                             self.scroll_offset = 0
@@ -805,24 +762,20 @@ class SoundTestMenu:
         screen.blit(background, (0, 0))
 
         title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
-        title_surface = title_font.render(
-            self.title, True, pygame.Color(MENU_TITLE_COLOR))
+        title_surface = title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
         title_rect = title_surface.get_rect(center=(SCREEN_WIDTH / 2, 60))
         screen.blit(title_surface, title_rect)
 
         indicator_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.7))
 
         if self.scroll_offset > 0:
-            up_text = indicator_font.render(
-                "Scroll UP", True, pygame.Color("yellow"))
+            up_text = indicator_font.render("Scroll UP", True, pygame.Color("yellow"))
             up_rect = up_text.get_rect(center=(SCREEN_WIDTH / 2, 100))
             screen.blit(up_text, up_rect)
 
         if self.scroll_offset + self.max_visible_items < len(self.sound_items):
-            down_text = indicator_font.render(
-                "Scroll DOWN", True, pygame.Color("yellow"))
-            down_rect = down_text.get_rect(
-                center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100))
+            down_text = indicator_font.render("Scroll DOWN", True, pygame.Color("yellow"))
+            down_rect = down_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100))
             screen.blit(down_text, down_rect)
 
         font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
@@ -856,14 +809,11 @@ class SoundTestMenu:
 
             if is_selected:
                 color = MENU_SELECTED_COLOR
-                scaled_font = pygame.font.Font(
-                    None, int(MENU_ITEM_FONT_SIZE * 1.1))
-                surface = scaled_font.render(
-                    f"► {text}", True, pygame.Color(color))
+                scaled_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 1.1))
+                surface = scaled_font.render(f"► {text}", True, pygame.Color(color))
             else:
                 color = base_color
-                surface = small_font.render(
-                    f"  {text}", True, pygame.Color(color))
+                surface = small_font.render(f"  {text}", True, pygame.Color(color))
 
             text_rect = surface.get_rect(center=(SCREEN_WIDTH / 2, current_y))
             screen.blit(surface, text_rect)
@@ -871,25 +821,18 @@ class SoundTestMenu:
             visible_item_count += 1
 
         if self.last_played:
-            played_font = pygame.font.Font(
-                None, int(MENU_ITEM_FONT_SIZE * 0.8))
+            played_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.8))
 
-            played_text = played_font.render(
-                self.last_played, True, pygame.Color("lightgreen"))
-            played_rect = played_text.get_rect(
-                center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 128))
+            played_text = played_font.render(self.last_played, True, pygame.Color("lightgreen"))
+            played_rect = played_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 128))
             screen.blit(played_text, played_rect)
 
-        instructions = [
-            "UP / DOWN to Navigate - ENTER to play sound - SPACE to go back"]
+        instructions = ["UP / DOWN to Navigate - ENTER to play sound - SPACE to go back"]
 
-        instruction_font = pygame.font.Font(
-            None, int(MENU_ITEM_FONT_SIZE * 0.65))
+        instruction_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.65))
         for i, instruction in enumerate(instructions):
-            text = instruction_font.render(
-                instruction, True, pygame.Color("lightgray"))
-            text_rect = text.get_rect(
-                center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 70 + i * 25))
+            text = instruction_font.render(instruction, True, pygame.Color("lightgray"))
+            text_rect = text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 70 + i * 25))
             screen.blit(text, text_rect)
 
 
@@ -918,10 +861,8 @@ class AchievementsMenu(Menu):
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_surf = self.title_font.render(
-            self.title, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surf.get_rect(
-            center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 12))
+        title_surf = self.title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
+        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 12))
         screen.blit(title_surf, title_rect)
 
         start_y = SCREEN_HEIGHT / 5
@@ -961,16 +902,13 @@ class AchievementsMenu(Menu):
                 ascii_start_x = center_x - 120
 
                 for line_idx, line in enumerate(graphics):
-                    graphic_surf = graphics_font.render(
-                        line, True, graphic_color)
-                    graphic_rect = graphic_surf.get_rect(
-                        topleft=(ascii_start_x, current_y - 8 + line_idx * 10))
+                    graphic_surf = graphics_font.render(line, True, graphic_color)
+                    graphic_rect = graphic_surf.get_rect(topleft=(ascii_start_x, current_y - 8 + line_idx * 10))
                     screen.blit(graphic_surf, graphic_rect)
 
                 name_x = center_x - 20
             else:
-                name_surf_temp = name_font.render(
-                    achievement.name, True, name_color)
+                name_surf_temp = name_font.render(achievement.name, True, name_color)
                 name_x = center_x - name_surf_temp.get_width() / 2
 
             name_surf = name_font.render(achievement.name, True, name_color)
@@ -979,18 +917,14 @@ class AchievementsMenu(Menu):
 
         back_button_y = SCREEN_HEIGHT - 80
         for i, item in enumerate(self.items):
-            item_rect = item.draw(
-                screen, (SCREEN_WIDTH / 2, back_button_y + i * MENU_ITEM_SPACING), self.item_font)
+            item_rect = item.draw(screen, (SCREEN_WIDTH / 2, back_button_y + i * MENU_ITEM_SPACING), self.item_font)
 
-        unlocked_count = sum(
-            1 for achievement in self.achievement_system.achievements if achievement.unlocked)
+        unlocked_count = sum(1 for achievement in self.achievement_system.achievements if achievement.unlocked)
         total_count = len(self.achievement_system.achievements)
         progress_text = f"Progress: {unlocked_count}/{total_count} Achievements unlocked"
         progress_font = pygame.font.Font(None, 20)
-        progress_surf = progress_font.render(
-            progress_text, True, pygame.Color("lightblue"))
-        progress_rect = progress_surf.get_rect(
-            center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 12 + 35))
+        progress_surf = progress_font.render(progress_text, True, pygame.Color("lightblue"))
+        progress_rect = progress_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 12 + 35))
         screen.blit(progress_surf, progress_rect)
 
     def update(self, dt, events):
@@ -1019,8 +953,7 @@ class ShipSelectionMenu(Menu):
         self.ships = ship_manager.get_available_ships()
 
         try:
-            self.selected_ship_index = self.ships.index(
-                ship_manager.current_ship)
+            self.selected_ship_index = self.ships.index(ship_manager.current_ship)
         except ValueError:
             self.selected_ship_index = 0
 
@@ -1030,11 +963,9 @@ class ShipSelectionMenu(Menu):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                    self.selected_ship_index = (
-                        self.selected_ship_index - 1) % len(self.ships)
+                    self.selected_ship_index = (self.selected_ship_index - 1) % len(self.ships)
                 elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                    self.selected_ship_index = (
-                        self.selected_ship_index + 1) % len(self.ships)
+                    self.selected_ship_index = (self.selected_ship_index + 1) % len(self.ships)
                 elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                     selected_ship = self.ships[self.selected_ship_index]
                     ship_data = ship_manager.get_ship_data(selected_ship)
@@ -1051,8 +982,7 @@ class ShipSelectionMenu(Menu):
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_surf = self.title_font.render(
-            self.title, True, pygame.Color(MENU_TITLE_COLOR))
+        title_surf = self.title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
         title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, 80))
         screen.blit(title_surf, title_rect)
 
@@ -1066,34 +996,28 @@ class ShipSelectionMenu(Menu):
 
             if i == self.selected_ship_index:
                 highlight_size = 80 + 10 * math.sin(self.animation_time * 4)
-                pygame.draw.circle(screen, (100, 100, 100, 100), (int(
-                    x), int(ship_y)), int(highlight_size), 3)
+                pygame.draw.circle(screen, (100, 100, 100, 100), (int(x), int(ship_y)), int(highlight_size), 3)
 
             if ship_data["unlocked"]:
 
                 base_color = ship_data.get("color", (255, 255, 255))
                 if i == self.selected_ship_index:
 
-                    ship_color = tuple(min(255, int(c * 1.3))
-                                       for c in base_color)
+                    ship_color = tuple(min(255, int(c * 1.3)) for c in base_color)
                 else:
                     ship_color = base_color
-                ShipRenderer.draw_ship(
-                    screen, x, ship_y, 0, ship_data["shape"], 2.0, ship_color)
+                ShipRenderer.draw_ship(screen, x, ship_y, 0, ship_data["shape"], 2.0, ship_color)
             else:
 
-                lock_color = (100, 100, 100) if i != self.selected_ship_index else (
-                    150, 150, 150)
-                ShipRenderer.draw_question_mark(
-                    screen, x, ship_y, 2.0, lock_color)
+                lock_color = (100, 100, 100) if i != self.selected_ship_index else (150, 150, 150)
+                ShipRenderer.draw_question_mark(screen, x, ship_y, 2.0, lock_color)
 
             name_font = pygame.font.Font(None, 24)
             if ship_data["unlocked"]:
 
                 base_color = ship_data.get("color", (255, 255, 255))
                 if i == self.selected_ship_index:
-                    name_color = tuple(min(255, int(c * 1.3))
-                                       for c in base_color)
+                    name_color = tuple(min(255, int(c * 1.3)) for c in base_color)
                 else:
                     name_color = base_color
                 name_text = ship_data["name"]
@@ -1114,8 +1038,7 @@ class ShipSelectionMenu(Menu):
 
         if ship_data["unlocked"]:
 
-            desc_surf = detail_font.render(
-                ship_data["description"], True, (255, 255, 255))
+            desc_surf = detail_font.render(ship_data["description"], True, (255, 255, 255))
             desc_rect = desc_surf.get_rect(center=(SCREEN_WIDTH / 2, detail_y))
             screen.blit(desc_surf, desc_rect)
 
@@ -1127,17 +1050,13 @@ class ShipSelectionMenu(Menu):
 
             for i, prop in enumerate(props):
                 prop_surf = small_font.render(prop, True, (200, 200, 200))
-                prop_rect = prop_surf.get_rect(
-                    center=(SCREEN_WIDTH / 2, detail_y + 40 + i * 25))
+                prop_rect = prop_surf.get_rect(center=(SCREEN_WIDTH / 2, detail_y + 40 + i * 25))
                 screen.blit(prop_surf, prop_rect)
 
         instruction_font = pygame.font.Font(None, 20)
-        instructions = ["LEFT / RIGHT: Select Ship",
-                        "ENTER / SPACE: Confirm Selection", "ESC: Back to Difficulty"]
+        instructions = ["LEFT / RIGHT: Select Ship", "ENTER / SPACE: Confirm Selection", "ESC: Back to Difficulty"]
 
         for i, instruction in enumerate(instructions):
-            instr_surf = instruction_font.render(
-                instruction, True, (150, 150, 150))
-            instr_rect = instr_surf.get_rect(
-                center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 60 + i * 20))
+            instr_surf = instruction_font.render(instruction, True, (150, 150, 150))
+            instr_rect = instr_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 60 + i * 20))
             screen.blit(instr_surf, instr_rect)

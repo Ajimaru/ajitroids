@@ -1,4 +1,5 @@
 import random
+
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 ASTEROID_MIN_RADIUS = 20
@@ -36,8 +37,7 @@ POWERUP_SPAWN_CHANCE = 0.3
 POWERUP_MAX_COUNT = 3
 POWERUP_LIFETIME = 15.0
 SHIELD_DURATION = 3.0
-POWERUP_TYPES = ["shield", "triple_shot", "rapid_fire",
-                 "laser_weapon", "missile_weapon", "shotgun_weapon"]
+POWERUP_TYPES = ["shield", "triple_shot", "rapid_fire", "laser_weapon", "missile_weapon", "shotgun_weapon"]
 POWERUP_COLORS = {
     "shield": "blue",
     "triple_shot": "magenta",
@@ -110,8 +110,7 @@ WEAPON_LASER = "laser"
 WEAPON_MISSILE = "missile"
 WEAPON_SHOTGUN = "shotgun"
 
-WEAPON_COLORS = {WEAPON_STANDARD: "white", WEAPON_LASER: "green",
-                 WEAPON_MISSILE: "red", WEAPON_SHOTGUN: "orange"}
+WEAPON_COLORS = {WEAPON_STANDARD: "white", WEAPON_LASER: "green", WEAPON_MISSILE: "red", WEAPON_SHOTGUN: "orange"}
 
 LASER_AMMO = 15
 MISSILE_AMMO = 8
@@ -129,8 +128,7 @@ BOSS_SCORE = 500
 
 BOSS_PROJECTILE_RADIUS = 8
 BOSS_PROJECTILE_SPEED = 200
-BOSS_PROJECTILE_COLORS = {"normal": (200, 0, 200), "homing": (
-    255, 0, 0), "explosive": (255, 128, 0)}
+BOSS_PROJECTILE_COLORS = {"normal": (200, 0, 200), "homing": (255, 0, 0), "explosive": (255, 128, 0)}
 
 
 def generate_default_highscores():
@@ -140,8 +138,7 @@ def generate_default_highscores():
 
     highscores = []
     for i in range(max_entries):
-        name = "".join(random.choice(allowed_chars)
-                       for _ in range(name_length))
+        name = "".join(random.choice(allowed_chars) for _ in range(name_length))
         score = (max_entries - i) * 1000
         highscores.append({"name": name, "score": score})
 

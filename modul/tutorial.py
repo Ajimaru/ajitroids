@@ -187,12 +187,9 @@ class Tutorial:
         page = self.pages[self.current_page]
         y_offset = 80
 
-        title_color = (100, 200, 255) if alpha == 255 else (
-            100, 200, 255, alpha)
-        title_surface = self.font_title.render(
-            page["title"], True, title_color)
-        title_rect = title_surface.get_rect(
-            center=(SCREEN_WIDTH / 2, y_offset))
+        title_color = (100, 200, 255) if alpha == 255 else (100, 200, 255, alpha)
+        title_surface = self.font_title.render(page["title"], True, title_color)
+        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH / 2, y_offset))
 
         if alpha < 255:
             title_surface.set_alpha(alpha)
@@ -206,11 +203,9 @@ class Tutorial:
                 continue
 
             if (line.startswith("[") and "]" in line) or (
-                ":" in line and any(weapon in line for weapon in [
-                                    "STANDARD", "LASER", "ROCKET", "SHOTGUN"])
+                ":" in line and any(weapon in line for weapon in ["STANDARD", "LASER", "ROCKET", "SHOTGUN"])
             ):
-                self.draw_colored_line(
-                    screen, line, SCREEN_WIDTH // 2, y_offset)
+                self.draw_colored_line(screen, line, SCREEN_WIDTH // 2, y_offset)
             else:
                 color = (255, 255, 255)
 
@@ -228,8 +223,7 @@ class Tutorial:
                 if alpha < 255:
                     content_surface.set_alpha(alpha)
 
-                content_rect = content_surface.get_rect(
-                    center=(SCREEN_WIDTH / 2, y_offset))
+                content_rect = content_surface.get_rect(center=(SCREEN_WIDTH / 2, y_offset))
                 screen.blit(content_surface, content_rect)
 
             y_offset += 35
@@ -237,14 +231,12 @@ class Tutorial:
         nav_y = SCREEN_HEIGHT - 80
 
         page_info = f"Page {self.current_page + 1} of {len(self.pages)}"
-        page_surface = self.font_navigation.render(
-            page_info, True, (150, 150, 150))
+        page_surface = self.font_navigation.render(page_info, True, (150, 150, 150))
         page_rect = page_surface.get_rect(center=(SCREEN_WIDTH / 2, nav_y))
         screen.blit(page_surface, page_rect)
 
         nav_text = "LEFT / RIGHT to navigate or SPACE to go Back"
-        nav_surface = self.font_navigation.render(
-            nav_text, True, (100, 100, 100))
+        nav_surface = self.font_navigation.render(nav_text, True, (100, 100, 100))
         nav_rect = nav_surface.get_rect(center=(SCREEN_WIDTH / 2, nav_y + 30))
         screen.blit(nav_surface, nav_rect)
 
@@ -253,13 +245,11 @@ class Tutorial:
         progress_x = (SCREEN_WIDTH - progress_width) // 2
         progress_y = nav_y - 30
 
-        pygame.draw.rect(screen, (50, 50, 50), (progress_x,
-                         progress_y, progress_width, progress_height))
+        pygame.draw.rect(screen, (50, 50, 50), (progress_x, progress_y, progress_width, progress_height))
 
         current_progress = (self.current_page + 1) / len(self.pages)
         progress_fill_width = int(progress_width * current_progress)
-        pygame.draw.rect(screen, (100, 200, 255), (progress_x,
-                         progress_y, progress_fill_width, progress_height))
+        pygame.draw.rect(screen, (100, 200, 255), (progress_x, progress_y, progress_fill_width, progress_height))
 
     def draw_colored_line(self, screen, line, x, y):
 
@@ -288,12 +278,10 @@ class Tutorial:
             elif "[HARD]" in name_part:
                 name_color = (255, 0, 0)
 
-            name_surface = self.font_content.render(
-                name_part, True, name_color)
+            name_surface = self.font_content.render(name_part, True, name_color)
             name_width = name_surface.get_width()
 
-            desc_surface = self.font_content.render(
-                desc_part, True, (255, 255, 255))
+            desc_surface = self.font_content.render(desc_part, True, (255, 255, 255))
 
             total_width = name_width + desc_surface.get_width()
             start_x = x - total_width // 2
@@ -316,12 +304,10 @@ class Tutorial:
             elif "SHOTGUN:" in name_part:
                 name_color = (255, 165, 0)
 
-            name_surface = self.font_content.render(
-                name_part, True, name_color)
+            name_surface = self.font_content.render(name_part, True, name_color)
             name_width = name_surface.get_width()
 
-            desc_surface = self.font_content.render(
-                desc_part, True, (255, 255, 255))
+            desc_surface = self.font_content.render(desc_part, True, (255, 255, 255))
 
             total_width = name_width + desc_surface.get_width()
             start_x = x - total_width // 2
@@ -331,7 +317,6 @@ class Tutorial:
 
         else:
 
-            content_surface = self.font_content.render(
-                line, True, (255, 255, 255))
+            content_surface = self.font_content.render(line, True, (255, 255, 255))
             content_rect = content_surface.get_rect(center=(x, y))
             screen.blit(content_surface, content_rect)

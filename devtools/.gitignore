@@ -2,3 +2,7 @@ version.txt
 changelog.md
 release-manager.log
 release.log
+markdownlint-log.txt
+black-log.txt
+flake8-report/
+htmlcov/

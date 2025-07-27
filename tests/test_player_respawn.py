@@ -1,6 +1,7 @@
 from modul.player import Player
 import pygame
 
+
 def test_player_respawn():
     player = Player(100, 100)
     player.position = pygame.Vector2(0, 0)

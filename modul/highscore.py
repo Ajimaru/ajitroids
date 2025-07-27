@@ -26,8 +26,7 @@ class HighscoreManager:
                 self.save_highscores()
         except Exception as e:
             print(f"Error loading highscores: {e}")
-            self.highscores = [{"name": "AAA", "score": 1000 - i * 100}
-                               for i in range(HIGHSCORE_MAX_ENTRIES)]
+            self.highscores = [{"name": "AAA", "score": 1000 - i * 100} for i in range(HIGHSCORE_MAX_ENTRIES)]
 
     def save_highscores(self):
         try:
@@ -76,8 +75,7 @@ class HighscoreInput:
                     self.current_pos = max(0, self.current_pos - 1)
 
                 elif event.key == pygame.K_RIGHT:
-                    self.current_pos = min(
-                        HIGHSCORE_NAME_LENGTH - 1, self.current_pos + 1)
+                    self.current_pos = min(HIGHSCORE_NAME_LENGTH - 1, self.current_pos + 1)
 
                 elif event.key == pygame.K_LEFT:
                     self.current_pos = max(0, self.current_pos - 1)
@@ -97,13 +95,11 @@ class HighscoreInput:
         return None
 
     def draw(self, screen):
-        overlay = pygame.Surface(
-            (SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 200))
         screen.blit(overlay, (0, 0))
 
-        title_text = self.font.render(
-            "NEW HIGHSCORE!", True, pygame.Color("white"))
+        title_text = self.font.render("NEW HIGHSCORE!", True, pygame.Color("white"))
         screen.blit(
             title_text,
             (
@@ -112,16 +108,14 @@ class HighscoreInput:
             ),
         )
 
-        score_text = self.font.render(
-            f"Score: {self.score}", True, pygame.Color("white"))
+        score_text = self.font.render(f"Score: {self.score}", True, pygame.Color("white"))
         screen.blit(
             score_text,
             (SCREEN_WIDTH // 2 - score_text.get_width() // 2, SCREEN_HEIGHT // 3),
         )
 
         for i in range(HIGHSCORE_NAME_LENGTH):
-            color = pygame.Color(
-                "yellow") if i == self.current_pos else pygame.Color("white")
+            color = pygame.Color("yellow") if i == self.current_pos else pygame.Color("white")
             char_text = self.font.render(self.name[i], True, color)
 
             x = SCREEN_WIDTH // 2 - (HIGHSCORE_NAME_LENGTH * 40) // 2 + i * 40
@@ -143,16 +137,13 @@ class HighscoreInput:
             screen.blit(char_text, (x, y))
 
         hint_font = pygame.font.Font(None, 30)
-        hint1 = hint_font.render(
-            "UP / DOWN Change letters", True, pygame.Color("white"))
+        hint1 = hint_font.render("UP / DOWN Change letters", True, pygame.Color("white"))
         hint2 = hint_font.render("ENTER Confirm", True, pygame.Color("white"))
 
-        screen.blit(hint1, (SCREEN_WIDTH // 2 -
-                    hint1.get_width() // 2, SCREEN_HEIGHT * 2 // 3))
+        screen.blit(hint1, (SCREEN_WIDTH // 2 - hint1.get_width() // 2, SCREEN_HEIGHT * 2 // 3))
         screen.blit(
             hint2,
-            (SCREEN_WIDTH // 2 - hint2.get_width() //
-             2, SCREEN_HEIGHT * 2 // 3 + 30),
+            (SCREEN_WIDTH // 2 - hint2.get_width() // 2, SCREEN_HEIGHT * 2 // 3 + 30),
         )
 
 
@@ -175,8 +166,7 @@ class HighscoreDisplay:
 
     def update(self, dt, events):
         if self.fade_in:
-            self.background_alpha = min(
-                255, self.background_alpha + 255 * dt / 0.5)
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / 0.5)
             if self.background_alpha >= 200:
                 self.fade_in = False
                 self.background_alpha = 200
@@ -184,9 +174,7 @@ class HighscoreDisplay:
         target = 1.0 if self.back_button["selected"] else 0.0
         animation_speed = 12.0
         self.back_button["hover_animation"] = (
-            self.back_button["hover_animation"] +
-            (target -
-             self.back_button["hover_animation"]) * dt * animation_speed
+            self.back_button["hover_animation"] + (target - self.back_button["hover_animation"]) * dt * animation_speed
         )
 
         if self.input_cooldown > 0:
@@ -202,15 +190,12 @@ class HighscoreDisplay:
         return None
 
     def draw(self, screen):
-        overlay = pygame.Surface(
-            (SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, self.background_alpha))
         screen.blit(overlay, (0, 0))
 
-        title_text = self.font_title.render(
-            "HIGHSCORES", True, pygame.Color("white"))
-        screen.blit(title_text, (SCREEN_WIDTH // 2 -
-                    title_text.get_width() // 2, 50))
+        title_text = self.font_title.render("HIGHSCORES", True, pygame.Color("white"))
+        screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, 50))
 
         for i, entry in enumerate(self.highscore_manager.highscores):
             if i == 0:
@@ -223,8 +208,7 @@ class HighscoreDisplay:
                 color = pygame.Color("white")
             rank_text = self.font_entry.render(f"{i+1}.", True, color)
             name_text = self.font_entry.render(f"{entry['name']}", True, color)
-            score_text = self.font_entry.render(
-                f"{entry['score']}", True, color)
+            score_text = self.font_entry.render(f"{entry['score']}", True, color)
 
             x_rank = SCREEN_WIDTH // 4
             x_name = SCREEN_WIDTH // 2 - 50
@@ -242,31 +226,26 @@ class HighscoreDisplay:
             0,
             min(
                 255,
-                int(color.r + (selected_color.r - color.r)
-                    * button["hover_animation"]),
+                int(color.r + (selected_color.r - color.r) * button["hover_animation"]),
             ),
         )
         g = max(
             0,
             min(
                 255,
-                int(color.g + (selected_color.g - color.g)
-                    * button["hover_animation"]),
+                int(color.g + (selected_color.g - color.g) * button["hover_animation"]),
             ),
         )
         b = max(
             0,
             min(
                 255,
-                int(color.b + (selected_color.b - color.b)
-                    * button["hover_animation"]),
+                int(color.b + (selected_color.b - color.b) * button["hover_animation"]),
             ),
         )
         size_multiplier = 1.0 + 0.2 * button["hover_animation"]
-        scaled_font = pygame.font.Font(
-            None, int(MENU_ITEM_FONT_SIZE * size_multiplier))
+        scaled_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * size_multiplier))
 
         button_text = scaled_font.render(button["text"], True, (r, g, b))
-        button_rect = button_text.get_rect(
-            center=(SCREEN_WIDTH // 2, button["y"]))
+        button_rect = button_text.get_rect(center=(SCREEN_WIDTH // 2, button["y"]))
         screen.blit(button_text, button_rect)

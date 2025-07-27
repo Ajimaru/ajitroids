@@ -6,8 +6,7 @@ from modul.constants import *
 
 class Star:
     def __init__(self):
-        self.position = pygame.Vector2(random.randint(
-            0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT))
+        self.position = pygame.Vector2(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT))
         self.size = random.choice(STAR_SIZES)
         self.color = random.choice(STAR_COLORS)
         self.twinkle_timer = random.random() * 2 * math.pi
@@ -15,12 +14,10 @@ class Star:
     def update(self, dt):
         self.twinkle_timer += dt
         brightness = abs(math.sin(self.twinkle_timer))
-        self.current_color = [int(c * brightness)
-                              for c in pygame.Color(self.color)]
+        self.current_color = [int(c * brightness) for c in pygame.Color(self.color)]
 
     def draw(self, screen):
-        pygame.draw.circle(screen, self.current_color,
-                           self.position, self.size)
+        pygame.draw.circle(screen, self.current_color, self.position, self.size)
 
 
 class Starfield:
@@ -91,10 +88,8 @@ class MenuStarfield:
                     if not all(isinstance(val, (int, float)) for val in [x, y, z, brightness]):
                         continue
                     scale = 200 / (z + 200)
-                    screen_x = SCREEN_WIDTH / 2 + \
-                        (x - SCREEN_WIDTH / 2) * scale
-                    screen_y = SCREEN_HEIGHT / 2 + \
-                        (y - SCREEN_HEIGHT / 2) * scale
+                    screen_x = SCREEN_WIDTH / 2 + (x - SCREEN_WIDTH / 2) * scale
+                    screen_y = SCREEN_HEIGHT / 2 + (y - SCREEN_HEIGHT / 2) * scale
                     size = max(1, int(3 * scale))
                     color_value = min(255, int(brightness * scale))
                     color = (color_value, color_value, color_value)
@@ -104,8 +99,7 @@ class MenuStarfield:
                         and isinstance(screen_x, (int, float))
                         and isinstance(screen_y, (int, float))
                     ):
-                        pygame.draw.circle(
-                            screen, color, (int(screen_x), int(screen_y)), max(1, size))
+                        pygame.draw.circle(screen, color, (int(screen_x), int(screen_y)), max(1, size))
             except (IndexError, TypeError, ValueError) as e:
                 print(f"Skipped faulty star: {star}, Error: {e}")
                 continue

@@ -1,19 +1,21 @@
+<!-- markdownlint-disable MD013 -->
 # 🚀 Ajitroids
+
 ![License](https://img.shields.io/badge/license-MIT-blue.svg?style=plastic)
 ![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids?style=plastic)
 ![Stars](https://img.shields.io/github/stars/Ajimaru/ajitroids?style=plastic)
 ![Downloads](https://img.shields.io/github/downloads/Ajimaru/ajitroids/total?style=plastic)
 
-**A modern Asteroids remake built with Pygame**
+[A modern Asteroids remake built with Pygame]
 
 ![Ajitroids Screenshot](docs/assets/screenshots/Ajitroids_title.png)
 
 ## 🎮 Game Description
 
-Ajitroids is an exciting remake of the classic arcade game Asteroids with modern features and gameplay elements. Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destroy enemies and collect power-ups while trying to achieve the highest score.
+Ajitroids is an exciting remake of the classic arcade game Asteroids with modern features and gameplay elements.
+Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destroy enemies and collect power-ups while trying to achieve the highest score.
 
 ![Ajitroids Screenshot](docs/assets/screenshots/Ajitroids_gameplay.gif)
-
 
 ## ✨ Features
 
@@ -25,7 +27,6 @@ Ajitroids is an exciting remake of the classic arcade game Asteroids with modern
 - **Boss Fights**: Face epic boss enemies in higher levels
 - **Customizable Settings**: Fullscreen mode, sound options and more
 - **Smooth Animations**: Fluid ship movements and asteroid rotations
-
 
 ## 🚀 Installation
 
@@ -61,7 +62,6 @@ pip install -r requirements.txt
 # Start the game
 python main.py
 ```
-
 
 ## 🌟 Gameplay
 
@@ -105,13 +105,16 @@ Unlock these ships by progressing through the game and achieving milestones!
 - Collision detection with optimized algorithms
 
 ## 📜 License
+
 This project is licensed under the MIT License with Commons Clause - see the LICENSE file for details.
 
 ### 👥 Contributors
+
 - Me - Main Developer
 - GitHub Copilot - Development Assistant
 
 ### 🙏 Acknowledgements
+
 - Inspiration from the classic Atari game Asteroids
 - Thanks to the [Pygame](https://www.pygame.org/ "Pygame Homepage") community for the great library
 - [Boot.dev](https://www.boot.dev/ "Boot.dev Homepage") for support and inspiration

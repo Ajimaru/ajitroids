@@ -16,6 +16,10 @@
   - [Requirements](#requirements-1)
   - [Notes](#notes-1)
 - [Dokumentation: full-release.sh](#dokumentation-full-releasesh)
+  - [Markdownlint Integration](#markdownlint-integration)
+  - [Black Integration](#black-integration)
+  - [flake8 Integration](#flake8-integration)
+  - [Pytest, Coverage und htmlcov Integration](#pytest-coverage-und-htmlcov-integration)
   - [Features](#features-2)
   - [How it works](#how-it-works-2)
   - [Usage](#usage-2)
@@ -23,7 +27,6 @@
   - [Notes](#notes-2)
   - [Commit Types according to Conventional Commits](#commit-types-according-to-conventional-commits)
   - [Further Information](#further-information)
-
 
 # Intro
 
@@ -44,17 +47,21 @@ All scripts are documented below and can be used independently or in combination
 
 ## Included Files
 
-| File                   | Purpose                                              |
-|------------------------|------------------------------------------------------|
-| `full-release.sh`      | Complete menu for commit + version + changelog + tag |
-| `release-manager.sh`   | Interactive management of releases and tags          |
-| `generate_docs.py`     | Generates HTML documentation from project README.md  |
-| `version.txt`          | Stores the current version number (e.g. v0.0.1)      |
-| `changelog.md`         | Change log grouped by commit types                   |
-| `release.log`          | Log of all releases and commits with timestamps      |
-| `release-manager.log`  | Log file for release-manager.sh actions and events   |
-| `flow.html`            | Visualizes the release workflow and process steps    |
-| `README.md`            | Documentation for the release module                 |
+| File                   | Purpose                                                 |
+|------------------------|---------------------------------------------------------|
+| `full-release.sh`      | Complete menu for commit + version + changelog + tag    |
+| `release-manager.sh`   | Interactive management of releases and tags             |
+| `generate_docs.py`     | Generates HTML documentation from project README.md     |
+| `version.txt`          | Stores the current version number (e.g. v0.0.1)         |
+| `changelog.md`         | Change log grouped by commit types                      |
+| `release.log`          | Log of all releases and commits with timestamps         |
+| `release-manager.log`  | Log file for release-manager.sh actions and events      |
+| `markdownlint-log.txt` | Stores results and warnings from Markdownlint checks    |
+| `black-log.txt`        | Contains Black formatting check output for Python files |
+| `htmlcov/`             | Directory for Pytest coverage HTML reports              |
+| `flake8-report/`       | Directory for Flake8 HTML linting reports               |
+| `flow.html`            | Visualizes the release workflow and process steps       |
+| `README.md`            | Documentation for the release module                    |
 
 # Documentation release-manager.sh
 
@@ -143,6 +150,22 @@ The script `generate_docs.py` generates a modern, responsive HTML documentation 
 
 `full-release.sh` is the central release and version management script for this project. It streamlines the entire publishing process, ensures consistent versioning, and automates the creation of changelogs and tags. The module is designed for developers who need a reliable and traceable release workflow.
 
+## Markdownlint Integration
+
+The release script checks all Markdown files using `markdownlint`. Results are saved in `devtools/markdownlint-log.txt`. Warnings **do not** abort the release process.
+
+## Black Integration
+
+All Python files in `modul/` and `tests/` are checked with Black in dry-run mode (`--check`). The output and any formatting warnings are saved in `devtools/black-logs.txt`. Warnings **do not** abort the release process.
+
+## flake8 Integration
+
+All Python files in `modul/` and `tests/` are checked with `flake8`. Additionally, an HTML report is generated in `devtools/flake8-report/` (`index.html`). Warnings or errors **do not** abort the release process.
+
+## Pytest, Coverage und htmlcov Integration
+
+The release script runs all tests using `pytest`. Test coverage is measured with the `--cov` option, and an HTML report is generated in the `/devtools/htmlcov` directory at the project root. If any test fails, the release script will **abort** immediately.
+
 ## Features
 
 - Interactive commit messages following Conventional Commits
@@ -200,5 +223,6 @@ The release module guides you through an interactive workflow for creating commi
 > Tip: This structure facilitates automatic changelog generation and semantic versioning.
 
 ## Further Information
+
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - [Semantic Versioning](https://semver.org/)

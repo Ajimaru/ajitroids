@@ -90,8 +90,7 @@ class ShipManager:
             ship_name = self.ships[ship_id]["name"]
             print(f"🚀 {ship_name} unlocked!")
             if notification_callback:
-                notification_callback(
-                    f" {ship_name} unlocked!", "New ship available in ship selection!")
+                notification_callback(f" {ship_name} unlocked!", "New ship available in ship selection!")
             return True
         return False
 
@@ -105,8 +104,7 @@ class ShipManager:
                     ship_name = self.ships["speedster"]["name"]
                     print(f"🚀 {ship_name} unlocked!")
                     if notification_callback:
-                        notification_callback(
-                            f" {ship_name} unlocked!", "New ship available in ship selection!")
+                        notification_callback(f" {ship_name} unlocked!", "New ship available in ship selection!")
 
             elif difficulty == "normal" and not self.ships["tank"]["unlocked"]:
                 if self.unlock_ship("tank"):
@@ -114,8 +112,7 @@ class ShipManager:
                     ship_name = self.ships["tank"]["name"]
                     print(f"🚀 {ship_name} unlocked!")
                     if notification_callback:
-                        notification_callback(
-                            f" {ship_name} unlocked!", "New ship available in ship selection!")
+                        notification_callback(f" {ship_name} unlocked!", "New ship available in ship selection!")
 
             elif difficulty == "hard" and not self.ships["destroyer"]["unlocked"]:
                 if self.unlock_ship("destroyer"):
@@ -123,8 +120,7 @@ class ShipManager:
                     ship_name = self.ships["destroyer"]["name"]
                     print(f"🚀 {ship_name} unlocked!")
                     if notification_callback:
-                        notification_callback(
-                            f" {ship_name} unlocked!", "New ship available in ship selection!")
+                        notification_callback(f" {ship_name} unlocked!", "New ship available in ship selection!")
 
         return unlocked_any
 
@@ -160,22 +156,19 @@ class ShipRenderer:
     def draw_ship(screen, x, y, rotation, ship_type, scale=1.0, color=(255, 255, 255)):
 
         if ship_type == "triangle" or ship_type == "standard":
-            ShipRenderer.draw_triangle_ship(
-                screen, x, y, rotation, scale, color)
+            ShipRenderer.draw_triangle_ship(screen, x, y, rotation, scale, color)
         elif ship_type == "arrow":
             ShipRenderer.draw_arrow_ship(screen, x, y, rotation, scale, color)
         elif ship_type == "heavy":
             ShipRenderer.draw_heavy_ship(screen, x, y, rotation, scale, color)
         elif ship_type == "destroyer":
-            ShipRenderer.draw_destroyer_ship(
-                screen, x, y, rotation, scale, color)
+            ShipRenderer.draw_destroyer_ship(screen, x, y, rotation, scale, color)
         else:
             ShipRenderer.draw_question_mark(screen, x, y, scale, color)
 
     @staticmethod
     def draw_triangle_ship(screen, x, y, rotation, scale, color):
-        points = [(0, -15 * scale), (-12 * scale, 15 * scale),
-                  (12 * scale, 15 * scale)]
+        points = [(0, -15 * scale), (-12 * scale, 15 * scale), (12 * scale, 15 * scale)]
 
         rotated_points = []
         for px, py in points:
@@ -258,8 +251,7 @@ class ShipRenderer:
 
         pygame.draw.polygon(screen, color, rotated_points, 2)
 
-        weapon_points = [(-6 * scale, -9 * scale), (6 * scale, -9 * scale),
-                         (-9 * scale, 6 * scale), (9 * scale, 6 * scale)]
+        weapon_points = [(-6 * scale, -9 * scale), (6 * scale, -9 * scale), (-9 * scale, 6 * scale), (9 * scale, 6 * scale)]
 
         for px, py in weapon_points:
             cos_r = math.cos(math.radians(rotation))

@@ -37,16 +37,89 @@ check_clean_state() {
 }
 
 color_msg "$CYAN" "[INFO] Commit creation"
+
+BLACK_LOG="$SCRIPT_DIR/black-logs.txt"
+if ! command -v black >/dev/null 2>&1; then
+  color_msg "$YELLOW" "[WARNING] black not found in PATH."
+  read -r -p "Install black for your OS? (y/n): " DO_INSTALL_BLACK
+  if [[ "$DO_INSTALL_BLACK" =~ ^[Yy]$ ]]; then
+    if command -v python3 >/dev/null 2>&1; then
+      color_msg "$CYAN" "[INFO] Installing black via pip..."
+      python3 -m pip install black || color_msg "$YELLOW" "[WARNING] Installation failed. Please install manually."
+    else
+      color_msg "$YELLOW" "[WARNING] Python3 not found. Please install black manually."
+    fi
+  fi
+  color_msg "$YELLOW" "[INFO] Continuing without black."
+else
+  color_msg "$CYAN" "[LINT] Running black in dry-run mode..."
+  if ! black --check modul/ tests/ | tee "$BLACK_LOG"; then
+    color_msg "$YELLOW" "[WARNING] black found formatting issues. See $BLACK_LOG. Release continues."
+  else
+    color_msg "$GREEN" "[OK] All Python files are properly formatted. Log: $BLACK_LOG"
+  fi
+fi
+
+if ! command -v markdownlint >/dev/null 2>&1; then
+  color_msg "$YELLOW" "[WARNING] markdownlint not found in PATH."
+  read -r -p "Install markdownlint for your OS? (y/n): " DO_INSTALL_MD
+  if [[ "$DO_INSTALL_MD" =~ ^[Yy]$ ]]; then
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      color_msg "$CYAN" "[INFO] Installing markdownlint-cli via Homebrew..."
+      brew install markdownlint-cli || color_msg "$YELLOW" "[WARNING] Installation failed. Please install manually."
+    else
+      color_msg "$CYAN" "[INFO] Installing markdownlint-cli via npm..."
+      npm install -g markdownlint-cli || color_msg "$YELLOW" "[WARNING] Installation failed. Please install manually."
+    fi
+  fi
+  color_msg "$YELLOW" "[INFO] Continuing without markdownlint."
+else
+  color_msg "$CYAN" "[LINT] Running markdownlint on all Markdown files..."
+  MARKDOWNLINT_LOG="$SCRIPT_DIR/markdownlint-log.txt"
+  if ! markdownlint "**/*.md" | tee "$MARKDOWNLINT_LOG"; then
+    color_msg "$YELLOW" "[WARNING] markdownlint found issues. See $MARKDOWNLINT_LOG. Release continues."
+  else
+    color_msg "$GREEN" "[OK] All Markdown files passed linting. Log: $MARKDOWNLINT_LOG"
+  fi
+fi
+
+FLAKE8_HTML_DIR="$SCRIPT_DIR/flake8-report"
+if ! command -v flake8 >/dev/null 2>&1; then
+  color_msg "$YELLOW" "[WARNING] flake8 not found in PATH."
+  read -r -p "Install flake8 for your OS? (y/n): " DO_INSTALL_FLAKE8
+  if [[ "$DO_INSTALL_FLAKE8" =~ ^[Yy]$ ]]; then
+    if command -v python3 >/dev/null 2>&1; then
+      color_msg "$CYAN" "[INFO] Installing flake8 and flake8-html via pip..."
+      python3 -m pip install flake8 flake8-html || color_msg "$YELLOW" "[WARNING] Installation failed. Please install manually."
+    else
+      color_msg "$YELLOW" "[WARNING] Python3 not found. Please install flake8 manually."
+    fi
+  fi
+  color_msg "$YELLOW" "[INFO] Continuing without flake8."
+else
+  color_msg "$CYAN" "[LINT] Running flake8 with HTML report..."
+  if ! flake8 modul/ tests/ --format=html --htmldir="$FLAKE8_HTML_DIR"; then
+    color_msg "$YELLOW" "[WARNING] flake8 found issues. See $FLAKE8_HTML_DIR/index.html. Release continues."
+  else
+    color_msg "$GREEN" "[OK] flake8 passed. HTML report: $FLAKE8_HTML_DIR/index.html"
+  fi
+fi
+
 if ! command -v pytest >/dev/null 2>&1; then
   color_msg "$YELLOW" "[WARNING] pytest not found in PATH."
-  read -r -p "Continue without tests? (y/n): " DO_CONTINUE
-  if [[ ! "$DO_CONTINUE" =~ ^[Yy]$ ]]; then
-    color_msg "$RED" "[CANCELLED] Release aborted."
-    exit 1
+  read -r -p "Install pytest for your OS? (y/n): " DO_INSTALL_PYTEST
+  if [[ "$DO_INSTALL_PYTEST" =~ ^[Yy]$ ]]; then
+    if command -v python3 >/dev/null 2>&1; then
+      color_msg "$CYAN" "[INFO] Installing pytest via pip..."
+      python3 -m pip install pytest || color_msg "$YELLOW" "[WARNING] Installation failed. Please install manually."
+    else
+      color_msg "$YELLOW" "[WARNING] Python3 not found. Please install pytest manually."
+    fi
   fi
+  color_msg "$YELLOW" "[INFO] Continuing without pytest."
 else
   color_msg "$CYAN" "[TEST] Starting pytest..."
-  if ! pytest --cov --cov-report=html --import-mode=importlib; then
+  if ! pytest --cov --cov-report=html:devtools/htmlcov --import-mode=importlib; then
     color_msg "$RED" "[ERROR] Pytest failed. Release aborted."
     exit 1
   fi
