@@ -56,8 +56,19 @@ types:
 	@echo "  chore     Maintenance"
 	@echo "  ci        CI/CD"
 	@echo "  build     Build System"
+	@echo "  ui        User Interface Changes"
+	@echo "  api       API Changes"
+	@echo "  parser    Parser Changes"
+	@echo "  script    Script Changes"
+	@echo "  config    Configuration Changes"
+	@echo "  test       Test Changes"
 	@echo "  revert    Revert commit"
 	@echo "  wip       Work in Progress"
+	@echo "  security  Security Fix"
+	@echo "  deps      Dependency Update"
+	@echo "  release   Release Preparation"
+	@echo "  merge     Merge Changes"
+	@echo "  subtask   Subtask Implementation"
 
 ## Shows all available targets
 help:
@@ -66,6 +77,7 @@ help:
 	@echo "  make preview   Show version & changelog"
 	@echo "  make log       Show release log"
 	@echo "  make types     Show commit types"
+	@echo "  make lint      Run all linters (black, markdownlint, flake8)"
 	@echo "  make test      Run all tests with pytest"
 	@echo "  make clean     Remove logs and reports"
 	@echo "  make help      Show this help"

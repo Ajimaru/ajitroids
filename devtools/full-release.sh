@@ -146,7 +146,7 @@ else
 fi
 
 PS3="Choose commit type: "
-select TYPE in feat fix docs style refactor perf test chore ci build Cancel; do
+select TYPE in feat fix docs style refactor perf test chore ci build revert Cancel; do
   case $TYPE in
     Cancel) color_msg "$RED" "[CANCELLED] Operation aborted."; exit 0 ;;
     *) break ;;
@@ -154,7 +154,7 @@ select TYPE in feat fix docs style refactor perf test chore ci build Cancel; do
 done
 
 PS3="Choose commit scope (or Cancel): "
-select SCOPE in api ui docs parser script config test build Cancel; do
+select SCOPE in api ui docs parser script config test wip security deps merge release subtask build Cancel; do
   case $SCOPE in
     Cancel) SCOPE=""; break ;;
     *) break ;;
