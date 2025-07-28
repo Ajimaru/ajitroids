@@ -4,6 +4,7 @@ markdownlint.log
 black.log
 changelog.md
 version.txt
+delete.queue
 flake8-report/
 htmlcov/
 markdownlint-report/
