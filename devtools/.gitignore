@@ -2,6 +2,8 @@ release-manager.log
 release.log
 markdownlint.log
 black.log
+changelog.md
+version.txt
 flake8-report/
 htmlcov/
 markdownlint-report/

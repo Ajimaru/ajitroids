@@ -32,8 +32,6 @@ htmlcov
 # user files
 *.json
 *.yaml
-devtools/changelog.md
-devtools/version.txt
 
 # Git files
 .git/
