@@ -17,7 +17,6 @@ log:
 	@echo "Release Log:"
 	@cat devtools/release.log
 
-
 ## Runs all linters (black, markdownlint, flake8)
 lint:
 	@echo "Running Python formatter (black)..."
@@ -28,10 +27,12 @@ lint:
 	@flake8 modul/ tests/ devtools/ --format=html --htmldir="devtools/flake8-report"
 	@echo "Tests and linters completed successfully."
 
+
 ## Runs all tests with pytest
 test:
 	@echo "Running tests with pytest..."
 	@pytest --cov --cov-report=html:devtools/htmlcov --import-mode=importlib
+
 ## Removes temporary files (optional extendable)
 clean:
 	@echo "Cleaning up devtools directory..."
@@ -74,6 +75,7 @@ types:
 help:
 	@echo "Makefile Help:"
 	@echo "  make release   execute full-release.sh"
+	@echo "  make ci        Run build tests with act"
 	@echo "  make preview   Show version & changelog"
 	@echo "  make log       Show release log"
 	@echo "  make types     Show commit types"

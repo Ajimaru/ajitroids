@@ -32,7 +32,6 @@ htmlcov
 # user files
 *.json
 *.yaml
-/_qpasslogs
 
 # Git files
 .git/
