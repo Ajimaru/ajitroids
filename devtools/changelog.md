@@ -193,3 +193,9 @@
 - test(release): Release description improved
 
 [Full Changelog](https://github.com/Ajimaru/ajitroids/compare/v0.19.6...v0.19.7)
+## v0.19.8 (2025-08-05)
+
+### chore
+- chore(release): release description optimized
+
+Full Changelog: v0.19.7...v0.19.8
