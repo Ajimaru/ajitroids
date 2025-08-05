@@ -272,7 +272,9 @@ if [ -n "$LAST_TAG" ]; then
     DIFF_LINK=""
     color_msg "$YELLOW" "[WARNING] Could not parse GitHub URL. Comparison link will be skipped."
   fi
-  echo "Full Changelog: $LAST_TAG...$NEW_VERSION" >> "$CHANGELOG_FILE"
+  echo "Full Changelog: [$LAST_TAG...$NEW_VERSION](https://github.com/$USERNAME/$REPO/compare/$LAST_TAG...$NEW_VERSION)" >> "$CHANGELOG_FILE"
+  echo "[Comparison of changes between $LAST_TAG and $NEW_VERSION]($DIFF_LINK)" >> "$CHANGELOG_FILE"
+  log "Added comparison link: $DIFF_LINK"
   [ -n "$DIFF_LINK" ] && log "Added comparison link: $DIFF_LINK"
 fi
 color_msg "$CYAN" "[CHANGELOG] Updated: $CHANGELOG_FILE"
