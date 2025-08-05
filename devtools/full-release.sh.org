@@ -138,7 +138,7 @@ if ! command -v pytest >/dev/null 2>&1; then
   color_msg "$YELLOW" "[INFO] Continuing without pytest."
 else
   color_msg "$CYAN" "[TEST] Starting pytest..."
-  if ! pytest --cov --cov-report=html:"${SCRIPT_DIR}/htmlcov" --import-mode=importlib; then
+  if ! pytest --cov --cov-report=html:devtools/htmlcov --import-mode=importlib; then
     color_msg "$RED" "[ERROR] Pytest failed. Release aborted."
     exit 1
   fi
@@ -262,27 +262,9 @@ TYPES=(feat fix docs style refactor perf test chore ci build)
   done
 } >> "$CHANGELOG_FILE"
 
-if [ -n "$LAST_TAG" ]; then
-  REMOTE_URL=$(git config --get remote.origin.url)
-  if [[ "$REMOTE_URL" =~ github\.com[/:]([^/]+)/([^/.]+)(\.git)?$ ]]; then
-    USERNAME="${BASH_REMATCH[1]}"
-    REPO="${BASH_REMATCH[2]}"
-    DIFF_LINK="https://github.com/$USERNAME/$REPO/compare/$LAST_TAG...$NEW_VERSION"
-  else
-    DIFF_LINK=""
-    color_msg "$YELLOW" "[WARNING] Could not parse GitHub URL. Comparison link will be skipped."
-  fi
-  echo "[Comparison of changes between $LAST_TAG and $NEW_VERSION]($DIFF_LINK)" >> "$CHANGELOG_FILE"
-  [ -n "$DIFF_LINK" ] && log "Added comparison link: $DIFF_LINK"
-fi
-color_msg "$CYAN" "[CHANGELOG] Updated: $CHANGELOG_FILE"
-log "Changelog updated: $NEW_VERSION"
-
 git add -f "$VERSION_FILE" "$CHANGELOG_FILE"
 git commit -m "chore(release): bump to $NEW_VERSION"
 git tag "$NEW_VERSION"
-color_msg "$GREEN" "[OK] Version bumped to $NEW_VERSION"
-log "Version bumped: $NEW_VERSION"
 
 color_msg "$CYAN" "[BUILD] Starting build to update modul/_version.py ..."
 if ! command -v python3 >/dev/null 2>&1; then
