@@ -4,7 +4,7 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg?style=plastic)
 ![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids?style=plastic)
 ![Stars](https://img.shields.io/github/stars/Ajimaru/ajitroids?style=plastic)
-![Downloads](https://img.shields.io/github/downloads/Ajimaru/ajitroids/total?style=plastic)
+![Forks](https://img.shields.io/github/forks/Ajimaru/ajitroids?style=plastic)
 
 [A modern Asteroids remake built with Pygame]
 
