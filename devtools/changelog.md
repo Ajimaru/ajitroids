@@ -181,3 +181,9 @@
 - test(release): Test Release
 
 [Comparison of changes between v0.19.4 and v0.19.5](https://github.com/Ajimaru/ajitroids/compare/v0.19.4...v0.19.5)
+## v0.19.6 (2025-08-05)
+
+### test
+- test(release): README.md updated
+
+[Comparison of changes between v0.19.5 and v0.19.6](https://github.com/Ajimaru/ajitroids/compare/v0.19.5...v0.19.6)
