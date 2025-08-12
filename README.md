@@ -106,7 +106,7 @@ Unlock these ships by progressing through the game and achieving milestones!
 
 ## 📜 License
 
-This project is licensed under the MIT License with Commons Clause - see the LICENSE file for details.
+This project is licensed under the MIT License with Commons Clause - see the LICENSE.md file for details.
 
 ### 👥 Contributors
 

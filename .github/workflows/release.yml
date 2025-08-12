@@ -19,7 +19,7 @@ jobs:
         id: changelog
         run: |
           TAG=${{ github.ref_name }}
-          awk "/^## $TAG / {flag=1; next} /^## v/ {flag=0} flag" devtools/changelog.md > _changelog_section.txt
+          awk "/^## $TAG / {flag=1; next} /^## v/ {flag=0} flag" changelog.md > _changelog_section.txt
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           cat _changelog_section.txt >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT

@@ -2,7 +2,10 @@
 
 ## Our Pledge
 
-We as members, contributors, and leaders pledge to make participation in our project and community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
+We as members, contributors, and leaders pledge to make participation in our project
+and community a harassment-free experience for everyone, regardless of age, body size,
+disability, ethnicity, gender identity, level of experience, nationality,
+personal appearance, race, religion, or sexual identity and orientation.
 
 We commit to providing a welcoming and safe environment where everyone feels respected.
 
@@ -24,10 +27,13 @@ Examples of unacceptable behavior include:
 
 ## Enforcement
 
-Violations may be reported by contacting the project team at [ajitroids@noreply.github.com]. All reports will be reviewed and investigated promptly and fairly.
+Violations may be reported by contacting the project team
+at [ajitroids@noreply.github.com]. All reports will be reviewed
+and investigated promptly and fairly.
 
 Maintainers are obligated to respect the privacy of the reporter.
 
 ---
 
-This Code of Conduct is adapted from the Contributor Covenant, version 2.1, available at <https://www.contributor-covenant.org/version/2/1/code_of_conduct.html>.
+This Code of Conduct is adapted from the Contributor Covenant,
+version 2.1, available at <https://www.contributor-covenant.org/version/2/1/code_of_conduct.html>.

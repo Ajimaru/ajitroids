@@ -1,5 +1,6 @@
 import pygame
 import math
+from typing import Optional, Union
 from modul.constants import *
 from modul.circleshape import CircleShape
 
@@ -17,10 +18,8 @@ class Shot(CircleShape):
         cls.enemy_ships_group = enemy_ships
 
     def __init__(self, x, y, shot_type=WEAPON_STANDARD):
-        pygame.sprite.Sprite.__init__(self, self.containers)
-        self.position = pygame.Vector2(x, y)
+        super().__init__(x, y, 3)
         self.velocity = pygame.Vector2(0, 0)
-        self.radius = 3
         self.shot_type = shot_type
         self.lifetime = 2.0
         self.damage = 1
@@ -61,18 +60,19 @@ class Shot(CircleShape):
     def draw(self, screen):
         if self.shot_type == WEAPON_LASER:
             end_pos = self.position + self.velocity.normalize() * 20
-            pygame.draw.line(
-                screen, self.color, (int(self.position.x), int(self.position.y)), (int(end_pos.x), int(end_pos.y)), 3
-            )
+            pos_tuple = (int(self.position[0]), int(self.position[1]))
+            end_pos_tuple = (int(end_pos[0]), int(end_pos[1]))
+            pygame.draw.line(screen, self.color, pos_tuple, end_pos_tuple, 3)
         elif self.shot_type == WEAPON_MISSILE:
-            pygame.draw.circle(screen, self.color, (int(self.position.x), int(self.position.y)), self.radius)
+            pos_tuple = (int(self.position[0]), int(self.position[1]))
+            pygame.draw.circle(screen, self.color, pos_tuple, self.radius)
 
             tail_end = self.position - self.velocity.normalize() * 8
-            pygame.draw.line(
-                screen, (255, 128, 0), (int(self.position.x), int(self.position.y)), (int(tail_end.x), int(tail_end.y)), 2
-            )
+            tail_end_tuple = (int(tail_end[0]), int(tail_end[1]))
+            pygame.draw.line(screen, (255, 128, 0), pos_tuple, tail_end_tuple, 2)
         else:
-            pygame.draw.circle(screen, self.color, (int(self.position.x), int(self.position.y)), self.radius)
+            pos_tuple = (int(self.position[0]), int(self.position[1]))
+            pygame.draw.circle(screen, self.color, pos_tuple, self.radius)
 
     def seek_target(self, dt):
         if not Shot.asteroids_group and not Shot.enemy_ships_group:
