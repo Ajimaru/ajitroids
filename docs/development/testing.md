@@ -328,13 +328,12 @@ assert abs(player.position.x - expected_x) < 0.01
 
 ❌ **Don't test external libraries**
 ```python
-# Bad: Testing Pygame
-def test_pygame_vector_addition():
-    v1 = Vector2(1, 0)
-    v2 = Vector2(0, 1)
-    assert v1 + v2 == Vector2(1, 1)
+# Bad: Testing Pygame internals or complex behavior
+def test_pygame_display_creation():
+    screen = pygame.display.set_mode((800, 600))
+    assert screen is not None
 
-# Good: Testing your code
+# Good: Testing your code that uses Pygame
 def test_player_movement_calculation():
     result = player.calculate_movement(dt)
     assert result.length() > 0

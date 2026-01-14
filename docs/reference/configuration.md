@@ -24,7 +24,7 @@ Unlocked achievements.
 
 ## Settings Schema
 
-### Complete Configuration
+### Default Configuration
 
 ```json
 {
