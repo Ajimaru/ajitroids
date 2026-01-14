@@ -10,36 +10,36 @@ The Ajitroids codebase is organized into modules that handle different aspects o
 
 ### Game Entities
 
-- **[player](#player)**: Player ship mechanics
-- **[asteroid](#asteroid)**: Asteroid behavior
-- **[boss](#boss)**: Boss enemy AI
-- **[shot](#shot)**: Projectile physics
-- **[powerup](#powerup)**: Power-up system
+- **player**: Player ship mechanics
+- **asteroid**: Asteroid behavior
+- **boss**: Boss enemy AI
+- **shot**: Projectile physics
+- **powerup**: Power-up system
 
 ### Support Systems
 
-- **[sounds](#sounds)**: Audio management
-- **[menu](#menu)**: UI and menu system
-- **[highscore](#highscore)**: Score persistence
-- **[achievements](#achievements)**: Achievement tracking
-- **[settings](#settings)**: Configuration management
+- **sounds**: Audio management
+- **menu**: UI and menu system
+- **highscore**: Score persistence
+- **achievements**: Achievement tracking
+- **settings**: Configuration management
 
 ### Base Classes
 
-- **[circleshape](#circleshape)**: Base collision class
-- **[groups](#groups)**: Sprite groups
+- **circleshape**: Base collision class
+- **groups**: Sprite groups
 
 ### Visual Effects
 
-- **[particle](#particle)**: Particle effects
-- **[starfield](#starfield)**: Background stars
-- **[asteroidfield](#asteroidfield)**: Asteroid spawning
+- **particle**: Particle effects
+- **starfield**: Background stars
+- **asteroidfield**: Asteroid spawning
 
 ### Utilities
 
-- **[constants](#constants)**: Game constants
-- **[tutorial](#tutorial)**: Tutorial mode
-- **[ships](#ships)**: Ship definitions
+- **constants**: Game constants
+- **tutorial**: Tutorial mode
+- **ships**: Ship definitions
 
 ---
 

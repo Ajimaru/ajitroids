@@ -338,7 +338,7 @@ mkdocs build
 
 ## Getting Help
 
-- **Documentation**: Read the [developer docs](index.md)
+- **Documentation**: Read the [developer docs](../index.md)
 - **Discussions**: Use [GitHub Discussions](https://github.com/Ajimaru/ajitroids/discussions)
 - **Issues**: Search existing issues or create a new one
 - **Discord**: Join our community (if available)

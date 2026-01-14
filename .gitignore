@@ -62,6 +62,7 @@ site/
 htmlcov/
 mypy-report/
 flake-report/
+docs-old/
 
 # Github
 .github/copilot-instructions.md
