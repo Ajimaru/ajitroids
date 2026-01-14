@@ -1,0 +1,69 @@
+site_name: Ajitroids (Developer Docs)
+site_url: https://ajimaru.github.io/ajitroids/
+repo_url: https://github.com/Ajimaru/ajitroids
+repo_name: Ajimaru/ajitroids
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - content.code.copy
+    - content.tabs.link
+    - search.highlight
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_source: true
+            docstring_style: google
+            merge_init_into_class: true
+            separate_signature: true
+            filters:
+              - "!^_"
+
+nav:
+  - Overview: index.md
+  - Getting started: getting-started.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - Data flow: architecture/data-flow.md
+      - Game mechanics: architecture/game-mechanics.md
+      - Settings: architecture/settings.md
+      - Pygame integration: architecture/pygame-integration.md
+  - API:
+      - Python: api/python.md
+  - Development:
+      - Contributing: development/contributing.md
+      - Testing: development/testing.md
+      - Release process: development/release-process.md
+  - Reference:
+      - Configuration: reference/configuration.md
+      - Dev scripts: reference/cli-dev-scripts.md
