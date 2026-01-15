@@ -47,7 +47,7 @@ class HelpScreen:
         """Update help screen state."""
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key in (pygame.K_ESCAPE, pygame.K_h, pygame.K_F1, pygame.K_SPACE, pygame.K_RETURN):
+                if event.key in (pygame.K_ESCAPE, pygame.K_h, pygame.K_F1):
                     self.deactivate()
                     return "close"
         return None
@@ -112,7 +112,7 @@ class HelpScreen:
             y_pos += 35
 
         # Footer
-        footer_text = "Press ESC, H, F1, Space or Enter to close"
+        footer_text = "Press ESC, H, or F1 to close"
         footer_surface = self.small_font.render(footer_text, True, (150, 150, 150))
         footer_rect = footer_surface.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 30))
         screen.blit(footer_surface, footer_rect)

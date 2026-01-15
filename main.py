@@ -276,7 +276,7 @@ def main(args=None):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F11:
                     toggle_fullscreen()
-                elif event.key == pygame.K_F10:
+                if event.key == pygame.K_F10:
                     game_settings.music_on = not game_settings.music_on
                     game_settings.save()
                     if game_settings.music_on:
@@ -287,20 +287,20 @@ def main(args=None):
                         pygame.mixer.music.stop()
                         toggle_message = "Music Disabled"
                     toggle_message_timer = 2
-                elif event.key == pygame.K_F9:
+                if event.key == pygame.K_F9:
                     game_settings.sound_on = not game_settings.sound_on
                     game_settings.save()
                     sounds.toggle_sound(game_settings.sound_on)
                     toggle_message = "Sound Effects Enabled" if game_settings.sound_on else "Sound Effects Disabled"
                     toggle_message_timer = 2
-                elif event.key == pygame.K_F8:
+                if event.key == pygame.K_F8:
                     show_fps = not show_fps
                     toggle_message = "FPS Display Enabled" if show_fps else "FPS Display Disabled"
                     toggle_message_timer = 2
-                elif event.key in (pygame.K_h, pygame.K_F1) and game_state == "playing":
+                if event.key in (pygame.K_h, pygame.K_F1) and game_state == "playing":
                     game_state = "help"
                     help_screen.activate()
-                elif event.key == pygame.K_b and player:
+                if event.key == pygame.K_b and player:
                     player.cycle_weapon()
 
         if toggle_message and toggle_message_timer > 0:
