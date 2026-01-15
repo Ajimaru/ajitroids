@@ -186,7 +186,7 @@ class TestHighscoreInput:
         """Test HighscoreInput initialization"""
         input_handler = HighscoreInput(1000)
         assert input_handler.score == 1000
-        assert input_handler.name == ["A", "A", "A"]
+        assert input_handler.name == ["A"] * HIGHSCORE_NAME_LENGTH
         assert input_handler.current_pos == 0
         assert input_handler.done is False
 
