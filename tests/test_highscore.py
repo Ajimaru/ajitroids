@@ -2,7 +2,7 @@ import pytest
 import pygame
 import os
 import json
-from modul.highscore import HighscoreManager, HighscoreInput
+from modul.highscore import HighscoreManager, HighscoreInput, HighscoreDisplay
 from modul.constants import HIGHSCORE_FILE, HIGHSCORE_MAX_ENTRIES, HIGHSCORE_NAME_LENGTH
 
 
@@ -256,3 +256,165 @@ class TestHighscoreInput:
         input_handler = HighscoreInput(1000)
         screen = pygame.Surface((800, 600))
         input_handler.draw(screen)  # Should not raise exception
+
+    def test_highscore_input_up_key_cycles_chars(self):
+        """Test UP key cycles characters forward"""
+        input_handler = HighscoreInput(1000)
+        input_handler.current_pos = 0
+        initial_char = input_handler.name[0]
+        
+        event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_UP})
+        input_handler.update([event])
+        
+        # Character should have changed
+        assert input_handler.name[0] != initial_char
+
+    def test_highscore_input_down_key_cycles_chars(self):
+        """Test DOWN key cycles characters backward"""
+        input_handler = HighscoreInput(1000)
+        input_handler.current_pos = 0
+        initial_char = input_handler.name[0]
+        
+        event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_DOWN})
+        input_handler.update([event])
+        
+        # Character should have changed
+        assert input_handler.name[0] != initial_char
+
+    def test_highscore_input_no_events(self):
+        """Test update with no events"""
+        input_handler = HighscoreInput(1000)
+        
+        result = input_handler.update([])
+        
+        assert result is None
+        assert input_handler.done is False
+
+
+class TestHighscoreDisplay:
+    """Test suite for HighscoreDisplay class"""
+
+    def test_highscore_display_initialization(self):
+        """Test HighscoreDisplay initialization"""
+        manager = HighscoreManager()
+        display = HighscoreDisplay(manager)
+        
+        assert display.highscore_manager is manager
+        assert display.background_alpha == 0
+        assert display.fade_in is True
+        assert display.input_cooldown == 0
+        assert display.back_button["selected"] is True
+
+    def test_highscore_display_update_fade_in(self):
+        """Test fade-in animation"""
+        manager = HighscoreManager()
+        display = HighscoreDisplay(manager)
+        
+        display.update(0.1, [])
+        
+        assert display.background_alpha > 0
+
+    def test_highscore_display_update_fade_complete(self):
+        """Test fade-in completes"""
+        manager = HighscoreManager()
+        display = HighscoreDisplay(manager)
+        
+        display.update(1.0, [])
+        
+        assert display.fade_in is False
+        assert display.background_alpha == 200
+
+    def test_highscore_display_update_button_animation(self):
+        """Test button hover animation"""
+        manager = HighscoreManager()
+        display = HighscoreDisplay(manager)
+        
+        display.update(0.1, [])
+        
+        assert display.back_button["hover_animation"] > 0
+
+    def test_highscore_display_update_input_cooldown(self):
+        """Test input cooldown decrements"""
+        manager = HighscoreManager()
+        display = HighscoreDisplay(manager)
+        display.input_cooldown = 1.0
+        
+        display.update(0.5, [])
+        
+        assert display.input_cooldown == 0.5
+
+    def test_highscore_display_update_space_returns_main_menu(self):
+        """Test SPACE key returns to main menu"""
+        manager = HighscoreManager()
+        display = HighscoreDisplay(manager)
+        
+        event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_SPACE})
+        result = display.update(0.1, [event])
+        
+        assert result == "main_menu"
+
+    def test_highscore_display_update_return_returns_main_menu(self):
+        """Test RETURN key returns to main menu"""
+        manager = HighscoreManager()
+        display = HighscoreDisplay(manager)
+        
+        event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_RETURN})
+        result = display.update(0.1, [event])
+        
+        assert result == "main_menu"
+
+    def test_highscore_display_update_escape_returns_main_menu(self):
+        """Test ESCAPE key returns to main menu"""
+        manager = HighscoreManager()
+        display = HighscoreDisplay(manager)
+        
+        event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_ESCAPE})
+        result = display.update(0.1, [event])
+        
+        assert result == "main_menu"
+
+    def test_highscore_display_update_cooldown_blocks_input(self):
+        """Test input cooldown blocks repeated input"""
+        manager = HighscoreManager()
+        display = HighscoreDisplay(manager)
+        display.input_cooldown = 1.0
+        
+        event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_SPACE})
+        result = display.update(0.1, [event])
+        
+        assert result is None
+
+    def test_highscore_display_draw(self):
+        """Test drawing highscore display"""
+        manager = HighscoreManager()
+        display = HighscoreDisplay(manager)
+        screen = pygame.Surface((800, 600))
+        
+        display.draw(screen)  # Should not raise exception
+
+    def test_highscore_display_draw_with_entries(self):
+        """Test drawing with highscore entries"""
+        manager = HighscoreManager()
+        manager.highscores = [
+            {"name": "AAA", "score": 5000},
+            {"name": "BBB", "score": 4000},
+            {"name": "CCC", "score": 3000}
+        ]
+        display = HighscoreDisplay(manager)
+        screen = pygame.Surface((800, 600))
+        
+        display.draw(screen)
+
+    def test_highscore_display_draw_medal_colors(self):
+        """Test first three places have medal colors"""
+        manager = HighscoreManager()
+        manager.highscores = [
+            {"name": "1ST", "score": 5000},
+            {"name": "2ND", "score": 4000},
+            {"name": "3RD", "score": 3000},
+            {"name": "4TH", "score": 2000}
+        ]
+        display = HighscoreDisplay(manager)
+        screen = pygame.Surface((800, 600))
+        
+        display.draw(screen)  # Gold, silver, bronze should be rendered
