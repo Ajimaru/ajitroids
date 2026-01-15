@@ -184,16 +184,14 @@ class TestPlayer:
 
     def test_player_update_forward_movement(self, mock_pygame):
         """Test player moves forward"""
-        mock_keys = {
-            pygame.K_LEFT: False,
-            pygame.K_RIGHT: False,
-            pygame.K_UP: True,
-            pygame.K_DOWN: False,
-            pygame.K_SPACE: False,
-            pygame.K_b: False
-        }
-        
-        with patch('pygame.key.get_pressed', return_value=mock_keys):
+        class _Pressed:
+            def __init__(self, pressed):
+                self._pressed = set(pressed)
+
+            def __getitem__(self, key):
+                return 1 if key in self._pressed else 0
+
+        with patch('pygame.key.get_pressed', return_value=_Pressed({pygame.K_UP})):
             player = Player(100, 100)
             player.rotation = 0
             
