@@ -300,7 +300,7 @@ class TestTutorial:
     def test_tutorial_draw_colored_line_easy(self, mock_screen):
         """Test drawing colored line for easy difficulty"""
         tutorial = Tutorial()
-        tutorial.draw_colored_line(mock_screen, "[LEASY] - Easy mode", SCREEN_WIDTH // 2, 100)
+        tutorial.draw_colored_line(mock_screen, "[EASY] - Easy mode", SCREEN_WIDTH // 2, 100)
 
     def test_tutorial_draw_colored_line_normal(self, mock_screen):
         """Test drawing colored line for normal difficulty"""
