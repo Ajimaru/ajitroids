@@ -90,11 +90,11 @@ class TestSettings:
         # Load settings
         settings = Settings()
         assert settings.music_on is False
-        # Others should use defaults from get()
+        # Others should retain their constructor defaults
         assert settings.sound_on is True
         assert settings.fullscreen is False
-        assert settings.music_volume == 1.0  # Default from get()
-        assert settings.sound_volume == 1.0  # Default from get()
+        assert settings.music_volume == 0.5  # Default from __init__
+        assert settings.sound_volume == 0.5  # Default from __init__
 
     def test_settings_save_load_cycle(self, clean_settings_file):
         """Test save and load cycle"""
