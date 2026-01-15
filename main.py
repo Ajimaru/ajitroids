@@ -1057,4 +1057,5 @@ if __name__ == "__main__":
             print(f"Please check the log file: {args.log_file}", file=sys.stderr)
         sys.exit(1)
     finally:
+        logging.shutdown()
         print("Game over.")
