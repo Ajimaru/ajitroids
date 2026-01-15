@@ -274,9 +274,10 @@ def main(args=None):
                 return
 
             if event.type == pygame.KEYDOWN:
+                # Handle function keys with elif to prevent multiple messages
                 if event.key == pygame.K_F11:
                     toggle_fullscreen()
-                if event.key == pygame.K_F10:
+                elif event.key == pygame.K_F10:
                     game_settings.music_on = not game_settings.music_on
                     game_settings.save()
                     if game_settings.music_on:
@@ -287,20 +288,20 @@ def main(args=None):
                         pygame.mixer.music.stop()
                         toggle_message = "Music Disabled"
                     toggle_message_timer = 2
-                if event.key == pygame.K_F9:
+                elif event.key == pygame.K_F9:
                     game_settings.sound_on = not game_settings.sound_on
                     game_settings.save()
                     sounds.toggle_sound(game_settings.sound_on)
                     toggle_message = "Sound Effects Enabled" if game_settings.sound_on else "Sound Effects Disabled"
                     toggle_message_timer = 2
-                if event.key == pygame.K_F8:
+                elif event.key == pygame.K_F8:
                     show_fps = not show_fps
                     toggle_message = "FPS Display Enabled" if show_fps else "FPS Display Disabled"
                     toggle_message_timer = 2
-                if event.key in (pygame.K_h, pygame.K_F1) and game_state == "playing":
+                elif event.key in (pygame.K_h, pygame.K_F1) and game_state == "playing":
                     game_state = "help"
                     help_screen.activate()
-                if event.key == pygame.K_b and player:
+                elif event.key == pygame.K_b and player:
                     player.cycle_weapon()
 
         if toggle_message and toggle_message_timer > 0:
@@ -1036,7 +1037,12 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n\nGame interrupted by user.")
     except Exception as e:
-        logging.error(f"Fatal error: {e}", exc_info=True)
+        # Use basic logging if main() hasn't been called yet
+        try:
+            import logging
+            logging.error(f"Fatal error: {e}", exc_info=True)
+        except:
+            print(f"Fatal error: {e}", file=sys.stderr)
         raise
     finally:
         print("Game over.")
