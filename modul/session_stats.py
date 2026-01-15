@@ -70,10 +70,11 @@ class SessionStats:
         return self.total_score / max(1, self.games_played)
         
     def get_accuracy(self):
-        """Calculate shot accuracy (asteroids destroyed / shots fired)."""
+        """Calculate shot accuracy (targets destroyed / shots fired)."""
         if self.total_shots_fired == 0:
             return 0.0
-        return (self.total_asteroids_destroyed / self.total_shots_fired) * 100
+        total_hits = self.total_asteroids_destroyed + self.total_enemies_destroyed
+        return (total_hits / self.total_shots_fired) * 100
         
     def get_summary(self):
         """Get a dictionary of all statistics."""
