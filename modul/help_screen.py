@@ -8,10 +8,13 @@ class HelpScreen:
 
     def __init__(self):
         self.active = False
-        self.title_font = pygame.font.Font(None, 64)
-        self.section_font = pygame.font.Font(None, 40)
-        self.text_font = pygame.font.Font(None, 28)
-        self.small_font = pygame.font.Font(None, 24)
+
+        # Fonts are initialized lazily to avoid crashes when HelpScreen is
+        # created before pygame/font initialization (e.g., during tests).
+        self.title_font = None
+        self.section_font = None
+        self.text_font = None
+        self.small_font = None
         
         self.shortcuts = [
             ("GAME CONTROLS", [
@@ -30,6 +33,20 @@ class HelpScreen:
         ]
         
         self.background_alpha = 200
+
+    def _ensure_fonts(self):
+        if not pygame.font.get_init():
+            pygame.font.init()
+        if self.title_font is None:
+            self.title_font = pygame.font.Font(None, 64)
+            self.section_font = pygame.font.Font(None, 40)
+            self.text_font = pygame.font.Font(None, 28)
+            self.small_font = pygame.font.Font(None, 24)
+
+    def activate(self):
+        """Activate the help screen."""
+        self._ensure_fonts()
+        self.active = True
 
     def activate(self):
         """Activate the help screen."""
