@@ -75,10 +75,43 @@ python main.py
 
 ## 🎯 Controls
 
+### Game Controls
 - **Arrow Keys**: Control ship (rotation and thrust)
 - **Space**: Shoot
 - **ESC**: Pause game
 - **B**: Switch weapons (when available)
+
+### Function Keys
+- **F1 / H**: Toggle help screen (in-game)
+- **F8**: Toggle FPS display
+- **F9**: Toggle sound effects
+- **F10**: Toggle music
+- **F11**: Toggle fullscreen
+
+## 💻 Command-Line Options
+
+Ajitroids supports several command-line arguments for enhanced control:
+
+```bash
+# Display version
+python main.py --version
+
+# Show help and available options
+python main.py --help
+
+# Enable debug mode with verbose logging
+python main.py --debug
+
+# Skip main menu and start game directly
+python main.py --skip-intro
+
+# Force windowed or fullscreen mode
+python main.py --windowed
+python main.py --fullscreen
+
+# Save logs to a file
+python main.py --log-file game.log
+```
 
 ## 🚀 Spaceships
 

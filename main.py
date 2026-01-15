@@ -3,6 +3,9 @@ import pygame
 import math
 import random
 import time
+import argparse
+import logging
+import sys
 from modul.constants import *
 from modul.player import Player
 from modul.asteroid import Asteroid, EnemyShip
@@ -32,6 +35,8 @@ from modul.bossprojectile import BossProjectile
 from modul.achievements import AchievementSystem
 from modul.achievement_notification import AchievementNotificationManager
 from modul.groups import collidable, drawable, updatable
+from modul.help_screen import HelpScreen
+from modul.session_stats import SessionStats
 
 
 class GameSettings:
@@ -42,8 +47,66 @@ class GameSettings:
 game_settings = GameSettings()
 
 
-def main():
+def parse_arguments():
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(
+        description='Ajitroids - A modern Asteroids remake built with Pygame',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Keyboard Shortcuts:
+  Arrow Keys    - Control ship (rotation and thrust)
+  Space         - Shoot
+  B             - Cycle weapons
+  ESC           - Pause game
+  F1 / H        - Help screen (in-game)
+  F8            - Toggle FPS display
+  F9            - Toggle sound effects
+  F10           - Toggle music
+  F11           - Toggle fullscreen
 
+Examples:
+  python main.py --debug          # Start with debug logging
+  python main.py --skip-intro     # Skip main menu
+  python main.py --windowed       # Force windowed mode
+        """
+    )
+    parser.add_argument('--version', action='version', version=f'Ajitroids v{__version__}')
+    parser.add_argument('--debug', action='store_true', help='Enable debug mode with verbose logging')
+    parser.add_argument('--skip-intro', action='store_true', help='Skip main menu and start game immediately')
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument('--windowed', action='store_true', help='Start in windowed mode')
+    mode_group.add_argument('--fullscreen', action='store_true', help='Start in fullscreen mode')
+    parser.add_argument('--log-file', type=str, help='Write logs to specified file')
+    
+    return parser.parse_args()
+
+
+def setup_logging(args):
+    """Configure logging based on command-line arguments."""
+    log_level = logging.DEBUG if args.debug else logging.INFO
+    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    
+    handlers = [logging.StreamHandler(sys.stdout)]
+    if args.log_file:
+        handlers.append(logging.FileHandler(args.log_file))
+    
+    logging.basicConfig(
+        level=log_level,
+        format=log_format,
+        handlers=handlers
+    )
+    
+    return logging.getLogger('Ajitroids')
+
+
+def main(args=None):
+
+    if args is None:
+        args = parse_arguments()
+    
+    logger = setup_logging(args)
+    logger.info(f"Starting Ajitroids v{__version__}")
+    
     global sounds, player, PLAYER_INVINCIBLE_TIME, game_settings
 
     global game_state, score, lives, level
@@ -60,27 +123,36 @@ def main():
     speed_boosts_used = 0
     achievement_system.set_notification_callback(achievement_notifications.add_notification)
     global boss_active, boss_defeated_timer, boss_defeated_message
+    
+    global show_fps
+    show_fps = args.debug
 
     pygame.init()
 
     try:
         pygame.mixer.init(44100, -16, 2, 2048)
-        print("Pygame Mixer initialized successfully")
+        logger.info("Pygame Mixer initialized successfully")
     except Exception as e:
-        print(f"Error during mixer initialization: {e}")
+        logger.error(f"Error during mixer initialization: {e}")
 
     pygame.display.set_caption(f"Ajitroids v{__version__}")
 
     clock = pygame.time.Clock()
 
     game_settings = Settings()
+    
+    # Override settings with command-line arguments
+    if args.fullscreen:
+        game_settings.fullscreen = True
+    elif args.windowed:
+        game_settings.fullscreen = False
 
     if game_settings.fullscreen:
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
-        print("Fullscreen mode activated")
+        logger.info("Fullscreen mode activated")
     else:
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        print("Windowed mode activated")
+        logger.info("Windowed mode activated")
 
     sounds = Sounds()
 
@@ -154,11 +226,17 @@ def main():
     difficulty_menu = DifficultyMenu()
     ship_selection_menu = ShipSelectionMenu()
     tutorial = Tutorial()
+    help_screen = HelpScreen()
+    session_stats = SessionStats()
 
     difficulty = "normal"
 
-    game_state = "main_menu"
-    main_menu.activate()
+    game_state = "main_menu" if not args.skip_intro else "difficulty_select"
+    if args.skip_intro:
+        difficulty_menu.activate()
+        logger.info("Skipping intro, going directly to difficulty select")
+    else:
+        main_menu.activate()
 
     boss_active = False
     boss_defeated_timer = 0
@@ -191,12 +269,18 @@ def main():
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
+                logger.info("Game closing...")
+                if game_state in ("playing", "help"):
+                    session_stats.end_game(score, level)
+                if args.debug:
+                    logger.info("\n" + session_stats.get_formatted_summary())
                 return
 
             if event.type == pygame.KEYDOWN:
+                # Handle function keys with elif to prevent multiple messages
                 if event.key == pygame.K_F11:
                     toggle_fullscreen()
-                if event.key == pygame.K_F10:
+                elif event.key == pygame.K_F10:
                     game_settings.music_on = not game_settings.music_on
                     game_settings.save()
                     if game_settings.music_on:
@@ -213,6 +297,13 @@ def main():
                     sounds.toggle_sound(game_settings.sound_on)
                     toggle_message = "Sound Effects Enabled" if game_settings.sound_on else "Sound Effects Disabled"
                     toggle_message_timer = 2
+                elif event.key == pygame.K_F8:
+                    show_fps = not show_fps
+                    toggle_message = "FPS Display Enabled" if show_fps else "FPS Display Disabled"
+                    toggle_message_timer = 2
+                elif event.key in (pygame.K_h, pygame.K_F1) and game_state == "playing":
+                    game_state = "help"
+                    help_screen.activate()
                 elif event.key == pygame.K_b and player:
                     player.cycle_weapon()
 
@@ -334,6 +425,10 @@ def main():
                 score = 0
                 lives = PLAYER_LIVES
                 level = 1
+                
+                # Start tracking session statistics
+                session_stats.start_game()
+                logger.info(f"Game started - Difficulty: {difficulty}, Ship: {selected_ship}")
 
                 last_spawn_time = time.time()
                 spawn_interval = random.uniform(10, 30)
@@ -492,7 +587,7 @@ def main():
                     current_enemy_ships.append(enemy_ship)
                     last_spawn_time = time.time()
                     spawn_interval = random.uniform(10, 30)
-                    print(f"EnemyShip spawned! Current count: {len(current_enemy_ships)}, Max: {max_enemy_ships[difficulty]}")
+                    logger.debug(f"EnemyShip spawned! Current count: {len(current_enemy_ships)}, Max: {max_enemy_ships[difficulty]}")
 
             current_enemy_ships = [ship for ship in current_enemy_ships if ship in updatable]
 
@@ -532,13 +627,15 @@ def main():
                     Particle.create_ship_explosion(player.position.x, player.position.y)
 
                     if lives <= 0:
-                        print(f"Game Over! Final Score: {score}")
+                        logger.info(f"Game Over! Final Score: {score}, Level: {level}")
+                        session_stats.end_game(score, level)
                         sounds.play_game_over()
                         game_over_screen.set_score(score)
                         game_over_screen.fade_in = True
                         game_over_screen.background_alpha = 0
                         game_state = "game_over"
                     else:
+                        session_stats.record_life_lost()
                         player.respawn()
 
                 for shot in shots:
@@ -562,6 +659,7 @@ def main():
                             achievement_system.unlock("First Blood")
 
                         asteroids_destroyed += 1
+                        session_stats.record_asteroid_destroyed()
 
                         if asteroids_destroyed >= 1000 and not achievement_system.is_unlocked("Asteroid Hunter"):
                             achievement_system.unlock("Asteroid Hunter")
@@ -592,25 +690,28 @@ def main():
                             current_enemy_ships.remove(obj)
 
                         if lives <= 0:
-                            print(f"Game Over! Final Score: {score}")
+                            logger.info(f"Game Over! Final Score: {score}, Level: {level}")
+                            session_stats.end_game(score, level)
                             sounds.play_game_over()
                             game_over_screen.set_score(score)
                             game_over_screen.fade_in = True
                             game_over_screen.background_alpha = 0
                             game_state = "game_over"
                         else:
+                            session_stats.record_life_lost()
                             player.respawn()
 
                     for shot in shots:
                         if obj.collides_with(shot):
                             sounds.play_explosion()
                             score += SCORE_MEDIUM
+                            session_stats.record_enemy_destroyed()
                             obj.split()
                             shot.kill()
 
                             if obj in current_enemy_ships:
                                 current_enemy_ships.remove(obj)
-                            print(f"EnemyShip destroyed! Remaining count: {len(current_enemy_ships)}")
+                            logger.debug(f"EnemyShip destroyed! Remaining count: {len(current_enemy_ships)}")
                             break
 
             for enemy_ship in current_enemy_ships:
@@ -618,7 +719,7 @@ def main():
                     if enemy_ship.collides_with(asteroid):
                         speed = enemy_ship.velocity.length()
                         enemy_ship.velocity = pygame.Vector2(random.uniform(-1, 1), random.uniform(-1, 1)).normalize() * speed
-                        print(f"EnemyShip changed direction due to asteroid collision.")
+                        logger.debug("EnemyShip changed direction due to asteroid collision.")
 
             for obj in updatable:
                 if not hasattr(obj, "position"):
@@ -731,6 +832,7 @@ def main():
                     powerup.kill()
 
                     powerups_collected += 1
+                    session_stats.record_powerup_collected()
 
                     if powerup.type == "shield":
                         shields_used += 1
@@ -801,6 +903,7 @@ def main():
                         if boss_defeated:
                             score += BOSS_SCORE
                             boss_active = False
+                            session_stats.record_boss_defeated()
 
                             if not achievement_system.is_unlocked("Boss Slayer"):
                                 achievement_system.unlock("Boss Slayer")
@@ -865,6 +968,26 @@ def main():
             if action == "back":
                 game_state = "main_menu"
 
+        elif game_state == "help":
+            # Keep game objects visible in background
+            for obj in drawable:
+                obj.draw(screen)
+            
+            action = help_screen.update(dt, events)
+            help_screen.draw(screen)
+            
+            if action == "close":
+                game_state = "playing"
+                help_screen.deactivate()
+
+        # Draw FPS counter if enabled
+        if show_fps:
+            fps = clock.get_fps()
+            fps_font = pygame.font.Font(None, 24)
+            fps_text = fps_font.render(f"FPS: {fps:.1f}", True, (0, 255, 0))
+            fps_rect = fps_text.get_rect(topright=(SCREEN_WIDTH - 10, 10))
+            screen.blit(fps_text, fps_rect)
+
         pygame.display.flip()
 
         dt = clock.tick(60) / 1000.0
@@ -911,5 +1034,28 @@ def toggle_fullscreen():
 
 
 if __name__ == "__main__":
-    main()
-    print("Game over.")
+    args = parse_arguments()
+    try:
+        # Logger is configured inside main()
+        main(args)
+    except KeyboardInterrupt:
+        print("\n\nGame interrupted by user.")
+    except Exception as e:
+        # Ensure we can always emit a crash log even if main() failed early
+        root = logging.getLogger()
+        if not root.handlers:
+            logging.basicConfig(
+                level=logging.ERROR,
+                format='%(asctime)s - %(levelname)s - %(message)s',
+                handlers=[logging.StreamHandler(sys.stderr)],
+            )
+
+        log = logging.getLogger('Ajitroids')
+        log.error("A fatal error occurred. The game will now close.", exc_info=True)
+        print(f"\nA fatal error occurred: {e}", file=sys.stderr)
+        if getattr(args, "log_file", None):
+            print(f"Please check the log file: {args.log_file}", file=sys.stderr)
+        sys.exit(1)
+    finally:
+        logging.shutdown()
+        print("Game over.")
