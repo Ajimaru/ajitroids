@@ -45,10 +45,12 @@ class HelpScreen:
 
     def update(self, dt, events):
         """Update help screen state."""
-        for event in events:
+        for i, event in reversed(list(enumerate(events))):
             if event.type == pygame.KEYDOWN:
                 if event.key in (pygame.K_ESCAPE, pygame.K_h, pygame.K_F1):
                     self.deactivate()
+                    # Remove the event so it's not processed again
+                    events.pop(i)
                     return "close"
         return None
 
