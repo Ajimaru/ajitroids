@@ -77,9 +77,9 @@ class TestBoss:
         boss = Boss(1)
         boss.death_timer = 0
         boss.kill = MagicMock()
-        
-        boss.update(BOSS_DEATH_DURATION + 0.1)
-        
+
+        boss.update(BOSS_DEATH_DURATION + 0.1, pygame.Vector2(0, 0))
+
         boss.kill.assert_called_once()
 
     def test_boss_update_death_particles(self, mock_pygame):
@@ -87,12 +87,12 @@ class TestBoss:
         boss = Boss(1)
         boss.death_timer = 0
         boss.kill = MagicMock()
-        
-        boss.update(0.1)
+
+        boss.update(0.1, pygame.Vector2(0, 0))
         assert boss.death_particles_emitted is True
-        
+
         # Update again shouldn't emit more
-        boss.update(0.1)
+        boss.update(0.1, pygame.Vector2(0, 0))
 
     def test_boss_update_decrements_hit_flash(self, mock_pygame):
         """Test hit flash timer decrements"""
