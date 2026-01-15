@@ -1,6 +1,7 @@
 import pygame
 
 pygame.init()
+pygame.font.init()  # Initialize font system
 from modul.menu import Menu
 
 
