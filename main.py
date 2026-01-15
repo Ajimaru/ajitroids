@@ -3,6 +3,9 @@ import pygame
 import math
 import random
 import time
+import argparse
+import logging
+import sys
 from modul.constants import *
 from modul.player import Player
 from modul.asteroid import Asteroid, EnemyShip
@@ -32,6 +35,7 @@ from modul.bossprojectile import BossProjectile
 from modul.achievements import AchievementSystem
 from modul.achievement_notification import AchievementNotificationManager
 from modul.groups import collidable, drawable, updatable
+from modul.help_screen import HelpScreen
 
 
 class GameSettings:
@@ -42,8 +46,65 @@ class GameSettings:
 game_settings = GameSettings()
 
 
-def main():
+def parse_arguments():
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(
+        description='Ajitroids - A modern Asteroids remake built with Pygame',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Keyboard Shortcuts:
+  Arrow Keys    - Control ship (rotation and thrust)
+  Space         - Shoot
+  B             - Cycle weapons
+  ESC           - Pause game
+  F1 / H        - Help screen (in-game)
+  F8            - Toggle FPS display
+  F9            - Toggle sound effects
+  F10           - Toggle music
+  F11           - Toggle fullscreen
 
+Examples:
+  python main.py --debug          # Start with debug logging
+  python main.py --skip-intro     # Skip main menu
+  python main.py --windowed       # Force windowed mode
+        """
+    )
+    parser.add_argument('--version', action='version', version=f'Ajitroids v{__version__}')
+    parser.add_argument('--debug', action='store_true', help='Enable debug mode with verbose logging')
+    parser.add_argument('--skip-intro', action='store_true', help='Skip main menu and start game immediately')
+    parser.add_argument('--windowed', action='store_true', help='Start in windowed mode')
+    parser.add_argument('--fullscreen', action='store_true', help='Start in fullscreen mode')
+    parser.add_argument('--log-file', type=str, help='Write logs to specified file')
+    
+    return parser.parse_args()
+
+
+def setup_logging(args):
+    """Configure logging based on command-line arguments."""
+    log_level = logging.DEBUG if args.debug else logging.INFO
+    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    
+    handlers = [logging.StreamHandler(sys.stdout)]
+    if args.log_file:
+        handlers.append(logging.FileHandler(args.log_file))
+    
+    logging.basicConfig(
+        level=log_level,
+        format=log_format,
+        handlers=handlers
+    )
+    
+    return logging.getLogger('Ajitroids')
+
+
+def main(args=None):
+
+    if args is None:
+        args = parse_arguments()
+    
+    logger = setup_logging(args)
+    logger.info(f"Starting Ajitroids v{__version__}")
+    
     global sounds, player, PLAYER_INVINCIBLE_TIME, game_settings
 
     global game_state, score, lives, level
@@ -60,27 +121,36 @@ def main():
     speed_boosts_used = 0
     achievement_system.set_notification_callback(achievement_notifications.add_notification)
     global boss_active, boss_defeated_timer, boss_defeated_message
+    
+    global show_fps
+    show_fps = args.debug
 
     pygame.init()
 
     try:
         pygame.mixer.init(44100, -16, 2, 2048)
-        print("Pygame Mixer initialized successfully")
+        logger.info("Pygame Mixer initialized successfully")
     except Exception as e:
-        print(f"Error during mixer initialization: {e}")
+        logger.error(f"Error during mixer initialization: {e}")
 
     pygame.display.set_caption(f"Ajitroids v{__version__}")
 
     clock = pygame.time.Clock()
 
     game_settings = Settings()
+    
+    # Override settings with command-line arguments
+    if args.fullscreen:
+        game_settings.fullscreen = True
+    elif args.windowed:
+        game_settings.fullscreen = False
 
     if game_settings.fullscreen:
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
-        print("Fullscreen mode activated")
+        logger.info("Fullscreen mode activated")
     else:
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        print("Windowed mode activated")
+        logger.info("Windowed mode activated")
 
     sounds = Sounds()
 
@@ -154,11 +224,16 @@ def main():
     difficulty_menu = DifficultyMenu()
     ship_selection_menu = ShipSelectionMenu()
     tutorial = Tutorial()
+    help_screen = HelpScreen()
 
     difficulty = "normal"
 
-    game_state = "main_menu"
-    main_menu.activate()
+    game_state = "main_menu" if not args.skip_intro else "difficulty_select"
+    if args.skip_intro:
+        difficulty_menu.activate()
+        logger.info("Skipping intro, going directly to difficulty select")
+    else:
+        main_menu.activate()
 
     boss_active = False
     boss_defeated_timer = 0
@@ -196,7 +271,7 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F11:
                     toggle_fullscreen()
-                if event.key == pygame.K_F10:
+                elif event.key == pygame.K_F10:
                     game_settings.music_on = not game_settings.music_on
                     game_settings.save()
                     if game_settings.music_on:
@@ -213,6 +288,13 @@ def main():
                     sounds.toggle_sound(game_settings.sound_on)
                     toggle_message = "Sound Effects Enabled" if game_settings.sound_on else "Sound Effects Disabled"
                     toggle_message_timer = 2
+                elif event.key == pygame.K_F8:
+                    show_fps = not show_fps
+                    toggle_message = "FPS Display Enabled" if show_fps else "FPS Display Disabled"
+                    toggle_message_timer = 2
+                elif event.key in (pygame.K_h, pygame.K_F1) and game_state == "playing":
+                    game_state = "help"
+                    help_screen.activate()
                 elif event.key == pygame.K_b and player:
                     player.cycle_weapon()
 
@@ -865,6 +947,26 @@ def main():
             if action == "back":
                 game_state = "main_menu"
 
+        elif game_state == "help":
+            # Keep game objects visible in background
+            for obj in drawable:
+                obj.draw(screen)
+            
+            action = help_screen.update(dt, events)
+            help_screen.draw(screen)
+            
+            if action == "close":
+                game_state = "playing"
+                help_screen.deactivate()
+
+        # Draw FPS counter if enabled
+        if show_fps:
+            fps = clock.get_fps()
+            fps_font = pygame.font.Font(None, 24)
+            fps_text = fps_font.render(f"FPS: {fps:.1f}", True, (0, 255, 0))
+            fps_rect = fps_text.get_rect(topright=(SCREEN_WIDTH - 10, 10))
+            screen.blit(fps_text, fps_rect)
+
         pygame.display.flip()
 
         dt = clock.tick(60) / 1000.0
@@ -911,5 +1013,13 @@ def toggle_fullscreen():
 
 
 if __name__ == "__main__":
-    main()
-    print("Game over.")
+    args = parse_arguments()
+    try:
+        main(args)
+    except KeyboardInterrupt:
+        print("\n\nGame interrupted by user.")
+    except Exception as e:
+        logging.error(f"Fatal error: {e}", exc_info=True)
+        raise
+    finally:
+        print("Game over.")
