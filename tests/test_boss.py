@@ -99,7 +99,7 @@ class TestBoss:
         boss = Boss(1)
         boss.hit_flash = 1.0
         
-        boss.update(0.5)
+        boss.update(0.5, pygame.Vector2(0, 0))
         
         assert boss.hit_flash == 0.5
 
