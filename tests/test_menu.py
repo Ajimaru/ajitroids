@@ -1,7 +1,17 @@
+import pytest
 import pygame
-
-pygame.init()
 from modul.menu import Menu
+
+
+@pytest.fixture(autouse=True)
+def init_pygame(monkeypatch):
+    """Initialize pygame for each test (headless-safe)"""
+    monkeypatch.setenv("SDL_VIDEODRIVER", "dummy")
+    monkeypatch.setenv("SDL_AUDIODRIVER", "dummy")
+    pygame.init()
+    pygame.font.init()
+    yield
+    pygame.quit()
 
 
 def test_menu_initial_state():

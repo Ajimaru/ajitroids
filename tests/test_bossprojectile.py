@@ -29,6 +29,14 @@ class TestBossProjectile:
         assert projectile.type == "normal"
         assert projectile.lifetime == 5.0
         assert projectile.damage == 1
+        assert projectile.rotation == 0
+        assert projectile.rotation_speed == 180
+
+    def test_boss_projectile_initialization_with_type(self, mock_pygame):
+        """Test boss projectile initializes with specified type"""
+        projectile = BossProjectile(0, 0, pygame.Vector2(0, 0), "homing")
+        
+        assert projectile.type == "homing"
         
     def test_boss_projectile_types(self, mock_pygame):
         """Test different projectile types have correct colors"""
@@ -50,6 +58,16 @@ class TestBossProjectile:
         # Should move 10 pixels right
         assert projectile.position.x == 10
         assert projectile.position.y == 0
+
+    def test_boss_projectile_movement_diagonal(self, mock_pygame):
+        """Test projectile moves diagonally"""
+        velocity = pygame.Vector2(100, 100)
+        projectile = BossProjectile(0, 0, velocity)
+        
+        projectile.update(0.1)
+        
+        assert projectile.position.x == 10
+        assert projectile.position.y == 10
         
     def test_boss_projectile_rotation(self, mock_pygame):
         """Test projectile rotates over time"""
@@ -61,6 +79,25 @@ class TestBossProjectile:
         
         # Rotation should have changed
         assert projectile.rotation != initial_rotation
+        assert projectile.rotation == initial_rotation + 180 * 0.1
+
+    def test_boss_projectile_rotation_multiple_updates(self, mock_pygame):
+        """Test rotation accumulates over multiple updates"""
+        projectile = BossProjectile(0, 0, pygame.Vector2(0, 0))
+        
+        projectile.update(0.1)
+        projectile.update(0.1)
+        
+        assert projectile.rotation == 180 * 0.2
+
+    def test_boss_projectile_lifetime_decrements(self, mock_pygame):
+        """Test lifetime decrements over time"""
+        projectile = BossProjectile(0, 0, pygame.Vector2(0, 0))
+        initial_lifetime = projectile.lifetime
+        
+        projectile.update(0.5)
+        
+        assert projectile.lifetime == initial_lifetime - 0.5
         
     def test_boss_projectile_lifetime_expiry(self, mock_pygame):
         """Test projectile gets killed when lifetime expires"""
@@ -73,6 +110,42 @@ class TestBossProjectile:
         
         # Should be killed
         projectile.kill.assert_called_once()
+
+    def test_boss_projectile_screen_bounds_left(self, mock_pygame):
+        """Test projectile killed when leaving left edge"""
+        projectile = BossProjectile(0, 0, pygame.Vector2(-1000, 0))
+        projectile.kill = MagicMock()
+        
+        projectile.update(1.0)
+        
+        projectile.kill.assert_called_once()
+
+    def test_boss_projectile_screen_bounds_right(self, mock_pygame):
+        """Test projectile killed when leaving right edge"""
+        projectile = BossProjectile(SCREEN_WIDTH, 0, pygame.Vector2(1000, 0))
+        projectile.kill = MagicMock()
+        
+        projectile.update(1.0)
+        
+        projectile.kill.assert_called_once()
+
+    def test_boss_projectile_screen_bounds_top(self, mock_pygame):
+        """Test projectile killed when leaving top edge"""
+        projectile = BossProjectile(100, 0, pygame.Vector2(0, -1000))
+        projectile.kill = MagicMock()
+        
+        projectile.update(1.0)
+        
+        projectile.kill.assert_called_once()
+
+    def test_boss_projectile_screen_bounds_bottom(self, mock_pygame):
+        """Test projectile killed when leaving bottom edge"""
+        projectile = BossProjectile(100, SCREEN_HEIGHT, pygame.Vector2(0, 1000))
+        projectile.kill = MagicMock()
+        
+        projectile.update(1.0)
+        
+        projectile.kill.assert_called_once()
         
     def test_boss_projectile_screen_bounds(self, mock_pygame):
         """Test projectile gets killed when leaving screen"""
@@ -84,9 +157,48 @@ class TestBossProjectile:
         
         # Should be killed when off screen
         projectile.kill.assert_called_once()
+
+    def test_boss_projectile_screen_bounds_margin(self, mock_pygame):
+        """Test screen bounds check has margin"""
+        projectile = BossProjectile(-25, 0, pygame.Vector2(0, 0))
+        projectile.kill = MagicMock()
+        
+        projectile.update(0.1)
+        
+        # Should be killed (outside -20 margin)
+        projectile.kill.assert_called_once()
         
     def test_boss_projectile_damage_values(self, mock_pygame):
         """Test all projectile types have appropriate damage"""
         for proj_type in ["normal", "homing", "explosive"]:
             projectile = BossProjectile(0, 0, pygame.Vector2(0, 0), proj_type)
             assert projectile.damage >= 1
+
+    def test_boss_projectile_draw_normal(self, mock_pygame):
+        """Test drawing normal projectile"""
+        projectile = BossProjectile(100, 100, pygame.Vector2(0, 0), "normal")
+        screen = pygame.Surface((800, 600))
+        
+        projectile.draw(screen)  # Should not raise exception
+
+    def test_boss_projectile_draw_homing(self, mock_pygame):
+        """Test drawing homing projectile"""
+        projectile = BossProjectile(100, 100, pygame.Vector2(0, 0), "homing")
+        screen = pygame.Surface((800, 600))
+        
+        projectile.draw(screen)
+
+    def test_boss_projectile_draw_explosive(self, mock_pygame):
+        """Test drawing explosive projectile"""
+        projectile = BossProjectile(100, 100, pygame.Vector2(0, 0), "explosive")
+        screen = pygame.Surface((800, 600))
+        
+        projectile.draw(screen)
+
+    def test_boss_projectile_draw_with_rotation(self, mock_pygame):
+        """Test drawing projectile with rotation"""
+        projectile = BossProjectile(100, 100, pygame.Vector2(0, 0), "homing")
+        projectile.rotation = 45
+        screen = pygame.Surface((800, 600))
+        
+        projectile.draw(screen)

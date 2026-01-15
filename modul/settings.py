@@ -45,8 +45,9 @@ class Settings:
                 self.sound_on = settings_data.get("sound_on", True)
                 self.fullscreen = settings_data.get("fullscreen", False)
                 self.difficulty = settings_data.get("difficulty", "normal")
-                self.music_volume = settings_data.get("music_volume", 1.0)
-                self.sound_volume = settings_data.get("sound_volume", 1.0)
+                # Preserve constructor defaults (0.5) when values are missing
+                self.music_volume = settings_data.get("music_volume", self.music_volume)
+                self.sound_volume = settings_data.get("sound_volume", self.sound_volume)
                 print("Settings loaded")
             return True
         except Exception as e:

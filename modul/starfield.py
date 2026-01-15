@@ -39,7 +39,7 @@ class MenuStarfield:
         self.speed = 0.4
         self.respawn_counter = 0
         self.max_respawns_per_frame = 1
-        self.respawn_delay = 0
+        self.respawn_delay = 0.2
         self.respawn_delay_max = 0.2
         for _ in range(num_stars):
             if random.random() < 0.7:
