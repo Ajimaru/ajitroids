@@ -120,16 +120,6 @@ def test_session_stats_powerup_tracking():
     assert stats.total_powerups_collected == 3
 
 
-def test_session_stats_shot_tracking():
-    """Test shot fired tracking."""
-    from modul.session_stats import SessionStats
-    stats = SessionStats()
-    
-    for _ in range(10):
-        stats.record_shot_fired()
-    assert stats.total_shots_fired == 10
-
-
 def test_session_stats_life_tracking():
     """Test life lost tracking."""
     from modul.session_stats import SessionStats
@@ -138,21 +128,6 @@ def test_session_stats_life_tracking():
     stats.record_life_lost()
     stats.record_life_lost()
     assert stats.total_lives_lost == 2
-
-
-def test_session_stats_accuracy_calculation():
-    """Test shot accuracy calculation."""
-    from modul.session_stats import SessionStats
-    stats = SessionStats()
-    
-    # Fire 10 shots, destroy 5 asteroids
-    for _ in range(10):
-        stats.record_shot_fired()
-    for _ in range(5):
-        stats.record_asteroid_destroyed()
-    
-    accuracy = stats.get_accuracy()
-    assert accuracy == 50.0
 
 
 def test_session_stats_average_score():

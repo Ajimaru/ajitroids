@@ -87,9 +87,7 @@ class SessionStats:
             'total_enemies_destroyed': self.total_enemies_destroyed,
             'total_bosses_defeated': self.total_bosses_defeated,
             'total_powerups_collected': self.total_powerups_collected,
-            'total_shots_fired': self.total_shots_fired,
             'total_lives_lost': self.total_lives_lost,
-            'shot_accuracy': self.get_accuracy(),
             'total_playtime': self.total_playtime,
             'session_duration': self.get_session_duration(),
         }
@@ -117,8 +115,6 @@ COMBAT STATS
 Asteroids Destroyed:  {stats['total_asteroids_destroyed']:,}
 Enemies Destroyed:    {stats['total_enemies_destroyed']:,}
 Bosses Defeated:      {stats['total_bosses_defeated']:,}
-Shots Fired:          {stats['total_shots_fired']:,}
-Shot Accuracy:        {stats['shot_accuracy']:.1f}%
 
 COLLECTION & SURVIVAL
 =====================

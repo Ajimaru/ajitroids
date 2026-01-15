@@ -584,7 +584,7 @@ def main(args=None):
                     current_enemy_ships.append(enemy_ship)
                     last_spawn_time = time.time()
                     spawn_interval = random.uniform(10, 30)
-                    print(f"EnemyShip spawned! Current count: {len(current_enemy_ships)}, Max: {max_enemy_ships[difficulty]}")
+                    logger.debug(f"EnemyShip spawned! Current count: {len(current_enemy_ships)}, Max: {max_enemy_ships[difficulty]}")
 
             current_enemy_ships = [ship for ship in current_enemy_ships if ship in updatable]
 
@@ -716,7 +716,7 @@ def main(args=None):
                     if enemy_ship.collides_with(asteroid):
                         speed = enemy_ship.velocity.length()
                         enemy_ship.velocity = pygame.Vector2(random.uniform(-1, 1), random.uniform(-1, 1)).normalize() * speed
-                        print(f"EnemyShip changed direction due to asteroid collision.")
+                        logger.debug("EnemyShip changed direction due to asteroid collision.")
 
             for obj in updatable:
                 if not hasattr(obj, "position"):
