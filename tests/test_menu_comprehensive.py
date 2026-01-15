@@ -324,7 +324,11 @@ class TestMenu:
         menu.add_item("Start", "start")
         menu.add_item("Exit", "exit")
         menu.selected_index = 1
-        mock_get_pressed.return_value = {pygame.K_UP: True, pygame.K_DOWN: False, pygame.K_w: False, pygame.K_s: False}
+
+        keys = [0] * (max(pygame.K_UP, pygame.K_DOWN, pygame.K_w, pygame.K_s) + 1)
+        keys[pygame.K_UP] = 1
+        mock_get_pressed.return_value = keys
+
         menu.update(0.1, [])
         assert menu.selected_index == 0
 
@@ -334,7 +338,11 @@ class TestMenu:
         menu = Menu("Test")
         menu.add_item("Start", "start")
         menu.add_item("Exit", "exit")
-        mock_get_pressed.return_value = {pygame.K_UP: False, pygame.K_DOWN: True, pygame.K_w: False, pygame.K_s: False}
+
+        keys = [0] * (max(pygame.K_UP, pygame.K_DOWN, pygame.K_w, pygame.K_s) + 1)
+        keys[pygame.K_DOWN] = 1
+        mock_get_pressed.return_value = keys
+
         menu.update(0.1, [])
         assert menu.selected_index == 1
 
