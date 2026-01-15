@@ -48,9 +48,11 @@ class HelpScreen:
         self._ensure_fonts()
         self.active = True
 
-    def activate(self):
-        """Activate the help screen."""
-        self.active = True
+    def toggle(self):
+        """Toggle help screen visibility."""
+        if not self.active:
+            self._ensure_fonts()
+        self.active = not self.active
 
     def deactivate(self):
         """Deactivate the help screen."""
