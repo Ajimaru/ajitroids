@@ -10,8 +10,10 @@ from modul.constants import *
 
 
 @pytest.fixture(autouse=True)
-def init_pygame():
+def init_pygame(monkeypatch):
     """Initialize pygame for each test"""
+    monkeypatch.setenv("SDL_VIDEODRIVER", "dummy")
+    monkeypatch.setenv("SDL_AUDIODRIVER", "dummy")
     pygame.init()
     pygame.font.init()
     yield
