@@ -5,8 +5,10 @@ from modul.constants import STAR_COUNT
 
 
 @pytest.fixture(autouse=True)
-def init_pygame():
-    """Initialize pygame for each test"""
+def init_pygame(monkeypatch):
+    """Initialize pygame for each test (headless-safe)"""
+    monkeypatch.setenv("SDL_VIDEODRIVER", "dummy")
+    monkeypatch.setenv("SDL_AUDIODRIVER", "dummy")
     pygame.init()
     yield
     pygame.quit()
