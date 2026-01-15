@@ -346,9 +346,14 @@ class TestMenu:
         menu.add_item("Start", "start")
         menu.add_item("Exit", "exit")
 
-        keys = [0] * (max(pygame.K_UP, pygame.K_DOWN, pygame.K_w, pygame.K_s) + 1)
-        keys[pygame.K_DOWN] = 1
-        mock_get_pressed.return_value = keys
+        class _Pressed:
+            def __init__(self, pressed):
+                self._pressed = set(pressed)
+
+            def __getitem__(self, key):
+                return 1 if key in self._pressed else 0
+
+        mock_get_pressed.return_value = _Pressed({pygame.K_DOWN})
 
         menu.update(0.1, [])
         assert menu.selected_index == 1
