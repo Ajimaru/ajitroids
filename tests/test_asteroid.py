@@ -1,5 +1,6 @@
 import pytest
 import pygame
+from unittest.mock import patch
 from modul.asteroid import Asteroid, EnemyShip
 from modul.constants import ASTEROID_MIN_RADIUS, ASTEROID_MAX_RADIUS, ASTEROID_VERTICES
 from modul.shot import Shot
@@ -284,47 +285,26 @@ class TestEnemyShip:
         class TestEnemyShip(EnemyShip):
             containers = (group,)
         
-        # Mock Particle to avoid issues
-        from modul import particle
-        original_create = particle.Particle.create_ship_explosion
-        called = []
-        
-        def mock_create(x, y):
-            called.append((x, y))
-        
-        particle.Particle.create_ship_explosion = mock_create
-        
-        try:
+        # Mock Particle.create_ship_explosion
+        with patch('modul.particle.Particle.create_ship_explosion') as mock_create:
             enemy = TestEnemyShip(100, 100, 50)
             enemy.split()
             
             # Should have called particle creation
-            assert len(called) > 0
+            assert mock_create.called
             
             # Enemy should be removed from group
             assert enemy not in group
-        finally:
-            particle.Particle.create_ship_explosion = original_create
 
     def test_enemyship_kill(self):
         """Test enemy ship kill method"""
-        from modul import particle
-        original_create = particle.Particle.create_ship_explosion
-        called = []
-        
-        def mock_create(x, y):
-            called.append((x, y))
-        
-        particle.Particle.create_ship_explosion = mock_create
-        
-        try:
+        # Mock Particle.create_ship_explosion
+        with patch('modul.particle.Particle.create_ship_explosion') as mock_create:
             enemy = EnemyShip(100, 100, 50)
             enemy.kill()
             
             # Should have called particle creation
-            assert len(called) > 0
-        finally:
-            particle.Particle.create_ship_explosion = original_create
+            assert mock_create.called
 
     def test_enemyship_update_no_player(self):
         """Test enemy ship update without player position"""

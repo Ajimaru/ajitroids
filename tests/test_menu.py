@@ -1,8 +1,15 @@
+import pytest
 import pygame
-
-pygame.init()
-pygame.font.init()  # Initialize font system
 from modul.menu import Menu
+
+
+@pytest.fixture(autouse=True)
+def init_pygame():
+    """Initialize pygame for each test"""
+    pygame.init()
+    pygame.font.init()
+    yield
+    pygame.quit()
 
 
 def test_menu_initial_state():
