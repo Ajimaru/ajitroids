@@ -269,6 +269,8 @@ def main(args=None):
         for event in events:
             if event.type == pygame.QUIT:
                 logger.info("Game closing...")
+                if game_state == "playing":
+                    session_stats.end_game(score, level)
                 if args.debug:
                     logger.info("\n" + session_stats.get_formatted_summary())
                 return
