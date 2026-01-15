@@ -1035,21 +1035,26 @@ def toggle_fullscreen():
 
 if __name__ == "__main__":
     args = parse_arguments()
-    logger = None
     try:
         # Logger is configured inside main()
         main(args)
     except KeyboardInterrupt:
         print("\n\nGame interrupted by user.")
     except Exception as e:
-        # Use basic logging if main() failed before logger was configured
+        # Ensure we can always emit a crash log even if main() failed early
+        root = logging.getLogger()
+        if not root.handlers:
+            logging.basicConfig(
+                level=logging.ERROR,
+                format='%(asctime)s - %(levelname)s - %(message)s',
+                handlers=[logging.StreamHandler(sys.stderr)],
+            )
+
         log = logging.getLogger('Ajitroids')
-        if not log.hasHandlers():
-            logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
-        
         log.error("A fatal error occurred. The game will now close.", exc_info=True)
         print(f"\nA fatal error occurred: {e}", file=sys.stderr)
-        print("Please check the log file for more details.", file=sys.stderr)
+        if getattr(args, "log_file", None):
+            print(f"Please check the log file: {args.log_file}", file=sys.stderr)
         sys.exit(1)
     finally:
         print("Game over.")
