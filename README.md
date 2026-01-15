@@ -32,7 +32,7 @@ Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destr
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.9 or higher (tested up to 3.12)
 - [uv](https://github.com/astral-sh/uv) or pip
 
 ### Installation with uv (recommended)
