@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import patch, MagicMock
 from modul.sounds import Sounds
 
 
