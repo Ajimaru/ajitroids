@@ -73,8 +73,9 @@ Examples:
     parser.add_argument('--version', action='version', version=f'Ajitroids v{__version__}')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode with verbose logging')
     parser.add_argument('--skip-intro', action='store_true', help='Skip main menu and start game immediately')
-    parser.add_argument('--windowed', action='store_true', help='Start in windowed mode')
-    parser.add_argument('--fullscreen', action='store_true', help='Start in fullscreen mode')
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument('--windowed', action='store_true', help='Start in windowed mode')
+    mode_group.add_argument('--fullscreen', action='store_true', help='Start in fullscreen mode')
     parser.add_argument('--log-file', type=str, help='Write logs to specified file')
     
     return parser.parse_args()
