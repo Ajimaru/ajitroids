@@ -2,11 +2,20 @@ import random
 import math
 import pygame
 from modul.circleshape import CircleShape
-from modul.constants import *
+from modul.constants import (
+    ASTEROID_VERTICES,
+    ASTEROID_IRREGULARITY,
+    ASTEROID_MIN_RADIUS,
+    COLLISION_DEBUG,
+    POWERUP_SPAWN_CHANCE,
+    POWERUP_MAX_COUNT,
+    PLAYER_RADIUS,
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+)
 from modul.shot import Shot
 from modul.powerup import PowerUp
-from modul.player import Player
-import modul.particle as Particle
+from modul.particle import Particle
 from modul.groups import collidable, drawable, updatable
 
 
