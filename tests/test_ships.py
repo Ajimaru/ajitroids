@@ -266,8 +266,8 @@ class TestShipManager:
 
         manager.check_all_ships_unlocked(achievements)
 
-        # Verify the achievement is unlocked when all ships are unlocked.
-        assert len(achievements.unlocked) == 1
+        # Verify the correct achievement is unlocked when all ships are unlocked.
+        assert achievements.unlocked == ["Fleet Commander"]
 
     def test_ship_properties(self, clean_ships_file):
         """Test ship properties are complete"""
