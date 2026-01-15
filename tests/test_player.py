@@ -214,6 +214,7 @@ class TestPlayer:
             player.update(0.1)
             
             # Velocity should be reduced
+            assert player.velocity.length() < 10
 
     def test_player_update_shoot(self, mock_pygame):
         """Test shooting on space key"""
