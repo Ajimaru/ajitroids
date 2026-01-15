@@ -56,6 +56,14 @@ logs/
 # Build artifacts
 ajitroids.egg-info/
 
+# Documentation
+site/
+.cache/
+htmlcov/
+mypy-report/
+flake-report/
+docs-old/
+
 # Github
 .github/copilot-instructions.md
 

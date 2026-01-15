@@ -104,6 +104,28 @@ Unlock these ships by progressing through the game and achieving milestones!
 - Efficient particle system for visual effects
 - Collision detection with optimized algorithms
 
+## 📚 Documentation
+
+Comprehensive developer documentation is available:
+
+- **[Developer Documentation](https://ajimaru.github.io/ajitroids/)**: Complete guide for developers
+- **[Getting Started](https://ajimaru.github.io/ajitroids/getting-started/)**: Setup and installation
+- **[Architecture](https://ajimaru.github.io/ajitroids/architecture/overview/)**: Code architecture and design
+- **[API Reference](https://ajimaru.github.io/ajitroids/api/python/)**: Auto-generated API docs
+- **[Contributing Guide](https://ajimaru.github.io/ajitroids/development/contributing/)**: How to contribute
+
+### Building Documentation Locally
+
+```bash
+# Install documentation dependencies
+pip install -r requirements-docs.txt
+
+# Serve documentation locally
+mkdocs serve
+
+# Open http://127.0.0.1:8000 in your browser
+```
+
 ## 📜 License
 
 This project is licensed under the MIT License with Commons Clause - see the LICENSE.md file for details.
