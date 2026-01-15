@@ -14,6 +14,8 @@ def test_main_module_imports():
         assert hasattr(main, 'player_hit')
         assert hasattr(main, 'toggle_fullscreen')
         assert hasattr(main, 'debug_music_status')
+        assert hasattr(main, 'parse_arguments')
+        assert hasattr(main, 'setup_logging')
     except ImportError as e:
         assert False, f"Failed to import main.py: {e}"
 

@@ -36,6 +36,7 @@ from modul.achievements import AchievementSystem
 from modul.achievement_notification import AchievementNotificationManager
 from modul.groups import collidable, drawable, updatable
 from modul.help_screen import HelpScreen
+from modul.session_stats import SessionStats
 
 
 class GameSettings:
@@ -225,6 +226,7 @@ def main(args=None):
     ship_selection_menu = ShipSelectionMenu()
     tutorial = Tutorial()
     help_screen = HelpScreen()
+    session_stats = SessionStats()
 
     difficulty = "normal"
 
@@ -266,6 +268,9 @@ def main(args=None):
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
+                logger.info("Game closing...")
+                if args.debug:
+                    logger.info("\n" + session_stats.get_formatted_summary())
                 return
 
             if event.type == pygame.KEYDOWN:
@@ -416,6 +421,10 @@ def main(args=None):
                 score = 0
                 lives = PLAYER_LIVES
                 level = 1
+                
+                # Start tracking session statistics
+                session_stats.start_game()
+                logger.info(f"Game started - Difficulty: {difficulty}, Ship: {selected_ship}")
 
                 last_spawn_time = time.time()
                 spawn_interval = random.uniform(10, 30)
@@ -614,13 +623,15 @@ def main(args=None):
                     Particle.create_ship_explosion(player.position.x, player.position.y)
 
                     if lives <= 0:
-                        print(f"Game Over! Final Score: {score}")
+                        logger.info(f"Game Over! Final Score: {score}, Level: {level}")
+                        session_stats.end_game(score, level)
                         sounds.play_game_over()
                         game_over_screen.set_score(score)
                         game_over_screen.fade_in = True
                         game_over_screen.background_alpha = 0
                         game_state = "game_over"
                     else:
+                        session_stats.record_life_lost()
                         player.respawn()
 
                 for shot in shots:
@@ -644,6 +655,7 @@ def main(args=None):
                             achievement_system.unlock("First Blood")
 
                         asteroids_destroyed += 1
+                        session_stats.record_asteroid_destroyed()
 
                         if asteroids_destroyed >= 1000 and not achievement_system.is_unlocked("Asteroid Hunter"):
                             achievement_system.unlock("Asteroid Hunter")
@@ -674,25 +686,28 @@ def main(args=None):
                             current_enemy_ships.remove(obj)
 
                         if lives <= 0:
-                            print(f"Game Over! Final Score: {score}")
+                            logger.info(f"Game Over! Final Score: {score}, Level: {level}")
+                            session_stats.end_game(score, level)
                             sounds.play_game_over()
                             game_over_screen.set_score(score)
                             game_over_screen.fade_in = True
                             game_over_screen.background_alpha = 0
                             game_state = "game_over"
                         else:
+                            session_stats.record_life_lost()
                             player.respawn()
 
                     for shot in shots:
                         if obj.collides_with(shot):
                             sounds.play_explosion()
                             score += SCORE_MEDIUM
+                            session_stats.record_enemy_destroyed()
                             obj.split()
                             shot.kill()
 
                             if obj in current_enemy_ships:
                                 current_enemy_ships.remove(obj)
-                            print(f"EnemyShip destroyed! Remaining count: {len(current_enemy_ships)}")
+                            logger.debug(f"EnemyShip destroyed! Remaining count: {len(current_enemy_ships)}")
                             break
 
             for enemy_ship in current_enemy_ships:
@@ -813,6 +828,7 @@ def main(args=None):
                     powerup.kill()
 
                     powerups_collected += 1
+                    session_stats.record_powerup_collected()
 
                     if powerup.type == "shield":
                         shields_used += 1
@@ -883,6 +899,7 @@ def main(args=None):
                         if boss_defeated:
                             score += BOSS_SCORE
                             boss_active = False
+                            session_stats.record_boss_defeated()
 
                             if not achievement_system.is_unlocked("Boss Slayer"):
                                 achievement_system.unlock("Boss Slayer")
