@@ -14,14 +14,15 @@ def init_pygame():
 
 
 @pytest.fixture
-def clean_ships_file():
-    """Remove ships file before and after test"""
-    ships_file = "ships.json"
-    if os.path.exists(ships_file):
-        os.remove(ships_file)
+def clean_ships_file(tmp_path, monkeypatch):
+    """Run ship persistence tests in an isolated directory"""
+    monkeypatch.chdir(tmp_path)
+    ships_file = tmp_path / "ships.json"
+    if ships_file.exists():
+        ships_file.unlink()
     yield
-    if os.path.exists(ships_file):
-        os.remove(ships_file)
+    if ships_file.exists():
+        ships_file.unlink()
 
 
 class TestShipManager:
