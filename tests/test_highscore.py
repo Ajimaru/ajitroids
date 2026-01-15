@@ -16,13 +16,16 @@ def init_pygame():
 
 
 @pytest.fixture
-def clean_highscore_file():
-    """Remove highscore file before and after test"""
-    if os.path.exists(HIGHSCORE_FILE):
-        os.remove(HIGHSCORE_FILE)
+def clean_highscore_file(tmp_path, monkeypatch):
+    """Isolate highscore file per test run"""
+    hs_file = tmp_path / "highscores.json"
+    monkeypatch.setattr("modul.constants.HIGHSCORE_FILE", str(hs_file), raising=False)
+
+    if hs_file.exists():
+        hs_file.unlink()
     yield
-    if os.path.exists(HIGHSCORE_FILE):
-        os.remove(HIGHSCORE_FILE)
+    if hs_file.exists():
+        hs_file.unlink()
 
 
 class TestHighscoreManager:
