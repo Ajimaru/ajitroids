@@ -3,6 +3,7 @@ import os
 import pygame
 import random
 from modul.constants import *
+import modul.constants as C
 
 
 class HighscoreManager:
@@ -12,8 +13,8 @@ class HighscoreManager:
 
     def load_highscores(self):
         try:
-            if os.path.exists(HIGHSCORE_FILE):
-                with open(HIGHSCORE_FILE, "r") as f:
+            if os.path.exists(C.HIGHSCORE_FILE):
+                with open(C.HIGHSCORE_FILE, "r") as f:
                     self.highscores = json.load(f)
             else:
                 self.highscores = [
@@ -30,7 +31,7 @@ class HighscoreManager:
 
     def save_highscores(self):
         try:
-            with open(HIGHSCORE_FILE, "w") as f:
+            with open(C.HIGHSCORE_FILE, "w") as f:
                 json.dump(self.highscores, f)
         except Exception as e:
             print(f"Error saving highscores: {e}")

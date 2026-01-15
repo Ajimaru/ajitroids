@@ -2,6 +2,7 @@ import pytest
 import pygame
 import os
 import json
+import sys
 from modul.highscore import HighscoreManager, HighscoreInput, HighscoreDisplay
 from modul.constants import HIGHSCORE_FILE, HIGHSCORE_MAX_ENTRIES, HIGHSCORE_NAME_LENGTH
 
@@ -20,7 +21,8 @@ def clean_highscore_file(tmp_path, monkeypatch):
     """Isolate highscore file per test run"""
     hs_file = tmp_path / "highscores.json"
     monkeypatch.setattr("modul.constants.HIGHSCORE_FILE", str(hs_file), raising=False)
-    monkeypatch.setattr(__name__, "HIGHSCORE_FILE", str(hs_file), raising=False)
+    # Also patch any locally imported constant within this module
+    monkeypatch.setattr(sys.modules[__name__], "HIGHSCORE_FILE", str(hs_file), raising=False)
 
     if hs_file.exists():
         hs_file.unlink()
