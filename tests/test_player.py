@@ -165,15 +165,15 @@ class TestPlayer:
 
     def test_player_update_right_rotation(self, mock_pygame):
         """Test player rotates right"""
-        mock_keys = {
-            pygame.K_LEFT: False,
-            pygame.K_RIGHT: True,
-            pygame.K_UP: False,
-            pygame.K_DOWN: False,
-            pygame.K_SPACE: False,
-            pygame.K_b: False
-        }
-        
+        class _Pressed:
+            def __init__(self, pressed):
+                self._pressed = set(pressed)
+
+            def __getitem__(self, key):
+                return 1 if key in self._pressed else 0
+
+        mock_keys = _Pressed({pygame.K_RIGHT})
+
         with patch('pygame.key.get_pressed', return_value=mock_keys):
             player = Player(100, 100)
             initial_rotation = player.rotation
