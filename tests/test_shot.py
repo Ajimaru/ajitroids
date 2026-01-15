@@ -99,22 +99,21 @@ class TestShot:
         # Should be killed
         shot.kill.assert_called_once()
 
-    def test_shot_update_missile_homing(self, mock_pygame):
+    def test_shot_update_missile_homing(self, mock_pygame, monkeypatch):
         """Test missile homes in on target"""
         shot = Shot(0, 0, WEAPON_MISSILE)
         shot.velocity = pygame.Vector2(100, 0)
-        
+
         # Create mock target
         target = MagicMock()
         target.position = pygame.Vector2(100, 100)
         target.alive = MagicMock(return_value=True)
-        
-        Shot.asteroids_group = [target]
-        
+
+        monkeypatch.setattr(Shot, "asteroids_group", [target], raising=False)
+
         shot.update(0.1)
-        
+
         # Velocity should have changed direction
-        Shot.asteroids_group = None
 
     def test_shot_update_standard_no_homing(self, mock_pygame):
         """Test standard shot doesn't home"""
