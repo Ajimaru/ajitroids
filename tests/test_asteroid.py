@@ -120,13 +120,14 @@ class TestAsteroid:
     def test_asteroid_split_min_size(self, sprite_groups):
         """Test splitting minimum size asteroid"""
         asteroid_group, _, powerup_group = sprite_groups
-        
-        asteroid = Asteroid(100, 100, ASTEROID_MIN_RADIUS)
-        initial_count = len(asteroid_group)
-        
-        asteroid.split()
-        
-        # Should not create new asteroids
+    asteroid = Asteroid(100, 100, ASTEROID_MIN_RADIUS)
+    asteroid_group.add(asteroid)
+    initial_count = len(asteroid_group)
+    
+    asteroid.split()
+    
+    # The original asteroid should be destroyed, and no new ones created.
+    assert len(asteroid_group) == initial_count - 1
         assert len(asteroid_group) <= initial_count
 
     def test_asteroid_split_creates_children(self, sprite_groups):
