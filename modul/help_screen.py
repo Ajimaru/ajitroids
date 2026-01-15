@@ -64,6 +64,9 @@ class HelpScreen:
 
     def update(self, dt, events):
         """Update help screen state."""
+        if self.active:
+            self._ensure_fonts()
+
         for event in events:
             if event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_h, pygame.K_F1):
                 self.deactivate()
