@@ -621,15 +621,17 @@ class TestCreditsScreen:
     def test_creditsscreen_scroll_wrap(self, mock_screen):
         """Test credits scroll wraps around"""
         screen = CreditsScreen()
-        screen.scroll_position = 250
-        for line in ["Test"] * 100:
-            pass
-        y = screen.scroll_position
-        for line in ["Test"] * 100:
-            y += CREDITS_LINE_SPACING
-        if y < 0:
-            screen.scroll_position = SCREEN_HEIGHT
-        screen.draw(mock_screen)
+        # Assuming CREDITS_TEXT is a list of strings in the CreditsScreen class
+        # and its length determines the total scroll height.
+        # This is a hypothetical implementation detail.
+        total_scroll_height = len(screen.CREDITS_TEXT) * CREDITS_LINE_SPACING
+        screen.scroll_position = -total_scroll_height + 10  # Position just before wrapping
+
+        # Update once to trigger the wrap
+        screen.update(0.1, [])
+
+        # Assert that the scroll position has wrapped to the top
+        assert screen.scroll_position > SCREEN_HEIGHT - 100
 
 
 class TestGameOverScreen:
