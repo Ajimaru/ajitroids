@@ -18,6 +18,8 @@ def clean_ships_file(tmp_path, monkeypatch):
     """Run ship persistence tests in an isolated directory"""
     monkeypatch.chdir(tmp_path)
     ships_file = tmp_path / "ships.json"
+    monkeypatch.setattr("modul.ships.SHIPS_FILE", str(ships_file), raising=False)
+
     if ships_file.exists():
         ships_file.unlink()
     yield
