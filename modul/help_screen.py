@@ -58,10 +58,6 @@ class HelpScreen:
         """Deactivate the help screen."""
         self.active = False
 
-    def toggle(self):
-        """Toggle help screen visibility."""
-        self.active = not self.active
-
     def update(self, dt, events):
         """Update help screen state."""
         if self.active:
