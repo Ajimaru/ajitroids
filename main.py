@@ -42,6 +42,7 @@ from modul.session_stats import SessionStats
 from modul.stats_dashboard import StatsDashboard
 from modul.replay_system import ReplayRecorder, ReplayPlayer, ReplayManager
 from modul.replay_ui import ReplayListMenu, ReplayViewer
+from modul.performance_profiler import PerformanceProfiler
 
 
 class GameSettings:
@@ -68,6 +69,7 @@ Keyboard Shortcuts:
   F9            - Toggle sound effects
   F10           - Toggle music
   F11           - Toggle fullscreen
+  F12           - Toggle performance profiler
 
 Examples:
   python main.py --debug          # Start with debug logging
@@ -236,6 +238,9 @@ def main(args=None):
     session_stats = SessionStats()
     stats_dashboard = StatsDashboard(session_stats)
     
+    # Performance profiler
+    performance_profiler = PerformanceProfiler()
+    
     # Replay system
     global replay_recorder, replay_manager, replay_list_menu, replay_player, replay_viewer
     replay_recorder = ReplayRecorder()
@@ -296,6 +301,10 @@ def main(args=None):
                 # Handle function keys with elif to prevent multiple messages
                 if event.key == pygame.K_F11:
                     toggle_fullscreen()
+                elif event.key == pygame.K_F12:
+                    profiler_enabled = performance_profiler.toggle()
+                    toggle_message = "Performance Profiler Enabled" if profiler_enabled else "Performance Profiler Disabled"
+                    toggle_message_timer = 2
                 elif event.key == pygame.K_F10:
                     game_settings.music_on = not game_settings.music_on
                     game_settings.save()
@@ -606,6 +615,16 @@ def main(args=None):
         elif game_state == "playing":
             # Cache current time for this frame
             current_frame_time = time.time()
+            
+            # Update performance profiler
+            object_groups = {
+                'asteroids': asteroids,
+                'shots': shots,
+                'particles': particles,
+                'powerups': powerups,
+                'enemies': current_enemy_ships
+            }
+            performance_profiler.update(dt, clock, object_groups)
             
             starfield.update(dt)
             starfield.draw(screen)
@@ -993,6 +1012,9 @@ def main(args=None):
 
             achievement_notifications.update(dt)
             achievement_notifications.draw(screen)
+            
+            # Draw performance profiler overlay
+            performance_profiler.draw(screen)
 
         elif game_state == "highscore_input":
             menu_starfield.update(dt)

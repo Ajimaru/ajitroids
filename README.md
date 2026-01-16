@@ -163,6 +163,7 @@ ajitroids
 - **F9**: Toggle sound effects
 - **F10**: Toggle music
 - **F11**: Toggle fullscreen
+- **F12**: Toggle performance profiler (in-game monitoring)
 
 ### Replay Controls (in Replay Viewer)
 
