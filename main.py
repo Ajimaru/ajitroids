@@ -786,6 +786,20 @@ def main(args=None):
             
             # Record replay frame
             if replay_recorder.recording and player:
+                def _safe_serialize_group(group):
+                    out = []
+                    for obj in group:
+                        serialize = getattr(obj, "serialize", None)
+                        if not callable(serialize):
+                            continue
+                        try:
+                            data = serialize()
+                        except Exception:
+                            continue
+                        if isinstance(data, dict):
+                            out.append(data)
+                    return out
+
                 game_state_data = {
                     'player_x': player.position.x,
                     'player_y': player.position.y,
@@ -795,21 +809,11 @@ def main(args=None):
                     'score': score,
                     'lives': lives,
                     'level': level,
-                    'asteroids': [s for obj in asteroids
-                                  if callable(getattr(obj, 'serialize', None))
-                                  for s in ([obj.serialize()] if isinstance(obj.serialize(), dict) else [])],
-                    'enemies': [s for obj in current_enemy_ships
-                                if callable(getattr(obj, 'serialize', None))
-                                for s in ([obj.serialize()] if isinstance(obj.serialize(), dict) else [])],
-                    'shots': [s for obj in shots
-                              if callable(getattr(obj, 'serialize', None))
-                              for s in ([obj.serialize()] if isinstance(obj.serialize(), dict) else [])],
-                    'powerups': [s for obj in powerups
-                                 if callable(getattr(obj, 'serialize', None))
-                                 for s in ([obj.serialize()] if isinstance(obj.serialize(), dict) else [])],
-                    'particles': [s for obj in particles
-                                  if callable(getattr(obj, 'serialize', None))
-                                  for s in ([obj.serialize()] if isinstance(obj.serialize(), dict) else [])],
+                    'asteroids': _safe_serialize_group(asteroids),
+                    'enemies': _safe_serialize_group(current_enemy_ships),
+                    'shots': _safe_serialize_group(shots),
+                    'powerups': _safe_serialize_group(powerups),
+                    'particles': _safe_serialize_group(particles),
                 }
                 replay_recorder.record_frame(game_state_data, current_frame_time)
 
