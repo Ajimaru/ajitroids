@@ -184,9 +184,9 @@ class ReplayPlayer:
         """Set playback speed (0.5x, 1x, 2x, etc.)."""
         if self.playing and not self.paused:
             # Adjust start time for new speed
-            elapsed = self.get_current_timestamp()
+            elapsed = (time.time() - self.start_playback_time) * self.playback_speed
             self.playback_speed = speed
-            self.start_playback_time = time.time() - (elapsed / speed)
+            self.start_playback_time = time.time() - (elapsed / self.playback_speed)
         else:
             self.playback_speed = speed
             
