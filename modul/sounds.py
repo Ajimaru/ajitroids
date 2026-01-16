@@ -12,40 +12,37 @@ def asset_path(name: str) -> str:
 
 
 def apply_volume_curve(slider_value):
-    """Apply exponential curve to volume slider.
+    """Apply quadratic curve to volume slider for perceptual volume control.
 
     0.5 (50%) maps to 1.0 (normal/reference volume).
-    Below 0.5: reduces volume exponentially.
-    Above 0.5: increases volume exponentially.
+    Creates larger perceived differences between slider positions.
 
-    Formula: 2^(2*(x - 0.5))
-    - 0% → 0.25x (very quiet)
-    - 25% → ~0.7x
-    - 50% → 1.0x (normal)
-    - 75% → ~1.4x
-    - 100% → 2.0x (double)
+    Formula: 4^(2*(slider - 0.5))
+    Gives: 0% → 0.0625x, 50% → 1.0x, 100% → 16.0x
+    More dramatic changes than exponential base 2.
     """
-    return 2 ** (2 * (slider_value - 0.5))
+    return 4 ** (2 * (slider_value - 0.5))
 
 
 class Sounds:
     # Base volume levels for individual sound effects (relative to master volume)
-    # Reduced to account for WAV files being typically louder than MP3s
+    # Heavily reduced to account for WAV files being typically very loud
+    # and to make volume slider changes actually perceptible
     BASE_VOLUMES = {
-        "shoot": 0.25,
-        "explosion": 0.3,
-        "player_death": 0.35,
-        "menu_move": 0.15,
-        "menu_select": 0.15,
-        "laser_shoot": 0.1,
-        "rocket_shoot": 0.12,
-        "boss_spawn": 0.2,
-        "boss_death": 0.25,
-        "powerup": 0.2,
-        "shield_activate": 0.15,
-        "level_up": 0.2,
-        "game_over": 0.3,
-        "player_hit": 0.35,
+        "shoot": 0.1,
+        "explosion": 0.12,
+        "player_death": 0.14,
+        "menu_move": 0.06,
+        "menu_select": 0.06,
+        "laser_shoot": 0.04,
+        "rocket_shoot": 0.05,
+        "boss_spawn": 0.08,
+        "boss_death": 0.1,
+        "powerup": 0.08,
+        "shield_activate": 0.06,
+        "level_up": 0.08,
+        "game_over": 0.12,
+        "player_hit": 0.14,
     }
 
     def __init__(self):
