@@ -40,7 +40,23 @@ Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destr
 - Python 3.9 or higher (tested up to 3.12)
 - [uv](https://github.com/astral-sh/uv) or pip
 
-### Method 1: Clone from Git (Simplest)
+### Method 1: Install from Release (Recommended)
+
+Download the latest wheel file from the [Releases page](https://github.com/Ajimaru/ajitroids/releases/latest):
+
+```bash
+# Download ajitroids-0.21.0-py3-none-any.whl (adjust version number)
+
+# Install with pip
+pip install ajitroids-0.21.0-py3-none-any.whl
+
+# Run the game
+python -m modul.main
+# or
+ajitroids  # if installed with scripts
+```
+
+### Method 2: Clone from Git (For Development)
 
 ```bash
 # Clone the repository
@@ -59,30 +75,42 @@ uv run main.py  # with uv
 python main.py  # with pip
 ```
 
-### Method 2: Download Release Archive
+### Method 3: Install from Source Archive
 
-If you prefer to download a release ZIP/tarball:
+If you downloaded a source archive (.tar.gz) from releases:
+
+```bash
+# Extract and install
+pip install ajitroids-0.21.0.tar.gz
+
+# Run the game
+python -m modul.main
+```
+
+<details>
+<summary>Alternative: Manual installation from ZIP (not recommended)</summary>
+
+If you must use the auto-generated source code ZIP from GitHub:
 
 ```bash
 # Extract the downloaded archive
-cd ajitroids-0.21.0  # adjust to your version
+cd ajitroids-0.21.0
 
-# Set the game version (replace 0.21.0 with your downloaded version)
+# Set the game version (replace 0.21.0 with your version)
 export SETUPTOOLS_SCM_PRETEND_VERSION="0.21.0"  # Linux/Mac
 # or (Windows CMD)
 set SETUPTOOLS_SCM_PRETEND_VERSION=0.21.0
 # or (Windows PowerShell)
 $env:SETUPTOOLS_SCM_PRETEND_VERSION="0.21.0"
 
-# Install dependencies with uv
-uv sync
-
-# Or install with pip
-pip install -r requirements.txt
+# Install dependencies
+uv sync  # or: pip install -r requirements.txt
 
 # Start the game
 python main.py
 ```
+
+</details>
 
 ## 🌟 Gameplay
 

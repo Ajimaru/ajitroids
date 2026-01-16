@@ -58,3 +58,6 @@ classifiers = [
 "Homepage" = "https://github.com/Ajimaru/ajitroids"
 "Bug Tracker" = "https://github.com/Ajimaru/ajitroids/issues"
 
+[project.scripts]
+ajitroids = "main:main"
+
