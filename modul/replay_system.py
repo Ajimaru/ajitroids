@@ -172,12 +172,21 @@ class ReplayPlayer:
     def load_replay(self, filepath: str):
         """Load a replay from file."""
         try:
+            # Reset any prior playback state
+            self.stop_playback()
+
             with open(filepath, 'r') as f:
                 replay_data = json.load(f)
-                
+
             self.metadata = replay_data['metadata']
             self.frames = [GameFrame(**frame_data) for frame_data in replay_data['frames']]
             self.events = [GameEvent(**event_data) for event_data in replay_data['events']]
+
+            # Ensure chronological order
+            self.frames.sort(key=lambda fr: fr.timestamp)
+            self.events.sort(key=lambda ev: ev.timestamp)
+
+            self.current_frame_index = 0
             logger.info(f"Successfully loaded replay: {filepath}")
         except FileNotFoundError:
             logger.error(f"Replay file not found: {filepath}")
