@@ -446,6 +446,8 @@ class GameOverScreen:
                     return "highscore_display"
                 elif event.key == pygame.K_ESCAPE:
                     return "main_menu"
+                elif event.key == pygame.K_r:
+                    return "quick_restart"
 
         return None
 
@@ -463,12 +465,16 @@ class GameOverScreen:
         screen.blit(score_surf, score_rect)
 
         instruction1 = self.text_font.render("Press SPACE to view the Highscores", True, (200, 200, 200))
-        instruction1_rect = instruction1.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 80))
+        instruction1_rect = instruction1.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 60))
         screen.blit(instruction1, instruction1_rect)
 
-        instruction2 = self.text_font.render("Press ESC to return to the Main Menu", True, (200, 200, 200))
-        instruction2_rect = instruction2.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 120))
+        instruction2 = self.text_font.render("Press R to restart instantly", True, (200, 200, 200))
+        instruction2_rect = instruction2.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 100))
         screen.blit(instruction2, instruction2_rect)
+
+        instruction3 = self.text_font.render("Press ESC to return to the Main Menu", True, (200, 200, 200))
+        instruction3_rect = instruction3.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 140))
+        screen.blit(instruction3, instruction3_rect)
 
 
 class DifficultyMenu(Menu):

@@ -329,6 +329,9 @@ def main(args=None):
             if event.key == pygame.K_ESCAPE:
                 game_state = "pause"
                 pause_menu.activate()
+            elif event.key == pygame.K_r:
+                # Quick restart with 'R' key
+                game_state = quick_restart_game()
 
         screen.fill("black")
 
@@ -957,6 +960,9 @@ def main(args=None):
             elif action == "main_menu":
                 game_state = "main_menu"
                 main_menu.activate()
+                
+            elif action == "quick_restart":
+                game_state = quick_restart_game()
 
         elif game_state == "achievements":
             menu_starfield.update(dt)
@@ -1031,6 +1037,75 @@ def toggle_fullscreen():
     else:
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         print("Switched to windowed mode")
+
+
+def quick_restart_game():
+    """Quickly restart the game without going through menus."""
+    global score, lives, level, last_spawn_time, spawn_interval, current_enemy_ships
+    global level_up_timer, level_up_text, boss_active, boss_defeated_timer, boss_defeated_message
+    global player, powerups_collected, asteroids_destroyed, shields_used, triple_shots_used, speed_boosts_used
+    
+    # Reset game state
+    score = 0
+    lives = PLAYER_LIVES
+    level = 1
+    level_up_timer = 0
+    level_up_text = ""
+    boss_active = False
+    boss_defeated_timer = 0
+    boss_defeated_message = ""
+    
+    # Reset tracking stats
+    powerups_collected = 0
+    asteroids_destroyed = 0
+    shields_used = 0
+    triple_shots_used = 0
+    speed_boosts_used = 0
+    
+    # Reset enemy spawn timers
+    last_spawn_time = time.time()
+    spawn_interval = random.uniform(10, 30)
+    current_enemy_ships = []
+    
+    # Clear all game objects
+    for asteroid in list(asteroids):
+        asteroid.kill()
+    for powerup in list(powerups):
+        powerup.kill()
+    for shot in list(shots):
+        shot.kill()
+    for particle in list(particles):
+        particle.kill()
+    
+    # Clear enemy ships
+    for obj in list(collidable):
+        if isinstance(obj, EnemyShip):
+            obj.kill()
+    
+    # Clear boss if active
+    for obj in list(updatable):
+        if isinstance(obj, Boss):
+            obj.kill()
+    for obj in list(updatable):
+        if isinstance(obj, BossProjectile):
+            obj.kill()
+    
+    # Respawn player
+    player.position.x = RESPAWN_POSITION_X
+    player.position.y = RESPAWN_POSITION_Y
+    player.velocity = pygame.Vector2(0, 0)
+    player.rotation = 0
+    player.respawn()
+    
+    # Start new game session
+    session_stats.start_game()
+    
+    # Spawn initial asteroids
+    for _ in range(3):
+        asteroid_field.spawn_random()
+    
+    logger.info("Quick restart: Game restarted")
+    return "playing"
 
 
 if __name__ == "__main__":
