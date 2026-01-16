@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+## v0.21.1 (2026-01-16)
+
+### Fixed
+
+- **Installation Issues**: Fixed setuptools-scm version detection when installing from release archives
+  - Added fallback version to pyproject.toml to support builds without Git metadata
+  - Release packages now include pre-built wheel and source distribution with baked-in version
+
+### Changed
+
+- **Installation Methods**: Reorganized and improved installation documentation
+  - Method 1: Install from wheel (recommended, no Git required)
+  - Method 2: Clone from Git (for development)
+  - Method 3: Install from source tarball
+  - Added clear instructions for all platforms (Linux, macOS, Windows)
+- **Entry Point**: Added `ajitroids` command-line script for easier game launch after pip install
+- **Build System**: Release workflow now automatically builds and uploads Python packages (wheel + sdist)
+
+### Documentation
+
+- Clarified installation instructions to be more welcoming for different installation methods
+- Fixed typo in repository URL (Ajimarue → Ajimaru)
+- Added Windows PowerShell commands for environment variables
+
+Full Changelog: [v0.21.0...v0.21.1](https://github.com/Ajimaru/ajitroids/compare/v0.21.0...v0.21.1)
+
 ## v0.21.0 (2026-01-16)
 
 ### Added
