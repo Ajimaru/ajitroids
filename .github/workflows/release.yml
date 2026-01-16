@@ -20,7 +20,7 @@ jobs:
         run: |
           TAG="${{ github.ref_name }}"
           # Escape special regex characters for safe use in awk pattern
-          TAG_ESCAPED=$(printf '%s\n' "${TAG}" | sed 's/[[\.*^$()+?{|]/\\&/g')
+          TAG_ESCAPED=$(printf '%s\n' "${TAG}" | sed 's/[\[\.*^$()+?{|]/\\&/g')
           awk "/^## ${TAG_ESCAPED} / {flag=1; next} /^## v/ {flag=0} flag" CHANGELOG.md > _changelog_section.txt
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           cat _changelog_section.txt >> $GITHUB_OUTPUT
