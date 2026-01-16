@@ -30,7 +30,14 @@ class AsteroidField:
         self.spawn_interval = 5.0
 
     def spawn(self, radius, position, velocity):
-        asteroid = Asteroid(position.x, position.y, radius)
+        # Randomly select asteroid type based on weights
+        asteroid_type = random.choices(
+            list(ASTEROID_TYPE_WEIGHTS.keys()),
+            weights=list(ASTEROID_TYPE_WEIGHTS.values()),
+            k=1
+        )[0]
+        
+        asteroid = Asteroid(position.x, position.y, radius, asteroid_type)
         asteroid.velocity = velocity
 
     def update(self, dt):

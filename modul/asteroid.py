@@ -12,6 +12,15 @@ from modul.constants import (
     PLAYER_RADIUS,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
+    ASTEROID_TYPE_NORMAL,
+    ASTEROID_TYPE_ICE,
+    ASTEROID_TYPE_METAL,
+    ASTEROID_TYPE_CRYSTAL,
+    ASTEROID_TYPES,
+    ASTEROID_TYPE_COLORS,
+    ASTEROID_ICE_VELOCITY_MULTIPLIER,
+    ASTEROID_METAL_HEALTH,
+    ASTEROID_CRYSTAL_SPLIT_COUNT,
 )
 from modul.shot import Shot
 from modul.powerup import PowerUp
@@ -20,11 +29,14 @@ from modul.groups import collidable, drawable, updatable
 
 
 class Asteroid(CircleShape):
-    def __init__(self, x, y, radius):
+    def __init__(self, x, y, radius, asteroid_type=ASTEROID_TYPE_NORMAL):
         super().__init__(x, y, radius)
+        self.asteroid_type = asteroid_type
         self.vertices = self._generate_vertices()
         self.rotation_speed = 0
         self.rotation = 0
+        # Metal asteroids require multiple hits
+        self.health = ASTEROID_METAL_HEALTH if asteroid_type == ASTEROID_TYPE_METAL else 1
 
     def _generate_vertices(self):
         vertices = []
@@ -97,13 +109,25 @@ class Asteroid(CircleShape):
             for x, y in self.vertices
         ]
         points = [(self.position.x + x, self.position.y + y) for x, y in rotated_vertices]
-        pygame.draw.polygon(screen, "white", points, 2)
+        
+        # Get color based on asteroid type
+        color = ASTEROID_TYPE_COLORS.get(self.asteroid_type, "white")
+        
+        pygame.draw.polygon(screen, color, points, 2)
         if COLLISION_DEBUG:
             pygame.draw.circle(screen, "red", self.position, self.radius, 1)
             for point in points:
                 pygame.draw.circle(screen, "yellow", point, 2)
 
     def split(self):
+        # For metal asteroids, reduce health first
+        if self.asteroid_type == ASTEROID_TYPE_METAL and self.health > 1:
+            self.health -= 1
+            # Create visual feedback for hit but not destroyed
+            for _ in range(2):
+                Particle.create_asteroid_explosion(self.position.x, self.position.y)
+            return
+        
         self.kill()
 
         powerup_group = None
@@ -123,24 +147,29 @@ class Asteroid(CircleShape):
         new_radius = self.radius - ASTEROID_MIN_RADIUS
 
         random_angle = random.uniform(20, 50)
+        
+        # Determine how many pieces to split into based on type
+        split_count = ASTEROID_CRYSTAL_SPLIT_COUNT if self.asteroid_type == ASTEROID_TYPE_CRYSTAL else 2
+        
+        # Ice asteroids move faster when split (slippery)
+        velocity_multiplier = ASTEROID_ICE_VELOCITY_MULTIPLIER if self.asteroid_type == ASTEROID_TYPE_ICE else 1.2
 
-        velocity1 = self.velocity.rotate(random_angle) * 1.2
-        velocity2 = self.velocity.rotate(-random_angle) * 1.2
+        # Create split asteroids
+        for i in range(split_count):
+            # Calculate angle for each piece
+            if split_count == 2:
+                angle = random_angle if i == 0 else -random_angle
+            else:
+                # For crystal (3 pieces), spread them evenly
+                angle = random_angle + (i - 1) * 60  # -60, 0, 60 degrees approximately
 
-        rotation_speed1 = (random.uniform(-0.25, 0.25) + self.velocity.length() * math.sin(math.radians(random_angle))) * 0.1
-        rotation_speed2 = (random.uniform(-0.25, 0.25) + self.velocity.length() * math.sin(math.radians(-random_angle))) * 0.1
+            velocity = self.velocity.rotate(angle) * velocity_multiplier
+            rotation_speed = (random.uniform(-0.25, 0.25) + self.velocity.length() * math.sin(math.radians(angle))) * 0.1
 
-        new_asteroid1 = Asteroid(self.position.x, self.position.y, new_radius)
-        new_asteroid2 = Asteroid(self.position.x, self.position.y, new_radius)
-
-        new_asteroid1.velocity = velocity1
-        new_asteroid2.velocity = velocity2
-
-        new_asteroid1.rotation_speed = rotation_speed1
-        new_asteroid2.rotation_speed = rotation_speed2
-
-        new_asteroid1.vertices = new_asteroid1._generate_vertices()
-        new_asteroid2.vertices = new_asteroid2._generate_vertices()
+            new_asteroid = Asteroid(self.position.x, self.position.y, new_radius, self.asteroid_type)
+            new_asteroid.velocity = velocity
+            new_asteroid.rotation_speed = rotation_speed
+            new_asteroid.vertices = new_asteroid._generate_vertices()
 
     def update(self, dt):
         self.position += self.velocity * dt
