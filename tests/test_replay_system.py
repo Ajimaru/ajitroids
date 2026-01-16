@@ -367,3 +367,137 @@ def test_game_event_creation():
     assert event.timestamp == 1.0
     assert event.event_type == "asteroid_destroyed"
     assert event.data["score"] == 100
+
+
+def test_replay_manager_corrupted_json(tmp_path):
+    """Test that corrupted JSON files are logged and skipped."""
+    replay_dir = tmp_path / "replays"
+    replay_dir.mkdir()
+    
+    # Create a corrupted JSON file
+    corrupted_file = replay_dir / "corrupted.json"
+    corrupted_file.write_text("{ invalid json }")
+    
+    manager = ReplayManager()
+    manager.replays_dir = str(replay_dir)
+    
+    # Should not crash, should skip corrupted file
+    with patch('modul.replay_system.logger') as mock_logger:
+        replays = manager.list_replays()
+        assert len(replays) == 0
+        # Verify warning was logged
+        mock_logger.warning.assert_called_once()
+        assert "corrupted" in str(mock_logger.warning.call_args).lower()
+
+
+def test_replay_manager_missing_metadata(tmp_path):
+    """Test that files with missing metadata are handled gracefully."""
+    replay_dir = tmp_path / "replays"
+    replay_dir.mkdir()
+    
+    # Create a file without metadata
+    invalid_file = replay_dir / "invalid.json"
+    invalid_file.write_text('{"frames": [], "events": []}')
+    
+    manager = ReplayManager()
+    manager.replays_dir = str(replay_dir)
+    
+    # Should handle missing metadata gracefully
+    replays = manager.list_replays()
+    assert len(replays) == 1
+    assert replays[0]['metadata'] == {}
+
+
+def test_replay_manager_validate_filepath(tmp_path):
+    """Test filepath validation prevents directory traversal."""
+    replay_dir = tmp_path / "replays"
+    replay_dir.mkdir()
+    
+    manager = ReplayManager()
+    manager.replays_dir = str(replay_dir)
+    
+    # Valid path
+    valid_path = str(replay_dir / "valid.json")
+    assert manager._validate_filepath(valid_path) is True
+    
+    # Invalid path (parent directory)
+    invalid_path = str(tmp_path / "outside.json")
+    assert manager._validate_filepath(invalid_path) is False
+    
+    # Invalid path (directory traversal attempt)
+    traversal_path = str(replay_dir / ".." / "outside.json")
+    assert manager._validate_filepath(traversal_path) is False
+
+
+def test_replay_manager_delete_with_validation(tmp_path):
+    """Test that delete only works on valid paths."""
+    replay_dir = tmp_path / "replays"
+    replay_dir.mkdir()
+    
+    # Create a file to delete
+    valid_file = replay_dir / "valid.json"
+    valid_file.write_text('{"test": "data"}')
+    
+    manager = ReplayManager()
+    manager.replays_dir = str(replay_dir)
+    
+    # Try to delete file outside replays dir (should be rejected)
+    outside_file = tmp_path / "outside.json"
+    outside_file.write_text('{"test": "data"}')
+    
+    with patch('modul.replay_system.logger') as mock_logger:
+        manager.delete_replay(str(outside_file))
+        # File should still exist
+        assert outside_file.exists()
+        # Warning should be logged
+        mock_logger.warning.assert_called_once()
+    
+    # Delete valid file (should work)
+    manager.delete_replay(str(valid_file))
+    assert not valid_file.exists()
+
+
+def test_replay_player_load_invalid_file():
+    """Test that loading invalid replay files raises appropriate errors."""
+    player = ReplayPlayer()
+    
+    # Test with non-existent file
+    with pytest.raises(FileNotFoundError):
+        player.load_replay("/nonexistent/file.json")
+
+
+def test_replay_player_load_corrupted_json(tmp_path):
+    """Test that loading corrupted JSON raises JSONDecodeError."""
+    corrupted_file = tmp_path / "corrupted.json"
+    corrupted_file.write_text("{ invalid json }")
+    
+    player = ReplayPlayer()
+    
+    with patch('modul.replay_system.logger'):
+        with pytest.raises(json.JSONDecodeError):
+            player.load_replay(str(corrupted_file))
+
+
+def test_replay_recorder_save_with_error_handling(tmp_path):
+    """Test that save_replay handles errors appropriately."""
+    recorder = ReplayRecorder()
+    recorder.start_recording("normal", "default")
+    
+    # Create an invalid directory path
+    invalid_dir = tmp_path / "readonly"
+    invalid_dir.mkdir()
+    
+    # Make directory read-only on Unix systems
+    try:
+        os.chmod(invalid_dir, 0o444)
+        
+        with patch('modul.replay_system.os.makedirs', side_effect=OSError("Permission denied")):
+            with patch('modul.replay_system.logger'):
+                with pytest.raises(OSError):
+                    recorder.save_replay()
+    finally:
+        # Restore permissions for cleanup
+        try:
+            os.chmod(invalid_dir, 0o755)
+        except:
+            pass

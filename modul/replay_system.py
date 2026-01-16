@@ -2,8 +2,11 @@
 import json
 import os
 import time
+import logging
 from dataclasses import dataclass, field, asdict
 from typing import List, Dict, Any
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -116,24 +119,32 @@ class ReplayRecorder:
         
     def save_replay(self, filename: str = None) -> str:
         """Save the replay to a file."""
-        if filename is None:
-            # Generate filename from timestamp
-            filename = f"replay_{int(self.start_time)}.json"
+        try:
+            if filename is None:
+                # Generate filename from timestamp
+                filename = f"replay_{int(self.start_time)}.json"
+                
+            # Ensure replays directory exists
+            os.makedirs("replays", exist_ok=True)
+            filepath = os.path.join("replays", filename)
             
-        # Ensure replays directory exists
-        os.makedirs("replays", exist_ok=True)
-        filepath = os.path.join("replays", filename)
-        
-        replay_data = {
-            'metadata': self.metadata,
-            'frames': [asdict(frame) for frame in self.frames],
-            'events': [asdict(event) for event in self.events],
-        }
-        
-        with open(filepath, 'w') as f:
-            json.dump(replay_data, f, indent=2)
+            replay_data = {
+                'metadata': self.metadata,
+                'frames': [asdict(frame) for frame in self.frames],
+                'events': [asdict(event) for event in self.events],
+            }
             
-        return filepath
+            with open(filepath, 'w') as f:
+                json.dump(replay_data, f, indent=2)
+                
+            logger.info(f"Successfully saved replay to: {filepath}")
+            return filepath
+        except OSError as e:
+            logger.error(f"Failed to create replays directory or save file: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error saving replay: {e}")
+            raise
 
 
 class ReplayPlayer:
@@ -151,12 +162,26 @@ class ReplayPlayer:
         
     def load_replay(self, filepath: str):
         """Load a replay from file."""
-        with open(filepath, 'r') as f:
-            replay_data = json.load(f)
-            
-        self.metadata = replay_data['metadata']
-        self.frames = [GameFrame(**frame_data) for frame_data in replay_data['frames']]
-        self.events = [GameEvent(**event_data) for event_data in replay_data['events']]
+        try:
+            with open(filepath, 'r') as f:
+                replay_data = json.load(f)
+                
+            self.metadata = replay_data['metadata']
+            self.frames = [GameFrame(**frame_data) for frame_data in replay_data['frames']]
+            self.events = [GameEvent(**event_data) for event_data in replay_data['events']]
+            logger.info(f"Successfully loaded replay: {filepath}")
+        except FileNotFoundError:
+            logger.error(f"Replay file not found: {filepath}")
+            raise
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in replay file '{filepath}': {e}")
+            raise
+        except KeyError as e:
+            logger.error(f"Missing required field in replay file '{filepath}': {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Failed to load replay '{filepath}': {e}")
+            raise
         
     def start_playback(self):
         """Start playing the replay."""
@@ -252,6 +277,18 @@ class ReplayManager:
     def __init__(self):
         self.replays_dir = "replays"
         
+    def _validate_filepath(self, filepath: str) -> bool:
+        """Validate that filepath is within the replays directory."""
+        try:
+            # Get absolute paths and resolve any symlinks
+            replays_abs = os.path.abspath(self.replays_dir)
+            file_abs = os.path.abspath(filepath)
+            # Check if the file is within the replays directory
+            return file_abs.startswith(replays_abs + os.sep) or file_abs.startswith(replays_abs)
+        except Exception as e:
+            logger.error(f"Error validating filepath '{filepath}': {e}")
+            return False
+        
     def list_replays(self) -> List[Dict[str, Any]]:
         """List all available replay files."""
         if not os.path.exists(self.replays_dir):
@@ -269,8 +306,12 @@ class ReplayManager:
                             'filepath': filepath,
                             'metadata': data.get('metadata', {}),
                         })
-                except Exception:
-                    pass  # Skip corrupted files
+                except json.JSONDecodeError as e:
+                    logger.warning(f"Skipping corrupted replay file '{filename}': Invalid JSON - {e}")
+                except KeyError as e:
+                    logger.warning(f"Skipping replay file '{filename}': Missing required field - {e}")
+                except Exception as e:
+                    logger.error(f"Unexpected error reading replay file '{filename}': {e}")
                     
         # Sort by timestamp (newest first)
         replays.sort(key=lambda x: x['metadata'].get('start_time', 0), reverse=True)
@@ -278,8 +319,16 @@ class ReplayManager:
         
     def delete_replay(self, filepath: str):
         """Delete a replay file."""
+        if not self._validate_filepath(filepath):
+            logger.warning(f"Attempted to delete file outside replays directory: {filepath}")
+            return
+            
         if os.path.exists(filepath):
-            os.remove(filepath)
+            try:
+                os.remove(filepath)
+                logger.info(f"Deleted replay file: {filepath}")
+            except Exception as e:
+                logger.error(f"Failed to delete replay file '{filepath}': {e}")
             
     def get_replay_count(self) -> int:
         """Get the number of replay files."""
