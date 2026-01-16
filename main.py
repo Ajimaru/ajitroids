@@ -793,11 +793,11 @@ def main(args=None):
                     'score': score,
                     'lives': lives,
                     'level': level,
-                    'asteroids': [obj.serialize() for obj in asteroids if hasattr(obj, 'serialize')],
-                    'enemies': [obj.serialize() for obj in current_enemy_ships if hasattr(obj, 'serialize')],
-                    'shots': [obj.serialize() for obj in shots if hasattr(obj, 'serialize')],
-                    'powerups': [obj.serialize() for obj in powerups if hasattr(obj, 'serialize')],
-                    'particles': [obj.serialize() for obj in particles if hasattr(obj, 'serialize')],
+                    'asteroids': [obj.serialize() for obj in asteroids if callable(getattr(obj, 'serialize', None))],
+                    'enemies': [obj.serialize() for obj in current_enemy_ships if callable(getattr(obj, 'serialize', None))],
+                    'shots': [obj.serialize() for obj in shots if callable(getattr(obj, 'serialize', None))],
+                    'powerups': [obj.serialize() for obj in powerups if callable(getattr(obj, 'serialize', None))],
+                    'particles': [obj.serialize() for obj in particles if callable(getattr(obj, 'serialize', None))],
                 }
                 replay_recorder.record_frame(game_state_data, current_frame_time)
 
