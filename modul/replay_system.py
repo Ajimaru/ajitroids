@@ -201,15 +201,16 @@ class ReplayPlayer:
         if not self.playing or not self.frames:
             return
 
-        self.paused = not self.paused
         if not self.paused:
-            # Adjust start time when resuming
-            elapsed_at_current_speed = (
-                self.frames[self.current_frame_index].timestamp
-                if self.current_frame_index < len(self.frames)
-                else 0
-            )
-            self.start_playback_time = time.time() - (elapsed_at_current_speed / self.playback_speed)
+            # Pausing: capture the exact playback timestamp
+            self._paused_timestamp = self.get_current_timestamp()
+            self.paused = True
+            return
+
+        # Resuming: continue from the captured timestamp
+        self.paused = False
+        resume_ts = getattr(self, "_paused_timestamp", 0.0)
+        self.start_playback_time = time.time() - (resume_ts / self.playback_speed)
                 
     def set_speed(self, speed: float):
         """Set playback speed (0.5x, 1x, 2x, etc.)."""
