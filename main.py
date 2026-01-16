@@ -786,19 +786,20 @@ def main(args=None):
             
             # Record replay frame
             if replay_recorder.recording and player:
-                def _safe_serialize_group(group):
-                    out = []
-                    for obj in group:
-                        serialize = getattr(obj, "serialize", None)
-                        if not callable(serialize):
-                            continue
-                        try:
-                            data = serialize()
-                        except Exception:
-                            continue
-                        if isinstance(data, dict):
-                            out.append(data)
-                    return out
+                def _serialize_position(obj, radius_default=8, extra=None):
+                    data = {
+                        'x': getattr(obj.position, 'x', 0.0),
+                        'y': getattr(obj.position, 'y', 0.0),
+                        'radius': getattr(obj, 'radius', radius_default),
+                    }
+                    if extra:
+                        data.update(extra)
+                    return data
+
+                asteroids_data = [_serialize_position(a, radius_default=12) for a in asteroids]
+                enemies_data = [_serialize_position(e, radius_default=14) for e in current_enemy_ships]
+                shots_data = [_serialize_position(s, radius_default=4) for s in shots]
+                powerups_data = [_serialize_position(p, radius_default=6, extra={'type': getattr(p, 'type', 'unknown')}) for p in powerups]
 
                 game_state_data = {
                     'player_x': player.position.x,
@@ -809,11 +810,11 @@ def main(args=None):
                     'score': score,
                     'lives': lives,
                     'level': level,
-                    'asteroids': _safe_serialize_group(asteroids),
-                    'enemies': _safe_serialize_group(current_enemy_ships),
-                    'shots': _safe_serialize_group(shots),
-                    'powerups': _safe_serialize_group(powerups),
-                    'particles': _safe_serialize_group(particles),
+                    'asteroids': asteroids_data,
+                    'enemies': enemies_data,
+                    'shots': shots_data,
+                    'powerups': powerups_data,
+                    'particles': [],
                 }
                 replay_recorder.record_frame(game_state_data, current_frame_time)
 
@@ -1082,13 +1083,42 @@ def main(args=None):
             # Get current frame
             frame = replay_player.get_current_frame()
             if frame:
-                # Draw a simplified view - just show score, level, lives
+                # Draw player
+                pygame.draw.circle(screen, (0, 200, 255), (int(frame.player_pos[0]), int(frame.player_pos[1])), 10)
+
+                # Draw asteroids
+                for a in frame.asteroids:
+                    x = int(a.get('x', 0))
+                    y = int(a.get('y', 0))
+                    r = int(a.get('radius', 12))
+                    pygame.draw.circle(screen, (180, 180, 180), (x, y), r, 2)
+
+                # Draw enemies
+                for e in frame.enemies:
+                    x = int(e.get('x', 0))
+                    y = int(e.get('y', 0))
+                    r = int(e.get('radius', 14))
+                    pygame.draw.circle(screen, (255, 80, 80), (x, y), r, 2)
+
+                # Draw shots
+                for s in frame.shots:
+                    x = int(s.get('x', 0))
+                    y = int(s.get('y', 0))
+                    pygame.draw.circle(screen, (255, 255, 0), (x, y), 3)
+
+                # Draw powerups
+                for p in frame.powerups:
+                    x = int(p.get('x', 0))
+                    y = int(p.get('y', 0))
+                    pygame.draw.circle(screen, (0, 255, 0), (x, y), 6, 1)
+
+                # HUD text
                 score_text = font.render(f"Score: {frame.score}", True, (255, 255, 255))
                 screen.blit(score_text, (20, 20))
-                
+
                 lives_text = font.render(f"Lives: {frame.lives}", True, (255, 255, 255))
                 screen.blit(lives_text, (20, 50))
-                
+
                 level_text = font.render(f"Level: {frame.level}", True, (200, 200, 200))
                 screen.blit(level_text, (20, 80))
             
