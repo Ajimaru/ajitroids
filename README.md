@@ -67,7 +67,7 @@ If you prefer to download a release ZIP/tarball:
 # Extract the downloaded archive
 cd ajitroids-0.21.0  # adjust to your version
 
-# Set version for the build system
+# Set the game version (replace 0.21.0 with your downloaded version)
 export SETUPTOOLS_SCM_PRETEND_VERSION="0.21.0"  # Linux/Mac
 # or (Windows CMD)
 set SETUPTOOLS_SCM_PRETEND_VERSION=0.21.0
