@@ -1,11 +1,14 @@
 # flake8: noqa
+# pylint: disable=all
 # pyright: reportUndefinedVariable=false
 # pyright: reportWildcardImportFromLibrary=false
-from modul._version import __version__
+import math
+
 import pygame
+
+from modul._version import __version__
 from modul.constants import *
 from modul.ships import ship_manager, ShipRenderer
-import math
 
 sounds = None
 
@@ -156,7 +159,7 @@ class Menu:
         screen.blit(background, (0, 0))
 
         title_surf = self.title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4))
+        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 8))
         screen.blit(title_surf, title_rect)
 
         # Center items vertically so long lists still fit

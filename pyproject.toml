@@ -1,3 +1,10 @@
+[tool.pylint.messages_control]
+disable = ["fixme", "too-many-lines", "too-many-arguments", "too-many-branches", "too-many-statements", "too-many-instance-attributes", "too-many-locals", "duplicate-code"]
+
+[tool.pylint.format]
+ignore-patterns = ["modul/_version.py"]
+max-line-length = 127
+
 [tool.black]
 line-length = 127
 target-version = ["py39", "py310", "py311", "py312"]
@@ -60,4 +67,3 @@ classifiers = [
 
 [project.scripts]
 ajitroids = "main:main"
-
