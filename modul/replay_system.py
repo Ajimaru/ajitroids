@@ -234,7 +234,8 @@ class ReplayPlayer:
         # Resuming: continue from the captured timestamp
         resume_ts = getattr(self, "_paused_timestamp", 0.0)
         self.paused = False
-        self.start_playback_time = time.time() - (resume_ts / self.playback_speed)
+        safe_speed = self.playback_speed if self.playback_speed not in (0, 0.0) else 1.0
+        self.start_playback_time = time.time() - (resume_ts / safe_speed)
         if hasattr(self, "_paused_timestamp"):
             delattr(self, "_paused_timestamp")
                 
