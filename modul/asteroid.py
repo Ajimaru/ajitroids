@@ -113,7 +113,10 @@ class Asteroid(CircleShape):
         points = [(self.position.x + x, self.position.y + y) for x, y in rotated_vertices]
         
         # Get color based on asteroid type
-        color = ASTEROID_TYPE_COLORS.get(self.asteroid_type, "white")
+        color = ASTEROID_TYPE_COLORS.get(
+            self.asteroid_type,
+            ASTEROID_TYPE_COLORS[ASTEROID_TYPE_NORMAL]
+        )
         
         pygame.draw.polygon(screen, color, points, 2)
         if COLLISION_DEBUG:
