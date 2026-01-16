@@ -25,6 +25,7 @@ Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destr
 - **Modern Graphics**: Enhanced visuals with particle effects and animations
 - **Sound System**: Dynamic sound effects and background music
 - **Power-Up System**: Collect various weapon upgrades and shields
+- **Advanced Asteroid Types**: Face four distinct asteroid types (Normal, Ice, Metal, Crystal) with unique behaviors
 - **Highscore System**: Save your best results and compare them
 - **Boss Fights**: Face epic boss enemies in higher levels
 - **Customizable Settings**: Fullscreen mode, sound options and more

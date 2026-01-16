@@ -81,6 +81,36 @@ if shot.collides_with(asteroid):
 
 ## Asteroid Mechanics
 
+### Asteroid Types
+
+Ajitroids features four distinct asteroid types, each with unique properties and behaviors:
+
+**Normal Asteroids (White)**
+- Standard asteroids with balanced properties
+- Split into 2 pieces when destroyed
+- Most common type (50% spawn rate)
+
+**Ice Asteroids (Light Blue)**
+- Slippery and fast-moving
+- Split into 2 pieces with 1.4x velocity multiplier
+- Harder to predict trajectory after splitting
+- Spawn rate: 20%
+
+**Metal Asteroids (Gray)**
+- Reinforced and tough
+- Require 2 hits to destroy
+- First hit damages but doesn't split the asteroid
+- Split into 2 pieces on final hit
+- Spawn rate: 15%
+
+**Crystal Asteroids (Purple)**
+- Brittle and shatter dramatically
+- Split into 3 pieces instead of 2
+- Creates more chaotic asteroid fields
+- Spawn rate: 15%
+
+All asteroid types maintain their properties when split - ice asteroids spawn ice fragments, metal asteroids spawn tougher metal fragments, and crystal asteroids spawn crystal fragments.
+
 ### Spawning
 
 Asteroids spawn in waves:
@@ -103,27 +133,44 @@ def spawn_asteroid():
 
 ### Splitting
 
-When hit, asteroids split into smaller pieces:
+When hit, asteroids split into smaller pieces with type-specific behavior:
 
 ```python
 def split(self):
+    # Metal asteroids require multiple hits
+    if self.type == METAL and self.health > 1 and not at_min_size:
+        self.health -= 1
+        create_damage_particles()
+        return  # Don't split yet
+    
     if self.size == LARGE:
-        # Create 2 medium asteroids
-        for i in range(2):
-            angle = random.uniform(0, 360)
-            velocity = Vector2(SPLIT_SPEED, 0).rotate(angle)
-            Asteroid(self.position, velocity, MEDIUM)
+        # Normal/Ice/Metal: Create 2 asteroids
+        # Crystal: Create 3 asteroids
+        split_count = 3 if self.type == CRYSTAL else 2
+        
+        for i in range(split_count):
+            angle = calculate_split_angle(i, split_count)
+            
+            # Ice asteroids have higher velocity multiplier
+            velocity_mult = 1.4 if self.type == ICE else 1.2
+            velocity = Vector2(SPLIT_SPEED, 0).rotate(angle) * velocity_mult
+            
+            # New asteroid inherits parent type
+            Asteroid(self.position, velocity, MEDIUM, self.type)
     
     elif self.size == MEDIUM:
-        # Create 2-3 small asteroids
-        for i in range(random.randint(2, 3)):
-            angle = random.uniform(0, 360)
-            velocity = Vector2(SPLIT_SPEED, 0).rotate(angle)
-            Asteroid(self.position, velocity, SMALL)
+        # Same splitting logic for medium asteroids
+        # ...
     
     # Small asteroids just disappear
     self.kill()
 ```
+
+Type-specific splitting behaviors:
+- **Normal**: Standard 2-way split with 1.2x velocity
+- **Ice**: 2-way split with 1.4x velocity (slippery/fast)
+- **Metal**: Requires 2 hits before splitting normally
+- **Crystal**: 3-way split for more chaotic asteroid fields
 
 ## Boss Mechanics
 
