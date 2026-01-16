@@ -41,7 +41,7 @@ Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destr
 
 ```bash
 # Clone repository
-git clone https://github.com/your-username/ajitroids.git
+git clone https://github.com/Ajimaru/ajitroids.git
 cd ajitroids
 
 # Install dependencies
@@ -55,7 +55,7 @@ uv run main.py
 
 ```bash
 # Clone repository
-git clone https://github.com/your-username/ajitroids.git
+git clone https://github.com/Ajimarue/ajitroids.git
 cd ajitroids
 
 # Install dependencies
