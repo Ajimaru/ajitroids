@@ -1,6 +1,6 @@
 # flake8: noqa
 # pyright: reportUndefinedVariable=false, reportWildcardImportFromLibrary=false
-from modul._version import __version__
+from modul.version import __version__
 import pygame
 import math
 import random
