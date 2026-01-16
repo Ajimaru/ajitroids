@@ -6,6 +6,10 @@ The Performance Profiler provides real-time monitoring of game performance metri
 
 The Performance Profiler is an in-game overlay that displays key performance metrics including FPS (Frames Per Second), frame time, and object counts. It helps developers and players monitor the game's performance in real-time.
 
+![Performance Profiler Screenshot](../assets/screenshots/performance_profiler.png)
+
+*The performance profiler overlay showing FPS graph, frame time, and object counts*
+
 ## Usage
 
 ### Keyboard Shortcut

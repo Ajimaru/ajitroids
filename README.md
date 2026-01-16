@@ -32,6 +32,7 @@ Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destr
 - **Quick Restart**: Press 'R' to instantly restart without going through menus
 - **Stats Dashboard**: View detailed statistics with visual progress bars
 - **Replay System**: Watch and analyze your previous games with playback controls
+- **Performance Profiler**: Real-time FPS monitoring and performance metrics (F12)
 
 ## 🚀 Installation
 
