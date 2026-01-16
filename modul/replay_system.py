@@ -280,11 +280,9 @@ class ReplayManager:
     def _validate_filepath(self, filepath: str) -> bool:
         """Validate that filepath is within the replays directory."""
         try:
-            # Get absolute paths and resolve any symlinks
-            replays_abs = os.path.abspath(self.replays_dir)
-            file_abs = os.path.abspath(filepath)
-            # Check if the file is within the replays directory
-            return file_abs.startswith(replays_abs + os.sep) or file_abs.startswith(replays_abs)
+            replays_abs = os.path.realpath(self.replays_dir)
+            file_abs = os.path.realpath(filepath)
+            return os.path.commonpath([replays_abs, file_abs]) == replays_abs
         except Exception as e:
             logger.error(f"Error validating filepath '{filepath}': {e}")
             return False
