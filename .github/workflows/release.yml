@@ -38,6 +38,15 @@ jobs:
           python -m build
           ls -lh dist/
 
+      - name: Create latest aliases
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          WHL="dist/ajitroids-${VERSION}-py3-none-any.whl"
+          TAR="dist/ajitroids-${VERSION}.tar.gz"
+          cp "$WHL" dist/ajitroids-latest-py3-none-any.whl
+          cp "$TAR" dist/ajitroids-latest.tar.gz
+          ls -lh dist/
+
       - name: Extract changelog for tag
         id: changelog
         run: |
