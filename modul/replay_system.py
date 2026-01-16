@@ -131,19 +131,30 @@ class ReplayRecorder:
         """Save the replay to a file."""
         try:
             if filename is None:
-                # Generate filename from timestamp
-                filename = f"replay_{int(self.start_time)}.json"
-                
+                # Generate filename from timestamp (millisecond resolution)
+                filename = f"replay_{int(self.start_time * 1000)}.json"
+
             # Ensure replays directory exists
             os.makedirs("replays", exist_ok=True)
             filepath = os.path.join("replays", filename)
-            
+
+            # Ensure we never overwrite an existing replay
+            if os.path.exists(filepath):
+                base, ext = os.path.splitext(filename)
+                i = 1
+                while True:
+                    candidate = os.path.join("replays", f"{base}_{i}{ext}")
+                    if not os.path.exists(candidate):
+                        filepath = candidate
+                        break
+                    i += 1
+
             replay_data = {
                 'metadata': self.metadata,
                 'frames': [asdict(frame) for frame in self.frames],
                 'events': [asdict(event) for event in self.events],
             }
-            
+
             with open(filepath, 'w') as f:
                 json.dump(replay_data, f, indent=2)
                 
