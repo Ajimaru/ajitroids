@@ -30,21 +30,22 @@ def apply_volume_curve(slider_value):
 
 class Sounds:
     # Base volume levels for individual sound effects (relative to master volume)
+    # Reduced to account for WAV files being typically louder than MP3s
     BASE_VOLUMES = {
-        "shoot": 0.5,
-        "explosion": 0.6,
-        "player_death": 0.7,
-        "menu_move": 0.3,
-        "menu_select": 0.3,
-        "laser_shoot": 0.2,
-        "rocket_shoot": 0.25,
-        "boss_spawn": 0.4,
-        "boss_death": 0.5,
-        "powerup": 0.4,
-        "shield_activate": 0.3,
-        "level_up": 0.4,
-        "game_over": 0.6,
-        "player_hit": 0.7,
+        "shoot": 0.25,
+        "explosion": 0.3,
+        "player_death": 0.35,
+        "menu_move": 0.15,
+        "menu_select": 0.15,
+        "laser_shoot": 0.1,
+        "rocket_shoot": 0.12,
+        "boss_spawn": 0.2,
+        "boss_death": 0.25,
+        "powerup": 0.2,
+        "shield_activate": 0.15,
+        "level_up": 0.2,
+        "game_over": 0.3,
+        "player_hit": 0.35,
     }
 
     def __init__(self):
