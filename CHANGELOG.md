@@ -2,6 +2,30 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## v0.23.0 (2026-01-16)
+
+### Fixed
+
+- Asteroid split crash resolved (`angle` now always defined) and split angles
+  spread consistently across shard counts.
+- Sound effect volume now respects the linear slider value; toggle on/off
+  reapplies the expected volume instead of curved amplification.
+
+### Changed
+
+- Asteroid scoring is type-aware via multipliers (ice 0.9x, metal 1.5x,
+  crystal 0.6x) on top of size-based base points; metal asteroids use a warmer
+  brass color for better contrast against ice blue.
+- Pre-commit now runs the full Pytest suite; pytest hook uses `python3` for
+  reliability.
+
+### Build
+
+- Version bumped to 0.23.0 with setuptools-scm fallback aligned.
+
+Full Changelog:
+[v0.22.0...v0.23.0](https://github.com/Ajimaru/ajitroids/compare/v0.22.0...v0.23.0)
+
 ## v0.22.0 (2026-01-16)
 
 ### Added
