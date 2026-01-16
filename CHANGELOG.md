@@ -1,18 +1,19 @@
 # Changelog
+
 <!-- markdownlint-disable MD024 -->
 
 ## v0.22.0 (2026-01-16)
 
 ### Added
 
-- Pause menu shows the full keyboard shortcut list to match the README.
-- Restart from pause now has a confirmation dialog to prevent accidental loss
-  of a running session.
+- Pause menu shows the full keyboard shortcut list.
+- Restart from pause now has a confirmation dialog to prevent accidental loss of
+  a running session.
 
 ### Changed
 
-- Performance profiler overlay moved to the bottom-right corner for better
-  menu visibility.
+- Performance profiler overlay moved to the bottom-right corner for better menu
+  visibility.
 - Leaving a running game for the main menu now requires confirmation; the
   difficulty menu ESC action returns to the main menu instead of silently
   exiting the flow.
