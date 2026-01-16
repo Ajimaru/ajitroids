@@ -65,7 +65,11 @@ class HelpScreen:
             self._ensure_fonts()
 
         for event in events:
-            if event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_h, pygame.K_F1):
+            if event.type == pygame.KEYDOWN and event.key in (
+                pygame.K_ESCAPE,
+                pygame.K_h,
+                pygame.K_F1,
+            ):
                 self.deactivate()
                 return "close"
         return None
@@ -82,7 +86,11 @@ class HelpScreen:
         screen.blit(overlay, (0, 0))
 
         # Title
-        title_surface = self.title_font.render("KEYBOARD SHORTCUTS", True, (255, 215, 0))
+        title_surface = self.title_font.render(
+            "KEYBOARD SHORTCUTS",
+            True,
+            (255, 215, 0),
+        )
         title_rect = title_surface.get_rect(center=(SCREEN_WIDTH / 2, 60))
         screen.blit(title_surface, title_rect)
 
@@ -92,7 +100,11 @@ class HelpScreen:
         
         for section_title, shortcuts in self.shortcuts:
             # Section title
-            section_surface = self.section_font.render(section_title, True, (100, 200, 255))
+            section_surface = self.section_font.render(
+                section_title,
+                True,
+                (100, 200, 255),
+            )
             screen.blit(section_surface, (x_left, y_pos))
             y_pos += 50
 
@@ -103,7 +115,11 @@ class HelpScreen:
                 screen.blit(key_surface, (x_left + 20, y_pos))
                 
                 # Description
-                desc_surface = self.text_font.render(f"- {description}", True, (200, 200, 200))
+                desc_surface = self.text_font.render(
+                    f"- {description}",
+                    True,
+                    (200, 200, 200),
+                )
                 screen.blit(desc_surface, (x_left + 250, y_pos))
                 
                 y_pos += 35
@@ -131,6 +147,12 @@ class HelpScreen:
 
         # Footer
         footer_text = "Press ESC, H, or F1 to close"
-        footer_surface = self.small_font.render(footer_text, True, (150, 150, 150))
-        footer_rect = footer_surface.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 30))
+        footer_surface = self.small_font.render(
+            footer_text,
+            True,
+            (150, 150, 150),
+        )
+        footer_rect = footer_surface.get_rect(
+            center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 30)
+        )
         screen.blit(footer_surface, footer_rect)

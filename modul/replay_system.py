@@ -1,12 +1,46 @@
 """Replay system for recording and playing back game sessions."""
+import gzip
 import json
 import os
 import time
 import logging
 from dataclasses import dataclass, field, asdict
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional, cast, TextIO
 
 logger = logging.getLogger(__name__)
+
+
+MIN_REPLAY_FPS = 30
+DEFAULT_FRAME_INTERVAL = 1.0 / MIN_REPLAY_FPS
+QUANTIZE_DIGITS = 3
+
+
+def _quantize(value, ndigits: int = QUANTIZE_DIGITS):
+    """Recursively round floats and leave other types unchanged."""
+    if isinstance(value, float):
+        return round(value, ndigits)
+    if isinstance(value, (list, tuple)):
+        return type(value)(_quantize(v, ndigits) for v in value)
+    if isinstance(value, dict):
+        return {k: _quantize(v, ndigits) for k, v in value.items()}
+    return value
+
+
+def _open_replay(path: str, mode: str = "rt"):
+    """Open replay file with gzip support based on extension."""
+    if path.endswith(".gz"):
+        return gzip.open(path, mode)
+    return open(path, mode)
+
+
+def _quantize_float(value: float) -> float:
+    """Round float inputs to a fixed precision."""
+    return round(float(value), QUANTIZE_DIGITS)
+
+
+def _quantize_dict_list(values: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Quantize nested dict structures while preserving list typing."""
+    return [cast(Dict[str, Any], _quantize(value)) for value in values]
 
 
 @dataclass
@@ -24,28 +58,28 @@ class GameFrame:
     powerups: List[Dict[str, Any]] = field(default_factory=list)
     enemies: List[Dict[str, Any]] = field(default_factory=list)
     particles: List[Dict[str, Any]] = field(default_factory=list)
-    
+
 
 @dataclass
 class GameEvent:
     """Records a significant game event."""
     timestamp: float
-    event_type: str  # 'asteroid_destroyed', 'powerup_collected', 'level_up', 'boss_spawn', etc.
+    event_type: str
     data: Dict[str, Any] = field(default_factory=dict)
 
 
 class ReplayRecorder:
     """Records game sessions for later playback."""
-    
+
     def __init__(self):
         self.recording = False
         self.frames: List[GameFrame] = []
         self.events: List[GameEvent] = []
         self.start_time = 0
         self.metadata = {}
-        self.frame_interval = 0.1  # Record every 100ms
+        self.frame_interval = DEFAULT_FRAME_INTERVAL
         self.last_frame_time = 0
-        
+
     def start_recording(self, difficulty: str, ship_type: str):
         """Start recording a new game session."""
         self.recording = True
@@ -54,10 +88,13 @@ class ReplayRecorder:
         self.start_time = time.time()
         self.last_frame_time = 0
         self.metadata = {
-            'version': '1.0',
+            'version': '1.1',
             'difficulty': difficulty,
             'ship_type': ship_type,
             'start_time': self.start_time,
+            'frame_rate_hz': round(1.0 / self.frame_interval, 2),
+            'format': 'json',
+            'compression': 'gzip',
         }
         
     def stop_recording(self, final_score: int, final_level: int):
@@ -83,42 +120,63 @@ class ReplayRecorder:
         relative_time = max(0, current_time - self.start_time)
 
         # Only record frames at specified interval
-        if self.last_frame_time > 0 and relative_time - self.last_frame_time < self.frame_interval:
+        if (self.last_frame_time > 0 and
+                relative_time - self.last_frame_time < self.frame_interval):
             return
 
         required = (
-            'player_x', 'player_y', 'player_rotation', 'player_vx', 'player_vy',
-            'score', 'lives', 'level'
+            'player_x', 'player_y', 'player_rotation',
+            'player_vx', 'player_vy', 'score', 'lives', 'level'
         )
         if any(k not in game_state for k in required):
-            logger.debug("Skipping replay frame due to missing required fields")
+            logger.debug("Skipping frame; missing required fields")
             return
 
         self.last_frame_time = relative_time
 
+        px = _quantize(game_state['player_x'])
+        py = _quantize(game_state['player_y'])
+        vx = _quantize(game_state['player_vx'])
+        vy = _quantize(game_state['player_vy'])
+
         frame = GameFrame(
-            timestamp=relative_time,
-            player_pos=(game_state['player_x'], game_state['player_y']),
-            player_rotation=game_state['player_rotation'],
-            player_velocity=(game_state['player_vx'], game_state['player_vy']),
+            timestamp=_quantize_float(relative_time),
+            player_pos=(px, py),
+            player_rotation=_quantize_float(game_state['player_rotation']),
+            player_velocity=(vx, vy),
             score=game_state['score'],
             lives=game_state['lives'],
             level=game_state['level'],
-            asteroids=game_state.get('asteroids', []),
-            shots=game_state.get('shots', []),
-            powerups=game_state.get('powerups', []),
-            enemies=game_state.get('enemies', []),
-            particles=game_state.get('particles', []),
+            asteroids=_quantize_dict_list(
+                cast(List[Dict[str, Any]], game_state.get('asteroids', []))
+            ),
+            shots=_quantize_dict_list(
+                cast(List[Dict[str, Any]], game_state.get('shots', []))
+            ),
+            powerups=_quantize_dict_list(
+                cast(List[Dict[str, Any]], game_state.get('powerups', []))
+            ),
+            enemies=_quantize_dict_list(
+                cast(List[Dict[str, Any]], game_state.get('enemies', []))
+            ),
+            particles=_quantize_dict_list(
+                cast(List[Dict[str, Any]], game_state.get('particles', []))
+            ),
         )
         self.frames.append(frame)
         
-    def record_event(self, event_type: str, data: Dict[str, Any], current_time: float):
+    def record_event(
+        self,
+        event_type: str,
+        data: Dict[str, Any],
+        current_time: float,
+    ):
         """Record a significant game event."""
         if not self.recording:
             return
         
         # Calculate relative timestamp
-        relative_time = max(0, current_time - self.start_time)
+        relative_time = _quantize_float(max(0, current_time - self.start_time))
             
         event = GameEvent(
             timestamp=relative_time,
@@ -127,12 +185,13 @@ class ReplayRecorder:
         )
         self.events.append(event)
         
-    def save_replay(self, filename: str = None) -> str:
+    def save_replay(self, filename: Optional[str] = None) -> str:
         """Save the replay to a file."""
         try:
             if filename is None:
-                # Generate filename from timestamp (millisecond resolution)
-                filename = f"replay_{int(self.start_time * 1000)}.json"
+                filename = f"replay_{int(self.start_time * 1000)}.json.gz"
+            elif not filename.endswith(('.json', '.json.gz')):
+                filename = f"{filename}.json.gz"
 
             # Ensure replays directory exists
             os.makedirs("replays", exist_ok=True)
@@ -141,6 +200,10 @@ class ReplayRecorder:
             # Ensure we never overwrite an existing replay
             if os.path.exists(filepath):
                 base, ext = os.path.splitext(filename)
+                # Handle double extensions like .json.gz
+                if ext == '.gz' and base.endswith('.json'):
+                    base, _ = os.path.splitext(base)
+                    ext = '.json.gz'
                 i = 1
                 while True:
                     candidate = os.path.join("replays", f"{base}_{i}{ext}")
@@ -156,7 +219,7 @@ class ReplayRecorder:
             }
 
             def _json_default(obj):
-                # Best-effort conversion for common non-JSON objects (e.g., pygame.Vector2)
+                # Best-effort conversion for common non-JSON objects
                 try:
                     if hasattr(obj, "x") and hasattr(obj, "y"):
                         return {"x": float(obj.x), "y": float(obj.y)}
@@ -164,13 +227,19 @@ class ReplayRecorder:
                     pass
                 return str(obj)
 
-            with open(filepath, 'w') as f:
-                json.dump(replay_data, f, indent=2, default=_json_default)
+            with cast(TextIO, _open_replay(filepath, 'wt')) as f:
+                json.dump(
+                    replay_data,
+                    f,
+                    indent=None,
+                    separators=(",", ":"),
+                    default=_json_default,
+                )
                 
             logger.info(f"Successfully saved replay to: {filepath}")
             return filepath
         except OSError as e:
-            logger.error(f"Failed to create replays directory or save file: {e}")
+            logger.error(f"Failed to save replay: {e}")
             raise
         except Exception as e:
             logger.error(f"Unexpected error saving replay: {e}")
@@ -193,15 +262,20 @@ class ReplayPlayer:
     def load_replay(self, filepath: str):
         """Load a replay from file."""
         try:
-            # Reset any prior playback state
             self.stop_playback()
 
-            with open(filepath, 'r') as f:
+            with _open_replay(filepath, 'rt') as f:
                 replay_data = json.load(f)
 
             self.metadata = replay_data['metadata']
-            self.frames = [GameFrame(**frame_data) for frame_data in replay_data['frames']]
-            self.events = [GameEvent(**event_data) for event_data in replay_data['events']]
+            self.frames = [
+                GameFrame(**frame_data)
+                for frame_data in replay_data['frames']
+            ]
+            self.events = [
+                GameEvent(**event_data)
+                for event_data in replay_data['events']
+            ]
 
             # Ensure chronological order
             self.frames.sort(key=lambda fr: fr.timestamp)
@@ -213,10 +287,10 @@ class ReplayPlayer:
             logger.error(f"Replay file not found: {filepath}")
             raise
         except json.JSONDecodeError as e:
-            logger.error(f"Invalid JSON in replay file '{filepath}': {e}")
+            logger.error(f"Invalid JSON in replay '{filepath}': {e}")
             raise
         except KeyError as e:
-            logger.error(f"Missing required field in replay file '{filepath}': {e}")
+            logger.error(f"Missing field in replay '{filepath}': {e}")
             raise
         except Exception as e:
             logger.error(f"Failed to load replay '{filepath}': {e}")
@@ -244,9 +318,11 @@ class ReplayPlayer:
             return
 
         if not self.paused:
-            # Pausing: capture a robust timestamp (frame timestamp if available)
+            # Pausing: capture a frame timestamp if available
             if 0 <= self.current_frame_index < len(self.frames):
-                self._paused_timestamp = self.frames[self.current_frame_index].timestamp
+                self._paused_timestamp = (
+                    self.frames[self.current_frame_index].timestamp
+                )
             else:
                 self._paused_timestamp = 0.0
             self.paused = True
@@ -255,7 +331,9 @@ class ReplayPlayer:
         # Resuming: continue from the captured timestamp
         resume_ts = getattr(self, "_paused_timestamp", 0.0)
         self.paused = False
-        safe_speed = self.playback_speed if self.playback_speed not in (0, 0.0) else 1.0
+        safe_speed = (
+            self.playback_speed if self.playback_speed not in (0, 0.0) else 1.0
+        )
         self.start_playback_time = time.time() - (resume_ts / safe_speed)
         if hasattr(self, "_paused_timestamp"):
             delattr(self, "_paused_timestamp")
@@ -264,21 +342,27 @@ class ReplayPlayer:
         """Set playback speed (0.5x, 1x, 2x, etc.)."""
         if self.playing and not self.paused:
             # Adjust start time for new speed
-            elapsed = (time.time() - self.start_playback_time) * self.playback_speed
+            elapsed = (
+                (time.time() - self.start_playback_time) * self.playback_speed
+            )
             self.playback_speed = speed
-            self.start_playback_time = time.time() - (elapsed / self.playback_speed)
+            self.start_playback_time = time.time() - (
+                elapsed / self.playback_speed
+            )
         else:
             self.playback_speed = speed
             
     def get_current_timestamp(self) -> float:
         """Get current playback timestamp."""
         if self.paused:
-            if not self.frames or not (0 <= self.current_frame_index < len(self.frames)):
+            if not self.frames or not (
+                0 <= self.current_frame_index < len(self.frames)
+            ):
                 return 0.0
             return self.frames[self.current_frame_index].timestamp
         return (time.time() - self.start_playback_time) * self.playback_speed
         
-    def get_current_frame(self) -> GameFrame:
+    def get_current_frame(self) -> Optional[GameFrame]:
         """Get the current frame based on playback time."""
         if not self.playing or not self.frames:
             return None
@@ -286,8 +370,10 @@ class ReplayPlayer:
         current_time = self.get_current_timestamp()
         
         # Find the appropriate frame for current timestamp
-        while (self.current_frame_index < len(self.frames) - 1 and 
-               self.frames[self.current_frame_index + 1].timestamp <= current_time):
+        while (
+            self.current_frame_index < len(self.frames) - 1 and
+            self.frames[self.current_frame_index + 1].timestamp <= current_time
+        ):
             self.current_frame_index += 1
             
         if self.current_frame_index >= len(self.frames):
@@ -313,7 +399,9 @@ class ReplayPlayer:
                 break
 
         # Adjust playback time
-        self.start_playback_time = time.time() - (timestamp / self.playback_speed)
+        self.start_playback_time = time.time() - (
+            timestamp / self.playback_speed
+        )
         
     def skip_forward(self, seconds: float = 5.0):
         """Skip forward by specified seconds."""
@@ -357,10 +445,10 @@ class ReplayManager:
             
         replays = []
         for filename in os.listdir(self.replays_dir):
-            if filename.endswith('.json'):
+            if filename.endswith('.json') or filename.endswith('.json.gz'):
                 filepath = os.path.join(self.replays_dir, filename)
                 try:
-                    with open(filepath, 'r') as f:
+                    with _open_replay(filepath, 'rt') as f:
                         data = json.load(f)
                         replays.append({
                             'filename': filename,
@@ -368,20 +456,32 @@ class ReplayManager:
                             'metadata': data.get('metadata', {}),
                         })
                 except json.JSONDecodeError as e:
-                    logger.warning(f"Skipping corrupted replay file '{filename}': Invalid JSON - {e}")
+                    logger.warning(
+                        f"Skipping replay '{filename}': Invalid JSON - {e}"
+                    )
                 except KeyError as e:
-                    logger.warning(f"Skipping replay file '{filename}': Missing required field - {e}")
+                    logger.warning(
+                        f"Skipping replay '{filename}': Missing field - {e}"
+                    )
                 except Exception as e:
-                    logger.error(f"Unexpected error reading replay file '{filename}': {e}")
+                    logger.error(
+                        f"Error reading replay '{filename}': {e}"
+                    )
                     
         # Sort by timestamp (newest first)
-        replays.sort(key=lambda x: x['metadata'].get('start_time', 0), reverse=True)
+        replays.sort(
+            key=lambda replay: replay['metadata'].get('start_time', 0),
+            reverse=True,
+        )
         return replays
         
     def delete_replay(self, filepath: str):
         """Delete a replay file."""
         if not self._validate_filepath(filepath):
-            logger.warning(f"Attempted to delete file outside replays directory: {filepath}")
+            logger.warning(
+                "Attempted to delete file outside replays directory: %s",
+                filepath,
+            )
             return
             
         if os.path.exists(filepath):

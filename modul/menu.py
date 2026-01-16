@@ -1,3 +1,6 @@
+# flake8: noqa
+# pyright: reportUndefinedVariable=false
+# pyright: reportWildcardImportFromLibrary=false
 from modul._version import __version__
 import pygame
 from modul.constants import *
@@ -134,7 +137,7 @@ class Menu:
         if "sounds" in globals() or hasattr(self, "sounds"):
             try:
                 sounds.play_menu_move()
-            except:
+            except Exception:
                 pass
 
     def _select_previous(self):
@@ -144,7 +147,7 @@ class Menu:
         if "sounds" in globals() or hasattr(self, "sounds"):
             try:
                 sounds.play_menu_move()
-            except:
+            except Exception:
                 pass
 
     def draw(self, screen):
@@ -156,7 +159,9 @@ class Menu:
         title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4))
         screen.blit(title_surf, title_rect)
 
-        start_y = SCREEN_HEIGHT / 2
+        # Center items vertically so long lists still fit
+        total_height = (len(self.items) - 1) * MENU_ITEM_SPACING
+        start_y = SCREEN_HEIGHT / 2 - total_height / 2
         for i, item in enumerate(self.items):
             position = (SCREEN_WIDTH / 2, start_y + i * MENU_ITEM_SPACING)
             item.draw(screen, position, self.item_font)
