@@ -20,6 +20,9 @@ This document outlines potential features and improvements that could enhance th
 - **Keyboard Shortcuts Reference**: Accessible in-game help screen (press H or F1)
 - **Session Statistics**: Track performance during current play session
 - **Configuration Validation**: Automatic validation and repair of corrupted settings
+- **Quick Restart**: Press 'R' during gameplay or game over to instantly restart without menus
+- **Stats Dashboard**: Detailed statistics screen with visual metrics and progress bars
+- **Replay System**: Automatic recording of game sessions with playback controls
 
 ## 🚀 Future Feature Suggestions
 
@@ -110,12 +113,12 @@ This document outlines potential features and improvements that could enhance th
 - **Subtitle Options**: For all audio cues
 
 #### 12. User Experience
-- **Tutorials**: Expanded interactive tutorials
+- ~~**Tutorials**: Expanded interactive tutorials~~ ✅ Implemented
 - **Practice Mode**: Try weapons and mechanics safely
-- **Replay System**: Watch and analyze previous games
-- **Stats Dashboard**: Detailed statistics and graphs
+- ~~**Replay System**: Watch and analyze previous games~~ ✅ Implemented
+- ~~**Stats Dashboard**: Detailed statistics and graphs~~ ✅ Implemented
 - **Customizable HUD**: Moveable/scalable UI elements
-- **Quick Restart**: Instant restart without menus
+- ~~**Quick Restart**: Instant restart without menus~~ ✅ Implemented
 
 ### Content Expansion
 
@@ -155,17 +158,18 @@ This document outlines potential features and improvements that could enhance th
 2. ✅ FPS counter toggle
 3. ✅ Keyboard shortcuts reference
 4. ✅ Configuration validation
-5. Controller support
-6. Remappable controls
-7. Quick restart option
+5. ✅ Quick restart option
+6. ✅ Stats dashboard
+7. ✅ Replay system
+8. Controller support
+9. Remappable controls
 
 ### Medium Priority (Significant Impact)
 1. Combo/multiplier system
 2. Additional game modes (Survival, Time Attack)
 3. More enemy types
 4. Enhanced particle effects
-5. Stats dashboard
-6. Practice mode
+5. Practice mode
 
 ### Low Priority (Long-term Goals)
 1. Multiplayer support

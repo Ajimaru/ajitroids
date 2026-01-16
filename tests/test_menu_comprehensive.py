@@ -438,14 +438,16 @@ class TestMainMenu:
         """Test MainMenu initializes with correct items"""
         menu = MainMenu()
         assert menu.title == "AJITROIDS"
-        assert len(menu.items) == 7
+        assert len(menu.items) == 9  # Updated: added Replays and Statistics
         assert menu.items[0].text == "Start Game"
         assert menu.items[1].text == "Tutorial"
-        assert menu.items[2].text == "Highscores"
-        assert menu.items[3].text == "Achievements"
-        assert menu.items[4].text == "Optionen"
-        assert menu.items[5].text == "Credits"
-        assert menu.items[6].text == "Exit"
+        assert menu.items[2].text == "Replays"
+        assert menu.items[3].text == "Highscores"
+        assert menu.items[4].text == "Statistics"
+        assert menu.items[5].text == "Achievements"
+        assert menu.items[6].text == "Optionen"
+        assert menu.items[7].text == "Credits"
+        assert menu.items[8].text == "Exit"
 
     def test_mainmenu_draw(self, mock_screen):
         """Test MainMenu draws version number"""
