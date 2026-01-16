@@ -52,15 +52,32 @@ jobs:
           cp "$TAR" dist/ajitroids-latest.tar.gz
           ls -lh dist/
 
-      - name: Extract changelog for tag
+      - name: Extract changelog for tag and build release notes
         id: changelog
         run: |
           TAG="${{ github.ref_name }}"
           # Escape special regex characters for safe use in awk pattern
           TAG_ESCAPED=$(printf '%s\n' "${TAG}" | sed 's/[].*^$[()+?{|]/\\&/g')
           awk "/^## ${TAG_ESCAPED} / {flag=1; next} /^## v/ {flag=0} flag" CHANGELOG.md > _changelog_section.txt
+
+          # Find previous tag for Full Changelog link
+          CURRENT_TAG="${TAG#v}"  # Remove 'v' prefix
+          ALL_TAGS=$(git tag -l 'v*' --sort=-version:refname)
+          PREV_TAG=$(echo "$ALL_TAGS" | grep -v "^${TAG}$" | head -1)
+
+          # Build release notes with changelog section and Full Changelog link
+          {
+            cat _changelog_section.txt
+            echo ""
+            if [ -n "$PREV_TAG" ]; then
+              echo "Full Changelog: [$PREV_TAG...$TAG](https://github.com/Ajimaru/ajitroids/compare/$PREV_TAG...$TAG)"
+            else
+              echo "Full Changelog: https://github.com/Ajimaru/ajitroids/releases/tag/$TAG"
+            fi
+          } > _release_notes.txt
+
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          cat _changelog_section.txt >> $GITHUB_OUTPUT
+          cat _release_notes.txt >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Check if release already exists
