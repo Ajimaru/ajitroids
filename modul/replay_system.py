@@ -248,7 +248,9 @@ class ReplayPlayer:
     def get_current_timestamp(self) -> float:
         """Get current playback timestamp."""
         if self.paused:
-            return self.frames[self.current_frame_index].timestamp if self.current_frame_index < len(self.frames) else 0
+            if not self.frames or not (0 <= self.current_frame_index < len(self.frames)):
+                return 0.0
+            return self.frames[self.current_frame_index].timestamp
         return (time.time() - self.start_playback_time) * self.playback_speed
         
     def get_current_frame(self) -> GameFrame:
