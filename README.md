@@ -2,8 +2,10 @@
 # 🚀 Ajitroids
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg?style=plastic)
-![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids?style=plastic)
+[![Python](https://img.shields.io/badge/python-3.09%2B-blue.svg)](https://python.org)
+[![Latest Release](https://img.shields.io/github/v/release/Ajimaru/ajitroids?sort=semver)](https://github.com/Ajimaru/ajitroids/releases/latest)
 ![Stars](https://img.shields.io/github/stars/Ajimaru/ajitroids?style=plastic)
+![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids?style=plastic)
 ![Forks](https://img.shields.io/github/forks/Ajimaru/ajitroids?style=plastic)
 
 [A modern Asteroids remake built with Pygame]
