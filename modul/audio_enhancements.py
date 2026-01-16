@@ -88,9 +88,8 @@ class DynamicMusicSystem:
         try:
             track = self.music_tracks[new_intensity]
             
-            # Fade out current music
+            # Fade out current music (non-blocking)
             pygame.mixer.music.fadeout(1000)
-            time.sleep(0.1)  # Brief pause for fade
             
             # Load and play new track
             pygame.mixer.music.load(asset_path_func(track))
@@ -344,6 +343,7 @@ class AudioEnhancementManager:
         self.dynamic_music = DynamicMusicSystem()
         self.voice_announcements = VoiceAnnouncement()
         self.theme_manager = SoundThemeManager()
+        self.low_health_announced = False
         
     def update(self, dt: float, game_state: dict, asset_path_func):
         """Update all audio enhancement systems"""
@@ -385,3 +385,11 @@ class AudioEnhancementManager:
     def set_voice_announcements_enabled(self, enabled: bool):
         """Enable/disable voice announcements"""
         self.voice_announcements.set_enabled(enabled)
+    
+    def check_low_health(self, lives: int):
+        """Check and trigger low health announcement if needed"""
+        if lives == 1 and not self.low_health_announced:
+            self.trigger_announcement("low_health", priority=7.0)
+            self.low_health_announced = True
+        elif lives > 1:
+            self.low_health_announced = False

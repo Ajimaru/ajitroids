@@ -175,8 +175,9 @@ def main(args=None):
     try:
         sounds.set_theme(game_settings.sound_theme)
         audio_enhancements.set_theme(SoundTheme[game_settings.sound_theme.upper()])
-    except:
-        pass  # Use default theme if invalid
+    except (KeyError, ValueError, AttributeError) as e:
+        print(f"Invalid theme setting: {e}. Using default theme.")
+        # Use default theme if invalid
     
     # Load voice announcement sounds
     audio_enhancements.voice_announcements.load_announcement_sounds(asset_path)
@@ -1136,12 +1137,8 @@ def main(args=None):
                 
                 screen.blit(announcement_surf, announcement_rect)
             
-            # Trigger low health warning
-            if lives == 1 and not hasattr(audio_enhancements, '_low_health_triggered'):
-                audio_enhancements.trigger_announcement("low_health", priority=7.0)
-                audio_enhancements._low_health_triggered = True
-            elif lives > 1:
-                audio_enhancements._low_health_triggered = False
+            # Check and trigger low health warning
+            audio_enhancements.check_low_health(lives)
 
             # Draw performance profiler overlay
             performance_profiler.draw(screen)

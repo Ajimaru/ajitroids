@@ -109,8 +109,7 @@ class TestDynamicMusicSystem:
         assert dms.current_intensity == IntensityLevel.CALM
     
     @patch('pygame.mixer.music')
-    @patch('time.sleep')
-    def test_transition_music(self, mock_sleep, mock_music):
+    def test_transition_music(self, mock_music):
         """Test music transition functionality"""
         dms = DynamicMusicSystem()
         mock_asset_path = MagicMock(return_value="/path/to/boss_music.mp3")
