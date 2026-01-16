@@ -599,19 +599,22 @@ def main(args=None):
                 main_menu.activate()
 
         elif game_state == "playing":
+            # Cache current time for this frame
+            current_frame_time = time.time()
+            
             starfield.update(dt)
             starfield.draw(screen)
 
             asteroid_field.update(dt)
 
-            if time.time() - last_spawn_time > spawn_interval:
+            if current_frame_time - last_spawn_time > spawn_interval:
                 if len(current_enemy_ships) < max_enemy_ships[difficulty]:
                     enemy_ship = EnemyShip(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 30)
                     updatable.add(enemy_ship)
                     drawable.add(enemy_ship)
                     collidable.add(enemy_ship)
                     current_enemy_ships.append(enemy_ship)
-                    last_spawn_time = time.time()
+                    last_spawn_time = current_frame_time
                     spawn_interval = random.uniform(10, 30)
                     logger.debug(f"EnemyShip spawned! Current count: {len(current_enemy_ships)}, Max: {max_enemy_ships[difficulty]}")
 
@@ -791,7 +794,7 @@ def main(args=None):
                     'lives': lives,
                     'level': level,
                 }
-                replay_recorder.record_frame(game_state_data, time.time())
+                replay_recorder.record_frame(game_state_data, current_frame_time)
 
             for obj in drawable:
                 obj.draw(screen)
@@ -1146,6 +1149,8 @@ def quick_restart_game():
     global score, lives, level, last_spawn_time, spawn_interval, current_enemy_ships
     global level_up_timer, level_up_text, boss_active, boss_defeated_timer, boss_defeated_message
     global player, powerups_collected, asteroids_destroyed, shields_used, triple_shots_used, speed_boosts_used
+    global difficulty, asteroid_field, asteroids, shots, powerups, particles, collidable, updatable
+    global replay_recorder, session_stats, logger
     
     # Stop any ongoing replay recording
     if replay_recorder.recording:

@@ -94,9 +94,15 @@ def test_replay_recorder_record_event():
 
 def test_replay_recorder_frame_interval():
     """Test that frames are recorded at specified intervals."""
+    import time as time_module
+    
     recorder = ReplayRecorder()
-    recorder.frame_interval = 1.0  # Only record every second
+    recorder.frame_interval = 0.5  # Only record every 0.5 seconds
+    
+    # Manually set start time for predictable testing
+    start = time_module.time()
     recorder.start_recording("normal", "default")
+    recorder.start_time = start  # Override to known value
     
     game_state = {
         'player_x': 100.0,
@@ -109,13 +115,18 @@ def test_replay_recorder_frame_interval():
         'level': 2,
     }
     
-    # Record multiple frames quickly
-    recorder.record_frame(game_state, 0.5)
-    recorder.record_frame(game_state, 0.6)
-    recorder.record_frame(game_state, 0.7)
+    # Record first frame at start + 0.1
+    recorder.record_frame(game_state, start + 0.1)
+    assert len(recorder.frames) == 1
     
-    # Should have recorded only 1 frame due to interval
-    assert len(recorder.frames) <= 1
+    # Try to record frames quickly (should be ignored due to interval)
+    recorder.record_frame(game_state, start + 0.2)
+    recorder.record_frame(game_state, start + 0.3)
+    assert len(recorder.frames) == 1  # Should still be 1
+    
+    # Record after interval has passed (0.6 seconds from start)
+    recorder.record_frame(game_state, start + 0.7)
+    assert len(recorder.frames) == 2  # Now should be 2
 
 
 def test_replay_player_initialization():

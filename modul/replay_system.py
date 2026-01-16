@@ -73,15 +73,18 @@ class ReplayRecorder:
         """Record a single frame of game state."""
         if not self.recording:
             return
+        
+        # Calculate relative timestamp
+        relative_time = max(0, current_time - self.start_time)
             
         # Only record frames at specified interval
-        if current_time - self.last_frame_time < self.frame_interval:
+        if self.last_frame_time > 0 and relative_time - self.last_frame_time < self.frame_interval:
             return
             
-        self.last_frame_time = current_time
+        self.last_frame_time = relative_time
         
         frame = GameFrame(
-            timestamp=current_time - self.start_time,
+            timestamp=relative_time,
             player_pos=(game_state['player_x'], game_state['player_y']),
             player_rotation=game_state['player_rotation'],
             player_velocity=(game_state['player_vx'], game_state['player_vy']),
@@ -100,9 +103,12 @@ class ReplayRecorder:
         """Record a significant game event."""
         if not self.recording:
             return
+        
+        # Calculate relative timestamp
+        relative_time = max(0, current_time - self.start_time)
             
         event = GameEvent(
-            timestamp=current_time - self.start_time,
+            timestamp=relative_time,
             event_type=event_type,
             data=data
         )

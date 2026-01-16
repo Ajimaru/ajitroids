@@ -187,7 +187,7 @@ class ReplayViewer:
         # Time info
         current_time = self.replay_player.get_current_timestamp()
         total_time = self.replay_player.metadata.get('duration', 0)
-        time_text = f"{int(current_time)}s / {int(total_time)}s"
+        time_text = f"{int(current_time//60)}:{int(current_time%60):02d} / {int(total_time//60)}:{int(total_time%60):02d}"
         time_surf = self.small_font.render(time_text, True, (200, 200, 200))
         time_rect = time_surf.get_rect(center=(SCREEN_WIDTH / 2, bar_y + 45))
         screen.blit(time_surf, time_rect)
