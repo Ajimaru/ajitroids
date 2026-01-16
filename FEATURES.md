@@ -27,6 +27,14 @@ This document outlines potential features and improvements that could enhance th
 - **Stats Dashboard**: Detailed statistics screen with visual metrics and progress bars
 - **Replay System**: Automatic recording of game sessions with playback controls
 
+### Advanced Enemy Types
+
+- **Asteroid Types**: Four distinct asteroid types with unique behaviors
+  - **Normal Asteroids** (White): Standard balanced asteroids
+  - **Ice Asteroids** (Light Blue): Slippery with 1.4x velocity when split
+  - **Metal Asteroids** (Gray): Tough asteroids requiring 2 hits to destroy
+  - **Crystal Asteroids** (Purple): Shatter into 3 pieces instead of 2
+
 ## 🚀 Future Feature Suggestions
 
 ### Gameplay Enhancements
@@ -54,10 +62,9 @@ This document outlines potential features and improvements that could enhance th
 - **Ultimate Ability**: Charge meter for devastating special attacks
 - **Weapon Upgrades**: Permanent progression for weapons
 
-#### 4. Advanced Enemy Types
+#### 4. Additional Enemy Types
 
 - **Mini-Bosses**: Mid-level challenging enemies
-- **Asteroid Types**: Ice (slippery), Metal (tougher), Crystal (shatters differently)
 - **Enemy Formations**: Organized attack patterns
 - **Enemy Abilities**: Shields, teleportation, healing
 - **Kamikaze Enemies**: Rush at player for high damage
