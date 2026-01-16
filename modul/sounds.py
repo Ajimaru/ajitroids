@@ -53,7 +53,7 @@ class Sounds:
         self.menu_move = None
         self.menu_select = None
         self.level_up = None
-        self.master_volume = 1.0  # Track master volume for proper scaling
+        self.master_volume = 0.5  # Default to mid volume for consistent toggle behavior
         try:
             self.shoot = pygame.mixer.Sound(asset_path("shoot.wav"))
         except:
@@ -276,57 +276,27 @@ class Sounds:
                 self.explosion.play()
 
     def set_effects_volume(self, volume):
-        """Set master volume for all sound effects.
-
-        Applies exponential curve where 0.5 (50%) = normal.
-        Each sound uses its base volume multiplied by the curve.
-        """
-        # Clamp slider value to 0.0-1.0
+        """Set master volume for all sound effects (linear 0.0-1.0)."""
         slider_value = max(0.0, min(1.0, volume))
-        # Apply exponential curve: 50% = 1.0x, below = quieter, above = louder
-        curve_multiplier = apply_volume_curve(slider_value)
-        self.master_volume = curve_multiplier
+        self.master_volume = slider_value
 
-        # Apply master volume with base volume multiplication
-        if self.shoot:
-            vol = self.BASE_VOLUMES["shoot"] * self.master_volume
-            self.shoot.set_volume(vol)
-        if self.explosion:
-            vol = self.BASE_VOLUMES["explosion"] * self.master_volume
-            self.explosion.set_volume(vol)
-        if self.player_death:
-            vol = self.BASE_VOLUMES["player_death"] * self.master_volume
-            self.player_death.set_volume(vol)
-        if self.menu_move:
-            vol = self.BASE_VOLUMES["menu_move"] * self.master_volume
-            self.menu_move.set_volume(vol)
-        if self.menu_select:
-            vol = self.BASE_VOLUMES["menu_select"] * self.master_volume
-            self.menu_select.set_volume(vol)
-        if self.laser_shoot:
-            vol = self.BASE_VOLUMES["laser_shoot"] * self.master_volume
-            self.laser_shoot.set_volume(vol)
-        if self.rocket_shoot:
-            vol = self.BASE_VOLUMES["rocket_shoot"] * self.master_volume
-            self.rocket_shoot.set_volume(vol)
-        if self.boss_spawn:
-            vol = self.BASE_VOLUMES["boss_spawn"] * self.master_volume
-            self.boss_spawn.set_volume(vol)
-        if self.boss_death:
-            vol = self.BASE_VOLUMES["boss_death"] * self.master_volume
-            self.boss_death.set_volume(vol)
-        if self.powerup:
-            vol = self.BASE_VOLUMES["powerup"] * self.master_volume
-            self.powerup.set_volume(vol)
-        if self.shield_activate:
-            vol = self.BASE_VOLUMES["shield_activate"] * self.master_volume
-            self.shield_activate.set_volume(vol)
-        if self.level_up:
-            vol = self.BASE_VOLUMES["level_up"] * self.master_volume
-            self.level_up.set_volume(vol)
-        if self.game_over:
-            vol = self.BASE_VOLUMES["game_over"] * self.master_volume
-            self.game_over.set_volume(vol)
-        if self.player_hit:
-            vol = self.BASE_VOLUMES["player_hit"] * self.master_volume
-            self.player_hit.set_volume(vol)
+        for attr_name in [
+            "shoot",
+            "explosion",
+            "player_death",
+            "menu_move",
+            "menu_select",
+            "laser_shoot",
+            "rocket_shoot",
+            "boss_spawn",
+            "boss_death",
+            "powerup",
+            "shield_activate",
+            "level_up",
+            "game_over",
+            "player_hit",
+        ]:
+            if hasattr(self, attr_name):
+                sound = getattr(self, attr_name)
+                if sound:
+                    sound.set_volume(slider_value)

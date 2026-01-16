@@ -65,3 +65,12 @@ repos:
         name: prettier (markdown formatting)
         types: [markdown]
         args: ["--prose-wrap=always"]
+
+  # Run the full test suite before committing
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest (all files)
+        entry: python3 -m pytest
+        language: system
+        pass_filenames: false
