@@ -33,7 +33,8 @@ Use the manual release workflow via GitHub Actions:
 1. Go to https://github.com/Ajimaru/ajitroids/actions/workflows/manual-release.yml
 2. Click "Run workflow"
 3. Enter the tag: `v0.21.0`
-4. Click "Run workflow" button
+4. Leave "ref" empty (it will default to `release/v0.21.0`) or specify a specific branch/commit
+5. Click "Run workflow" button
 
 This workflow will:
 - Create and push the tag if it doesn't exist on GitHub
