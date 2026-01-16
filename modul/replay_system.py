@@ -203,6 +203,9 @@ class ReplayPlayer:
         
     def start_playback(self):
         """Start playing the replay."""
+        if not self.frames:
+            self.stop_playback()
+            return
         self.playing = True
         self.paused = False
         self.current_frame_index = 0
