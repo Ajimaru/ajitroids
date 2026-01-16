@@ -45,7 +45,7 @@ git clone https://github.com/Ajimaru/ajitroids.git
 cd ajitroids
 
 # Install dependencies
-uv install
+uv sync
 
 # Start the game
 uv run main.py
