@@ -77,16 +77,24 @@ class ReplayRecorder:
         """Record a single frame of game state."""
         if not self.recording:
             return
-        
+
         # Calculate relative timestamp
         relative_time = max(0, current_time - self.start_time)
-            
+
         # Only record frames at specified interval
         if self.last_frame_time > 0 and relative_time - self.last_frame_time < self.frame_interval:
             return
-            
+
+        required = (
+            'player_x', 'player_y', 'player_rotation', 'player_vx', 'player_vy',
+            'score', 'lives', 'level'
+        )
+        if any(k not in game_state for k in required):
+            logger.debug("Skipping replay frame due to missing required fields")
+            return
+
         self.last_frame_time = relative_time
-        
+
         frame = GameFrame(
             timestamp=relative_time,
             player_pos=(game_state['player_x'], game_state['player_y']),
