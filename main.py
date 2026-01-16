@@ -188,7 +188,9 @@ def main(args=None):
         pygame.mixer.music.stop()
         print("Music disabled at startup")
 
+    sounds.set_effects_volume(game_settings.sound_volume)
     sounds.toggle_sound(game_settings.sound_on)
+    pygame.mixer.music.set_volume(game_settings.music_volume)
 
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()

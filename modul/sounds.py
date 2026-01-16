@@ -12,6 +12,24 @@ def asset_path(name: str) -> str:
 
 
 class Sounds:
+    # Base volume levels for individual sound effects (relative to master volume)
+    BASE_VOLUMES = {
+        "shoot": 0.5,
+        "explosion": 0.6,
+        "player_death": 0.7,
+        "menu_move": 0.3,
+        "menu_select": 0.3,
+        "laser_shoot": 0.2,
+        "rocket_shoot": 0.25,
+        "boss_spawn": 0.4,
+        "boss_death": 0.5,
+        "powerup": 0.4,
+        "shield_activate": 0.3,
+        "level_up": 0.4,
+        "game_over": 0.6,
+        "player_hit": 0.7,
+    }
+
     def __init__(self):
         pygame.mixer.init(44100, -16, 2, 2048)
         self.shoot = None
@@ -20,35 +38,28 @@ class Sounds:
         self.menu_move = None
         self.menu_select = None
         self.level_up = None
+        self.master_volume = 1.0  # Track master volume for proper scaling
         try:
             self.shoot = pygame.mixer.Sound(asset_path("shoot.wav"))
-            self.shoot.set_volume(1.0)
         except:
             print("Shoot sound could not be loaded")
         try:
             self.explosion = pygame.mixer.Sound(asset_path("explosion.wav"))
-            self.explosion.set_volume(1.0)
         except:
             print("Explosion sound could not be loaded")
         try:
             self.player_death = pygame.mixer.Sound(asset_path("player_hit.wav"))
-            self.player_death.set_volume(1.0)
         except:
             print("Player-Death sound could not be loaded")
         try:
             self.menu_move = pygame.mixer.Sound(asset_path("menu_select.wav"))
             self.menu_select = pygame.mixer.Sound(asset_path("menu_confirm.wav"))
-            if self.menu_move:
-                self.menu_move.set_volume(1.0)
-            if self.menu_select:
-                self.menu_select.set_volume(1.0)
         except:
             self.menu_move = None
             self.menu_select = None
             print("Menu sounds could not be loaded")
         try:
             pygame.mixer.music.load(asset_path("background.mp3"))
-            pygame.mixer.music.set_volume(1.0)
         except Exception as e:
             print(f"Error loading background music: {e}")
             print(f"Current directory: {os.getcwd()}")
@@ -59,53 +70,44 @@ class Sounds:
     def load_new_sounds(self):
         try:
             self.laser_shoot = pygame.mixer.Sound(asset_path("laser_shoot.wav"))
-            self.laser_shoot.set_volume(0.2)
         except:
             self.laser_shoot = None
             print("Laser shoot sound could not be loaded")
         try:
             self.rocket_shoot = pygame.mixer.Sound(asset_path("rocket_shoot.wav"))
-            self.rocket_shoot.set_volume(0.3)
         except:
             self.rocket_shoot = None
             print("Rocket shoot sound could not be loaded")
         try:
             self.boss_spawn = pygame.mixer.Sound(asset_path("boss_spawn.wav"))
-            self.boss_spawn.set_volume(0.4)
         except:
             self.boss_spawn = None
             print("Boss spawn sound could not be loaded")
         try:
             self.boss_death = pygame.mixer.Sound(asset_path("boss_death.wav"))
-            self.boss_death.set_volume(0.5)
         except:
             self.boss_death = None
         try:
             self.powerup = pygame.mixer.Sound(asset_path("powerup.wav"))
-            self.powerup.set_volume(0.4)
         except:
             self.powerup = None
             print("PowerUp sound could not be loaded")
         try:
             self.shield_activate = pygame.mixer.Sound(asset_path("shield_hit.wav"))
-            self.shield_activate.set_volume(0.3)
         except:
             self.shield_activate = None
         try:
             self.level_up = pygame.mixer.Sound(asset_path("level_up.wav"))
-            self.level_up.set_volume(0.4)
         except:
             self.level_up = None
             print("Level-Up sound could not be loaded")
         try:
             self.game_over = pygame.mixer.Sound(asset_path("game_over.wav"))
-            self.game_over.set_volume(0.6)
         except:
             self.game_over = None
             print("Game-Over sound could not be loaded")
         try:
             self.player_hit = pygame.mixer.Sound(asset_path("player_hit.wav"))
-            self.player_hit.set_volume(0.7)
         except:
             self.player_hit = None
             print("Player-Hit sound could not be loaded")
@@ -192,30 +194,25 @@ class Sounds:
             print(f"Error toggling music: {e}")
 
     def toggle_sound(self, enabled):
+        """Toggle sound on/off. Keep master volume unchanged."""
         self.sound_on = enabled
-        volume = 0.5 if enabled else 0.0
-        sound_attributes = [
-            "shoot",
-            "explosion",
-            "player_death",
-            "powerup",
-            "laser_shoot",
-            "rocket_shoot",
-            "boss_spawn",
-            "boss_death",
-            "shield_activate",
-            "level_up",
-        ]
-        for attr_name in sound_attributes:
-            if hasattr(self, attr_name):
-                sound = getattr(self, attr_name)
-                if sound:
-                    sound.set_volume(volume)
-        menu_volume = 0.3 if enabled else 0.0
-        if self.menu_move:
-            self.menu_move.set_volume(menu_volume)
-        if self.menu_select:
-            self.menu_select.set_volume(menu_volume)
+        # Re-apply current master_volume to all sounds
+        if enabled:
+            # Sound is enabled, apply current master volume
+            self.set_effects_volume(self.master_volume)
+        else:
+            # Sound is disabled, mute all sounds
+            sound_attributes = [
+                "shoot", "explosion", "player_death", "powerup",
+                "laser_shoot", "rocket_shoot", "boss_spawn", "boss_death",
+                "shield_activate", "level_up", "game_over", "player_hit",
+                "menu_move", "menu_select",
+            ]
+            for attr_name in sound_attributes:
+                if hasattr(self, attr_name):
+                    sound = getattr(self, attr_name)
+                    if sound:
+                        sound.set_volume(0.0)
 
     def play_boss_music(self):
         try:
@@ -254,31 +251,51 @@ class Sounds:
                 self.explosion.play()
 
     def set_effects_volume(self, volume):
+        """Set master volume for all sound effects.
+
+        Each sound uses its base volume multiplied by this master volume.
+        """
+        self.master_volume = max(0.0, min(1.0, volume))
+        # Apply master volume with base volume multiplication
         if self.shoot:
-            self.shoot.set_volume(volume)
+            vol = self.BASE_VOLUMES["shoot"] * self.master_volume
+            self.shoot.set_volume(vol)
         if self.explosion:
-            self.explosion.set_volume(volume)
+            vol = self.BASE_VOLUMES["explosion"] * self.master_volume
+            self.explosion.set_volume(vol)
         if self.player_death:
-            self.player_death.set_volume(volume)
+            vol = self.BASE_VOLUMES["player_death"] * self.master_volume
+            self.player_death.set_volume(vol)
         if self.menu_move:
-            self.menu_move.set_volume(volume)
+            vol = self.BASE_VOLUMES["menu_move"] * self.master_volume
+            self.menu_move.set_volume(vol)
         if self.menu_select:
-            self.menu_select.set_volume(volume)
+            vol = self.BASE_VOLUMES["menu_select"] * self.master_volume
+            self.menu_select.set_volume(vol)
         if self.laser_shoot:
-            self.laser_shoot.set_volume(volume)
+            vol = self.BASE_VOLUMES["laser_shoot"] * self.master_volume
+            self.laser_shoot.set_volume(vol)
         if self.rocket_shoot:
-            self.rocket_shoot.set_volume(volume)
+            vol = self.BASE_VOLUMES["rocket_shoot"] * self.master_volume
+            self.rocket_shoot.set_volume(vol)
         if self.boss_spawn:
-            self.boss_spawn.set_volume(volume)
+            vol = self.BASE_VOLUMES["boss_spawn"] * self.master_volume
+            self.boss_spawn.set_volume(vol)
         if self.boss_death:
-            self.boss_death.set_volume(volume)
+            vol = self.BASE_VOLUMES["boss_death"] * self.master_volume
+            self.boss_death.set_volume(vol)
         if self.powerup:
-            self.powerup.set_volume(volume)
+            vol = self.BASE_VOLUMES["powerup"] * self.master_volume
+            self.powerup.set_volume(vol)
         if self.shield_activate:
-            self.shield_activate.set_volume(volume)
+            vol = self.BASE_VOLUMES["shield_activate"] * self.master_volume
+            self.shield_activate.set_volume(vol)
         if self.level_up:
-            self.level_up.set_volume(volume)
+            vol = self.BASE_VOLUMES["level_up"] * self.master_volume
+            self.level_up.set_volume(vol)
         if self.game_over:
-            self.game_over.set_volume(volume)
+            vol = self.BASE_VOLUMES["game_over"] * self.master_volume
+            self.game_over.set_volume(vol)
         if self.player_hit:
-            self.player_hit.set_volume(volume)
+            vol = self.BASE_VOLUMES["player_hit"] * self.master_volume
+            self.player_hit.set_volume(vol)
