@@ -1,6 +1,6 @@
 # flake8: noqa
 # pyright: reportUndefinedVariable=false, reportWildcardImportFromLibrary=false
-from modul._version import __version__
+from modul.version import __version__
 import pygame
 import math
 import random
@@ -84,7 +84,7 @@ Examples:
     mode_group.add_argument('--windowed', action='store_true', help='Start in windowed mode')
     mode_group.add_argument('--fullscreen', action='store_true', help='Start in fullscreen mode')
     parser.add_argument('--log-file', type=str, help='Write logs to specified file')
-    
+
     return parser.parse_args()
 
 
@@ -92,17 +92,17 @@ def setup_logging(args):
     """Configure logging based on command-line arguments."""
     log_level = logging.DEBUG if args.debug else logging.INFO
     log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    
+
     handlers = [logging.StreamHandler(sys.stdout)]
     if args.log_file:
         handlers.append(logging.FileHandler(args.log_file))
-    
+
     logging.basicConfig(
         level=log_level,
         format=log_format,
         handlers=handlers
     )
-    
+
     return logging.getLogger('Ajitroids')
 
 
@@ -110,10 +110,10 @@ def main(args=None):
 
     if args is None:
         args = parse_arguments()
-    
+
     logger = setup_logging(args)
     logger.info(f"Starting Ajitroids v{__version__}")
-    
+
     global sounds, player, PLAYER_INVINCIBLE_TIME, game_settings
 
     global game_state, score, lives, level
@@ -130,7 +130,7 @@ def main(args=None):
     speed_boosts_used = 0
     achievement_system.set_notification_callback(achievement_notifications.add_notification)
     global boss_active, boss_defeated_timer, boss_defeated_message
-    
+
     global show_fps
     show_fps = args.debug
 
@@ -147,7 +147,7 @@ def main(args=None):
     clock = pygame.time.Clock()
 
     game_settings = Settings()
-    
+
     # Override settings with command-line arguments
     if args.fullscreen:
         game_settings.fullscreen = True
@@ -237,10 +237,10 @@ def main(args=None):
     help_screen = HelpScreen()
     session_stats = SessionStats()
     stats_dashboard = StatsDashboard(session_stats)
-    
+
     # Performance profiler
     performance_profiler = PerformanceProfiler()
-    
+
     # Replay system
     global replay_recorder, replay_manager, replay_list_menu, replay_player, replay_viewer
     replay_recorder = ReplayRecorder()
@@ -377,14 +377,14 @@ def main(args=None):
 
             elif action == "tutorial":
                 game_state = "tutorial"
-                
+
             elif action == "replays":
                 game_state = "replay_list"
                 replay_list_menu.activate()
 
             elif action == "highscores":
                 game_state = "highscore_display"
-                
+
             elif action == "statistics":
                 game_state = "statistics"
                 stats_dashboard.activate()
@@ -414,6 +414,11 @@ def main(args=None):
             action = difficulty_menu.update(dt, events)
             difficulty_menu.draw(screen)
 
+            for event in events:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    game_state = "main_menu"
+                    main_menu.activate()
+
             if action == "difficulty_easy":
                 difficulty = "easy"
                 game_state = "ship_selection"
@@ -433,10 +438,97 @@ def main(args=None):
                 game_state = "main_menu"
                 main_menu.activate()
 
+        elif game_state == "pause_confirm":
+            for obj in drawable:
+                obj.draw(screen)
+
+            # Reuse pause menu backdrop and then draw confirmation prompt
+            pause_menu.draw(screen)
+
+            confirm_font = pygame.font.Font(None, 28)
+            box_width, box_height = 520, 140
+            box_x = SCREEN_WIDTH / 2 - box_width / 2
+            box_y = SCREEN_HEIGHT / 2 - box_height / 2
+
+            # Semi-transparent box
+            overlay = pygame.Surface((box_width, box_height), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 200))
+            screen.blit(overlay, (box_x, box_y))
+
+            lines = [
+                "Return to Main Menu?",
+                "Current run will be lost.",
+                "Enter/Space = Confirm   ESC = Cancel",
+            ]
+            for i, line in enumerate(lines):
+                text = confirm_font.render(line, True, (240, 240, 240))
+                text_rect = text.get_rect(center=(SCREEN_WIDTH / 2, box_y + 30 + i * 35))
+                screen.blit(text, text_rect)
+
             for event in events:
-                if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE):
-                    game_state = "main_menu"
-                    main_menu.activate()
+                if event.type == pygame.KEYDOWN:
+                    if event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                        game_state = "main_menu"
+                        main_menu.activate()
+                    elif event.key == pygame.K_ESCAPE:
+                        game_state = "pause"
+
+        elif game_state == "pause_restart_confirm":
+            for obj in drawable:
+                obj.draw(screen)
+
+            pause_menu.draw(screen)
+
+            confirm_font = pygame.font.Font(None, 28)
+            box_width, box_height = 520, 140
+            box_x = SCREEN_WIDTH / 2 - box_width / 2
+            box_y = SCREEN_HEIGHT / 2 - box_height / 2
+
+            overlay = pygame.Surface((box_width, box_height), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 200))
+            screen.blit(overlay, (box_x, box_y))
+
+            lines = [
+                "Restart current run?",
+                "Progress will be reset.",
+                "Enter/Space = Confirm   ESC = Cancel",
+            ]
+            for i, line in enumerate(lines):
+                text = confirm_font.render(line, True, (240, 240, 240))
+                text_rect = text.get_rect(center=(SCREEN_WIDTH / 2, box_y + 30 + i * 35))
+                screen.blit(text, text_rect)
+
+            for event in events:
+                if event.type == pygame.KEYDOWN:
+                    if event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                        game_state = "playing"
+                        score = 0
+                        lives = PLAYER_LIVES
+
+                        last_spawn_time = time.time()
+                        spawn_interval = random.uniform(10, 30)
+                        current_enemy_ships = []
+
+                        for asteroid in list(asteroids):
+                            asteroid.kill()
+                        for powerup in list(powerups):
+                            powerup.kill()
+                        for shot in list(shots):
+                            shot.kill()
+                        for particle in list(particles):
+                            particle.kill()
+
+                        for obj in list(collidable):
+                            if isinstance(obj, EnemyShip):
+                                obj.kill()
+
+                        player.position.x = RESPAWN_POSITION_X
+                        player.position.y = RESPAWN_POSITION_Y
+                        player.velocity = pygame.Vector2(0, 0)
+                        player.rotation = 0
+                        player.respawn()
+                    elif event.key == pygame.K_ESCAPE:
+                        game_state = "pause"
 
         elif game_state == "ship_selection":
             menu_starfield.update(dt)
@@ -452,13 +544,13 @@ def main(args=None):
                 score = 0
                 lives = PLAYER_LIVES
                 level = 1
-                
+
                 # Start tracking session statistics
                 session_stats.start_game()
-                
+
                 # Start recording replay
                 replay_recorder.start_recording(difficulty, selected_ship)
-                
+
                 logger.info(f"Game started - Difficulty: {difficulty}, Ship: {selected_ship}")
 
                 last_spawn_time = time.time()
@@ -517,43 +609,16 @@ def main(args=None):
 
             for event in events:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    game_state = "main_menu"
-                    main_menu.activate()
+                    game_state = "pause_confirm"
 
             if action == "continue":
                 game_state = "playing"
 
             elif action == "restart":
-                game_state = "playing"
-                score = 0
-                lives = PLAYER_LIVES
-
-                last_spawn_time = time.time()
-                spawn_interval = random.uniform(10, 30)
-                current_enemy_ships = []
-
-                for asteroid in asteroids:
-                    asteroid.kill()
-                for powerup in powerups:
-                    powerup.kill()
-                for shot in shots:
-                    shot.kill()
-                for particle in particles:
-                    particle.kill()
-
-                for obj in list(collidable):
-                    if isinstance(obj, EnemyShip):
-                        obj.kill()
-
-                player.position.x = RESPAWN_POSITION_X
-                player.position.y = RESPAWN_POSITION_Y
-                player.velocity = pygame.Vector2(0, 0)
-                player.rotation = 0
-                player.respawn()
+                game_state = "pause_restart_confirm"
 
             elif action == "main_menu":
-                game_state = "main_menu"
-                main_menu.activate()
+                game_state = "pause_confirm"
 
         elif game_state == "options":
             menu_starfield.update(dt)
@@ -606,7 +671,7 @@ def main(args=None):
         elif game_state == "playing":
             # Cache current time for this frame
             current_frame_time = time.time()
-            
+
             # Update performance profiler
             object_groups = {
                 'asteroids': asteroids,
@@ -616,7 +681,7 @@ def main(args=None):
                 'enemies': current_enemy_ships
             }
             performance_profiler.update(dt, clock, object_groups)
-            
+
             starfield.update(dt)
             starfield.draw(screen)
 
@@ -673,7 +738,7 @@ def main(args=None):
                     if lives <= 0:
                         logger.info(f"Game Over! Final Score: {score}, Level: {level}")
                         session_stats.end_game(score, level)
-                        
+
                         # Stop and save replay
                         replay_recorder.stop_recording(score, level)
                         try:
@@ -681,7 +746,7 @@ def main(args=None):
                             logger.info(f"Replay saved: {saved_path}")
                         except Exception as e:
                             logger.error(f"Failed to save replay: {e}")
-                        
+
                         sounds.play_game_over()
                         game_over_screen.set_score(score)
                         game_over_screen.fade_in = True
@@ -796,7 +861,7 @@ def main(args=None):
                     obj.position.y = SCREEN_HEIGHT
                 elif obj.position.y > SCREEN_HEIGHT:
                     obj.position.y = 0
-            
+
             # Record replay frame
             if replay_recorder.recording and player:
                 def _serialize_position(obj, radius_default=8, extra=None):
@@ -1003,7 +1068,7 @@ def main(args=None):
 
             achievement_notifications.update(dt)
             achievement_notifications.draw(screen)
-            
+
             # Draw performance profiler overlay
             performance_profiler.draw(screen)
 
@@ -1047,7 +1112,7 @@ def main(args=None):
             elif action == "main_menu":
                 game_state = "main_menu"
                 main_menu.activate()
-                
+
             elif action == "quick_restart":
                 game_state = quick_restart_game()
 
@@ -1060,25 +1125,25 @@ def main(args=None):
 
             if action == "back":
                 game_state = "main_menu"
-                
+
         elif game_state == "statistics":
             menu_starfield.update(dt)
             menu_starfield.draw(screen)
-            
+
             action = stats_dashboard.update(dt, events)
             stats_dashboard.draw(screen)
-            
+
             if action == "back":
                 game_state = "main_menu"
                 main_menu.activate()
-                
+
         elif game_state == "replay_list":
             menu_starfield.update(dt)
             menu_starfield.draw(screen)
-            
+
             result = replay_list_menu.update(dt, events)
             replay_list_menu.draw(screen)
-            
+
             if result:
                 if result.get("action") == "back":
                     game_state = "main_menu"
@@ -1090,12 +1155,12 @@ def main(args=None):
                         game_state = "replay_viewer"
                     except Exception as e:
                         logger.error(f"Failed to load replay: {e}")
-                        
+
         elif game_state == "replay_viewer":
             # Draw game objects based on replay data
             starfield.update(dt)
             starfield.draw(screen)
-            
+
             # Get current frame
             frame = replay_player.get_current_frame()
             if frame:
@@ -1137,10 +1202,10 @@ def main(args=None):
 
                 level_text = font.render(f"Level: {frame.level}", True, (200, 200, 200))
                 screen.blit(level_text, (20, 80))
-            
+
             # Draw replay HUD
             replay_viewer.draw_hud(screen)
-            
+
             action = replay_viewer.update(dt, events)
             if action == "back":
                 game_state = "replay_list"
@@ -1150,10 +1215,10 @@ def main(args=None):
             # Keep game objects visible in background
             for obj in drawable:
                 obj.draw(screen)
-            
+
             action = help_screen.update(dt, events)
             help_screen.draw(screen)
-            
+
             if action == "close":
                 game_state = "playing"
                 help_screen.deactivate()
@@ -1216,7 +1281,7 @@ def quick_restart_game():
     global score, lives, level, last_spawn_time, spawn_interval, current_enemy_ships
     global level_up_timer, level_up_text, boss_active, boss_defeated_timer, boss_defeated_message
     global powerups_collected, asteroids_destroyed, shields_used, triple_shots_used, speed_boosts_used
-    
+
     # Stop any ongoing replay recording
     if replay_recorder.recording:
         replay_recorder.stop_recording(score, level)
@@ -1225,7 +1290,7 @@ def quick_restart_game():
             logger.info(f"Replay saved before restart: {saved_path}")
         except Exception as e:
             logger.error(f"Failed to save replay: {e}")
-    
+
     # Reset game state
     score = 0
     lives = PLAYER_LIVES
@@ -1235,26 +1300,26 @@ def quick_restart_game():
     boss_active = False
     boss_defeated_timer = 0
     boss_defeated_message = ""
-    
+
     # Reset tracking stats
     powerups_collected = 0
     asteroids_destroyed = 0
     shields_used = 0
     triple_shots_used = 0
     speed_boosts_used = 0
-    
+
     # Reset enemy spawn timers
     last_spawn_time = time.time()
     spawn_interval = random.uniform(10, 30)
     current_enemy_ships = []
-    
+
     # Clear all game objects in one pass
     for group in (asteroids, powerups, shots, particles, collidable, updatable):
         for obj in list(group):
             if obj is player:
                 continue
             obj.kill()
-    
+
     # Respawn player
     if player:
         player.respawn()
@@ -1262,18 +1327,18 @@ def quick_restart_game():
         player.position.y = RESPAWN_POSITION_Y
         player.velocity.update(0, 0)
         player.rotation = 0
-    
+
     # Start new game session
     session_stats.start_game()
-    
+
     # Start new replay recording
     selected_ship = ship_manager.current_ship
     replay_recorder.start_recording(difficulty, selected_ship)
-    
+
     # Spawn initial asteroids
     for _ in range(3):
         asteroid_field.spawn_random()
-    
+
     logger.info("Quick restart: Game restarted")
     return "playing"
 

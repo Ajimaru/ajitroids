@@ -1,0 +1,13 @@
+[FORMAT]
+max-line-length=127
+
+[MESSAGES CONTROL]
+disable=
+    fixme,
+    too-many-lines,
+    too-many-arguments,
+    too-many-branches,
+    too-many-statements,
+    too-many-instance-attributes,
+    too-many-locals,
+    duplicate-code

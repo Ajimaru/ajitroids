@@ -1,3 +1,10 @@
+[tool.pylint.messages_control]
+disable = ["fixme", "too-many-lines", "too-many-arguments", "too-many-branches", "too-many-statements", "too-many-instance-attributes", "too-many-locals", "duplicate-code"]
+
+[tool.pylint.format]
+ignore-patterns = ["modul/_version.py"]
+max-line-length = 127
+
 [tool.black]
 line-length = 127
 target-version = ["py39", "py310", "py311", "py312"]
@@ -16,7 +23,7 @@ testpaths = ["tests"]
 version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"
 write_to = "modul/_version.py"
-fallback_version = "0.21.2"
+fallback_version = "0.22.0"
 
 [build-system]
 requires = ["setuptools>=64", "setuptools-scm>=8"]
@@ -60,4 +67,3 @@ classifiers = [
 
 [project.scripts]
 ajitroids = "main:main"
-

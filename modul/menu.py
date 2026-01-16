@@ -1,11 +1,14 @@
 # flake8: noqa
+# pylint: disable=all
 # pyright: reportUndefinedVariable=false
 # pyright: reportWildcardImportFromLibrary=false
-from modul._version import __version__
+import math
+
 import pygame
+
+from modul.version import __version__
 from modul.constants import *
 from modul.ships import ship_manager, ShipRenderer
-import math
 
 sounds = None
 
@@ -156,7 +159,7 @@ class Menu:
         screen.blit(background, (0, 0))
 
         title_surf = self.title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4))
+        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 8))
         screen.blit(title_surf, title_rect)
 
         # Center items vertically so long lists still fit
@@ -195,6 +198,34 @@ class PauseMenu(Menu):
         self.add_item("Continue", "continue")
         self.add_item("Restart", "restart")
         self.add_item("Main Menu", "main_menu")
+
+    def draw(self, screen):
+        super().draw(screen)
+
+        # Show common keyboard shortcuts while paused
+        shortcuts_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.8))
+        shortcuts = [
+            "Arrow Up: Accelerate",
+            "Arrow Left/Right: Turn",
+            "Arrow Down: Reverse",
+            "Spacebar: Shoot",
+            "ESC: Pause",
+            "B: Switch weapons",
+            "R: Quick restart",
+            "F1 / H: Help",
+            "F8: Toggle FPS",
+            "F9: Toggle SFX",
+            "F10: Toggle music",
+            "F11: Fullscreen",
+            "F12: Performance profiler",
+            "P: Screenshot",
+        ]
+
+        shortcuts_x = 30
+        shortcuts_y = 150
+        for i, shortcut in enumerate(shortcuts):
+            shortcut_surf = shortcuts_font.render(shortcut, True, (200, 200, 200))
+            screen.blit(shortcut_surf, (shortcuts_x, shortcuts_y + i * 35))
 
 
 class TutorialScreen:
@@ -242,7 +273,6 @@ class TutorialScreen:
             "",
             "SPACEBAR to go back",
         ]
-
         y = 180
         for line in instructions:
             text_surf = self.text_font.render(line, True, (255, 255, 255))
