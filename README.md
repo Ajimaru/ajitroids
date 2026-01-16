@@ -45,15 +45,15 @@ Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destr
 Download the latest wheel file from the [Releases page](https://github.com/Ajimaru/ajitroids/releases/latest):
 
 ```bash
-# Download ajitroids-0.21.0-py3-none-any.whl (adjust version number)
+# Download ajitroids-0.21.1-py3-none-any.whl (adjust version number)
 
 # Install with pip
-pip install ajitroids-0.21.0-py3-none-any.whl
+pip install ajitroids-0.21.1-py3-none-any.whl
 
-# Run the game
-python -m modul.main
-# or
-ajitroids  # if installed with scripts
+# Run the game via the installed console script
+ajitroids
+# If ~/.local/bin is not on your PATH, run it explicitly:
+~/.local/bin/ajitroids
 ```
 
 ### Method 2: Clone from Git (For Development)
@@ -81,10 +81,10 @@ If you downloaded a source archive (.tar.gz) from releases:
 
 ```bash
 # Extract and install
-pip install ajitroids-0.21.0.tar.gz
+pip install ajitroids-0.21.1.tar.gz
 
-# Run the game
-python -m modul.main
+# Run the game via the installed console script
+ajitroids
 ```
 
 <details>
@@ -94,14 +94,14 @@ If you must use the auto-generated source code ZIP from GitHub:
 
 ```bash
 # Extract the downloaded archive
-cd ajitroids-0.21.0
+cd ajitroids-0.21.1
 
-# Set the game version (replace 0.21.0 with your version)
-export SETUPTOOLS_SCM_PRETEND_VERSION="0.21.0"  # Linux/Mac
+# Set the game version (replace 0.21.1 with your version)
+export SETUPTOOLS_SCM_PRETEND_VERSION="0.21.1"  # Linux/Mac
 # or (Windows CMD)
-set SETUPTOOLS_SCM_PRETEND_VERSION=0.21.0
+set SETUPTOOLS_SCM_PRETEND_VERSION=0.21.1
 # or (Windows PowerShell)
-$env:SETUPTOOLS_SCM_PRETEND_VERSION="0.21.0"
+$env:SETUPTOOLS_SCM_PRETEND_VERSION="0.21.1"
 
 # Install dependencies
 uv sync  # or: pip install -r requirements.txt
