@@ -155,8 +155,17 @@ class ReplayRecorder:
                 'events': [asdict(event) for event in self.events],
             }
 
+            def _json_default(obj):
+                # Best-effort conversion for common non-JSON objects (e.g., pygame.Vector2)
+                try:
+                    if hasattr(obj, "x") and hasattr(obj, "y"):
+                        return {"x": float(obj.x), "y": float(obj.y)}
+                except Exception:
+                    pass
+                return str(obj)
+
             with open(filepath, 'w') as f:
-                json.dump(replay_data, f, indent=2)
+                json.dump(replay_data, f, indent=2, default=_json_default)
                 
             logger.info(f"Successfully saved replay to: {filepath}")
             return filepath
