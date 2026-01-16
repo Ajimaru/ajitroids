@@ -1215,7 +1215,7 @@ def quick_restart_game():
     if player:
         player.position.x = RESPAWN_POSITION_X
         player.position.y = RESPAWN_POSITION_Y
-        player.velocity = pygame.Vector2(0, 0)
+        player.velocity.update(0, 0)
         player.rotation = 0
         player.respawn()
     
