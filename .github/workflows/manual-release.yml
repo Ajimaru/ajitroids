@@ -19,6 +19,13 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
+      - name: Validate tag format
+        run: |
+          if ! echo "${{ github.event.inputs.tag }}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Error: Tag must follow semantic versioning format (e.g., v0.21.0)"
+            exit 1
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -30,13 +37,15 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
+          TAG="${{ github.event.inputs.tag }}"
+          
           # Check if tag already exists remotely
-          if git ls-remote --tags origin | grep -q "refs/tags/${{ github.event.inputs.tag }}"; then
+          if git ls-remote --tags origin | grep -qF "refs/tags/${TAG}"; then
             echo "Tag already exists remotely, skipping tag creation"
           else
             echo "Creating and pushing tag"
-            git tag ${{ github.event.inputs.tag }}
-            git push origin ${{ github.event.inputs.tag }}
+            git tag "${TAG}"
+            git push origin "${TAG}"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -44,8 +53,10 @@ jobs:
       - name: Extract changelog for tag
         id: changelog
         run: |
-          TAG=${{ github.event.inputs.tag }}
-          awk "/^## $TAG / {flag=1; next} /^## v/ {flag=0} flag" CHANGELOG.md > _changelog_section.txt
+          TAG="${{ github.event.inputs.tag }}"
+          # Escape special regex characters for safe use in awk pattern
+          TAG_ESCAPED=$(printf '%s\n' "${TAG}" | sed 's/[[\.*^$()+?{|]/\\&/g')
+          awk "/^## ${TAG_ESCAPED} / {flag=1; next} /^## v/ {flag=0} flag" CHANGELOG.md > _changelog_section.txt
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           cat _changelog_section.txt >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
