@@ -1,5 +1,14 @@
 import pygame
 import os
+from pathlib import Path
+
+
+def asset_path(name: str) -> str:
+    """Resolve asset path from CWD or packaged assets directory."""
+    cwd_candidate = Path.cwd() / "assets" / name
+    if cwd_candidate.exists():
+        return str(cwd_candidate)
+    return str(Path(__file__).resolve().parent / "assets" / name)
 
 
 class Sounds:
@@ -12,23 +21,23 @@ class Sounds:
         self.menu_select = None
         self.level_up = None
         try:
-            self.shoot = pygame.mixer.Sound("assets/shoot.wav")
+            self.shoot = pygame.mixer.Sound(asset_path("shoot.wav"))
             self.shoot.set_volume(1.0)
         except:
             print("Shoot sound could not be loaded")
         try:
-            self.explosion = pygame.mixer.Sound("assets/explosion.wav")
+            self.explosion = pygame.mixer.Sound(asset_path("explosion.wav"))
             self.explosion.set_volume(1.0)
         except:
             print("Explosion sound could not be loaded")
         try:
-            self.player_death = pygame.mixer.Sound("assets/player_hit.wav")
+            self.player_death = pygame.mixer.Sound(asset_path("player_hit.wav"))
             self.player_death.set_volume(1.0)
         except:
             print("Player-Death sound could not be loaded")
         try:
-            self.menu_move = pygame.mixer.Sound("assets/menu_select.wav")
-            self.menu_select = pygame.mixer.Sound("assets/menu_confirm.wav")
+            self.menu_move = pygame.mixer.Sound(asset_path("menu_select.wav"))
+            self.menu_select = pygame.mixer.Sound(asset_path("menu_confirm.wav"))
             if self.menu_move:
                 self.menu_move.set_volume(1.0)
             if self.menu_select:
@@ -38,64 +47,64 @@ class Sounds:
             self.menu_select = None
             print("Menu sounds could not be loaded")
         try:
-            pygame.mixer.music.load("assets/background.mp3")
+            pygame.mixer.music.load(asset_path("background.mp3"))
             pygame.mixer.music.set_volume(1.0)
         except Exception as e:
             print(f"Error loading background music: {e}")
             print(f"Current directory: {os.getcwd()}")
-            print(f"File exists: {os.path.exists('assets/background.mp3')}")
+            print(f"File exists: {os.path.exists(asset_path('background.mp3'))}")
         self.sound_on = True
         self.load_new_sounds()
 
     def load_new_sounds(self):
         try:
-            self.laser_shoot = pygame.mixer.Sound("assets/laser_shoot.wav")
+            self.laser_shoot = pygame.mixer.Sound(asset_path("laser_shoot.wav"))
             self.laser_shoot.set_volume(0.2)
         except:
             self.laser_shoot = None
             print("Laser shoot sound could not be loaded")
         try:
-            self.rocket_shoot = pygame.mixer.Sound("assets/rocket_shoot.wav")
+            self.rocket_shoot = pygame.mixer.Sound(asset_path("rocket_shoot.wav"))
             self.rocket_shoot.set_volume(0.3)
         except:
             self.rocket_shoot = None
             print("Rocket shoot sound could not be loaded")
         try:
-            self.boss_spawn = pygame.mixer.Sound("assets/boss_spawn.wav")
+            self.boss_spawn = pygame.mixer.Sound(asset_path("boss_spawn.wav"))
             self.boss_spawn.set_volume(0.4)
         except:
             self.boss_spawn = None
             print("Boss spawn sound could not be loaded")
         try:
-            self.boss_death = pygame.mixer.Sound("assets/boss_death.wav")
+            self.boss_death = pygame.mixer.Sound(asset_path("boss_death.wav"))
             self.boss_death.set_volume(0.5)
         except:
             self.boss_death = None
         try:
-            self.powerup = pygame.mixer.Sound("assets/powerup.wav")
+            self.powerup = pygame.mixer.Sound(asset_path("powerup.wav"))
             self.powerup.set_volume(0.4)
         except:
             self.powerup = None
             print("PowerUp sound could not be loaded")
         try:
-            self.shield_activate = pygame.mixer.Sound("assets/shield_hit.wav")
+            self.shield_activate = pygame.mixer.Sound(asset_path("shield_hit.wav"))
             self.shield_activate.set_volume(0.3)
         except:
             self.shield_activate = None
         try:
-            self.level_up = pygame.mixer.Sound("assets/level_up.wav")
+            self.level_up = pygame.mixer.Sound(asset_path("level_up.wav"))
             self.level_up.set_volume(0.4)
         except:
             self.level_up = None
             print("Level-Up sound could not be loaded")
         try:
-            self.game_over = pygame.mixer.Sound("assets/game_over.wav")
+            self.game_over = pygame.mixer.Sound(asset_path("game_over.wav"))
             self.game_over.set_volume(0.6)
         except:
             self.game_over = None
             print("Game-Over sound could not be loaded")
         try:
-            self.player_hit = pygame.mixer.Sound("assets/player_hit.wav")
+            self.player_hit = pygame.mixer.Sound(asset_path("player_hit.wav"))
             self.player_hit.set_volume(0.7)
         except:
             self.player_hit = None
@@ -170,7 +179,7 @@ class Sounds:
             if enabled:
                 pygame.mixer.music.set_volume(0.6)
                 if not pygame.mixer.music.get_busy():
-                    pygame.mixer.music.load("assets/background.mp3")
+                    pygame.mixer.music.load(asset_path("background.mp3"))
                     pygame.mixer.music.play(-1)
                     print("toggle_music: Music reloaded and started")
                 else:
@@ -211,7 +220,7 @@ class Sounds:
     def play_boss_music(self):
         try:
             if pygame.mixer.get_init() is not None:
-                pygame.mixer.music.load("assets/boss_music.mp3")
+                pygame.mixer.music.load(asset_path("boss_music.mp3"))
                 pygame.mixer.music.set_volume(0.6)
                 pygame.mixer.music.play(-1)
                 print("Boss music started")

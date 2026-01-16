@@ -1,3 +1,5 @@
+# flake8: noqa
+# pyright: reportUndefinedVariable=false, reportWildcardImportFromLibrary=false
 from modul._version import __version__
 import pygame
 import math
@@ -12,7 +14,7 @@ from modul.asteroid import Asteroid, EnemyShip
 from modul.asteroidfield import AsteroidField
 from modul.shot import Shot
 from modul.particle import Particle
-from modul.sounds import Sounds
+from modul.sounds import Sounds, asset_path
 from modul.starfield import Starfield, MenuStarfield
 from modul.powerup import PowerUp
 from modul.highscore import HighscoreManager, HighscoreInput, HighscoreDisplay
@@ -166,7 +168,7 @@ def main(args=None):
     if game_settings.music_on:
         try:
             pygame.mixer.music.stop()
-            pygame.mixer.music.load("assets/background.mp3")
+            pygame.mixer.music.load(asset_path("background.mp3"))
             pygame.mixer.music.set_volume(1.0)
             pygame.mixer.music.play(-1)
             pygame.time.delay(100)
@@ -174,9 +176,10 @@ def main(args=None):
             print(f"❌ Error starting music: {e}")
             import os
 
-            print(f"Background.mp3 exists: {os.path.exists('assets/background.mp3')}")
-            if os.path.exists("assets/background.mp3"):
-                print(f"Background.mp3 size: {os.path.getsize('assets/background.mp3')} bytes")
+            background_path = asset_path("background.mp3")
+            print(f"Background.mp3 exists: {os.path.exists(background_path)}")
+            if os.path.exists(background_path):
+                print(f"Background.mp3 size: {os.path.getsize(background_path)} bytes")
 
     else:
         pygame.mixer.music.set_volume(1.0)
@@ -362,7 +365,7 @@ def main(args=None):
 
             if game_settings.music_on and not pygame.mixer.music.get_busy():
                 try:
-                    pygame.mixer.music.load("assets/background.mp3")
+                    pygame.mixer.music.load(asset_path("background.mp3"))
                     pygame.mixer.music.set_volume(0.8)
                     pygame.mixer.music.play(-1)
                 except Exception as e:

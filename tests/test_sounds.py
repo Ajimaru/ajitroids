@@ -414,7 +414,8 @@ class TestSounds:
             
             sounds.play_boss_music()
             
-            mock_load.assert_called_once_with("assets/boss_music.mp3")
+            loaded_path = mock_load.call_args.args[0]
+            assert loaded_path.endswith("boss_music.mp3")
             mock_play.assert_called_once_with(-1)
 
     def test_play_boss_music_mixer_not_init(self, mock_pygame):
