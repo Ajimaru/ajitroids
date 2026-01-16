@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## v0.21.2 (2026-01-16)
+
+### Fixed
+
+- **Replay Viewer**: Recorded gameplay now renders the player, asteroids, enemies, shots, and powerups using captured positions
+
+### Build
+
+- **Release Artifacts**: Release workflow now exports `SETUPTOOLS_SCM_PRETEND_VERSION` from the tag to produce wheels/sdists with the exact tagged version (no dev suffix)
+
+### Documentation
+
+- **Installation**: Updated installation examples to use the `ajitroids` console script and current release asset names
+
+Full Changelog: [v0.21.1...v0.21.2](https://github.com/Ajimaru/ajitroids/compare/v0.21.1...v0.21.2)
+
 ## v0.21.1 (2026-01-16)
 
 ### Fixed
