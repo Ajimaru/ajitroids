@@ -157,6 +157,7 @@ class TestMetalAsteroidBehavior:
         
         # Should be destroyed without splitting
         assert asteroid not in asteroid_group
+        assert len(asteroid_group) == 0
 
 
 class TestIceAsteroidBehavior:
