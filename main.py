@@ -1163,9 +1163,11 @@ def toggle_fullscreen():
 
 def quick_restart_game():
     """Quickly restart the game without going through menus."""
+    global logger, replay_recorder, session_stats, asteroid_field, difficulty
     global score, lives, level, last_spawn_time, spawn_interval, current_enemy_ships
     global level_up_timer, level_up_text, boss_active, boss_defeated_timer, boss_defeated_message
     global powerups_collected, asteroids_destroyed, shields_used, triple_shots_used, speed_boosts_used
+    global player
     
     # Stop any ongoing replay recording
     if replay_recorder.recording:
@@ -1206,11 +1208,12 @@ def quick_restart_game():
             obj.kill()
     
     # Respawn player
-    player.position.x = RESPAWN_POSITION_X
-    player.position.y = RESPAWN_POSITION_Y
-    player.velocity = pygame.Vector2(0, 0)
-    player.rotation = 0
-    player.respawn()
+    if player:
+        player.position.x = RESPAWN_POSITION_X
+        player.position.y = RESPAWN_POSITION_Y
+        player.velocity = pygame.Vector2(0, 0)
+        player.rotation = 0
+        player.respawn()
     
     # Start new game session
     session_stats.start_game()
