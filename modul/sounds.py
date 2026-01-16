@@ -11,6 +11,23 @@ def asset_path(name: str) -> str:
     return str(Path(__file__).resolve().parent / "assets" / name)
 
 
+def apply_volume_curve(slider_value):
+    """Apply exponential curve to volume slider.
+
+    0.5 (50%) maps to 1.0 (normal/reference volume).
+    Below 0.5: reduces volume exponentially.
+    Above 0.5: increases volume exponentially.
+
+    Formula: 2^(2*(x - 0.5))
+    - 0% → 0.25x (very quiet)
+    - 25% → ~0.7x
+    - 50% → 1.0x (normal)
+    - 75% → ~1.4x
+    - 100% → 2.0x (double)
+    """
+    return 2 ** (2 * (slider_value - 0.5))
+
+
 class Sounds:
     # Base volume levels for individual sound effects (relative to master volume)
     BASE_VOLUMES = {
@@ -176,6 +193,16 @@ class Sounds:
         else:
             print("Game Over sound not available or disabled")
 
+    def set_music_volume(self, slider_value):
+        """Set music volume using the exponential curve.
+
+        0.5 (50%) = normal volume (1.0x).
+        Below 0.5 = quieter, above 0.5 = louder.
+        """
+        slider_value = max(0.0, min(1.0, slider_value))
+        curve_volume = apply_volume_curve(slider_value)
+        pygame.mixer.music.set_volume(curve_volume)
+
     def toggle_music(self, enabled):
         try:
             if enabled:
@@ -253,9 +280,15 @@ class Sounds:
     def set_effects_volume(self, volume):
         """Set master volume for all sound effects.
 
-        Each sound uses its base volume multiplied by this master volume.
+        Applies exponential curve where 0.5 (50%) = normal.
+        Each sound uses its base volume multiplied by the curve.
         """
-        self.master_volume = max(0.0, min(1.0, volume))
+        # Clamp slider value to 0.0-1.0
+        slider_value = max(0.0, min(1.0, volume))
+        # Apply exponential curve: 50% = 1.0x, below = quieter, above = louder
+        curve_multiplier = apply_volume_curve(slider_value)
+        self.master_volume = curve_multiplier
+
         # Apply master volume with base volume multiplication
         if self.shoot:
             vol = self.BASE_VOLUMES["shoot"] * self.master_volume

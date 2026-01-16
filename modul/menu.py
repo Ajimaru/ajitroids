@@ -312,7 +312,8 @@ class OptionsMenu(Menu):
         elif action == "adjust_music_volume":
             self.settings.music_volume = min(1.0, max(0.0, self.settings.music_volume + 0.1))
             self.settings.save()
-            pygame.mixer.music.set_volume(self.settings.music_volume)
+            if self.sounds:
+                self.sounds.set_music_volume(self.settings.music_volume)
             self.items[2].text = f"Music Volume: {self.settings.music_volume * 100:.0f}%"
             return None
 
@@ -360,7 +361,8 @@ class OptionsMenu(Menu):
                     if self.items[self.selected_index].action == "adjust_music_volume":
                         self.settings.music_volume = max(0.0, self.settings.music_volume - 0.1)
                         self.settings.save()
-                        pygame.mixer.music.set_volume(self.settings.music_volume)
+                        if self.sounds:
+                            self.sounds.set_music_volume(self.settings.music_volume)
                         self.items[self.selected_index].text = f"Music Volume: {self.settings.music_volume * 100:.0f}%"
                     elif self.items[self.selected_index].action == "adjust_sound_volume":
                         self.settings.sound_volume = max(0.0, self.settings.sound_volume - 0.1)
@@ -372,7 +374,8 @@ class OptionsMenu(Menu):
                     if self.items[self.selected_index].action == "adjust_music_volume":
                         self.settings.music_volume = min(1.0, self.settings.music_volume + 0.1)
                         self.settings.save()
-                        pygame.mixer.music.set_volume(self.settings.music_volume)
+                        if self.sounds:
+                            self.sounds.set_music_volume(self.settings.music_volume)
                         self.items[self.selected_index].text = f"Music Volume: {self.settings.music_volume * 100:.0f}%"
                     elif self.items[self.selected_index].action == "adjust_sound_volume":
                         self.settings.sound_volume = min(1.0, self.settings.sound_volume + 0.1)
