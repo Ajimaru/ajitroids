@@ -262,14 +262,20 @@ class ReplayPlayer:
         
     def seek_to_time(self, timestamp: float):
         """Seek to a specific time in the replay."""
+        if not self.frames:
+            self.current_frame_index = 0
+            self.start_playback_time = time.time()
+            return
+
         timestamp = max(0, min(timestamp, self.metadata.get('duration', 0)))
-        
-        # Find closest frame
+
+        # Find closest frame (or clamp to last frame)
+        self.current_frame_index = len(self.frames) - 1
         for i, frame in enumerate(self.frames):
             if frame.timestamp >= timestamp:
                 self.current_frame_index = i
                 break
-                
+
         # Adjust playback time
         self.start_playback_time = time.time() - (timestamp / self.playback_speed)
         
