@@ -37,6 +37,7 @@ from modul.achievement_notification import AchievementNotificationManager
 from modul.groups import collidable, drawable, updatable
 from modul.help_screen import HelpScreen
 from modul.session_stats import SessionStats
+from modul.stats_dashboard import StatsDashboard
 
 
 class GameSettings:
@@ -228,6 +229,7 @@ def main(args=None):
     tutorial = Tutorial()
     help_screen = HelpScreen()
     session_stats = SessionStats()
+    stats_dashboard = StatsDashboard(session_stats)
 
     difficulty = "normal"
 
@@ -364,6 +366,10 @@ def main(args=None):
 
             elif action == "highscores":
                 game_state = "highscore_display"
+                
+            elif action == "statistics":
+                game_state = "statistics"
+                stats_dashboard.activate()
 
             elif action == "options":
                 game_state = "options"
@@ -973,6 +979,17 @@ def main(args=None):
 
             if action == "back":
                 game_state = "main_menu"
+                
+        elif game_state == "statistics":
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+            
+            action = stats_dashboard.update(dt, events)
+            stats_dashboard.draw(screen)
+            
+            if action == "back":
+                game_state = "main_menu"
+                main_menu.activate()
 
         elif game_state == "help":
             # Keep game objects visible in background

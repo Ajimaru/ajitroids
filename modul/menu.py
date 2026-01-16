@@ -168,6 +168,7 @@ class MainMenu(Menu):
         self.add_item("Start Game", "start_game")
         self.add_item("Tutorial", "tutorial")
         self.add_item("Highscores", "highscores")
+        self.add_item("Statistics", "statistics")
         self.add_item("Achievements", "achievements")
         self.add_item("Optionen", "options")
         self.add_item("Credits", "credits")
