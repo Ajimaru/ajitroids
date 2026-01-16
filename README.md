@@ -46,7 +46,7 @@ Download `ajitroids-latest-py3-none-any.whl` from the [Releases page](https://gi
 
 ```bash
 # Install with pip
-pip install ajitroids-<version>-py3-none-any.whl
+pip install ajitroids-latest-py3-none-any.whl 
 
 # Run the game via the installed console script
 ajitroids
@@ -67,10 +67,10 @@ uv sync
 # Or install with pip
 pip install -r requirements.txt
 
-# Start the game
-uv run main.py  # with uv
-# or
-python main.py  # with pip
+# Start the game with uv
+uv run main.py
+# or  pip
+python main.py
 ```
 
 <details>
@@ -130,36 +130,11 @@ If you downloaded a source archive (.tar.gz) from releases (prefer `ajitroids-la
 
 ```bash
 # Extract and install
-pip install ajitroids-<version>.tar.gz
+pip install ajitroids-latest.tar.gz 
 
 # Run the game via the installed console script
 ajitroids
 ```
-
-<details>
-<summary>Alternative: Manual installation from ZIP (not recommended)</summary>
-
-If you must use the auto-generated source code ZIP from GitHub:
-
-```bash
-# Extract the downloaded archive
-cd ajitroids-<version>
-
-# Set the game version (replace with your version)
-export SETUPTOOLS_SCM_PRETEND_VERSION="<version>"  # Linux/Mac
-# or (Windows CMD)
-set SETUPTOOLS_SCM_PRETEND_VERSION=<version>
-# or (Windows PowerShell)
-$env:SETUPTOOLS_SCM_PRETEND_VERSION="<version>"
-
-# Install dependencies
-uv sync  # or: pip install -r requirements.txt
-
-# Start the game
-python main.py
-```
-
-</details>
 
 ## 🌟 Gameplay
 
