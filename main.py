@@ -234,6 +234,7 @@ def main(args=None):
     stats_dashboard = StatsDashboard(session_stats)
     
     # Replay system
+    global replay_recorder, replay_manager, replay_list_menu, replay_player, replay_viewer
     replay_recorder = ReplayRecorder()
     replay_manager = ReplayManager()
     replay_list_menu = ReplayListMenu(replay_manager)
