@@ -30,6 +30,8 @@ from modul.groups import collidable, drawable, updatable
 
 class Asteroid(CircleShape):
     def __init__(self, x, y, radius, asteroid_type=ASTEROID_TYPE_NORMAL):
+        if asteroid_type not in ASTEROID_TYPES:
+            raise ValueError(f"Invalid asteroid_type: {asteroid_type}")
         super().__init__(x, y, radius)
         self.asteroid_type = asteroid_type
         self.vertices = self._generate_vertices()
