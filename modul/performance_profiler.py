@@ -7,8 +7,9 @@ This module provides real-time performance metrics display including:
 - Performance graph visualization
 """
 
-import pygame
 from collections import deque
+
+import pygame
 
 
 class PerformanceProfiler:
@@ -18,7 +19,8 @@ class PerformanceProfiler:
         """Initialize the performance profiler.
 
         Args:
-            max_samples: Number of samples to keep for graphing (default: 120 = 2 seconds at 60 FPS)
+            max_samples: Number of samples to keep for graphing
+                (default: 120 = 2 seconds at 60 FPS)
         """
         self.enabled = False
         self.max_samples = max_samples
@@ -81,18 +83,28 @@ class PerformanceProfiler:
 
         # Update object counts
         if object_groups:
-            self.object_counts['asteroids'] = len(object_groups.get('asteroids', []))
+            self.object_counts['asteroids'] = len(
+                object_groups.get('asteroids', [])
+            )
             self.object_counts['shots'] = len(object_groups.get('shots', []))
-            self.object_counts['particles'] = len(object_groups.get('particles', []))
-            self.object_counts['powerups'] = len(object_groups.get('powerups', []))
-            self.object_counts['enemies'] = len(object_groups.get('enemies', []))
-            self.object_counts['total'] = sum([
-                self.object_counts['asteroids'],
-                self.object_counts['shots'],
-                self.object_counts['particles'],
-                self.object_counts['powerups'],
-                self.object_counts['enemies']
-            ])
+            self.object_counts['particles'] = len(
+                object_groups.get('particles', [])
+            )
+            self.object_counts['powerups'] = len(
+                object_groups.get('powerups', [])
+            )
+            self.object_counts['enemies'] = len(
+                object_groups.get('enemies', [])
+            )
+            self.object_counts['total'] = sum(
+                [
+                    self.object_counts['asteroids'],
+                    self.object_counts['shots'],
+                    self.object_counts['particles'],
+                    self.object_counts['powerups'],
+                    self.object_counts['enemies'],
+                ]
+            )
 
     def draw(self, screen):
         """Draw performance metrics overlay.
@@ -109,10 +121,20 @@ class PerformanceProfiler:
             self.font_small = pygame.font.Font(None, 18)
 
         # Calculate metrics
-        avg_fps = sum(self.fps_history) / len(self.fps_history) if self.fps_history else 0
+        avg_fps = (
+            sum(self.fps_history) / len(self.fps_history)
+            if self.fps_history
+            else 0
+        )
         current_fps = self.fps_history[-1] if self.fps_history else 0
-        avg_frame_time = sum(self.frame_time_history) / len(self.frame_time_history) if self.frame_time_history else 0
-        current_frame_time = self.frame_time_history[-1] if self.frame_time_history else 0
+        avg_frame_time = (
+            sum(self.frame_time_history) / len(self.frame_time_history)
+            if self.frame_time_history
+            else 0
+        )
+        current_frame_time = (
+            self.frame_time_history[-1] if self.frame_time_history else 0
+        )
 
         # Determine performance color based on FPS
         if current_fps >= 55:
@@ -128,7 +150,10 @@ class PerformanceProfiler:
         overlay_x = screen.get_width() - overlay_width - 10
         overlay_y = screen.get_height() - overlay_height - 10
 
-        overlay_surface = pygame.Surface((overlay_width, overlay_height), pygame.SRCALPHA)
+        overlay_surface = pygame.Surface(
+            (overlay_width, overlay_height),
+            pygame.SRCALPHA,
+        )
         overlay_surface.fill(self.bg_color)
         screen.blit(overlay_surface, (overlay_x, overlay_y))
 
@@ -142,38 +167,70 @@ class PerformanceProfiler:
         y_offset += 30
 
         # FPS metrics
-        fps_text = self.font_small.render(f"FPS: {current_fps:.1f} (avg: {avg_fps:.1f})", True, fps_color)
+        fps_text = self.font_small.render(
+            f"FPS: {current_fps:.1f} (avg: {avg_fps:.1f})",
+            True,
+            fps_color,
+        )
         screen.blit(fps_text, (x_offset, y_offset))
         y_offset += 20
 
         # Frame time metrics
-        frame_time_text = self.font_small.render(f"Frame: {current_frame_time:.2f}ms (avg: {avg_frame_time:.2f}ms)", True, self.frame_time_color)
+        frame_time_text = self.font_small.render(
+            f"Frame: {current_frame_time:.2f}ms (avg: {avg_frame_time:.2f}ms)",
+            True,
+            self.frame_time_color,
+        )
         screen.blit(frame_time_text, (x_offset, y_offset))
         y_offset += 25
 
         # Draw FPS graph
-        self._draw_graph(screen, x_offset, y_offset, self.fps_history, 60, "FPS", self.fps_color)
+        self._draw_graph(
+            screen,
+            x_offset,
+            y_offset,
+            self.fps_history,
+            60,
+            "FPS",
+            self.fps_color,
+        )
         y_offset += self.graph_height + 15
 
         # Object counts
         y_offset += 5
-        counts_title = self.font_small.render("Object Counts:", True, self.text_color)
+        counts_title = self.font_small.render(
+            "Object Counts:",
+            True,
+            self.text_color,
+        )
         screen.blit(counts_title, (x_offset, y_offset))
         y_offset += 20
 
         for obj_type, count in self.object_counts.items():
             if obj_type != 'total':
-                count_text = self.font_small.render(f"  {obj_type.capitalize()}: {count}", True, (200, 200, 200))
+                count_text = self.font_small.render(
+                    f"  {obj_type.capitalize()}: {count}",
+                    True,
+                    (200, 200, 200),
+                )
                 screen.blit(count_text, (x_offset, y_offset))
                 y_offset += 18
 
         # Total
-        total_text = self.font_small.render(f"Total Objects: {self.object_counts['total']}", True, self.text_color)
+        total_text = self.font_small.render(
+            f"Total Objects: {self.object_counts['total']}",
+            True,
+            self.text_color,
+        )
         screen.blit(total_text, (x_offset, y_offset))
 
         # Draw hint at bottom
         hint_y = overlay_y + overlay_height - 20
-        hint = self.font_small.render("Press F12 to toggle", True, (150, 150, 150))
+        hint = self.font_small.render(
+            "Press F12 to toggle",
+            True,
+            (150, 150, 150),
+        )
         screen.blit(hint, (x_offset, hint_y))
 
     def _draw_graph(self, screen, x, y, data, max_value, label, color):
@@ -200,23 +257,45 @@ class PerformanceProfiler:
         screen.blit(label_surface, (x, y - 18))
 
         # Constants for FPS graph reference lines
-        TARGET_FPS = 60
-        MIN_ACCEPTABLE_FPS = 30
+        target_fps = 60
+        min_acceptable_fps = 30
 
         # Draw reference lines for FPS graphs
-        if max_value == TARGET_FPS:
+        if max_value == target_fps:
             # Draw 60 FPS line
-            reference_y = y + self.graph_height - (TARGET_FPS / max_value * self.graph_height)
-            pygame.draw.line(screen, (0, 100, 0), (x, reference_y), (x + self.graph_width, reference_y), 1)
+            reference_y = y + self.graph_height - (
+                target_fps / max_value * self.graph_height
+            )
+            pygame.draw.line(
+                screen,
+                (0, 100, 0),
+                (x, reference_y),
+                (x + self.graph_width, reference_y),
+                1,
+            )
             # Draw 30 FPS line
-            reference_y_30 = y + self.graph_height - (MIN_ACCEPTABLE_FPS / max_value * self.graph_height)
-            pygame.draw.line(screen, (100, 100, 0), (x, reference_y_30), (x + self.graph_width, reference_y_30), 1)
+            reference_y_30 = (
+                y
+                + self.graph_height
+                - (min_acceptable_fps / max_value * self.graph_height)
+            )
+            pygame.draw.line(
+                screen,
+                (100, 100, 0),
+                (x, reference_y_30),
+                (x + self.graph_width, reference_y_30),
+                1,
+            )
 
         # Draw data points
         data_list = list(data)
         num_points = len(data_list)
 
-        x_step = self.graph_width / (num_points - 1) if num_points > 1 else self.graph_width
+        x_step = (
+            self.graph_width / (num_points - 1)
+            if num_points > 1
+            else self.graph_width
+        )
 
         points = []
         for i, value in enumerate(data_list):
@@ -224,7 +303,9 @@ class PerformanceProfiler:
             clamped_value = min(value, max_value)
             # Calculate position
             px = x + i * x_step
-            py = y + self.graph_height - (clamped_value / max_value * self.graph_height)
+            py = y + self.graph_height - (
+                clamped_value / max_value * self.graph_height
+            )
             points.append((px, py))
 
         # Draw the graph line
@@ -234,10 +315,21 @@ class PerformanceProfiler:
         # Draw max/min values
         max_val = max(data_list)
         min_val = min(data_list)
-        max_text = self.font_small.render(f"{max_val:.1f}", True, (150, 150, 150))
-        min_text = self.font_small.render(f"{min_val:.1f}", True, (150, 150, 150))
+        max_text = self.font_small.render(
+            f"{max_val:.1f}",
+            True,
+            (150, 150, 150),
+        )
+        min_text = self.font_small.render(
+            f"{min_val:.1f}",
+            True,
+            (150, 150, 150),
+        )
         screen.blit(max_text, (x + self.graph_width + 5, y))
-        screen.blit(min_text, (x + self.graph_width + 5, y + self.graph_height - 15))
+        screen.blit(
+            min_text,
+            (x + self.graph_width + 5, y + self.graph_height - 15),
+        )
 
     def get_summary(self):
         """Get a summary of performance metrics.
@@ -252,7 +344,9 @@ class PerformanceProfiler:
             'avg_fps': sum(self.fps_history) / len(self.fps_history),
             'min_fps': min(self.fps_history),
             'max_fps': max(self.fps_history),
-            'avg_frame_time_ms': sum(self.frame_time_history) / len(self.frame_time_history),
+            'avg_frame_time_ms': (
+                sum(self.frame_time_history) / len(self.frame_time_history)
+            ),
             'max_frame_time_ms': max(self.frame_time_history),
             'total_objects': self.object_counts['total']
         }
