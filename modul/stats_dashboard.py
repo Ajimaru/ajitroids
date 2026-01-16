@@ -58,11 +58,11 @@ class StatsDashboard:
         y_pos += 50
         
         game_stats = [
-            ("Games Played", f"{stats['games_played']}"),
-            ("Highest Score", f"{stats['highest_score']:,}"),
-            ("Average Score", f"{stats['average_score']:.0f}"),
-            ("Highest Level", f"{stats['highest_level']}"),
-            ("Total Playtime", self.session_stats.format_time(stats['total_playtime'])),
+            ("Games Played", f"{stats.get('games_played', 0)}"),
+            ("Highest Score", f"{stats.get('highest_score', 0):,}"),
+            ("Average Score", f"{stats.get('average_score', 0.0):.0f}"),
+            ("Highest Level", f"{stats.get('highest_level', 0)}"),
+            ("Total Playtime", self.session_stats.format_time(stats.get('total_playtime', 0.0))),
         ]
         
         for label, value in game_stats:
