@@ -167,6 +167,7 @@ class MainMenu(Menu):
         super().__init__("AJITROIDS")
         self.add_item("Start Game", "start_game")
         self.add_item("Tutorial", "tutorial")
+        self.add_item("Replays", "replays")
         self.add_item("Highscores", "highscores")
         self.add_item("Statistics", "statistics")
         self.add_item("Achievements", "achievements")

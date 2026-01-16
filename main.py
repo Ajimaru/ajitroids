@@ -38,6 +38,8 @@ from modul.groups import collidable, drawable, updatable
 from modul.help_screen import HelpScreen
 from modul.session_stats import SessionStats
 from modul.stats_dashboard import StatsDashboard
+from modul.replay_system import ReplayRecorder, ReplayPlayer, ReplayManager
+from modul.replay_ui import ReplayListMenu, ReplayViewer
 
 
 class GameSettings:
@@ -230,6 +232,13 @@ def main(args=None):
     help_screen = HelpScreen()
     session_stats = SessionStats()
     stats_dashboard = StatsDashboard(session_stats)
+    
+    # Replay system
+    replay_recorder = ReplayRecorder()
+    replay_manager = ReplayManager()
+    replay_list_menu = ReplayListMenu(replay_manager)
+    replay_player = ReplayPlayer()
+    replay_viewer = ReplayViewer(replay_player)
 
     difficulty = "normal"
 
@@ -363,6 +372,10 @@ def main(args=None):
 
             elif action == "tutorial":
                 game_state = "tutorial"
+                
+            elif action == "replays":
+                game_state = "replay_list"
+                replay_list_menu.activate()
 
             elif action == "highscores":
                 game_state = "highscore_display"
@@ -437,6 +450,10 @@ def main(args=None):
                 
                 # Start tracking session statistics
                 session_stats.start_game()
+                
+                # Start recording replay
+                replay_recorder.start_recording(difficulty, selected_ship)
+                
                 logger.info(f"Game started - Difficulty: {difficulty}, Ship: {selected_ship}")
 
                 last_spawn_time = time.time()
@@ -638,6 +655,15 @@ def main(args=None):
                     if lives <= 0:
                         logger.info(f"Game Over! Final Score: {score}, Level: {level}")
                         session_stats.end_game(score, level)
+                        
+                        # Stop and save replay
+                        replay_recorder.stop_recording(score, level)
+                        try:
+                            saved_path = replay_recorder.save_replay()
+                            logger.info(f"Replay saved: {saved_path}")
+                        except Exception as e:
+                            logger.error(f"Failed to save replay: {e}")
+                        
                         sounds.play_game_over()
                         game_over_screen.set_score(score)
                         game_over_screen.fade_in = True
@@ -752,6 +778,20 @@ def main(args=None):
                     obj.position.y = SCREEN_HEIGHT
                 elif obj.position.y > SCREEN_HEIGHT:
                     obj.position.y = 0
+            
+            # Record replay frame
+            if replay_recorder.recording and player:
+                game_state_data = {
+                    'player_x': player.position.x,
+                    'player_y': player.position.y,
+                    'player_rotation': player.rotation,
+                    'player_vx': player.velocity.x,
+                    'player_vy': player.velocity.y,
+                    'score': score,
+                    'lives': lives,
+                    'level': level,
+                }
+                replay_recorder.record_frame(game_state_data, time.time())
 
             for obj in drawable:
                 obj.draw(screen)
@@ -990,6 +1030,51 @@ def main(args=None):
             if action == "back":
                 game_state = "main_menu"
                 main_menu.activate()
+                
+        elif game_state == "replay_list":
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+            
+            result = replay_list_menu.update(dt, events)
+            replay_list_menu.draw(screen)
+            
+            if result:
+                if result.get("action") == "back":
+                    game_state = "main_menu"
+                    main_menu.activate()
+                elif result.get("action") == "play_replay":
+                    try:
+                        replay_player.load_replay(result["filepath"])
+                        replay_player.start_playback()
+                        game_state = "replay_viewer"
+                    except Exception as e:
+                        logger.error(f"Failed to load replay: {e}")
+                        
+        elif game_state == "replay_viewer":
+            # Draw game objects based on replay data
+            starfield.update(dt)
+            starfield.draw(screen)
+            
+            # Get current frame
+            frame = replay_player.get_current_frame()
+            if frame:
+                # Draw a simplified view - just show score, level, lives
+                score_text = font.render(f"Score: {frame.score}", True, (255, 255, 255))
+                screen.blit(score_text, (20, 20))
+                
+                lives_text = font.render(f"Lives: {frame.lives}", True, (255, 255, 255))
+                screen.blit(lives_text, (20, 50))
+                
+                level_text = font.render(f"Level: {frame.level}", True, (200, 200, 200))
+                screen.blit(level_text, (20, 80))
+            
+            # Draw replay HUD
+            replay_viewer.draw_hud(screen)
+            
+            action = replay_viewer.update(dt, events)
+            if action == "back":
+                game_state = "replay_list"
+                replay_list_menu.activate()
 
         elif game_state == "help":
             # Keep game objects visible in background
@@ -1062,6 +1147,15 @@ def quick_restart_game():
     global level_up_timer, level_up_text, boss_active, boss_defeated_timer, boss_defeated_message
     global player, powerups_collected, asteroids_destroyed, shields_used, triple_shots_used, speed_boosts_used
     
+    # Stop any ongoing replay recording
+    if replay_recorder.recording:
+        replay_recorder.stop_recording(score, level)
+        try:
+            saved_path = replay_recorder.save_replay()
+            logger.info(f"Replay saved before restart: {saved_path}")
+        except Exception as e:
+            logger.error(f"Failed to save replay: {e}")
+    
     # Reset game state
     score = 0
     lives = PLAYER_LIVES
@@ -1116,6 +1210,10 @@ def quick_restart_game():
     
     # Start new game session
     session_stats.start_game()
+    
+    # Start new replay recording
+    selected_ship = ship_manager.current_ship
+    replay_recorder.start_recording(difficulty, selected_ship)
     
     # Spawn initial asteroids
     for _ in range(3):
