@@ -166,10 +166,39 @@ def test_replay_player_toggle_pause():
     player = ReplayPlayer()
     player.playing = True
     player.paused = False
+    # Add frames so toggle_pause doesn't return early
+    player.frames = [
+        GameFrame(0.0, (100, 100), 0, (0, 0), 0, 3, 1),
+        GameFrame(0.1, (110, 110), 0, (0, 0), 0, 3, 1),
+    ]
     
     player.toggle_pause()
     assert player.paused is True
     
+    player.toggle_pause()
+    assert player.paused is False
+
+
+def test_replay_player_toggle_pause_empty_frames():
+    """Test that toggle_pause safely handles empty frames list."""
+    player = ReplayPlayer()
+    player.playing = True
+    player.paused = False
+    player.frames = []  # Empty frames
+    
+    # Should not crash and should not change pause state
+    player.toggle_pause()
+    assert player.paused is False
+
+
+def test_replay_player_toggle_pause_not_playing():
+    """Test that toggle_pause does nothing when not playing."""
+    player = ReplayPlayer()
+    player.playing = False
+    player.paused = False
+    player.frames = [GameFrame(0.0, (100, 100), 0, (0, 0), 0, 3, 1)]
+    
+    # Should not change pause state
     player.toggle_pause()
     assert player.paused is False
 
@@ -297,6 +326,11 @@ def test_replay_viewer_space_key():
     viewer = ReplayViewer(player)
     player.playing = True
     player.paused = False
+    # Add frames so toggle_pause doesn't return early
+    player.frames = [
+        GameFrame(0.0, (100, 100), 0, (0, 0), 0, 3, 1),
+        GameFrame(0.1, (110, 110), 0, (0, 0), 0, 3, 1),
+    ]
     
     events = [MagicMock(type=pygame.KEYDOWN, key=pygame.K_SPACE)]
     viewer.update(0.016, events)
