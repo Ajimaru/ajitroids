@@ -150,9 +150,10 @@ class StatsDashboard:
         label_rect = label_surf.get_rect(center=(center_x, y - 25))
         screen.blit(label_surf, label_rect)
         
-        avg_score = stats['average_score']
-        high_score = max(stats['highest_score'], 1)
-        performance = min(100, (avg_score / high_score) * 100)
+        avg_score = float(stats.get('average_score', 0.0) or 0.0)
+        high_score = float(stats.get('highest_score', 0.0) or 0.0)
+        high_score = max(high_score, 1.0)
+        performance = min(100.0, max(0.0, (avg_score / high_score) * 100.0))
         
         self._draw_bar(screen, center_x - bar_width / 2, y, bar_width, bar_height,
                       performance, 100, (100, 100, 255), (100, 255, 100))
