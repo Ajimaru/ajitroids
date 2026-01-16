@@ -767,11 +767,14 @@ def main(args=None):
                         is_medium_asteroid = ASTEROID_MIN_RADIUS < original_size < ASTEROID_MIN_RADIUS * 2
 
                         if is_large_asteroid:
-                            score += SCORE_LARGE
+                            base_score = SCORE_LARGE
                         elif is_medium_asteroid:
-                            score += SCORE_MEDIUM
+                            base_score = SCORE_MEDIUM
                         else:
-                            score += SCORE_SMALL
+                            base_score = SCORE_SMALL
+
+                        type_multiplier = ASTEROID_TYPE_SCORE_MULTIPLIERS.get(asteroid.asteroid_type, 1.0)
+                        score += int(round(base_score * type_multiplier))
 
                         Particle.create_asteroid_explosion(asteroid.position.x, asteroid.position.y)
 

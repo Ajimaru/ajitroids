@@ -111,13 +111,13 @@ class Asteroid(CircleShape):
             for x, y in self.vertices
         ]
         points = [(self.position.x + x, self.position.y + y) for x, y in rotated_vertices]
-        
+
         # Get color based on asteroid type
         color = ASTEROID_TYPE_COLORS.get(
             self.asteroid_type,
             ASTEROID_TYPE_COLORS[ASTEROID_TYPE_NORMAL]
         )
-        
+
         pygame.draw.polygon(screen, color, points, 2)
         if COLLISION_DEBUG:
             pygame.draw.circle(screen, "red", self.position, self.radius, 1)
@@ -134,7 +134,7 @@ class Asteroid(CircleShape):
         if self.asteroid_type == ASTEROID_TYPE_METAL and self.health > 1 and self.radius > ASTEROID_MIN_RADIUS:
             self.health -= 1
             return
-        
+
         self.kill()
 
         powerup_group = None
@@ -153,23 +153,21 @@ class Asteroid(CircleShape):
 
         new_radius = self.radius - ASTEROID_MIN_RADIUS
 
-        random_angle = random.uniform(20, 50)
-        
+        base_angle = random.uniform(20, 50)
+
         # Determine how many pieces to split into based on type
         split_count = ASTEROID_CRYSTAL_SPLIT_COUNT if self.asteroid_type == ASTEROID_TYPE_CRYSTAL else 2
-        
+
         # Ice asteroids move faster when split (slippery)
         velocity_multiplier = ASTEROID_ICE_VELOCITY_MULTIPLIER if self.asteroid_type == ASTEROID_TYPE_ICE else 1.2
 
         # Create split asteroids
         for i in range(split_count):
-            # Calculate angle for each piece
-            if split_count == 2:
-                # For crystal (3 pieces), spread them evenly
-                base_angle = (i - 1) * 120  # -120, 0, 120 degrees
-                angle = random.uniform(-30, 30) + base_angle
-                # For crystal (3 pieces), spread them evenly
-                angle = random_angle + (i - 1) * 60  # -60, 0, 60 degrees approximately
+            # Spread shards evenly: crystals into 3 directions, others into 2 opposite angles
+            if split_count == ASTEROID_CRYSTAL_SPLIT_COUNT:
+                angle = base_angle + (i - 1) * 60  # -60, 0, 60 degrees approximately
+            else:
+                angle = base_angle if i == 0 else -base_angle
 
             velocity = self.velocity.rotate(angle) * velocity_multiplier
             rotation_speed = (random.uniform(-0.25, 0.25) + self.velocity.length() * math.sin(math.radians(angle))) * 0.1

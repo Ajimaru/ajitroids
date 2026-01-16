@@ -29,8 +29,16 @@ ASTEROID_TYPE_WEIGHTS = {
 ASTEROID_TYPE_COLORS = {
     ASTEROID_TYPE_NORMAL: "white",
     ASTEROID_TYPE_ICE: (150, 200, 255),  # Light blue
-    ASTEROID_TYPE_METAL: (180, 180, 200),  # Gray-blue
+    ASTEROID_TYPE_METAL: (190, 170, 120),  # Warm metallic (brass-like) for contrast
     ASTEROID_TYPE_CRYSTAL: (200, 150, 255),  # Purple
+}
+
+# Score multipliers per asteroid type (applied to size-based base points)
+ASTEROID_TYPE_SCORE_MULTIPLIERS = {
+    ASTEROID_TYPE_NORMAL: 1.0,
+    ASTEROID_TYPE_ICE: 0.9,
+    ASTEROID_TYPE_METAL: 1.5,
+    ASTEROID_TYPE_CRYSTAL: 0.6,
 }
 
 # Type-specific properties

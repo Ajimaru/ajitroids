@@ -18,6 +18,9 @@ ignore = ["E128", "F405"]
 minversion = "7.0"
 addopts = "-v"
 testpaths = ["tests"]
+filterwarnings = [
+  "ignore:pkg_resources is deprecated as an API:UserWarning",
+]
 
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
