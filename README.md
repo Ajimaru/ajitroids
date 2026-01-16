@@ -42,13 +42,11 @@ Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destr
 
 ### Method 1: Install from Release (Recommended)
 
-Download the latest wheel file from the [Releases page](https://github.com/Ajimaru/ajitroids/releases/latest):
+Download `ajitroids-latest-py3-none-any.whl` from the [Releases page](https://github.com/Ajimaru/ajitroids/releases/latest):
 
 ```bash
-# Download ajitroids-0.21.1-py3-none-any.whl (adjust version number)
-
 # Install with pip
-pip install ajitroids-0.21.1-py3-none-any.whl
+pip install ajitroids-<version>-py3-none-any.whl
 
 # Run the game via the installed console script
 ajitroids
@@ -75,13 +73,64 @@ uv run main.py  # with uv
 python main.py  # with pip
 ```
 
+<details>
+<summary>🔧 Development Setup</summary>
+
+If you plan to contribute or develop for Ajitroids, set up the development environment with pre-commit hooks:
+
+```bash
+# Run the setup script (Linux/macOS)
+bash setup-dev.sh
+
+# Or manual setup (all platforms)
+pip install pre-commit
+pre-commit install
+
+# Run hooks on all files (optional, to check before committing)
+pre-commit run --all-files
+```
+
+**What this does:**
+
+- Installs pre-commit framework
+- Activates git hooks that check code quality on every commit
+- Runs **flake8** (style), **pylint** (code analysis), and **prettier** (markdown formatting)
+- Prevents commits that violate configured style rules
+
+</details>
+
+<details>
+<summary>📚 Documentation</summary>
+
+Comprehensive developer documentation is available:
+
+- **[Developer Documentation](https://ajimaru.github.io/ajitroids/)**: Complete guide for developers
+- **[Getting Started](https://ajimaru.github.io/ajitroids/getting-started/)**: Setup and installation
+- **[Architecture](https://ajimaru.github.io/ajitroids/architecture/overview/)**: Code architecture and design
+- **[API Reference](https://ajimaru.github.io/ajitroids/api/python/)**: Auto-generated API docs
+- **[Contributing Guide](https://ajimaru.github.io/ajitroids/development/contributing/)**: How to contribute
+
+### Building Documentation Locally
+
+```bash
+# Install documentation dependencies
+pip install -r requirements-docs.txt
+
+# Serve documentation locally
+mkdocs serve
+
+# Open http://127.0.0.1:8000 in your browser
+```
+
+</details>
+
 ### Method 3: Install from Source Archive
 
-If you downloaded a source archive (.tar.gz) from releases:
+If you downloaded a source archive (.tar.gz) from releases (prefer `ajitroids-latest.tar.gz`):
 
 ```bash
 # Extract and install
-pip install ajitroids-0.21.1.tar.gz
+pip install ajitroids-<version>.tar.gz
 
 # Run the game via the installed console script
 ajitroids
@@ -94,14 +143,14 @@ If you must use the auto-generated source code ZIP from GitHub:
 
 ```bash
 # Extract the downloaded archive
-cd ajitroids-0.21.1
+cd ajitroids-<version>
 
-# Set the game version (replace 0.21.1 with your version)
-export SETUPTOOLS_SCM_PRETEND_VERSION="0.21.1"  # Linux/Mac
+# Set the game version (replace with your version)
+export SETUPTOOLS_SCM_PRETEND_VERSION="<version>"  # Linux/Mac
 # or (Windows CMD)
-set SETUPTOOLS_SCM_PRETEND_VERSION=0.21.1
+set SETUPTOOLS_SCM_PRETEND_VERSION=<version>
 # or (Windows PowerShell)
-$env:SETUPTOOLS_SCM_PRETEND_VERSION="0.21.1"
+$env:SETUPTOOLS_SCM_PRETEND_VERSION="<version>"
 
 # Install dependencies
 uv sync  # or: pip install -r requirements.txt
@@ -149,7 +198,8 @@ python main.py
 - **3**: 2.0x playback speed
 - **ESC**: Exit replay viewer
 
-## 💻 Command-Line Options
+<details>
+<summary>💻 Command-Line Options</summary>
 
 Ajitroids supports several command-line arguments for enhanced control:
 
@@ -174,6 +224,8 @@ python main.py --fullscreen
 python main.py --log-file game.log
 ```
 
+</details>
+
 ## 🚀 Spaceships
 
 Ajitroids features unlockable spaceships with unique abilities:
@@ -197,28 +249,6 @@ Unlock these ships by progressing through the game and achieving milestones!
 - Modular sound engine with dynamic effects
 - Efficient particle system for visual effects
 - Collision detection with optimized algorithms
-
-## 📚 Documentation
-
-Comprehensive developer documentation is available:
-
-- **[Developer Documentation](https://ajimaru.github.io/ajitroids/)**: Complete guide for developers
-- **[Getting Started](https://ajimaru.github.io/ajitroids/getting-started/)**: Setup and installation
-- **[Architecture](https://ajimaru.github.io/ajitroids/architecture/overview/)**: Code architecture and design
-- **[API Reference](https://ajimaru.github.io/ajitroids/api/python/)**: Auto-generated API docs
-- **[Contributing Guide](https://ajimaru.github.io/ajitroids/development/contributing/)**: How to contribute
-
-### Building Documentation Locally
-
-```bash
-# Install documentation dependencies
-pip install -r requirements-docs.txt
-
-# Serve documentation locally
-mkdocs serve
-
-# Open http://127.0.0.1:8000 in your browser
-```
 
 ## 📜 License
 
