@@ -23,7 +23,7 @@ testpaths = ["tests"]
 version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"
 write_to = "modul/_version.py"
-fallback_version = "0.21.2"
+fallback_version = "0.22.0"
 
 [build-system]
 requires = ["setuptools>=64", "setuptools-scm>=8"]

@@ -1,5 +1,35 @@
 # Changelog
 
+<!-- markdownlint-disable MD024 -->
+
+## v0.22.0 (2026-01-16)
+
+### Added
+
+- Pause menu shows the full keyboard shortcut list.
+- Restart from pause now has a confirmation dialog to prevent accidental loss of
+  a running session.
+
+### Changed
+
+- Performance profiler overlay moved to the bottom-right corner for better menu
+  visibility.
+- Leaving a running game for the main menu now requires confirmation; the
+  difficulty menu ESC action returns to the main menu instead of silently
+  exiting the flow.
+- Centralized version lookup via importlib.metadata with setuptools-scm
+  fallback, so the in-game version matches the package version without manual
+  sync.
+- Lint configuration aligned to the project’s 127-character line length.
+
+### Build
+
+- Set setuptools-scm fallback version to 0.22.0; release workflow will pick up
+  the tagged version for artifacts and release notes injection.
+
+Full Changelog:
+[v0.21.2...v0.22.0](https://github.com/Ajimaru/ajitroids/compare/v0.21.2...v0.22.0)
+
 ## v0.21.2 (2026-01-16)
 
 ### Fixed
