@@ -40,50 +40,41 @@ Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destr
 - Python 3.9 or higher (tested up to 3.12)
 - [uv](https://github.com/astral-sh/uv) or pip
 
-### Installation with uv (recommended)
+### Method 1: Clone from Git (Simplest)
 
 ```bash
-# Clone the Git repository (do NOT download as ZIP)
+# Clone the repository
 git clone https://github.com/Ajimaru/ajitroids.git
 cd ajitroids
 
-# Install dependencies
+# Install dependencies with uv (recommended)
 uv sync
 
-# Start the game
-uv run main.py
-```
-
-### Installation with pip
-
-```bash
-# Clone the Git repository (do NOT download as ZIP)
-git clone https://github.com/Ajimaru/ajitroids.git
-cd ajitroids
-
-# Install dependencies
+# Or install with pip
 pip install -r requirements.txt
 
 # Start the game
-python main.py
+uv run main.py  # with uv
+# or
+python main.py  # with pip
 ```
 
-> **⚠️ Important:** You must clone the repository using Git. Downloading the source code as a ZIP file from GitHub will not work due to version detection requirements.
+### Method 2: Download Release Archive
 
-### Alternative: Direct Installation from Release (without Git)
-
-If you downloaded a release archive and want to install without Git:
+If you prefer to download a release ZIP/tarball:
 
 ```bash
 # Extract the downloaded archive
-cd ajitroids-0.21.0  # or your version
+cd ajitroids-0.21.0  # adjust to your version
 
-# Set the version manually
+# Set version for the build system
 export SETUPTOOLS_SCM_PRETEND_VERSION="0.21.0"  # Linux/Mac
-# or
-set SETUPTOOLS_SCM_PRETEND_VERSION=0.21.0  # Windows
+# or (Windows CMD)
+set SETUPTOOLS_SCM_PRETEND_VERSION=0.21.0
+# or (Windows PowerShell)
+$env:SETUPTOOLS_SCM_PRETEND_VERSION="0.21.0"
 
-# Install with uv
+# Install dependencies with uv
 uv sync
 
 # Or install with pip
