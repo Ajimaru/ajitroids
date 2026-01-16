@@ -75,5 +75,4 @@ settings.json
 highscores.json
 pyvenv.cfg
 .envrc
-.pre-commit-config.yaml
 Makefile
