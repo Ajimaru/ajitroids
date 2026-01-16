@@ -40,9 +40,14 @@ jobs:
 
       - name: Create latest aliases
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          WHL="dist/ajitroids-${VERSION}-py3-none-any.whl"
-          TAR="dist/ajitroids-${VERSION}.tar.gz"
+          # Find the built distribution files (handles version normalization by setuptools)
+          WHL=$(ls -1 dist/ajitroids-*-py3-none-any.whl | head -1)
+          TAR=$(ls -1 dist/ajitroids-*.tar.gz | head -1)
+          if [ -z "$WHL" ] || [ -z "$TAR" ]; then
+            echo "Error: Distribution files not found in dist/"
+            ls -lh dist/
+            exit 1
+          fi
           cp "$WHL" dist/ajitroids-latest-py3-none-any.whl
           cp "$TAR" dist/ajitroids-latest.tar.gz
           ls -lh dist/
