@@ -307,8 +307,11 @@ class Sounds:
     def set_theme(self, theme_name: str) -> bool:
         """Change sound theme and reload all sounds"""
         try:
-            # Convert string to SoundTheme enum
-            theme = SoundTheme[theme_name.upper()]
+            # Convert string to SoundTheme enum safely
+            theme = getattr(SoundTheme, theme_name.upper(), None)
+            if theme is None:
+                print(f"Invalid theme: {theme_name}")
+                return False
             
             if self.theme_manager.set_theme(theme):
                 self.current_theme = theme
@@ -317,8 +320,8 @@ class Sounds:
                 print(f"Sound theme changed to: {theme_name}")
                 return True
             return False
-        except (KeyError, ValueError):
-            print(f"Invalid theme: {theme_name}")
+        except (AttributeError, ValueError) as e:
+            print(f"Error setting theme {theme_name}: {e}")
             return False
     
     def _reload_all_sounds(self):

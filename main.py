@@ -174,10 +174,14 @@ def main(args=None):
     # Set sound theme
     try:
         sounds.set_theme(game_settings.sound_theme)
-        audio_enhancements.set_theme(SoundTheme[game_settings.sound_theme.upper()])
+        # Use getattr for safe enum conversion
+        theme_enum = getattr(SoundTheme, game_settings.sound_theme.upper(), SoundTheme.DEFAULT)
+        audio_enhancements.set_theme(theme_enum)
     except (KeyError, ValueError, AttributeError) as e:
         print(f"Invalid theme setting: {e}. Using default theme.")
-        # Use default theme if invalid
+        # Explicitly set to default theme
+        sounds.set_theme("default")
+        audio_enhancements.set_theme(SoundTheme.DEFAULT)
     
     # Load voice announcement sounds
     audio_enhancements.voice_announcements.load_announcement_sounds(asset_path)

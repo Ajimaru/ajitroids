@@ -33,6 +33,10 @@ class DynamicMusicSystem:
     
     def __init__(self):
         self.current_intensity = IntensityLevel.CALM
+        # Music tracks for different intensity levels
+        # Note: Currently using the same track for CALM/NORMAL/INTENSE as only one background
+        # music file exists. In future, add distinct tracks (e.g., background_calm.mp3,
+        # background_intense.mp3) or implement volume/tempo variations for better effect.
         self.music_tracks = {
             IntensityLevel.CALM: "background.mp3",
             IntensityLevel.NORMAL: "background.mp3",
@@ -265,8 +269,9 @@ class SoundThemeManager:
                 "boss_music": "boss_music.mp3"
             },
             SoundTheme.SCIFI: {
-                # Sci-fi futuristic sounds
-                "shoot": "laser_shoot.wav",  # Use laser for sci-fi theme
+                # Sci-fi futuristic sounds - intentionally uses laser sounds for shooting
+                # to create a more futuristic audio experience
+                "shoot": "laser_shoot.wav",
                 "explosion": "explosion.wav",
                 "player_death": "player_hit.wav",
                 "menu_move": "menu_select.wav",
@@ -284,7 +289,7 @@ class SoundThemeManager:
                 "boss_music": "boss_music.mp3"
             },
             SoundTheme.ORCHESTRAL: {
-                # Orchestral epic sounds
+                # Orchestral epic sounds - uses boss music for more cinematic experience
                 "shoot": "shoot.wav",
                 "explosion": "explosion.wav",
                 "player_death": "player_hit.wav",
@@ -299,7 +304,7 @@ class SoundThemeManager:
                 "level_up": "level_up.wav",
                 "game_over": "game_over.wav",
                 "player_hit": "player_hit.wav",
-                "background_music": "boss_music.mp3",  # Use epic boss music
+                "background_music": "boss_music.mp3",
                 "boss_music": "boss_music.mp3"
             }
         }

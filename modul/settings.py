@@ -15,7 +15,13 @@ class Settings:
         self.sound_theme = "default"
         self.load()
         print(
-            f"Settings after loading: Music={self.music_on}, Sound={self.sound_on}, Fullscreen={self.fullscreen}, Music Volume={self.music_volume}, Sound Volume={self.sound_volume}, Dynamic Music={self.dynamic_music_enabled}, Voice Announcements={self.voice_announcements_enabled}, Theme={self.sound_theme}"
+            f"Settings after loading: "
+            f"Music={self.music_on}, Sound={self.sound_on}, "
+            f"Fullscreen={self.fullscreen}, "
+            f"Music Volume={self.music_volume}, Sound Volume={self.sound_volume}, "
+            f"Dynamic Music={self.dynamic_music_enabled}, "
+            f"Voice Announcements={self.voice_announcements_enabled}, "
+            f"Theme={self.sound_theme}"
         )
 
     def save(self):
