@@ -33,8 +33,7 @@ class AsteroidField:
         # Randomly select asteroid type based on weights
         asteroid_type = random.choices(
             list(ASTEROID_TYPE_WEIGHTS.keys()),
-            weights=list(ASTEROID_TYPE_WEIGHTS.values()),
-            k=1
+            weights=list(ASTEROID_TYPE_WEIGHTS.values())
         )[0]
         
         asteroid = Asteroid(position.x, position.y, radius, asteroid_type)
