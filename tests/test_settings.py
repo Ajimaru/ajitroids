@@ -25,6 +25,9 @@ class TestSettings:
         assert settings.difficulty == "normal"
         assert settings.music_volume == 0.5
         assert settings.sound_volume == 0.5
+        assert settings.dynamic_music_enabled is True
+        assert settings.voice_announcements_enabled is True
+        assert settings.sound_theme == "default"
 
     def test_settings_save(self, clean_settings_file):
         """Test saving settings"""
@@ -34,6 +37,9 @@ class TestSettings:
         settings.fullscreen = True
         settings.music_volume = 0.7
         settings.sound_volume = 0.3
+        settings.dynamic_music_enabled = False
+        settings.voice_announcements_enabled = False
+        settings.sound_theme = "retro"
         
         result = settings.save()
         assert result is True
@@ -47,6 +53,9 @@ class TestSettings:
         assert data["fullscreen"] is True
         assert data["music_volume"] == 0.7
         assert data["sound_volume"] == 0.3
+        assert data["dynamic_music_enabled"] is False
+        assert data["voice_announcements_enabled"] is False
+        assert data["sound_theme"] == "retro"
 
     def test_settings_load(self, clean_settings_file):
         """Test loading settings"""
@@ -58,6 +67,9 @@ class TestSettings:
             "difficulty": "hard",
             "music_volume": 0.8,
             "sound_volume": 0.2,
+            "dynamic_music_enabled": False,
+            "voice_announcements_enabled": False,
+            "sound_theme": "scifi",
         }
         with open("settings.json", "w") as f:
             json.dump(settings_data, f)
@@ -69,6 +81,9 @@ class TestSettings:
         assert settings.fullscreen is True
         assert settings.music_volume == 0.8
         assert settings.sound_volume == 0.2
+        assert settings.dynamic_music_enabled is False
+        assert settings.voice_announcements_enabled is False
+        assert settings.sound_theme == "scifi"
 
     def test_settings_load_no_file(self, clean_settings_file):
         """Test loading settings when no file exists"""

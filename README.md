@@ -23,12 +23,15 @@ Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destr
 
 - **Classic Gameplay**: Control your ship with precise rotation and thrust
 - **Modern Graphics**: Enhanced visuals with particle effects and animations
-- **Sound System**: Dynamic sound effects and background music
+- **Advanced Audio System**:
+  - **Dynamic Music**: Music intensity changes based on game state (asteroids, enemies, boss fights)
+  - **Voice Announcements**: Audio announcements for key events ("Level up!", "Boss incoming!", "Game over!")
+  - **Sound Themes**: Choose between different audio packs (Default, Retro, Sci-Fi, Orchestral)
 - **Power-Up System**: Collect various weapon upgrades and shields
 - **Advanced Asteroid Types**: Face four distinct asteroid types (Normal, Ice, Metal, Crystal) with unique behaviors
 - **Highscore System**: Save your best results and compare them
 - **Boss Fights**: Face epic boss enemies in higher levels
-- **Customizable Settings**: Fullscreen mode, sound options and more
+- **Customizable Settings**: Fullscreen mode, audio options, themes and more
 - **Smooth Animations**: Fluid ship movements and asteroid rotations
 - **Quick Restart**: Press 'R' to instantly restart without going through menus
 - **Stats Dashboard**: View detailed statistics with visual progress bars
