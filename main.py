@@ -1213,11 +1213,11 @@ def quick_restart_game():
     
     # Respawn player
     if player:
+        player.respawn()
         player.position.x = RESPAWN_POSITION_X
         player.position.y = RESPAWN_POSITION_Y
-        player.velocity.update(0, 0)
+        player.velocity = pygame.Vector2(0, 0)
         player.rotation = 0
-        player.respawn()
     
     # Start new game session
     session_stats.start_game()
