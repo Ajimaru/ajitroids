@@ -199,22 +199,22 @@ class PerformanceProfiler:
         label_surface = self.font_small.render(label, True, color)
         screen.blit(label_surface, (x, y - 18))
         
-        # Draw reference lines
-        # Draw 60 FPS line if this is FPS graph
-        if max_value == 60:
-            reference_y = y + self.graph_height - (60 / max_value * self.graph_height)
-            pygame.draw.line(screen, (0, 100, 0), (x, reference_y), (x + self.graph_width, reference_y), 1)
+        # Constants for FPS graph reference lines
+        TARGET_FPS = 60
+        MIN_ACCEPTABLE_FPS = 30
         
-        # Draw 30 FPS line
-        if max_value == 60:
-            reference_y_30 = y + self.graph_height - (30 / max_value * self.graph_height)
+        # Draw reference lines for FPS graphs
+        if max_value == TARGET_FPS:
+            # Draw 60 FPS line
+            reference_y = y + self.graph_height - (TARGET_FPS / max_value * self.graph_height)
+            pygame.draw.line(screen, (0, 100, 0), (x, reference_y), (x + self.graph_width, reference_y), 1)
+            # Draw 30 FPS line
+            reference_y_30 = y + self.graph_height - (MIN_ACCEPTABLE_FPS / max_value * self.graph_height)
             pygame.draw.line(screen, (100, 100, 0), (x, reference_y_30), (x + self.graph_width, reference_y_30), 1)
         
         # Draw data points
         data_list = list(data)
         num_points = len(data_list)
-        if num_points < 2:
-            return
         
         x_step = self.graph_width / (num_points - 1) if num_points > 1 else self.graph_width
         
