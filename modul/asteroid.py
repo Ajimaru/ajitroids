@@ -160,8 +160,9 @@ class Asteroid(CircleShape):
         for i in range(split_count):
             # Calculate angle for each piece
             if split_count == 2:
-                angle = random_angle if i == 0 else -random_angle
-            else:
+                # For crystal (3 pieces), spread them evenly
+                base_angle = (i - 1) * 120  # -120, 0, 120 degrees
+                angle = random.uniform(-30, 30) + base_angle
                 # For crystal (3 pieces), spread them evenly
                 angle = random_angle + (i - 1) * 60  # -60, 0, 60 degrees approximately
 
