@@ -21,6 +21,7 @@ class HelpScreen:
                 ("Arrow Keys", "Control ship (rotation and thrust)"),
                 ("Space", "Shoot / Fire weapon"),
                 ("B", "Cycle weapons (when available)"),
+                ("R", "Quick restart (in-game or game over)"),
                 ("ESC", "Pause game / Back"),
             ]),
             ("FUNCTION KEYS", [

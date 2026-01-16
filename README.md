@@ -2,8 +2,10 @@
 # 🚀 Ajitroids
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg?style=plastic)
-![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids?style=plastic)
+[![Python](https://img.shields.io/badge/python-3.09%2B-blue.svg)](https://python.org)
+[![Latest Release](https://img.shields.io/github/v/release/Ajimaru/ajitroids?sort=semver)](https://github.com/Ajimaru/ajitroids/releases/latest)
 ![Stars](https://img.shields.io/github/stars/Ajimaru/ajitroids?style=plastic)
+![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids?style=plastic)
 ![Forks](https://img.shields.io/github/forks/Ajimaru/ajitroids?style=plastic)
 
 [A modern Asteroids remake built with Pygame]
@@ -27,6 +29,9 @@ Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destr
 - **Boss Fights**: Face epic boss enemies in higher levels
 - **Customizable Settings**: Fullscreen mode, sound options and more
 - **Smooth Animations**: Fluid ship movements and asteroid rotations
+- **Quick Restart**: Press 'R' to instantly restart without going through menus
+- **Stats Dashboard**: View detailed statistics with visual progress bars
+- **Replay System**: Watch and analyze your previous games with playback controls
 
 ## 🚀 Installation
 
@@ -39,11 +44,11 @@ Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destr
 
 ```bash
 # Clone repository
-git clone https://github.com/your-username/ajitroids.git
+git clone https://github.com/Ajimaru/ajitroids.git
 cd ajitroids
 
 # Install dependencies
-uv install
+uv sync
 
 # Start the game
 uv run main.py
@@ -53,7 +58,7 @@ uv run main.py
 
 ```bash
 # Clone repository
-git clone https://github.com/your-username/ajitroids.git
+git clone https://github.com/Ajimarue/ajitroids.git
 cd ajitroids
 
 # Install dependencies
@@ -80,6 +85,7 @@ python main.py
 - **Space**: Shoot
 - **ESC**: Pause game
 - **B**: Switch weapons (when available)
+- **R**: Quick restart (during game or game over screen)
 
 ### Function Keys
 - **F1 / H**: Toggle help screen (in-game)
@@ -87,6 +93,14 @@ python main.py
 - **F9**: Toggle sound effects
 - **F10**: Toggle music
 - **F11**: Toggle fullscreen
+
+### Replay Controls (in Replay Viewer)
+- **Space**: Pause/Resume playback
+- **Left/Right Arrows**: Skip backward/forward 5 seconds
+- **1**: 0.5x playback speed
+- **2**: 1.0x playback speed (normal)
+- **3**: 2.0x playback speed
+- **ESC**: Exit replay viewer
 
 ## 💻 Command-Line Options
 
