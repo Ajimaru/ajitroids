@@ -64,9 +64,10 @@ class ReplayRecorder:
         """Stop recording and finalize metadata."""
         self.recording = False
         end_time = time.time()
+        start_time = self.start_time or end_time
         self.metadata.update({
             'end_time': end_time,
-            'duration': end_time - self.start_time,
+            'duration': max(0.0, end_time - start_time),
             'final_score': final_score,
             'final_level': final_level,
             'frame_count': len(self.frames),
