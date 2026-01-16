@@ -2,7 +2,10 @@
 
 ## Unreleased
 
+## v0.21.0 (2026-01-16)
+
 ### Added
+
 - **Quick Restart Feature**: Press 'R' during gameplay or on game over screen to instantly restart without menus
 - **Stats Dashboard**: New menu option showing detailed game statistics with visual progress bars
   - Game statistics: games played, highest/average scores, level tracking, playtime
@@ -17,13 +20,17 @@
 - **Enhanced Menu**: Added "Replays" and "Statistics" options to main menu
 
 ### Changed
+
 - Session statistics now automatically track replay-worthy data
 - Game over screen now displays quick restart instruction
 
 ### Tests
+
 - Added 44 new comprehensive tests for all new features
 - Maintained >89% code coverage across the codebase
- 
+
+Full Changelog: [v0.20.0...v0.21.0](https://github.com/Ajimaru/ajitroids/compare/v0.20.0...v0.21.0)
+
 ## v0.20.0 (2026-01-15)
 
 ### style
