@@ -341,15 +341,6 @@ def main(args=None):
             if toggle_message_timer <= 0:
                 toggle_message = None
 
-        if toggle_message and toggle_message_timer > 0:
-            font = pygame.font.Font(None, 36)
-            message_surface = font.render(toggle_message, True, (255, 255, 255))
-            message_rect = message_surface.get_rect(center=(SCREEN_WIDTH / 2, 50))
-            screen.blit(message_surface, message_rect)
-            toggle_message_timer -= dt
-            if toggle_message_timer <= 0:
-                toggle_message = None
-
         if game_state == "playing" and event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 game_state = "pause"

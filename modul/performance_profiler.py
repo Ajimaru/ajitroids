@@ -9,7 +9,6 @@ This module provides real-time performance metrics display including:
 
 import pygame
 from collections import deque
-import time
 
 
 class PerformanceProfiler:
@@ -27,7 +26,6 @@ class PerformanceProfiler:
         # Performance metrics
         self.fps_history = deque(maxlen=max_samples)
         self.frame_time_history = deque(maxlen=max_samples)
-        self.last_frame_time = time.time()
         
         # Object counts
         self.object_counts = {
