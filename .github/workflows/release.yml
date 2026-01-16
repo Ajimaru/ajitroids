@@ -17,6 +17,12 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all history for setuptools-scm
 
+      - name: Set version from tag for build
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "Using version: ${VERSION}"
+          echo "SETUPTOOLS_SCM_PRETEND_VERSION=${VERSION}" >> $GITHUB_ENV
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
