@@ -241,6 +241,7 @@ def main(args=None):
     replay_player = ReplayPlayer()
     replay_viewer = ReplayViewer(replay_player)
 
+    global difficulty
     difficulty = "normal"
 
     game_state = "main_menu" if not args.skip_intro else "difficulty_select"
