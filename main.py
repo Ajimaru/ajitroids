@@ -1188,27 +1188,9 @@ def quick_restart_game():
     spawn_interval = random.uniform(10, 30)
     current_enemy_ships = []
     
-    # Clear all game objects
-    for asteroid in list(asteroids):
-        asteroid.kill()
-    for powerup in list(powerups):
-        powerup.kill()
-    for shot in list(shots):
-        shot.kill()
-    for particle in list(particles):
-        particle.kill()
-    
-    # Clear enemy ships
-    for obj in list(collidable):
-        if isinstance(obj, EnemyShip):
-            obj.kill()
-    
-    # Clear boss if active
-    for obj in list(updatable):
-        if isinstance(obj, Boss):
-            obj.kill()
-    for obj in list(updatable):
-        if isinstance(obj, BossProjectile):
+    # Clear all game objects in one pass
+    for group in (asteroids, powerups, shots, particles, collidable, updatable, drawable):
+        for obj in list(group):
             obj.kill()
     
     # Respawn player
