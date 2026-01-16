@@ -43,7 +43,7 @@ Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destr
 ### Installation with uv (recommended)
 
 ```bash
-# Clone repository
+# Clone the Git repository (do NOT download as ZIP)
 git clone https://github.com/Ajimaru/ajitroids.git
 cd ajitroids
 
@@ -57,11 +57,36 @@ uv run main.py
 ### Installation with pip
 
 ```bash
-# Clone repository
-git clone https://github.com/Ajimarue/ajitroids.git
+# Clone the Git repository (do NOT download as ZIP)
+git clone https://github.com/Ajimaru/ajitroids.git
 cd ajitroids
 
 # Install dependencies
+pip install -r requirements.txt
+
+# Start the game
+python main.py
+```
+
+> **⚠️ Important:** You must clone the repository using Git. Downloading the source code as a ZIP file from GitHub will not work due to version detection requirements.
+
+### Alternative: Direct Installation from Release (without Git)
+
+If you downloaded a release archive and want to install without Git:
+
+```bash
+# Extract the downloaded archive
+cd ajitroids-0.21.0  # or your version
+
+# Set the version manually
+export SETUPTOOLS_SCM_PRETEND_VERSION="0.21.0"  # Linux/Mac
+# or
+set SETUPTOOLS_SCM_PRETEND_VERSION=0.21.0  # Windows
+
+# Install with uv
+uv sync
+
+# Or install with pip
 pip install -r requirements.txt
 
 # Start the game
@@ -81,6 +106,7 @@ python main.py
 ## 🎯 Controls
 
 ### Game Controls
+
 - **Arrow Keys**: Control ship (rotation and thrust)
 - **Space**: Shoot
 - **ESC**: Pause game
@@ -88,6 +114,7 @@ python main.py
 - **R**: Quick restart (during game or game over screen)
 
 ### Function Keys
+
 - **F1 / H**: Toggle help screen (in-game)
 - **F8**: Toggle FPS display
 - **F9**: Toggle sound effects
@@ -95,6 +122,7 @@ python main.py
 - **F11**: Toggle fullscreen
 
 ### Replay Controls (in Replay Viewer)
+
 - **Space**: Pause/Resume playback
 - **Left/Right Arrows**: Skip backward/forward 5 seconds
 - **1**: 0.5x playback speed
