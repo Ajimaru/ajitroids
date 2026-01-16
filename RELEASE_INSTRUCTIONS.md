@@ -12,6 +12,8 @@
 
 ## To Complete the Release
 
+### Option 1: Command Line (Preferred)
+
 Run the following command to push the tag:
 
 ```bash
@@ -23,6 +25,20 @@ This will:
 2. Automatically trigger the release workflow at `.github/workflows/release.yml`
 3. Create a GitHub Release at https://github.com/Ajimaru/ajitroids/releases
 4. Populate the release with the changelog content from CHANGELOG.md
+
+### Option 2: GitHub Actions UI (Alternative)
+
+Use the manual release workflow via GitHub Actions:
+
+1. Go to https://github.com/Ajimaru/ajitroids/actions/workflows/manual-release.yml
+2. Click "Run workflow"
+3. Enter the tag: `v0.21.0`
+4. Click "Run workflow" button
+
+This workflow will:
+- Create and push the tag if it doesn't exist on GitHub
+- Extract the changelog content
+- Create the GitHub release automatically
 
 ## Release Content Preview
 

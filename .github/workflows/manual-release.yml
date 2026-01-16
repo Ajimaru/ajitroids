@@ -1,0 +1,50 @@
+name: Manual Release Creation
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., v0.21.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ github.event.inputs.tag }}
+          git push origin ${{ github.event.inputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract changelog for tag
+        id: changelog
+        run: |
+          TAG=${{ github.event.inputs.tag }}
+          awk "/^## $TAG / {flag=1; next} /^## v/ {flag=0} flag" CHANGELOG.md > _changelog_section.txt
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          cat _changelog_section.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          release_name: Release ${{ github.event.inputs.tag }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
