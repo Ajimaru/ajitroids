@@ -1205,7 +1205,7 @@ def quick_restart_game():
     current_enemy_ships = []
     
     # Clear all game objects in one pass
-    for group in (asteroids, powerups, shots, particles, collidable, updatable):
+    for group in (asteroids, powerups, shots, particles, collidable, updatable, drawable):
         for obj in list(group):
             if obj is player:
                 continue
