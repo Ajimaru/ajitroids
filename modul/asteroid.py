@@ -120,8 +120,8 @@ class Asteroid(CircleShape):
                 pygame.draw.circle(screen, "yellow", point, 2)
 
     def split(self):
-        # For metal asteroids, reduce health first
-        if self.asteroid_type == ASTEROID_TYPE_METAL and self.health > 1:
+        # For metal asteroids that will split (not min size), reduce health first
+        if self.asteroid_type == ASTEROID_TYPE_METAL and self.health > 1 and self.radius > ASTEROID_MIN_RADIUS:
             self.health -= 1
             # Create visual feedback for hit but not destroyed
             for _ in range(2):
