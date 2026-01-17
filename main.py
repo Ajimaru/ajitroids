@@ -1130,7 +1130,7 @@ def main(args=None):
             if announcement_text:
                 announcement_font = pygame.font.Font(None, 48)
                 announcement_surf = announcement_font.render(announcement_text, True, (255, 215, 0))
-                announcement_rect = announcement_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4))
+                announcement_rect = announcement_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT * 3 / 4))
                 
                 # Draw semi-transparent background
                 bg_padding = 20
