@@ -22,7 +22,7 @@ class TestAchievement:
     def test_achievement_initialization(self):
         """Test achievement initializes correctly"""
         achievement = Achievement("Test Achievement", "Test description")
-        
+
         assert achievement.name == "Test Achievement"
         assert achievement.description == "Test description"
         assert achievement.unlocked is False
@@ -30,9 +30,9 @@ class TestAchievement:
     def test_achievement_unlock(self):
         """Test unlocking an achievement"""
         achievement = Achievement("Test", "Description")
-        
+
         achievement.unlock()
-        
+
         assert achievement.unlocked is True
 
     def test_achievement_unlock_idempotent(self):
@@ -40,7 +40,7 @@ class TestAchievement:
         achievement = Achievement("Test", "Description")
         achievement.unlock()
         achievement.unlock()
-        
+
         assert achievement.unlocked is True
 
 
@@ -50,14 +50,14 @@ class TestAchievementSystem:
     def test_achievement_system_initialization(self, clean_achievements_file):
         """Test system initializes with standard achievements"""
         system = AchievementSystem()
-        
+
         assert len(system.achievements) > 0
         assert system.notification_callback is None
 
     def test_achievement_system_standard_achievements(self, clean_achievements_file):
         """Test standard achievements are initialized"""
         system = AchievementSystem()
-        
+
         achievement_names = [a.name for a in system.achievements]
         assert "First Blood" in achievement_names
         assert "Survivor" in achievement_names
@@ -68,7 +68,7 @@ class TestAchievementSystem:
     def test_achievement_system_all_locked_initially(self, clean_achievements_file):
         """Test all achievements start locked"""
         system = AchievementSystem()
-        
+
         for achievement in system.achievements:
             assert achievement.unlocked is False
 
@@ -76,17 +76,17 @@ class TestAchievementSystem:
         """Test setting notification callback"""
         system = AchievementSystem()
         callback = MagicMock()
-        
+
         system.set_notification_callback(callback)
-        
+
         assert system.notification_callback is callback
 
     def test_unlock_achievement(self, clean_achievements_file):
         """Test unlocking an achievement"""
         system = AchievementSystem()
-        
+
         result = system.unlock("First Blood")
-        
+
         assert result is True
         assert system.is_unlocked("First Blood")
 
@@ -95,53 +95,53 @@ class TestAchievementSystem:
         system = AchievementSystem()
         callback = MagicMock()
         system.set_notification_callback(callback)
-        
+
         system.unlock("First Blood")
-        
+
         callback.assert_called_once()
 
     def test_unlock_achievement_saves(self, clean_achievements_file):
         """Test unlock saves achievements file"""
         system = AchievementSystem()
-        
+
         system.unlock("First Blood")
-        
+
         assert os.path.exists("achievements.json")
 
     def test_unlock_already_unlocked(self, clean_achievements_file):
         """Test unlocking already unlocked achievement"""
         system = AchievementSystem()
-        
+
         system.unlock("First Blood")
         result = system.unlock("First Blood")
-        
+
         assert result is False
 
     def test_unlock_nonexistent_achievement(self, clean_achievements_file):
         """Test unlocking nonexistent achievement"""
         system = AchievementSystem()
-        
+
         result = system.unlock("Nonexistent Achievement")
-        
+
         assert result is False
 
     def test_is_unlocked_true(self, clean_achievements_file):
         """Test is_unlocked returns True for unlocked achievement"""
         system = AchievementSystem()
         system.unlock("First Blood")
-        
+
         assert system.is_unlocked("First Blood") is True
 
     def test_is_unlocked_false(self, clean_achievements_file):
         """Test is_unlocked returns False for locked achievement"""
         system = AchievementSystem()
-        
+
         assert system.is_unlocked("Survivor") is False
 
     def test_is_unlocked_nonexistent(self, clean_achievements_file):
         """Test is_unlocked returns False for nonexistent achievement"""
         system = AchievementSystem()
-        
+
         assert system.is_unlocked("Nonexistent") is False
 
     def test_save_unlocked_achievements(self, clean_achievements_file):
@@ -149,12 +149,12 @@ class TestAchievementSystem:
         system = AchievementSystem()
         system.unlock("First Blood")
         system.unlock("Survivor")
-        
+
         system.save_unlocked_achievements()
-        
+
         with open("achievements.json", "r") as f:
             data = json.load(f)
-        
+
         assert len(data) == 2
         names = [item["name"] for item in data]
         assert "First Blood" in names
@@ -163,9 +163,9 @@ class TestAchievementSystem:
     def test_save_unlocked_achievements_none_unlocked(self, clean_achievements_file):
         """Test saving when no achievements unlocked"""
         system = AchievementSystem()
-        
+
         system.save_unlocked_achievements()
-        
+
         # Should not create file or create empty file
         if os.path.exists("achievements.json"):
             with open("achievements.json", "r") as f:
@@ -175,7 +175,7 @@ class TestAchievementSystem:
     def test_load_unlocked_achievements_no_file(self, clean_achievements_file):
         """Test loading when no file exists"""
         system = AchievementSystem()
-        
+
         # Should not crash
         assert len(system.achievements) > 0
 
@@ -187,9 +187,9 @@ class TestAchievementSystem:
         ]
         with open("achievements.json", "w") as f:
             json.dump(data, f)
-        
+
         system = AchievementSystem()
-        
+
         assert system.is_unlocked("First Blood")
 
     def test_load_unlocked_achievements_corrupted_file(self, clean_achievements_file):
@@ -197,25 +197,25 @@ class TestAchievementSystem:
         # Create corrupted file
         with open("achievements.json", "w") as f:
             f.write("invalid json {")
-        
+
         system = AchievementSystem()
-        
+
         # Should handle error gracefully
         assert len(system.achievements) > 0
 
     def test_load_achievements_method(self, clean_achievements_file):
         """Test load_achievements method (empty implementation)"""
         system = AchievementSystem()
-        
+
         system.load_achievements()  # Should not crash
 
     def test_save_achievements_method(self, clean_achievements_file):
         """Test save_achievements calls save_unlocked_achievements"""
         system = AchievementSystem()
         system.unlock("First Blood")
-        
+
         system.save_achievements()
-        
+
         assert os.path.exists("achievements.json")
 
     def test_unlock_achievement_method_with_ascii(self, clean_achievements_file):
@@ -223,9 +223,9 @@ class TestAchievementSystem:
         system = AchievementSystem()
         callback = MagicMock()
         system.set_notification_callback(callback)
-        
+
         system.unlock_achievement("First Blood")
-        
+
         assert system.is_unlocked("First Blood")
         # Should call callback with ASCII art
         callback.assert_called_once()
@@ -235,11 +235,11 @@ class TestAchievementSystem:
         system = AchievementSystem()
         callback = MagicMock()
         system.set_notification_callback(callback)
-        
+
         system.unlock_achievement("First Blood")
         callback.reset_mock()
         system.unlock_achievement("First Blood")
-        
+
         # Should not call callback again
         callback.assert_not_called()
 
@@ -249,9 +249,9 @@ class TestAchievementSystem:
         ships_mock = MagicMock()
         ships_mock.unlocked_ships = ["ship1", "ship2", "ship3", "ship4"]
         ships_mock.ships = {"ship1": {}, "ship2": {}, "ship3": {}, "ship4": {}}
-        
+
         system.check_fleet_commander(ships_mock)
-        
+
         assert system.is_unlocked("Fleet Commander")
 
     def test_check_fleet_commander_not_all_ships(self, clean_achievements_file):
@@ -260,21 +260,21 @@ class TestAchievementSystem:
         ships_mock = MagicMock()
         ships_mock.unlocked_ships = ["ship1", "ship2"]
         ships_mock.ships = {"ship1": {}, "ship2": {}, "ship3": {}, "ship4": {}}
-        
+
         system.check_fleet_commander(ships_mock)
-        
+
         assert not system.is_unlocked("Fleet Commander")
 
     def test_initialize_standard_achievements_count(self, clean_achievements_file):
         """Test correct number of standard achievements"""
         system = AchievementSystem()
-        
+
         assert len(system.achievements) == 11
 
     def test_achievements_have_descriptions(self, clean_achievements_file):
         """Test all achievements have descriptions"""
         system = AchievementSystem()
-        
+
         for achievement in system.achievements:
             assert achievement.name
             assert achievement.description

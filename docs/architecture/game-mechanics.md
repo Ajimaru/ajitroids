@@ -63,6 +63,7 @@ def collides_with(self, other):
 Different collision pairs have different effects:
 
 **Player vs Asteroid:**
+
 ```python
 if player.collides_with(asteroid):
     if not player.invulnerable:
@@ -72,6 +73,7 @@ if player.collides_with(asteroid):
 ```
 
 **Shot vs Asteroid:**
+
 ```python
 if shot.collides_with(asteroid):
     shot.kill()
@@ -83,20 +85,24 @@ if shot.collides_with(asteroid):
 
 ### Asteroid Types
 
-Ajitroids features four distinct asteroid types, each with unique properties and behaviors:
+Ajitroids features four distinct asteroid types, each with unique properties and
+behaviors:
 
 **Normal Asteroids (White)**
+
 - Standard asteroids with balanced properties
 - Split into 2 pieces when destroyed
 - Most common type (50% spawn rate)
 
 **Ice Asteroids (Light Blue)**
+
 - Slippery and fast-moving
 - Split into 2 pieces with 1.4x velocity multiplier
 - Harder to predict trajectory after splitting
 - Spawn rate: 20%
 
 **Metal Asteroids (Gray)**
+
 - Reinforced and tough
 - Require 2 hits to destroy
 - First hit damages but doesn't split the asteroid
@@ -104,12 +110,15 @@ Ajitroids features four distinct asteroid types, each with unique properties and
 - Spawn rate: 15%
 
 **Crystal Asteroids (Purple)**
+
 - Brittle and shatter dramatically
 - Split into 3 pieces instead of 2
 - Creates more chaotic asteroid fields
 - Spawn rate: 15%
 
-All asteroid types maintain their properties when split - ice asteroids spawn ice fragments, metal asteroids spawn tougher metal fragments, and crystal asteroids spawn crystal fragments.
+All asteroid types maintain their properties when split - ice asteroids spawn
+ice fragments, metal asteroids spawn tougher metal fragments, and crystal
+asteroids spawn crystal fragments.
 
 ### Spawning
 
@@ -120,14 +129,14 @@ def spawn_asteroid():
     # Spawn at random edge position
     edge = random.choice(['top', 'bottom', 'left', 'right'])
     position = get_edge_position(edge)
-    
+
     # Random velocity toward center
     direction = (screen_center - position).normalize()
     velocity = direction * random.uniform(MIN_SPEED, MAX_SPEED)
-    
+
     # Random size
     size = random.choice([LARGE, MEDIUM, SMALL])
-    
+
     return Asteroid(position, velocity, size)
 ```
 
@@ -142,31 +151,32 @@ def split(self):
         self.health -= 1
         create_damage_particles()
         return  # Don't split yet
-    
+
     if self.size == LARGE:
         # Normal/Ice/Metal: Create 2 asteroids
         # Crystal: Create 3 asteroids
         split_count = 3 if self.type == CRYSTAL else 2
-        
+
         for i in range(split_count):
             angle = calculate_split_angle(i, split_count)
-            
+
             # Ice asteroids have higher velocity multiplier
             velocity_mult = 1.4 if self.type == ICE else 1.2
             velocity = Vector2(SPLIT_SPEED, 0).rotate(angle) * velocity_mult
-            
+
             # New asteroid inherits parent type
             Asteroid(self.position, velocity, MEDIUM, self.type)
-    
+
     elif self.size == MEDIUM:
         # Same splitting logic for medium asteroids
         # ...
-    
+
     # Small asteroids just disappear
     self.kill()
 ```
 
 Type-specific splitting behaviors:
+
 - **Normal**: Standard 2-way split with 1.2x velocity
 - **Ice**: 2-way split with 1.4x velocity (slippery/fast)
 - **Metal**: Requires 2 hits before splitting normally
@@ -187,7 +197,7 @@ def update_boss(self, dt):
         self.chase_player(dt)
     elif self.pattern == "shoot":
         self.shoot_at_player()
-    
+
     # Change pattern after time
     self.pattern_timer -= dt
     if self.pattern_timer <= 0:
@@ -202,11 +212,11 @@ Bosses have multi-stage health:
 ```python
 def take_damage(self, amount):
     self.health -= amount
-    
+
     # Phase changes
     if self.health < self.max_health * 0.5:
         self.enter_rage_mode()
-    
+
     if self.health <= 0:
         self.defeat()
         spawn_explosion(self.position, size='large')
@@ -248,11 +258,11 @@ POWERUP_TYPES = {
 ```python
 def activate_powerup(self, powerup_type):
     config = POWERUP_TYPES[powerup_type]
-    
+
     # Apply effect
     if config["effect"] == "reduce_shot_cooldown":
         self.shot_cooldown *= config["multiplier"]
-    
+
     # Set timer
     self.powerup_timer = config["duration"]
     self.active_powerup = powerup_type
@@ -286,7 +296,7 @@ def add_score(self, base_points):
         self.combo_multiplier += 0.1
     else:
         self.combo_multiplier = 1.0
-    
+
     points = base_points * self.combo_multiplier
     self.score += points
     self.last_kill_time = time.now()
@@ -300,9 +310,9 @@ def add_score(self, base_points):
 def take_damage(self):
     if self.invulnerable:
         return
-    
+
     self.lives -= 1
-    
+
     if self.lives > 0:
         self.respawn()
     else:
@@ -316,11 +326,11 @@ def respawn(self):
     # Reset position to center
     self.position = Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     self.velocity = Vector2(0, 0)
-    
+
     # Invulnerability period
     self.invulnerable = True
     self.invulnerable_timer = INVULNERABLE_DURATION
-    
+
     # Clear nearby threats
     self.clear_spawn_area()
 ```
@@ -373,7 +383,7 @@ def create_explosion(position, count=20):
         angle = random.uniform(0, 360)
         speed = random.uniform(50, 150)
         velocity = Vector2(speed, 0).rotate(angle)
-        
+
         Particle(
             position=position,
             velocity=velocity,
@@ -388,14 +398,14 @@ def create_explosion(position, count=20):
 def update(self, dt):
     # Update position
     self.position += self.velocity * dt
-    
+
     # Apply gravity/friction
     self.velocity *= 0.95
-    
+
     # Fade out
     self.lifetime -= dt
     self.alpha = self.lifetime / self.max_lifetime
-    
+
     # Remove when expired
     if self.lifetime <= 0:
         self.kill()
@@ -413,7 +423,7 @@ def wrap_around_screen(self):
         self.position.x = SCREEN_WIDTH
     elif self.position.x > SCREEN_WIDTH:
         self.position.x = 0
-    
+
     if self.position.y < 0:
         self.position.y = SCREEN_HEIGHT
     elif self.position.y > SCREEN_HEIGHT:
@@ -430,10 +440,10 @@ Difficulty increases with each wave:
 def calculate_wave_difficulty(wave_number):
     base_asteroids = 3
     asteroids_per_wave = 1
-    
+
     total_asteroids = base_asteroids + (wave_number * asteroids_per_wave)
     asteroid_speed_multiplier = 1 + (wave_number * 0.1)
-    
+
     return {
         "asteroid_count": min(total_asteroids, 15),
         "speed_multiplier": min(asteroid_speed_multiplier, 2.0),

@@ -1,6 +1,7 @@
 # Data Flow
 
-This document describes how data flows through the Ajitroids game, from user input to screen rendering.
+This document describes how data flows through the Ajitroids game, from user
+input to screen rendering.
 
 ## Game Loop Data Flow
 
@@ -12,7 +13,7 @@ sequenceDiagram
     participant GameState
     participant Entities
     participant Renderer
-    
+
     User->>Main: Input (keyboard/mouse)
     Main->>EventHandler: Process events
     EventHandler->>GameState: Update state
@@ -33,23 +34,23 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    
+
     # 2. Get Input State
     keys = pygame.key.get_pressed()
-    
+
     # 3. Update Phase
     for obj in updatable:
         obj.update(dt)
-    
+
     # 4. Collision Detection
     check_collisions()
-    
+
     # 5. Render Phase
     screen.fill(BLACK)
     for obj in drawable:
         obj.draw(screen)
     pygame.display.flip()
-    
+
     # 6. Frame Rate Control
     dt = clock.tick(60) / 1000
 ```
@@ -65,7 +66,7 @@ graph LR
     B -->|Space| F[Fire Shot]
     B -->|B| G[Switch Weapon]
     B -->|ESC| H[Pause Menu]
-    
+
     C --> I[Update Player]
     D --> I
     E --> I
@@ -105,14 +106,14 @@ graph TD
 def update(self, dt):
     # 1. Move based on velocity
     self.position += self.velocity * dt
-    
+
     # 2. Rotate
     self.rotation += self.rotation_speed * dt
-    
+
     # 3. Wrap around screen
     if self.position.x < 0:
         self.position.x = SCREEN_WIDTH
-    
+
     # 4. Update sprite
     self.rect.center = self.position
 ```
@@ -126,13 +127,13 @@ graph TD
     A --> D{Player vs PowerUps}
     A --> E{Shots vs Asteroids}
     A --> F{Shots vs Enemies}
-    
+
     B -->|Collision| G[Damage Player]
     C -->|Collision| G
     D -->|Collision| H[Activate PowerUp]
     E -->|Collision| I[Destroy Asteroid]
     F -->|Collision| J[Damage Enemy]
-    
+
     G --> K[Check Lives]
     I --> L[Add Score]
     I --> M[Spawn Smaller Asteroids]
@@ -157,16 +158,16 @@ graph LR
     B -->|Destroy Asteroid| C[Add Score]
     B -->|Destroy Boss| D[Add Bonus Score]
     B -->|Collect PowerUp| E[Add Points]
-    
+
     C --> F[Update Score Display]
     D --> F
     E --> F
-    
+
     F --> G[Check Achievements]
     G --> H{Achievement Unlocked?}
     H -->|Yes| I[Show Notification]
     H -->|No| J[Continue]
-    
+
     F --> K[Check High Score]
     K --> L{New High Score?}
     L -->|Yes| M[Save High Score]
@@ -191,7 +192,7 @@ graph TD
     C --> D[JSON Serialization]
     D --> E[Write to File]
     E --> F[File Saved]
-    
+
     G[Game Start] --> H[Load Data]
     H --> I[Read File]
     I --> J[JSON Deserialization]
@@ -217,13 +218,13 @@ graph LR
     B --> C{Sound Type}
     C -->|Effect| D[Play Sound Effect]
     C -->|Music| E[Play Music]
-    
+
     D --> F[Check Volume]
     E --> G[Check Volume]
-    
+
     F --> H[Pygame Mixer]
     G --> H
-    
+
     H --> I[Audio Output]
 ```
 
@@ -244,15 +245,15 @@ stateDiagram-v2
     MainMenu --> Settings: Settings
     MainMenu --> HighScores: View Scores
     MainMenu --> Tutorial: Tutorial
-    
+
     Playing --> Paused: ESC
     Paused --> Playing: Resume
     Paused --> MainMenu: Quit
-    
+
     Playing --> GameOver: Lives = 0
     GameOver --> MainMenu: Return
     GameOver --> Playing: Restart
-    
+
     Settings --> MainMenu: Back
     HighScores --> MainMenu: Back
     Tutorial --> MainMenu: Back

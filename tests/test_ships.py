@@ -47,7 +47,7 @@ class TestShipManager:
         data = {"unlocked_ships": ["speedster", "tank"]}
         with open("ships.json", "w") as f:
             json.dump(data, f)
-        
+
         manager = ShipManager()
         assert "speedster" in manager.unlocked_ships
         assert "tank" in manager.unlocked_ships
@@ -57,9 +57,9 @@ class TestShipManager:
         manager = ShipManager()
         manager.unlocked_ships = ["speedster", "destroyer"]
         manager.save_unlocked_ships()
-        
+
         assert os.path.exists("ships.json")
-        
+
         # Verify saved data
         with open("ships.json", "r") as f:
             data = json.load(f)
@@ -70,7 +70,7 @@ class TestShipManager:
         """Test unlocking a ship"""
         manager = ShipManager()
         result = manager.unlock_ship("speedster")
-        
+
         assert result is True
         assert "speedster" in manager.unlocked_ships
         assert manager.ships["speedster"]["unlocked"] is True
@@ -80,26 +80,26 @@ class TestShipManager:
         manager = ShipManager()
         manager.unlock_ship("speedster")
         result = manager.unlock_ship("speedster")
-        
+
         assert result is False
 
     def test_unlock_ship_invalid(self, clean_ships_file):
         """Test unlocking invalid ship"""
         manager = ShipManager()
         result = manager.unlock_ship("nonexistent")
-        
+
         assert result is False
 
     def test_unlock_ship_with_notification(self, clean_ships_file):
         """Test unlocking ship with notification callback"""
         manager = ShipManager()
         called = []
-        
+
         def callback(title, message):
             called.append((title, message))
-        
+
         result = manager.unlock_ship_with_notification("tank", callback)
-        
+
         assert result is True
         assert len(called) == 1
         assert "tank" in manager.unlocked_ships
@@ -108,13 +108,13 @@ class TestShipManager:
         """Test notification not called for already unlocked ship"""
         manager = ShipManager()
         manager.unlock_ship("destroyer")
-        
+
         called = []
         def callback(title, message):
             called.append((title, message))
-        
+
         result = manager.unlock_ship_with_notification("destroyer", callback)
-        
+
         assert result is False
         assert len(called) == 0
 
@@ -122,7 +122,7 @@ class TestShipManager:
         """Test unlock condition for speedster"""
         manager = ShipManager()
         result = manager.check_unlock_conditions(50, "easy")
-        
+
         assert result is True
         assert manager.ships["speedster"]["unlocked"] is True
 
@@ -130,7 +130,7 @@ class TestShipManager:
         """Test unlock condition for tank"""
         manager = ShipManager()
         result = manager.check_unlock_conditions(50, "normal")
-        
+
         assert result is True
         assert manager.ships["tank"]["unlocked"] is True
 
@@ -138,7 +138,7 @@ class TestShipManager:
         """Test unlock condition for destroyer"""
         manager = ShipManager()
         result = manager.check_unlock_conditions(50, "hard")
-        
+
         assert result is True
         assert manager.ships["destroyer"]["unlocked"] is True
 
@@ -146,26 +146,26 @@ class TestShipManager:
         """Test no unlock with insufficient level"""
         manager = ShipManager()
         result = manager.check_unlock_conditions(30, "easy")
-        
+
         assert result is False
 
     def test_check_unlock_conditions_with_callback(self, clean_ships_file):
         """Test unlock conditions with callback"""
         manager = ShipManager()
         called = []
-        
+
         def callback(title, message):
             called.append((title, message))
-        
+
         manager.check_unlock_conditions(50, "easy", callback)
-        
+
         assert len(called) >= 1
 
     def test_get_ship_data(self, clean_ships_file):
         """Test getting ship data"""
         manager = ShipManager()
         data = manager.get_ship_data("standard")
-        
+
         assert data["name"] == "Standard Fighter"
         assert "speed_multiplier" in data
 
@@ -173,14 +173,14 @@ class TestShipManager:
         """Test getting data for invalid ship returns standard"""
         manager = ShipManager()
         data = manager.get_ship_data("nonexistent")
-        
+
         assert data["name"] == "Standard Fighter"
 
     def test_get_available_ships(self, clean_ships_file):
         """Test getting all available ships"""
         manager = ShipManager()
         ships = manager.get_available_ships()
-        
+
         assert len(ships) >= 4
         assert "standard" in ships
         assert "speedster" in ships
@@ -189,9 +189,9 @@ class TestShipManager:
         """Test getting unlocked ships"""
         manager = ShipManager()
         manager.unlock_ship("tank")
-        
+
         unlocked = manager.get_unlocked_ships()
-        
+
         assert "standard" in unlocked
         assert "tank" in unlocked
         assert "speedster" not in unlocked
@@ -200,9 +200,9 @@ class TestShipManager:
         """Test setting current ship"""
         manager = ShipManager()
         manager.unlock_ship("speedster")
-        
+
         result = manager.set_current_ship("speedster")
-        
+
         assert result is True
         assert manager.current_ship == "speedster"
 
@@ -210,7 +210,7 @@ class TestShipManager:
         """Test cannot set locked ship as current"""
         manager = ShipManager()
         result = manager.set_current_ship("destroyer")
-        
+
         assert result is False
         assert manager.current_ship == "standard"
 
@@ -218,23 +218,23 @@ class TestShipManager:
         """Test cannot set invalid ship as current"""
         manager = ShipManager()
         result = manager.set_current_ship("nonexistent")
-        
+
         assert result is False
 
     def test_get_current_ship_data(self, clean_ships_file):
         """Test getting current ship data"""
         manager = ShipManager()
         data = manager.get_current_ship_data()
-        
+
         assert data["name"] == "Standard Fighter"
 
     def test_is_ship_unlocked(self, clean_ships_file):
         """Test checking if ship is unlocked"""
         manager = ShipManager()
-        
+
         assert manager.is_ship_unlocked("standard") is True
         assert manager.is_ship_unlocked("speedster") is False
-        
+
         manager.unlock_ship("speedster")
         assert manager.is_ship_unlocked("speedster") is True
 
@@ -246,22 +246,22 @@ class TestShipManager:
     def test_check_all_ships_unlocked(self, clean_ships_file):
         """Test checking all ships unlocked achievement"""
         manager = ShipManager()
-        
+
         # Mock achievement system
         class MockAchievements:
             def __init__(self):
                 self.unlocked = []
-            
+
             def unlock(self, achievement):
                 self.unlocked.append(achievement)
-        
+
         achievements = MockAchievements()
-        
+
         # Unlock all ships (standard is always unlocked, so skip it)
         for ship_id in manager.ships.keys():
             if ship_id != "standard":
                 manager.unlock_ship(ship_id)
-    
+
         # Ensure `unlocked_ships` includes every ship id (including `standard`)
         manager.unlocked_ships = list(manager.ships.keys())
         for ship_id in manager.ships:
@@ -278,7 +278,7 @@ class TestShipManager:
     def test_ship_properties(self, clean_ships_file):
         """Test ship properties are complete"""
         manager = ShipManager()
-        
+
         for ship_id, ship_data in manager.ships.items():
             assert "name" in ship_data
             assert "description" in ship_data

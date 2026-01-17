@@ -1,6 +1,7 @@
 # Getting Started
 
-This guide will help you set up your development environment and start working on Ajitroids.
+This guide will help you set up your development environment and start working
+on Ajitroids.
 
 ## Prerequisites
 
@@ -14,7 +15,8 @@ Before you begin, ensure you have the following installed:
 
 ### Option 1: Using uv (Recommended)
 
-[uv](https://github.com/astral-sh/uv) is a fast Python package installer and resolver.
+[uv](https://github.com/astral-sh/uv) is a fast Python package installer and
+resolver.
 
 ```bash
 # Clone the repository
@@ -155,22 +157,27 @@ Then open your browser to `http://127.0.0.1:8000/`
 
 ## Next Steps
 
-- Read the [Architecture Overview](architecture/overview.md) to understand the codebase
-- Check out the [Contributing Guide](development/contributing.md) to start making changes
+- Read the [Architecture Overview](architecture/overview.md) to understand the
+  codebase
+- Check out the [Contributing Guide](development/contributing.md) to start
+  making changes
 - Explore the [Python API](api/python.md) for detailed code documentation
 
 ## Common Issues
 
 ### Pygame Installation Issues
 
-If you encounter issues installing Pygame, especially on Linux, you may need to install SDL dependencies:
+If you encounter issues installing Pygame, especially on Linux, you may need to
+install SDL dependencies:
 
 **Ubuntu/Debian:**
+
 ```bash
 sudo apt-get install python3-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
 ```
 
 **macOS:**
+
 ```bash
 brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf
 ```
@@ -188,5 +195,6 @@ If you don't hear any sound:
 If you run into problems:
 
 1. Check the [Issue Tracker](https://github.com/Ajimaru/ajitroids/issues)
-2. Read through existing issues to see if someone else has encountered the same problem
+2. Read through existing issues to see if someone else has encountered the same
+   problem
 3. Create a new issue with detailed information about your problem

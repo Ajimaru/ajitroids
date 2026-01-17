@@ -74,7 +74,7 @@ class TestPowerUp:
         """Test powerup kills itself when lifetime expires"""
         powerup = PowerUp(100, 100)
         assert powerup in powerup_group
-        
+
         # Update beyond lifetime
         powerup.update(POWERUP_LIFETIME + 1)
         assert powerup not in powerup_group
@@ -142,7 +142,7 @@ class TestPowerUp:
         for powerup_type in POWERUP_TYPES:
             powerup = PowerUp(100, 100, powerup_type=powerup_type)
             colors.add(powerup.color)
-        
+
         # Most types should have unique colors
         assert len(colors) >= len(POWERUP_TYPES) - 2
 
@@ -152,7 +152,7 @@ class TestPowerUp:
         for _ in range(10):
             powerup = PowerUp(100, 100)
             velocities.append((powerup.velocity.x, powerup.velocity.y))
-        
+
         # Should have variation
         assert len(set(velocities)) > 1
 
@@ -161,7 +161,7 @@ class TestPowerUp:
         powerup = PowerUp(100, 100)
         powerup.rotation = 0
         powerup.update(1.0)
-        
+
         # Should rotate 90 degrees per second
         assert powerup.rotation == pytest.approx(90, abs=1)
 
@@ -169,9 +169,9 @@ class TestPowerUp:
         """Test powerup position updates based on velocity"""
         powerup = PowerUp(100, 100)
         powerup.velocity = pygame.Vector2(50, 0)
-        
+
         powerup.update(1.0)
-        
+
         # Should move by velocity * dt
         assert powerup.position.x == pytest.approx(150, abs=1)
         assert powerup.position.y == pytest.approx(100, abs=1)
@@ -181,7 +181,7 @@ class TestPowerUp:
         powerup = PowerUp(100, 100)
         for _ in range(10):
             powerup.update(0.1)
-        
+
         # Should still exist and have valid state
         assert powerup.lifetime > 0 or not powerup.alive()
 

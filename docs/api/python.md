@@ -1,10 +1,12 @@
 # Python API
 
-This page provides auto-generated documentation for all Python modules in Ajitroids.
+This page provides auto-generated documentation for all Python modules in
+Ajitroids.
 
 ## Overview
 
-The Ajitroids codebase is organized into modules that handle different aspects of the game. All modules are located in the `modul/` directory.
+The Ajitroids codebase is organized into modules that handle different aspects
+of the game. All modules are located in the `modul/` directory.
 
 ## Core Modules
 
@@ -45,11 +47,5 @@ The Ajitroids codebase is organized into modules that handle different aspects o
 
 ## Auto-Generated Documentation
 
-::: modul
-    handler: python
-    options:
-      members_order: source
-      show_source: true
-      show_root_heading: true
-      show_root_toc_entry: true
-      heading_level: 2
+::: modul handler: python options: members_order: source show_source: true
+show_root_heading: true show_root_toc_entry: true heading_level: 2

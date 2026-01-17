@@ -54,7 +54,7 @@ class TestCircleShape:
         forward = shape.forward()
         assert forward.x == pytest.approx(0, abs=0.01)
         assert forward.y == pytest.approx(-1, abs=0.01)
-        
+
         shape.rotate(90)
         forward = shape.forward()
         assert forward.x == pytest.approx(1, abs=0.01)
@@ -74,10 +74,10 @@ class TestCircleShape:
     def test_circleshape_with_containers(self):
         """Test CircleShape initialization with containers"""
         group = pygame.sprite.Group()
-        
+
         class TestShape(CircleShape):
             containers = (group,)
-        
+
         shape = TestShape(50, 60, 20)
         assert shape in group
         assert shape.position.x == 50

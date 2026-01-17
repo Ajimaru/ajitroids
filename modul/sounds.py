@@ -303,7 +303,7 @@ class Sounds:
                 sound = getattr(self, attr_name)
                 if sound:
                     sound.set_volume(slider_value)
-    
+
     def set_theme(self, theme_name: str) -> bool:
         """Change sound theme and reload all sounds"""
         try:
@@ -312,7 +312,7 @@ class Sounds:
             if theme is None:
                 print(f"Invalid theme: {theme_name}")
                 return False
-            
+
             if self.theme_manager.set_theme(theme):
                 self.current_theme = theme
                 # Reload all sounds with new theme
@@ -323,7 +323,7 @@ class Sounds:
         except (AttributeError, ValueError) as e:
             print(f"Error setting theme {theme_name}: {e}")
             return False
-    
+
     def _reload_all_sounds(self):
         """Reload all sound effects with current theme"""
         # Get themed sound files
@@ -343,7 +343,7 @@ class Sounds:
             'game_over': 'game_over',
             'player_hit': 'player_hit',
         }
-        
+
         for attr_name, sound_name in sound_mappings.items():
             try:
                 sound_file = self.theme_manager.get_sound_file(sound_name)
@@ -355,11 +355,11 @@ class Sounds:
             except Exception as e:
                 print(f"Could not load {sound_name} for theme: {e}")
                 setattr(self, attr_name, None)
-    
+
     def get_current_theme(self) -> str:
         """Get current sound theme name"""
         return self.current_theme.value
-    
+
     def get_available_themes(self) -> list:
         """Get list of available theme names"""
         return [theme.value for theme in self.theme_manager.get_available_themes()]

@@ -62,21 +62,20 @@ Unlocked achievements.
 
 ### `video.fullscreen`
 
-**Type**: `boolean`  
-**Default**: `false`  
-**Description**: Enable fullscreen mode
+**Type**: `boolean` **Default**: `false` **Description**: Enable fullscreen mode
 
 **Values**:
+
 - `false`: Windowed mode
 - `true`: Fullscreen mode
 
 ### `video.resolution`
 
-**Type**: `[number, number]`  
-**Default**: `[1280, 720]`  
-**Description**: Window/screen resolution in pixels [width, height]
+**Type**: `[number, number]` **Default**: `[1280, 720]` **Description**:
+Window/screen resolution in pixels [width, height]
 
 **Common values**:
+
 - `[1280, 720]`: 720p
 - `[1920, 1080]`: 1080p
 - `[2560, 1440]`: 1440p
@@ -84,21 +83,21 @@ Unlocked achievements.
 
 ### `video.vsync`
 
-**Type**: `boolean`  
-**Default**: `true`  
-**Description**: Enable vertical sync to prevent screen tearing
+**Type**: `boolean` **Default**: `true` **Description**: Enable vertical sync to
+prevent screen tearing
 
 **Values**:
+
 - `true`: Enable VSync (recommended)
 - `false`: Disable VSync (may cause tearing)
 
 ### `video.fps_display`
 
-**Type**: `boolean`  
-**Default**: `false`  
-**Description**: Show FPS counter on screen
+**Type**: `boolean` **Default**: `false` **Description**: Show FPS counter on
+screen
 
 **Values**:
+
 - `false`: Hide FPS counter
 - `true`: Show FPS counter in top-right corner
 
@@ -106,67 +105,56 @@ Unlocked achievements.
 
 ### `audio.master_volume`
 
-**Type**: `number`  
-**Default**: `0.7`  
-**Range**: `0.0` to `1.0`  
-**Description**: Master volume level (affects all sounds)
+**Type**: `number` **Default**: `0.7` **Range**: `0.0` to `1.0` **Description**:
+Master volume level (affects all sounds)
 
 ### `audio.music_volume`
 
-**Type**: `number`  
-**Default**: `0.5`  
-**Range**: `0.0` to `1.0`  
-**Description**: Background music volume
+**Type**: `number` **Default**: `0.5` **Range**: `0.0` to `1.0` **Description**:
+Background music volume
 
 ### `audio.sfx_volume`
 
-**Type**: `number`  
-**Default**: `0.8`  
-**Range**: `0.0` to `1.0`  
-**Description**: Sound effects volume
+**Type**: `number` **Default**: `0.8` **Range**: `0.0` to `1.0` **Description**:
+Sound effects volume
 
 ### `audio.music_enabled`
 
-**Type**: `boolean`  
-**Default**: `true`  
-**Description**: Enable/disable background music
+**Type**: `boolean` **Default**: `true` **Description**: Enable/disable
+background music
 
 ### `audio.sfx_enabled`
 
-**Type**: `boolean`  
-**Default**: `true`  
-**Description**: Enable/disable sound effects
+**Type**: `boolean` **Default**: `true` **Description**: Enable/disable sound
+effects
 
 ## Gameplay Settings
 
 ### `gameplay.difficulty`
 
-**Type**: `string`  
-**Default**: `"normal"`  
-**Description**: Game difficulty level
+**Type**: `string` **Default**: `"normal"` **Description**: Game difficulty
+level
 
 **Values**:
+
 - `"easy"`: 5 lives, slower asteroids, more power-ups
 - `"normal"`: 3 lives, normal speed
 - `"hard"`: 1 life, faster asteroids, fewer power-ups
 
 ### `gameplay.show_fps`
 
-**Type**: `boolean`  
-**Default**: `false`  
-**Description**: Display FPS counter (same as video.fps_display)
+**Type**: `boolean` **Default**: `false` **Description**: Display FPS counter
+(same as video.fps_display)
 
 ### `gameplay.screen_shake`
 
-**Type**: `boolean`  
-**Default**: `true`  
-**Description**: Enable screen shake effect on impacts
+**Type**: `boolean` **Default**: `true` **Description**: Enable screen shake
+effect on impacts
 
 ### `gameplay.particle_effects`
 
-**Type**: `boolean`  
-**Default**: `true`  
-**Description**: Enable particle effects (explosions, trails)
+**Type**: `boolean` **Default**: `true` **Description**: Enable particle effects
+(explosions, trails)
 
 **Note**: Disable for better performance on low-end systems
 
@@ -174,41 +162,34 @@ Unlocked achievements.
 
 ### `controls.rotate_left`
 
-**Type**: `string`  
-**Default**: `"LEFT"`  
-**Description**: Key to rotate ship counter-clockwise
+**Type**: `string` **Default**: `"LEFT"` **Description**: Key to rotate ship
+counter-clockwise
 
 **Valid keys**: Any pygame key constant name (e.g., "LEFT", "a", "j")
 
 ### `controls.rotate_right`
 
-**Type**: `string`  
-**Default**: `"RIGHT"`  
-**Description**: Key to rotate ship clockwise
+**Type**: `string` **Default**: `"RIGHT"` **Description**: Key to rotate ship
+clockwise
 
 ### `controls.thrust`
 
-**Type**: `string`  
-**Default**: `"UP"`  
-**Description**: Key to apply forward thrust
+**Type**: `string` **Default**: `"UP"` **Description**: Key to apply forward
+thrust
 
 ### `controls.shoot`
 
-**Type**: `string`  
-**Default**: `"SPACE"`  
-**Description**: Key to fire weapons
+**Type**: `string` **Default**: `"SPACE"` **Description**: Key to fire weapons
 
 ### `controls.switch_weapon`
 
-**Type**: `string`  
-**Default**: `"b"`  
-**Description**: Key to switch between weapons (when power-ups active)
+**Type**: `string` **Default**: `"b"` **Description**: Key to switch between
+weapons (when power-ups active)
 
 ### `controls.pause`
 
-**Type**: `string`  
-**Default**: `"ESCAPE"`  
-**Description**: Key to pause game and open menu
+**Type**: `string` **Default**: `"ESCAPE"` **Description**: Key to pause game
+and open menu
 
 ## Game Constants
 
@@ -290,6 +271,7 @@ export AJITROIDS_DEBUG=1
 ```
 
 Features:
+
 - Debug logging
 - FPS display
 - Collision visualizations
@@ -309,6 +291,7 @@ Features:
 ```
 
 **Fields**:
+
 - `name`: Player name (string, max 20 chars)
 - `score`: Final score (integer)
 - `date`: ISO 8601 timestamp
@@ -319,11 +302,7 @@ Features:
 
 ```json
 {
-  "unlocked": [
-    "first_kill",
-    "sharpshooter",
-    "survivor"
-  ],
+  "unlocked": ["first_kill", "sharpshooter", "survivor"],
   "progress": {
     "asteroids_destroyed": 150,
     "bosses_defeated": 3,
@@ -333,12 +312,14 @@ Features:
 ```
 
 **Structure**:
+
 - `unlocked`: Array of achievement IDs
 - `progress`: Dictionary of progress counters
 
 ## File Permissions
 
 Settings files should have:
+
 - **Permissions**: `644` (readable by user, writable by user)
 - **Owner**: Current user
 
@@ -353,6 +334,7 @@ chmod 644 ~/.ajitroids/settings.json
 Invalid configurations are reset to defaults with a warning.
 
 **Validation rules**:
+
 - Volume values must be 0.0 to 1.0
 - Resolution values must be positive integers
 - Difficulty must be "easy", "normal", or "hard"
@@ -412,6 +394,7 @@ Adjust these settings:
 
 ## Next Steps
 
-- [Settings Architecture](../architecture/settings.md): How settings work internally
+- [Settings Architecture](../architecture/settings.md): How settings work
+  internally
 - [Dev Scripts](cli-dev-scripts.md): Development tools
 - [Contributing](../development/contributing.md): Modifying configuration system

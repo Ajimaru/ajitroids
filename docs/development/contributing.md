@@ -1,6 +1,7 @@
 # Contributing to Ajitroids
 
-Thank you for your interest in contributing to Ajitroids! This guide will help you get started with contributing to the project.
+Thank you for your interest in contributing to Ajitroids! This guide will help
+you get started with contributing to the project.
 
 ## 📋 Table of Contents
 
@@ -14,7 +15,8 @@ Thank you for your interest in contributing to Ajitroids! This guide will help y
 
 ## Code of Conduct
 
-Please read and follow our [Code of Conduct](https://github.com/Ajimaru/ajitroids/blob/main/CODE_OF_CONDUCT.md).
+Please read and follow our
+[Code of Conduct](https://github.com/Ajimaru/ajitroids/blob/main/CODE_OF_CONDUCT.md).
 
 ## Getting Started
 
@@ -155,12 +157,12 @@ Use docstrings for classes and functions:
 ```python
 def calculate_trajectory(start: Vector2, end: Vector2, speed: float) -> Vector2:
     """Calculate trajectory from start to end position.
-    
+
     Args:
         start: Starting position vector
         end: Target position vector
         speed: Movement speed
-        
+
     Returns:
         Velocity vector for movement
     """
@@ -195,10 +197,10 @@ def test_player_respawn():
     """Test that player respawns correctly after death."""
     player = Player(100, 100)
     player.lives = 2
-    
+
     # Simulate death
     player.take_damage()
-    
+
     assert player.lives == 1
     assert player.invulnerable == True
 ```
@@ -240,21 +242,26 @@ pytest -x
 
 ```markdown
 ## Description
+
 Brief description of changes
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Testing
+
 How has this been tested?
 
 ## Screenshots (if applicable)
+
 Add screenshots for UI changes
 
 ## Checklist
+
 - [ ] Code follows style guidelines
 - [ ] Tests added/updated
 - [ ] Documentation updated
@@ -339,7 +346,8 @@ mkdocs build
 ## Getting Help
 
 - **Documentation**: Read the [developer docs](../index.md)
-- **Discussions**: Use [GitHub Discussions](https://github.com/Ajimaru/ajitroids/discussions)
+- **Discussions**: Use
+  [GitHub Discussions](https://github.com/Ajimaru/ajitroids/discussions)
 - **Issues**: Search existing issues or create a new one
 - **Discord**: Join our community (if available)
 

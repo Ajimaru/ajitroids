@@ -1,6 +1,7 @@
 # Architecture Overview
 
-Ajitroids is built with a clean, object-oriented architecture that separates concerns and makes the codebase easy to understand and extend.
+Ajitroids is built with a clean, object-oriented architecture that separates
+concerns and makes the codebase easy to understand and extend.
 
 ## High-Level Architecture
 
@@ -80,7 +81,7 @@ classDiagram
     CircleShape <|-- Shot
     CircleShape <|-- BossProjectile
     CircleShape <|-- PowerUp
-    
+
     class CircleShape {
         +position
         +velocity
@@ -89,17 +90,17 @@ classDiagram
         +draw()
         +collides_with()
     }
-    
+
     class Player {
         +shoot()
         +rotate()
         +move()
     }
-    
+
     class Asteroid {
         +split()
     }
-    
+
     class Boss {
         +shoot()
         +move_pattern()
@@ -153,7 +154,8 @@ The menu system implements a state machine:
 
 ## Data Flow
 
-See [Data Flow](data-flow.md) for detailed information about how data moves through the system.
+See [Data Flow](data-flow.md) for detailed information about how data moves
+through the system.
 
 ## Game State Management
 
@@ -168,11 +170,13 @@ The game maintains several state variables:
 
 ### Sprite Groups
 
-Pygame's sprite groups provide efficient collision detection and batch rendering.
+Pygame's sprite groups provide efficient collision detection and batch
+rendering.
 
 ### Object Pooling
 
-Particles and some projectiles may be pooled to reduce garbage collection overhead.
+Particles and some projectiles may be pooled to reduce garbage collection
+overhead.
 
 ### Spatial Partitioning
 

@@ -85,7 +85,7 @@ from modul.player import Player
 def test_player_creation():
     """Test that player is created with correct initial state."""
     player = Player(100, 100)
-    
+
     assert player.position.x == 100
     assert player.position.y == 100
     assert player.lives == 3
@@ -108,7 +108,7 @@ def test_player_movement(player):
     initial_pos = player.position.copy()
     player.velocity = Vector2(10, 0)
     player.update(1.0)  # 1 second
-    
+
     assert player.position.x == initial_pos.x + 10
 ```
 
@@ -119,13 +119,13 @@ def test_player_asteroid_collision():
     """Test collision between player and asteroid."""
     player = Player(100, 100)
     asteroid = Asteroid(Vector2(100, 100), Vector2(0, 0), 50)
-    
+
     initial_lives = player.lives
-    
+
     # Simulate collision
     if player.collides_with(asteroid):
         player.take_damage()
-    
+
     assert player.lives == initial_lives - 1
 ```
 
@@ -136,19 +136,19 @@ def test_asteroid_splitting():
     """Test that large asteroids split into smaller ones."""
     from modul.asteroid import Asteroid
     from modul.groups import asteroids
-    
+
     # Clear group
     asteroids.empty()
-    
+
     # Create large asteroid
     large_asteroid = Asteroid(Vector2(100, 100), Vector2(0, 0), size=3)
     asteroids.add(large_asteroid)
-    
+
     initial_count = len(asteroids)
-    
+
     # Split asteroid
     large_asteroid.split()
-    
+
     # Should have more asteroids now
     assert len(asteroids) > initial_count
 ```
@@ -164,12 +164,12 @@ def test_sound_playback():
         # Create mock sound
         sound_instance = Mock()
         mock_sound.return_value = sound_instance
-        
+
         # Test sound playing
         from modul.sounds import SoundManager
         sound_mgr = SoundManager()
         sound_mgr.play_sound('shoot')
-        
+
         # Verify sound was played
         sound_instance.play.assert_called_once()
 ```
@@ -183,10 +183,10 @@ def test_player_shooting():
     # Arrange
     player = Player(100, 100)
     initial_shot_count = len(shots)
-    
+
     # Act
     player.shoot()
-    
+
     # Assert
     assert len(shots) == initial_shot_count + 1
 ```
@@ -224,19 +224,19 @@ def test_game_loop_iteration():
     # Initialize game
     pygame.init()
     screen = pygame.display.set_mode((800, 600))
-    
+
     # Create game objects
     player = Player(400, 300)
     asteroid = Asteroid(Vector2(100, 100), Vector2(1, 0), 50)
-    
+
     # Update game state
     dt = 0.016  # ~60 FPS
     player.update(dt)
     asteroid.update(dt)
-    
+
     # Check that objects updated
     assert asteroid.position.x > 100  # Moved
-    
+
     pygame.quit()
 ```
 
@@ -246,19 +246,19 @@ def test_game_loop_iteration():
 def test_highscore_persistence(tmp_path):
     """Test that high scores are saved and loaded correctly."""
     from modul.highscore import HighscoreManager
-    
+
     # Create highscore manager with temp file
     save_file = tmp_path / "highscores.json"
     hsm = HighscoreManager(str(save_file))
-    
+
     # Add score
     hsm.add_score("TestPlayer", 1000)
     hsm.save()
-    
+
     # Load in new instance
     hsm2 = HighscoreManager(str(save_file))
     scores = hsm2.get_scores()
-    
+
     assert len(scores) == 1
     assert scores[0]["name"] == "TestPlayer"
     assert scores[0]["score"] == 1000
@@ -269,6 +269,7 @@ def test_highscore_persistence(tmp_path):
 ### DO's
 
 ✅ **Write descriptive test names**
+
 ```python
 def test_player_becomes_invulnerable_after_respawn():
     # Good: Clear what is being tested
@@ -276,6 +277,7 @@ def test_player_becomes_invulnerable_after_respawn():
 ```
 
 ✅ **Test one thing per test**
+
 ```python
 def test_player_loses_life_on_collision():
     # Focus on one behavior
@@ -287,6 +289,7 @@ def test_player_respawns_at_center():
 ```
 
 ✅ **Use fixtures for common setup**
+
 ```python
 @pytest.fixture
 def game_setup():
@@ -296,6 +299,7 @@ def game_setup():
 ```
 
 ✅ **Clean up after tests**
+
 ```python
 def test_something():
     sprite_group.empty()  # Clean state
@@ -306,6 +310,7 @@ def test_something():
 ### DON'Ts
 
 ❌ **Don't test implementation details**
+
 ```python
 # Bad: Testing internal state
 def test_player_rotation_variable():
@@ -318,6 +323,7 @@ def test_player_rotates_left():
 ```
 
 ❌ **Don't use hard-coded values**
+
 ```python
 # Bad
 assert player.position.x == 314.159
@@ -327,6 +333,7 @@ assert abs(player.position.x - expected_x) < 0.01
 ```
 
 ❌ **Don't test external libraries**
+
 ```python
 # Bad: Testing Pygame internals or complex behavior
 def test_pygame_display_creation():
@@ -341,7 +348,8 @@ def test_player_movement_calculation():
 
 ## Continuous Integration
 
-Tests run automatically on GitHub Actions for every push and pull request. See `.github/workflows/python-package.yml`.
+Tests run automatically on GitHub Actions for every push and pull request. See
+`.github/workflows/python-package.yml`.
 
 ## Test Coverage Goals
 
@@ -396,12 +404,12 @@ import time
 def test_update_performance():
     """Test that updates complete in reasonable time."""
     player = Player(100, 100)
-    
+
     start = time.time()
     for _ in range(1000):
         player.update(0.016)
     elapsed = time.time() - start
-    
+
     # Should complete in under 1 second
     assert elapsed < 1.0
 ```

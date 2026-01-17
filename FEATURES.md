@@ -1,6 +1,7 @@
 # 🌟 Feature Suggestions & Improvements for Ajitroids
 
-This document outlines potential features and improvements that could enhance the Ajitroids game experience.
+This document outlines potential features and improvements that could enhance
+the Ajitroids game experience.
 
 ## 🎯 Implemented Features
 
@@ -14,17 +15,22 @@ This document outlines potential features and improvements that could enhance th
 
 ### Debug & Development Tools
 
-- **Logging System**: Structured logging with different levels (DEBUG, INFO, WARNING, ERROR)
+- **Logging System**: Structured logging with different levels (DEBUG, INFO,
+  WARNING, ERROR)
 - **FPS Display**: Toggle with F8 to show real-time performance metrics
 - **Debug Mode**: Collision visualization and extended game information
 
 ### Quality of Life Improvements
 
-- **Keyboard Shortcuts Reference**: Accessible in-game help screen (press H or F1)
+- **Keyboard Shortcuts Reference**: Accessible in-game help screen (press H or
+  F1)
 - **Session Statistics**: Track performance during current play session
-- **Configuration Validation**: Automatic validation and repair of corrupted settings
-- **Quick Restart**: Press 'R' during gameplay or game over to instantly restart without menus
-- **Stats Dashboard**: Detailed statistics screen with visual metrics and progress bars
+- **Configuration Validation**: Automatic validation and repair of corrupted
+  settings
+- **Quick Restart**: Press 'R' during gameplay or game over to instantly restart
+  without menus
+- **Stats Dashboard**: Detailed statistics screen with visual metrics and
+  progress bars
 - **Replay System**: Automatic recording of game sessions with playback controls
 
 ### Advanced Enemy Types
@@ -42,14 +48,14 @@ This document outlines potential features and improvements that could enhance th
   - **Normal**: Moderate activity, standard gameplay
   - **Intense**: High asteroid/enemy count, challenging action
   - **Boss**: Epic music during boss encounters
-  
+
 - **Voice Announcements**: Context-aware audio feedback
   - Level progression ("Level up!")
   - Boss encounters ("Boss incoming!", "Boss defeated!")
   - Power-ups ("Shield activated!", "New weapon acquired!")
   - Game events ("Game over!", "Achievement unlocked!")
   - Health warnings ("Warning! Low health!")
-  
+
 - **Sound Theme System**: Multiple audio styles
   - **Default**: Classic Ajitroids sounds
   - **Retro**: 8-bit arcade nostalgia
@@ -111,9 +117,12 @@ This document outlines potential features and improvements that could enhance th
 
 #### 7. Audio Enhancements ✅
 
-- **Dynamic Music** ✅: Music that changes based on game intensity (asteroids, enemies, boss fights)
-- **Voice Announcements** ✅: "Level up!", "Boss incoming!", "Game over!", "Achievement unlocked!", etc.
-- **Sound Themes** ✅: Different audio packs (Default, Retro, Sci-Fi, Orchestral)
+- **Dynamic Music** ✅: Music that changes based on game intensity (asteroids,
+  enemies, boss fights)
+- **Voice Announcements** ✅: "Level up!", "Boss incoming!", "Game over!",
+  "Achievement unlocked!", etc.
+- **Sound Themes** ✅: Different audio packs (Default, Retro, Sci-Fi,
+  Orchestral)
 - **Positional Audio**: 3D sound based on object positions
 - **Customizable Soundtracks**: Let players add their own music
 
@@ -247,4 +256,5 @@ If you'd like to implement any of these features:
 
 ---
 
-*This document is a living document and will be updated as features are implemented or new ideas emerge.*
+_This document is a living document and will be updated as features are
+implemented or new ideas emerge._

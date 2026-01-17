@@ -1,10 +1,12 @@
 # Pygame Integration
 
-This document explains how Ajitroids integrates with the Pygame framework and leverages its features.
+This document explains how Ajitroids integrates with the Pygame framework and
+leverages its features.
 
 ## Pygame Overview
 
-[Pygame](https://www.pygame.org/) is a cross-platform set of Python modules designed for writing video games. It provides functionality for:
+[Pygame](https://www.pygame.org/) is a cross-platform set of Python modules
+designed for writing video games. It provides functionality for:
 
 - Graphics rendering
 - Event handling
@@ -35,6 +37,7 @@ pygame.display.flip()  # Full screen update
 ```
 
 **Key functions:**
+
 - `set_mode()`: Create game window
 - `flip()`: Update the full display
 - `update()`: Update specific areas
@@ -61,6 +64,7 @@ if keys[pygame.K_LEFT]:
 ```
 
 **Event types used:**
+
 - `QUIT`: Window close button
 - `KEYDOWN`: Key press
 - `KEYUP`: Key release
@@ -90,6 +94,7 @@ drawable.draw(screen)
 ```
 
 **Benefits:**
+
 - Automatic sprite management
 - Efficient collision detection
 - Batch rendering
@@ -114,6 +119,7 @@ shoot_sound.play()
 ```
 
 **Audio features:**
+
 - Background music (streaming)
 - Sound effects (loaded in memory)
 - Volume control
@@ -131,12 +137,13 @@ clock = pygame.time.Clock()
 while running:
     # Limit to 60 FPS and get delta time
     dt = clock.tick(60) / 1000.0  # Convert to seconds
-    
+
     # Update game with delta time
     update_game(dt)
 ```
 
 **Time functions:**
+
 - `Clock.tick()`: Limit frame rate
 - `Clock.get_fps()`: Get current FPS
 - `get_ticks()`: Get milliseconds since init
@@ -154,6 +161,7 @@ pygame.draw.polygon(screen, color, points)
 ```
 
 **Used for:**
+
 - Debug visualization
 - UI elements
 - Particle effects
@@ -169,21 +177,21 @@ All game entities inherit from `pygame.sprite.Sprite`:
 class CircleShape(pygame.sprite.Sprite):
     def __init__(self, position, radius):
         super().__init__()
-        
+
         # Sprite properties
         self.image = pygame.Surface((radius * 2, radius * 2))
         self.rect = self.image.get_rect(center=position)
-        
+
         # Game properties
         self.position = pygame.math.Vector2(position)
         self.velocity = pygame.math.Vector2(0, 0)
         self.radius = radius
-    
+
     def update(self, dt):
         # Update position
         self.position += self.velocity * dt
         self.rect.center = self.position
-    
+
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 ```
@@ -246,6 +254,7 @@ velocity = velocity.rotate(angle)
 ```
 
 **Vector methods used:**
+
 - `distance_to()`: Calculate distance
 - `normalize()`: Get unit vector
 - `rotate()`: Rotate vector
@@ -332,26 +341,26 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     running = True
-    
+
     while running:
         # 1. Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-        
+
         # 2. Get input state
         keys = pygame.key.get_pressed()
-        
+
         # 3. Update game state
         dt = clock.tick(60) / 1000.0
         updatable.update(dt)
         check_collisions()
-        
+
         # 4. Render
         screen.fill(BLACK)
         drawable.draw(screen)
         pygame.display.flip()
-    
+
     pygame.quit()
 ```
 
@@ -448,7 +457,7 @@ pygame.display.toggle_fullscreen()
 def draw_debug_info(screen, entity):
     # Draw hitbox
     pygame.draw.circle(screen, RED, entity.position, entity.radius, 1)
-    
+
     # Draw velocity vector
     end_pos = entity.position + entity.velocity
     pygame.draw.line(screen, GREEN, entity.position, end_pos, 2)

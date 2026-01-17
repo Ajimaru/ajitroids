@@ -1,4 +1,5 @@
 <!-- markdownlint-disable MD013 -->
+
 # 🚀 Ajitroids
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg?style=plastic)
@@ -14,8 +15,10 @@
 
 ## 🎮 Game Description
 
-Ajitroids is an exciting remake of the classic arcade game Asteroids with modern features and gameplay elements.
-Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destroy enemies and collect power-ups while trying to achieve the highest score.
+Ajitroids is an exciting remake of the classic arcade game Asteroids with modern
+features and gameplay elements. Pilot your spaceship through dangerous asteroid
+fields, dodge space rocks, destroy enemies and collect power-ups while trying to
+achieve the highest score.
 
 ![Ajitroids Screenshot](docs/assets/screenshots/Ajitroids_gameplay.gif)
 
@@ -24,19 +27,25 @@ Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destr
 - **Classic Gameplay**: Control your ship with precise rotation and thrust
 - **Modern Graphics**: Enhanced visuals with particle effects and animations
 - **Advanced Audio System**:
-  - **Dynamic Music**: Music intensity changes based on game state (asteroids, enemies, boss fights)
-  - **Voice Announcements**: Audio announcements for key events ("Level up!", "Boss incoming!", "Game over!")
-  - **Sound Themes**: Choose between different audio packs (Default, Retro, Sci-Fi, Orchestral)
+  - **Dynamic Music**: Music intensity changes based on game state (asteroids,
+    enemies, boss fights)
+  - **Voice Announcements**: Audio announcements for key events ("Level up!",
+    "Boss incoming!", "Game over!")
+  - **Sound Themes**: Choose between different audio packs (Default, Retro,
+    Sci-Fi, Orchestral)
 - **Power-Up System**: Collect various weapon upgrades and shields
-- **Advanced Asteroid Types**: Face four distinct asteroid types (Normal, Ice, Metal, Crystal) with unique behaviors
+- **Advanced Asteroid Types**: Face four distinct asteroid types (Normal, Ice,
+  Metal, Crystal) with unique behaviors
 - **Highscore System**: Save your best results and compare them
 - **Boss Fights**: Face epic boss enemies in higher levels
 - **Customizable Settings**: Fullscreen mode, audio options, themes and more
 - **Smooth Animations**: Fluid ship movements and asteroid rotations
 - **Quick Restart**: Press 'R' to instantly restart without going through menus
 - **Stats Dashboard**: View detailed statistics with visual progress bars
-- **Replay System**: Watch and analyze your previous games with playback controls
-- **Performance Profiler**: Real-time FPS monitoring and performance metrics (F12)
+- **Replay System**: Watch and analyze your previous games with playback
+  controls
+- **Performance Profiler**: Real-time FPS monitoring and performance metrics
+  (F12)
 
 ## 🚀 Installation
 
@@ -47,11 +56,12 @@ Pilot your spaceship through dangerous asteroid fields, dodge space rocks, destr
 
 ### Method 1: Install from Release (Recommended)
 
-Download `ajitroids-latest-py3-none-any.whl` from the [Releases page](https://github.com/Ajimaru/ajitroids/releases/latest):
+Download `ajitroids-latest-py3-none-any.whl` from the
+[Releases page](https://github.com/Ajimaru/ajitroids/releases/latest):
 
 ```bash
 # Install with pip
-pip install ajitroids-latest-py3-none-any.whl 
+pip install ajitroids-latest-py3-none-any.whl
 
 # Run the game via the installed console script
 ajitroids
@@ -81,7 +91,8 @@ python main.py
 <details>
 <summary>🔧 Development Setup</summary>
 
-If you plan to contribute or develop for Ajitroids, set up the development environment with pre-commit hooks:
+If you plan to contribute or develop for Ajitroids, set up the development
+environment with pre-commit hooks:
 
 ```bash
 # Run the setup script (Linux/macOS)
@@ -99,7 +110,8 @@ pre-commit run --all-files
 
 - Installs pre-commit framework
 - Activates git hooks that check code quality on every commit
-- Runs **flake8** (style), **pylint** (code analysis), and **prettier** (markdown formatting)
+- Runs **flake8** (style), **pylint** (code analysis), and **prettier**
+  (markdown formatting)
 - Prevents commits that violate configured style rules
 
 </details>
@@ -109,11 +121,16 @@ pre-commit run --all-files
 
 Comprehensive developer documentation is available:
 
-- **[Developer Documentation](https://ajimaru.github.io/ajitroids/)**: Complete guide for developers
-- **[Getting Started](https://ajimaru.github.io/ajitroids/getting-started/)**: Setup and installation
-- **[Architecture](https://ajimaru.github.io/ajitroids/architecture/overview/)**: Code architecture and design
-- **[API Reference](https://ajimaru.github.io/ajitroids/api/python/)**: Auto-generated API docs
-- **[Contributing Guide](https://ajimaru.github.io/ajitroids/development/contributing/)**: How to contribute
+- **[Developer Documentation](https://ajimaru.github.io/ajitroids/)**: Complete
+  guide for developers
+- **[Getting Started](https://ajimaru.github.io/ajitroids/getting-started/)**:
+  Setup and installation
+- **[Architecture](https://ajimaru.github.io/ajitroids/architecture/overview/)**:
+  Code architecture and design
+- **[API Reference](https://ajimaru.github.io/ajitroids/api/python/)**:
+  Auto-generated API docs
+- **[Contributing Guide](https://ajimaru.github.io/ajitroids/development/contributing/)**:
+  How to contribute
 
 ### Building Documentation Locally
 
@@ -131,11 +148,12 @@ mkdocs serve
 
 ### Method 3: Install from Source Archive
 
-If you downloaded a source archive (.tar.gz) from releases (prefer `ajitroids-latest.tar.gz`):
+If you downloaded a source archive (.tar.gz) from releases (prefer
+`ajitroids-latest.tar.gz`):
 
 ```bash
 # Extract and install
-pip install ajitroids-latest.tar.gz 
+pip install ajitroids-latest.tar.gz
 
 # Run the game via the installed console script
 ajitroids
@@ -219,9 +237,12 @@ Unlock these ships by progressing through the game and achieving milestones!
 
 ## 🛡️ Enemies
 
-- **Enemy Ships**: Hostile ships that chase the player and add challenge to the gameplay
-- **Interaction**: Enemies can collide with the player and be destroyed by weapons
-- **Dynamic Movement**: Enemies actively pursue the player within a detection radius
+- **Enemy Ships**: Hostile ships that chase the player and add challenge to the
+  gameplay
+- **Interaction**: Enemies can collide with the player and be destroyed by
+  weapons
+- **Dynamic Movement**: Enemies actively pursue the player within a detection
+  radius
 
 ## 🛠️ Technical Details
 
@@ -233,7 +254,8 @@ Unlock these ships by progressing through the game and achieving milestones!
 
 ## 📜 License
 
-This project is licensed under the MIT License with Commons Clause - see the LICENSE.md file for details.
+This project is licensed under the MIT License with Commons Clause - see the
+LICENSE.md file for details.
 
 ### 👥 Contributors
 
@@ -243,9 +265,12 @@ This project is licensed under the MIT License with Commons Clause - see the LIC
 ### 🙏 Acknowledgements
 
 - Inspiration from the classic Atari game Asteroids
-- Thanks to the [Pygame](https://www.pygame.org/ "Pygame Homepage") community for the great library
-- [Boot.dev](https://www.boot.dev/ "Boot.dev Homepage") for support and inspiration
+- Thanks to the [Pygame](https://www.pygame.org/ "Pygame Homepage") community
+  for the great library
+- [Boot.dev](https://www.boot.dev/ "Boot.dev Homepage") for support and
+  inspiration
 - GitHub Copilot for assistance with code development
 - Developed with ❤️ and Pygame
 
-*Note: This project is in active development. New features and improvements are regularly being added.*
+_Note: This project is in active development. New features and improvements are
+regularly being added._

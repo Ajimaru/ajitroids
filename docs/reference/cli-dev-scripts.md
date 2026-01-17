@@ -1,6 +1,7 @@
 # Development Scripts
 
-This document describes the development scripts and CLI commands available for Ajitroids.
+This document describes the development scripts and CLI commands available for
+Ajitroids.
 
 ## Running the Game
 

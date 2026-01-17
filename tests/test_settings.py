@@ -40,11 +40,11 @@ class TestSettings:
         settings.dynamic_music_enabled = False
         settings.voice_announcements_enabled = False
         settings.sound_theme = "retro"
-        
+
         result = settings.save()
         assert result is True
         assert os.path.exists("settings.json")
-        
+
         # Verify saved data
         with open("settings.json", "r") as f:
             data = json.load(f)
@@ -73,7 +73,7 @@ class TestSettings:
         }
         with open("settings.json", "w") as f:
             json.dump(settings_data, f)
-        
+
         # Load settings
         settings = Settings()
         assert settings.music_on is False
@@ -101,7 +101,7 @@ class TestSettings:
         }
         with open("settings.json", "w") as f:
             json.dump(settings_data, f)
-        
+
         # Load settings
         settings = Settings()
         assert settings.music_on is False
@@ -118,7 +118,7 @@ class TestSettings:
         settings1.fullscreen = True
         settings1.music_volume = 0.6
         settings1.save()
-        
+
         settings2 = Settings()
         assert settings2.music_on is False
         assert settings2.fullscreen is True
@@ -127,11 +127,11 @@ class TestSettings:
     def test_settings_save_error_handling(self, clean_settings_file, monkeypatch):
         """Test error handling during save"""
         settings = Settings()
-        
+
         # Mock open to raise an exception
         def mock_open(*args, **kwargs):
             raise IOError("Mock error")
-        
+
         monkeypatch.setattr("builtins.open", mock_open)
         result = settings.save()
         assert result is False
@@ -141,7 +141,7 @@ class TestSettings:
         # Create a corrupted settings file
         with open("settings.json", "w") as f:
             f.write("invalid json content {")
-        
+
         settings = Settings()
         # Should use defaults when loading fails
         assert settings.music_on is True

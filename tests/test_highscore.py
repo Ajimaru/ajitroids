@@ -59,7 +59,7 @@ class TestHighscoreManager:
         ]
         with open(HIGHSCORE_FILE, "w") as f:
             json.dump(data, f)
-        
+
         manager = HighscoreManager()
         assert len(manager.highscores) == 2
         assert manager.highscores[0]["name"] == "AAA"
@@ -78,7 +78,7 @@ class TestHighscoreManager:
         manager = HighscoreManager()
         manager.highscores = [{"name": "TST", "score": 1234}]
         manager.save_highscores()
-        
+
         # Verify saved
         with open(HIGHSCORE_FILE, "r") as f:
             data = json.load(f)
@@ -90,30 +90,30 @@ class TestHighscoreManager:
         """Test is_highscore returns True for high score"""
         manager = HighscoreManager()
         manager.highscores = [{"name": "AAA", "score": 1000}]
-        
+
         assert manager.is_highscore(2000) is True
 
     def test_highscore_is_highscore_no(self, clean_highscore_file):
         """Test is_highscore returns False for low score"""
         manager = HighscoreManager()
         manager.highscores = [{"name": "AAA", "score": i * 1000} for i in range(HIGHSCORE_MAX_ENTRIES, 0, -1)]
-        
+
         assert manager.is_highscore(100) is False
 
     def test_highscore_is_highscore_not_full(self, clean_highscore_file):
         """Test is_highscore returns True when list not full"""
         manager = HighscoreManager()
         manager.highscores = [{"name": "AAA", "score": 1000}]
-        
+
         assert manager.is_highscore(100) is True
 
     def test_highscore_add_formats_name(self, clean_highscore_file):
         """Test add_highscore formats name correctly"""
         manager = HighscoreManager()
         manager.highscores = []
-        
+
         manager.add_highscore("test", 1000)
-        
+
         assert manager.highscores[0]["name"] == "TES"
         assert len(manager.highscores[0]["name"]) == HIGHSCORE_NAME_LENGTH
 
@@ -121,9 +121,9 @@ class TestHighscoreManager:
         """Test add_highscore pads short names"""
         manager = HighscoreManager()
         manager.highscores = []
-        
+
         manager.add_highscore("X", 1000)
-        
+
         assert len(manager.highscores[0]["name"]) == HIGHSCORE_NAME_LENGTH
         assert manager.highscores[0]["name"].startswith("X")
 
@@ -131,9 +131,9 @@ class TestHighscoreManager:
         """Test add_highscore filters invalid characters"""
         manager = HighscoreManager()
         manager.highscores = []
-        
+
         manager.add_highscore("A!@#B$C", 1000)
-        
+
         # Should only keep valid chars
         assert "!" not in manager.highscores[0]["name"]
         assert "@" not in manager.highscores[0]["name"]
@@ -142,11 +142,11 @@ class TestHighscoreManager:
         """Test add_highscore maintains sorted order"""
         manager = HighscoreManager()
         manager.highscores = []
-        
+
         manager.add_highscore("AAA", 1000)
         manager.add_highscore("BBB", 5000)
         manager.add_highscore("CCC", 3000)
-        
+
         assert manager.highscores[0]["score"] == 5000
         assert manager.highscores[1]["score"] == 3000
         assert manager.highscores[2]["score"] == 1000
@@ -155,24 +155,24 @@ class TestHighscoreManager:
         """Test add_highscore limits to max entries"""
         manager = HighscoreManager()
         manager.highscores = []
-        
+
         # Add more than max
         for i in range(HIGHSCORE_MAX_ENTRIES + 5):
             manager.add_highscore(f"A{i:02d}", i * 100)
-        
+
         assert len(manager.highscores) == HIGHSCORE_MAX_ENTRIES
 
     def test_highscore_add_returns_position(self, clean_highscore_file):
         """Test add_highscore returns correct position"""
         manager = HighscoreManager()
         manager.highscores = []
-        
+
         pos = manager.add_highscore("AAA", 5000)
         assert pos == 0
-        
+
         pos = manager.add_highscore("BBB", 3000)
         assert pos == 1
-        
+
         pos = manager.add_highscore("CCC", 7000)
         assert pos == 0
 
@@ -181,7 +181,7 @@ class TestHighscoreManager:
         # Create corrupted file
         with open(HIGHSCORE_FILE, "w") as f:
             f.write("invalid json {")
-        
+
         manager = HighscoreManager()
         # Should have fallback scores
         assert len(manager.highscores) == HIGHSCORE_MAX_ENTRIES
@@ -201,10 +201,10 @@ class TestHighscoreInput:
         """Test RETURN key completes input"""
         input_handler = HighscoreInput(1000)
         input_handler.name = ["B", "O", "B"]
-        
+
         event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_RETURN})
         result = input_handler.update([event])
-        
+
         assert result == "BOB"
         assert input_handler.done is True
 
@@ -212,50 +212,50 @@ class TestHighscoreInput:
         """Test LEFT key moves cursor"""
         input_handler = HighscoreInput(1000)
         input_handler.current_pos = 2
-        
+
         event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_LEFT})
         input_handler.update([event])
-        
+
         assert input_handler.current_pos == 1
 
     def test_highscore_input_right_key(self):
         """Test RIGHT key moves cursor"""
         input_handler = HighscoreInput(1000)
         input_handler.current_pos = 0
-        
+
         event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_RIGHT})
         input_handler.update([event])
-        
+
         assert input_handler.current_pos == 1
 
     def test_highscore_input_backspace_key(self):
         """Test BACKSPACE key moves cursor back"""
         input_handler = HighscoreInput(1000)
         input_handler.current_pos = 2
-        
+
         event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_BACKSPACE})
         input_handler.update([event])
-        
+
         assert input_handler.current_pos == 1
 
     def test_highscore_input_backspace_at_start(self):
         """Test BACKSPACE at start doesn't go negative"""
         input_handler = HighscoreInput(1000)
         input_handler.current_pos = 0
-        
+
         event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_BACKSPACE})
         input_handler.update([event])
-        
+
         assert input_handler.current_pos == 0
 
     def test_highscore_input_right_at_end(self):
         """Test RIGHT at end doesn't exceed limit"""
         input_handler = HighscoreInput(1000)
         input_handler.current_pos = HIGHSCORE_NAME_LENGTH - 1
-        
+
         event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_RIGHT})
         input_handler.update([event])
-        
+
         assert input_handler.current_pos == HIGHSCORE_NAME_LENGTH - 1
 
     def test_highscore_input_draw(self):
@@ -269,10 +269,10 @@ class TestHighscoreInput:
         input_handler = HighscoreInput(1000)
         input_handler.current_pos = 0
         initial_char = input_handler.name[0]
-        
+
         event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_UP})
         input_handler.update([event])
-        
+
         # Character should have changed
         assert input_handler.name[0] != initial_char
 
@@ -281,19 +281,19 @@ class TestHighscoreInput:
         input_handler = HighscoreInput(1000)
         input_handler.current_pos = 0
         initial_char = input_handler.name[0]
-        
+
         event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_DOWN})
         input_handler.update([event])
-        
+
         # Character should have changed
         assert input_handler.name[0] != initial_char
 
     def test_highscore_input_no_events(self):
         """Test update with no events"""
         input_handler = HighscoreInput(1000)
-        
+
         result = input_handler.update([])
-        
+
         assert result is None
         assert input_handler.done is False
 
@@ -305,7 +305,7 @@ class TestHighscoreDisplay:
         """Test HighscoreDisplay initialization"""
         manager = HighscoreManager()
         display = HighscoreDisplay(manager)
-        
+
         assert display.highscore_manager is manager
         assert display.background_alpha == 0
         assert display.fade_in is True
@@ -316,18 +316,18 @@ class TestHighscoreDisplay:
         """Test fade-in animation"""
         manager = HighscoreManager()
         display = HighscoreDisplay(manager)
-        
+
         display.update(0.1, [])
-        
+
         assert display.background_alpha > 0
 
     def test_highscore_display_update_fade_complete(self):
         """Test fade-in completes"""
         manager = HighscoreManager()
         display = HighscoreDisplay(manager)
-        
+
         display.update(1.0, [])
-        
+
         assert display.fade_in is False
         assert display.background_alpha == 200
 
@@ -335,9 +335,9 @@ class TestHighscoreDisplay:
         """Test button hover animation"""
         manager = HighscoreManager()
         display = HighscoreDisplay(manager)
-        
+
         display.update(0.1, [])
-        
+
         assert display.back_button["hover_animation"] > 0
 
     def test_highscore_display_update_input_cooldown(self):
@@ -345,39 +345,39 @@ class TestHighscoreDisplay:
         manager = HighscoreManager()
         display = HighscoreDisplay(manager)
         display.input_cooldown = 1.0
-        
+
         display.update(0.5, [])
-        
+
         assert display.input_cooldown == 0.5
 
     def test_highscore_display_update_space_returns_main_menu(self):
         """Test SPACE key returns to main menu"""
         manager = HighscoreManager()
         display = HighscoreDisplay(manager)
-        
+
         event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_SPACE})
         result = display.update(0.1, [event])
-        
+
         assert result == "main_menu"
 
     def test_highscore_display_update_return_returns_main_menu(self):
         """Test RETURN key returns to main menu"""
         manager = HighscoreManager()
         display = HighscoreDisplay(manager)
-        
+
         event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_RETURN})
         result = display.update(0.1, [event])
-        
+
         assert result == "main_menu"
 
     def test_highscore_display_update_escape_returns_main_menu(self):
         """Test ESCAPE key returns to main menu"""
         manager = HighscoreManager()
         display = HighscoreDisplay(manager)
-        
+
         event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_ESCAPE})
         result = display.update(0.1, [event])
-        
+
         assert result == "main_menu"
 
     def test_highscore_display_update_cooldown_blocks_input(self):
@@ -385,10 +385,10 @@ class TestHighscoreDisplay:
         manager = HighscoreManager()
         display = HighscoreDisplay(manager)
         display.input_cooldown = 1.0
-        
+
         event = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_SPACE})
         result = display.update(0.1, [event])
-        
+
         assert result is None
 
     def test_highscore_display_draw(self):
@@ -396,7 +396,7 @@ class TestHighscoreDisplay:
         manager = HighscoreManager()
         display = HighscoreDisplay(manager)
         screen = pygame.Surface((800, 600))
-        
+
         display.draw(screen)  # Should not raise exception
 
     def test_highscore_display_draw_with_entries(self):
@@ -409,7 +409,7 @@ class TestHighscoreDisplay:
         ]
         display = HighscoreDisplay(manager)
         screen = pygame.Surface((800, 600))
-        
+
         display.draw(screen)
 
     def test_highscore_display_draw_medal_colors(self):
@@ -423,5 +423,5 @@ class TestHighscoreDisplay:
         ]
         display = HighscoreDisplay(manager)
         screen = pygame.Surface((800, 600))
-        
+
         display.draw(screen)  # Gold, silver, bronze should be rendered

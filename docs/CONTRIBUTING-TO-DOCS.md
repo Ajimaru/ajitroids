@@ -1,6 +1,8 @@
 # Ajitroids Documentation
 
-This directory contains the source files for the Ajitroids developer documentation, built with [MkDocs](https://www.mkdocs.org/) and [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/).
+This directory contains the source files for the Ajitroids developer
+documentation, built with [MkDocs](https://www.mkdocs.org/) and
+[Material for MkDocs](https://squidfunk.github.io/mkdocs-material/).
 
 ## Quick Start
 
@@ -61,14 +63,11 @@ All documentation is written in Markdown with some extensions:
 ### Example Admonition
 
 ```markdown
-!!! note "Important Note"
-    This is a note admonition.
+!!! note "Important Note" This is a note admonition.
 
-!!! warning
-    This is a warning.
+!!! warning This is a warning.
 
-!!! tip
-    This is a tip.
+!!! tip This is a tip.
 ```
 
 ### Example Mermaid Diagram
@@ -92,21 +91,19 @@ def example():
 
 ## Auto-Generated API Documentation
 
-The Python API documentation is auto-generated using [mkdocstrings](https://mkdocstrings.github.io/).
+The Python API documentation is auto-generated using
+[mkdocstrings](https://mkdocstrings.github.io/).
 
 ### How It Works
 
 In `docs/api/python.md`:
 
-````markdown
-::: modul
-    handler: python
-    options:
-      members_order: source
-      show_source: true
-````
+```markdown
+::: modul handler: python options: members_order: source show_source: true
+```
 
-This automatically generates documentation from Python docstrings in the `modul/` directory.
+This automatically generates documentation from Python docstrings in the
+`modul/` directory.
 
 ### Docstring Format
 
@@ -115,16 +112,16 @@ Use Google-style docstrings:
 ```python
 def example_function(param1: int, param2: str) -> bool:
     """Brief description of function.
-    
+
     Longer description if needed.
-    
+
     Args:
         param1: Description of param1
         param2: Description of param2
-        
+
     Returns:
         Description of return value
-        
+
     Raises:
         ValueError: When something goes wrong
     """
@@ -155,7 +152,8 @@ brew install graphviz
 
 ## GitHub Pages Deployment
 
-Documentation is automatically deployed to GitHub Pages when changes are pushed to the `main` branch.
+Documentation is automatically deployed to GitHub Pages when changes are pushed
+to the `main` branch.
 
 ### Workflow
 

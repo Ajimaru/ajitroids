@@ -415,7 +415,7 @@ class TestTutorial:
         tutorial.current_page = len(tutorial.pages) - 1
         tutorial.next_page()
         assert tutorial.current_page == len(tutorial.pages) - 1
-        
+
         tutorial.current_page = 0
         tutorial.previous_page()
         assert tutorial.current_page == 0
@@ -434,13 +434,13 @@ class TestTutorial:
         tutorial = Tutorial()
         tutorial.transitioning = True
         tutorial.transition_duration = 0.3
-        
+
         tutorial.transition_timer = 0.0
         tutorial.draw(pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)))
-        
+
         tutorial.transition_timer = 0.15
         tutorial.draw(pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)))
-        
+
         tutorial.transition_timer = 0.3
         tutorial.draw(pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)))
 
@@ -530,7 +530,7 @@ class TestTutorial:
         for _ in range(10):
             tutorial.next_page()
             tutorial.update(0.01, [])
-        
+
     def test_tutorial_page_content_structure_consistency(self):
         """Test all pages have consistent structure"""
         tutorial = Tutorial()
@@ -560,12 +560,12 @@ class TestTutorial:
     def test_tutorial_transition_boundary_cases(self):
         """Test transition at boundary pages"""
         tutorial = Tutorial()
-        
+
         tutorial.current_page = 0
         tutorial.start_transition(1)
         tutorial.update(0.5, [])
         assert tutorial.current_page == 1
-        
+
         tutorial.current_page = len(tutorial.pages) - 2
         tutorial.start_transition(len(tutorial.pages) - 1)
         tutorial.update(0.5, [])

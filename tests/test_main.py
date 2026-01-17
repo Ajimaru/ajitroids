@@ -32,12 +32,12 @@ def test_game_settings_initialization():
 def test_main_function_structure(mock_clock, mock_display, mock_init):
     """Test that main function can be called without actually running the game"""
     import main
-    
+
     # Mock pygame to prevent actual game initialization
     mock_init.return_value = None
     mock_display.return_value = unittest.mock.MagicMock()
     mock_clock.return_value = unittest.mock.MagicMock()
-    
+
     # This test just ensures main function exists and can be imported
     # We don't actually run it to avoid starting the game
     assert callable(main.main)
@@ -45,7 +45,7 @@ def test_main_function_structure(mock_clock, mock_display, mock_init):
 def test_helper_functions():
     """Test utility functions in main.py"""
     import main
-    
+
     # Test that helper functions exist
     assert callable(main.player_hit)
     assert callable(main.toggle_fullscreen)

@@ -14,7 +14,7 @@ from datetime import datetime
 
 class ReplayListMenu:
     """Menu for listing and selecting replays."""
-    
+
     def __init__(self, replay_manager: ReplayManager):
         self.replay_manager = replay_manager
         self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
@@ -24,14 +24,14 @@ class ReplayListMenu:
         self.fade_in = False
         self.selected_index = 0
         self.replays = []
-        
+
     def activate(self):
         """Activate the replay list menu."""
         self.fade_in = True
         self.background_alpha = 0
         self.selected_index = 0
         self.replays = self.replay_manager.list_replays()
-        
+
     def update(self, dt, events):
         """Update replay list menu state."""
         if self.fade_in:
@@ -42,7 +42,7 @@ class ReplayListMenu:
             if self.background_alpha >= MENU_BACKGROUND_ALPHA:
                 self.fade_in = False
                 self.background_alpha = MENU_BACKGROUND_ALPHA
-        
+
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -70,16 +70,16 @@ class ReplayListMenu:
                     self.replays = self.replay_manager.list_replays()
                     if self.selected_index >= len(self.replays):
                         self.selected_index = max(0, len(self.replays) - 1)
-                        
+
         return None
-    
+
     def draw(self, screen):
         """Draw the replay list menu."""
         # Semi-transparent background
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
-        
+
         # Title
         title_surf = self.title_font.render(
             "REPLAY BROWSER",
@@ -88,7 +88,7 @@ class ReplayListMenu:
         )
         title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, 60))
         screen.blit(title_surf, title_rect)
-        
+
         if not self.replays:
             # No replays message
             no_replays_surf = self.text_font.render(
@@ -105,13 +105,13 @@ class ReplayListMenu:
             y_pos = 140
             for i, replay in enumerate(self.replays):
                 metadata = replay['metadata']
-                
+
                 # Format timestamp
                 timestamp = metadata.get('start_time', 0)
                 date_str = datetime.fromtimestamp(timestamp).strftime(
                     '%Y-%m-%d %H:%M'
                 )
-                
+
                 # Format info
                 score = metadata.get('final_score', 0)
                 level = metadata.get('final_level', 0)
@@ -120,12 +120,12 @@ class ReplayListMenu:
                 duration_str = (
                     f"{int(duration // 60)}:{int(duration % 60):02d}"
                 )
-                
+
                 info_text = (
                     f"{date_str} | Score: {score:,} | Level: {level} | "
                     f"{difficulty} | {duration_str}"
                 )
-                
+
                 # Highlight selected
                 if i == self.selected_index:
                     color = pygame.Color(MENU_SELECTED_COLOR)
@@ -133,7 +133,7 @@ class ReplayListMenu:
                 else:
                     color = pygame.Color(MENU_UNSELECTED_COLOR)
                     prefix = "  "
-                
+
                 text_surf = self.text_font.render(
                     prefix + info_text,
                     True,
@@ -143,18 +143,18 @@ class ReplayListMenu:
                     center=(SCREEN_WIDTH / 2, y_pos)
                 )
                 screen.blit(text_surf, text_rect)
-                
+
                 y_pos += 45
-                
+
                 # Don't draw too many at once
                 if y_pos > SCREEN_HEIGHT - 150:
                     break
-        
+
         # Instructions
         instructions = [
             "UP/DOWN: Navigate | ENTER: Play | DELETE: Remove | ESC: Back"
         ]
-        
+
         y_pos = SCREEN_HEIGHT - 60
         for instruction in instructions:
             instr_surf = self.small_font.render(
@@ -169,13 +169,13 @@ class ReplayListMenu:
 
 class ReplayViewer:
     """Viewer for playing back replays."""
-    
+
     def __init__(self, replay_player: ReplayPlayer):
         self.replay_player = replay_player
         self.title_font = pygame.font.Font(None, 48)
         self.text_font = pygame.font.Font(None, 32)
         self.small_font = pygame.font.Font(None, 24)
-        
+
     def update(self, dt, events):
         """Update replay viewer state."""
         for event in events:
@@ -195,21 +195,21 @@ class ReplayViewer:
                     self.replay_player.set_speed(1.0)
                 elif event.key == pygame.K_3:
                     self.replay_player.set_speed(2.0)
-                    
+
         return None
-    
+
     def draw_hud(self, screen):
         """Draw replay HUD with controls and info."""
         # Draw control bar at bottom
         bar_height = 80
         bar_y = SCREEN_HEIGHT - bar_height
-        
+
         # Semi-transparent background
         overlay = pygame.Surface((SCREEN_WIDTH, bar_height))
         overlay.set_alpha(180)
         overlay.fill((20, 20, 20))
         screen.blit(overlay, (0, bar_y))
-        
+
         # Playback status
         status = "PAUSED" if self.replay_player.paused else "PLAYING"
         status_color = (
@@ -217,20 +217,20 @@ class ReplayViewer:
         )
         status_surf = self.text_font.render(status, True, status_color)
         screen.blit(status_surf, (20, bar_y + 10))
-        
+
         # Progress bar
         progress = self.replay_player.get_progress_percentage()
         bar_width = 600
         bar_x = SCREEN_WIDTH / 2 - bar_width / 2
         bar_y_pos = bar_y + 20
-        
+
         # Background
         pygame.draw.rect(
             screen,
             (50, 50, 50),
             (bar_x, bar_y_pos, bar_width, 10),
         )
-        
+
         # Progress
         fill_width = (progress / 100.0) * bar_width
         pygame.draw.rect(
@@ -238,7 +238,7 @@ class ReplayViewer:
             (0, 200, 255),
             (bar_x, bar_y_pos, fill_width, 10),
         )
-        
+
         # Time info
         current_time = self.replay_player.get_current_timestamp()
         total_time = self.replay_player.metadata.get('duration', 0)
@@ -249,12 +249,12 @@ class ReplayViewer:
         time_surf = self.small_font.render(time_text, True, (200, 200, 200))
         time_rect = time_surf.get_rect(center=(SCREEN_WIDTH / 2, bar_y + 45))
         screen.blit(time_surf, time_rect)
-        
+
         # Speed indicator
         speed_text = f"Speed: {self.replay_player.playback_speed}x"
         speed_surf = self.small_font.render(speed_text, True, (200, 200, 200))
         screen.blit(speed_surf, (SCREEN_WIDTH - 150, bar_y + 10))
-        
+
         # Controls hint
         controls = "SPACE: Pause | ←/→: Skip | 1/2/3: Speed | ESC: Exit"
         controls_surf = self.small_font.render(controls, True, (150, 150, 150))
@@ -262,7 +262,7 @@ class ReplayViewer:
             center=(SCREEN_WIDTH / 2, bar_y + 65)
         )
         screen.blit(controls_surf, controls_rect)
-        
+
         # Replay indicator in top-right
         replay_text = "REPLAY"
         replay_surf = self.title_font.render(replay_text, True, (255, 0, 0))

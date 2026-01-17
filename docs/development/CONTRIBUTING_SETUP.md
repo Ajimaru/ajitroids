@@ -2,13 +2,15 @@
 
 # Contributing to Ajitroids
 
-Thank you for your interest in contributing to Ajitroids! This guide will help you get started with development.
+Thank you for your interest in contributing to Ajitroids! This guide will help
+you get started with development.
 
 ## Setting Up Your Development Environment
 
 ### Automatic Setup (Recommended)
 
-Run the provided setup script to install all dependencies and activate pre-commit hooks:
+Run the provided setup script to install all dependencies and activate
+pre-commit hooks:
 
 ```bash
 bash setup-dev.sh
@@ -41,7 +43,8 @@ pre-commit install
 
 ## Code Quality & Pre-Commit Hooks
 
-This project uses pre-commit hooks to maintain code quality. Hooks automatically run on every commit and will:
+This project uses pre-commit hooks to maintain code quality. Hooks automatically
+run on every commit and will:
 
 - **flake8**: Check code style (PEP 8)
 - **pylint**: Analyze code for errors and maintainability

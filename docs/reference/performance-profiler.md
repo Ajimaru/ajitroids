@@ -1,14 +1,18 @@
 # Performance Profiler
 
-The Performance Profiler provides real-time monitoring of game performance metrics during gameplay.
+The Performance Profiler provides real-time monitoring of game performance
+metrics during gameplay.
 
 ## Overview
 
-The Performance Profiler is an in-game overlay that displays key performance metrics including FPS (Frames Per Second), frame time, and object counts. It helps developers and players monitor the game's performance in real-time.
+The Performance Profiler is an in-game overlay that displays key performance
+metrics including FPS (Frames Per Second), frame time, and object counts. It
+helps developers and players monitor the game's performance in real-time.
 
 ![Performance Profiler Screenshot](../assets/screenshots/performance_profiler.png)
 
-*The performance profiler overlay showing FPS graph, frame time, and object counts*
+_The performance profiler overlay showing FPS graph, frame time, and object
+counts_
 
 ## Usage
 
@@ -49,7 +53,8 @@ The profiler displays the following information:
 
 ### Module: `modul/performance_profiler.py`
 
-The profiler is implemented as a standalone module that can be easily integrated into any pygame-based game.
+The profiler is implemented as a standalone module that can be easily integrated
+into any pygame-based game.
 
 ### Key Features
 
@@ -100,17 +105,20 @@ summary = profiler.get_summary()
 The profiler is integrated into the main game loop in `main.py`:
 
 1. **Initialization** (line ~241):
+
    ```python
    performance_profiler = PerformanceProfiler()
    ```
 
 2. **Toggle Handler** (line ~302):
+
    ```python
    elif event.key == pygame.K_F12:
        profiler_enabled = performance_profiler.toggle()
    ```
 
 3. **Update** (line ~618):
+
    ```python
    performance_profiler.update(dt, clock, object_groups)
    ```
@@ -131,7 +139,8 @@ The profiler itself has minimal performance impact:
 
 ## Testing
 
-The profiler includes comprehensive unit tests in `tests/test_performance_profiler.py`:
+The profiler includes comprehensive unit tests in
+`tests/test_performance_profiler.py`:
 
 ```bash
 # Run profiler tests
@@ -143,13 +152,17 @@ pytest tests/test_performance_profiler.py --cov=modul.performance_profiler
 
 ## Tips for Developers
 
-1. **Performance Bottlenecks**: Use the profiler to identify when FPS drops occur and correlate with object counts.
+1. **Performance Bottlenecks**: Use the profiler to identify when FPS drops
+   occur and correlate with object counts.
 
-2. **Optimization**: Watch the object counts to see if particle systems or other dynamic objects are growing unexpectedly.
+2. **Optimization**: Watch the object counts to see if particle systems or other
+   dynamic objects are growing unexpectedly.
 
-3. **Testing**: Enable the profiler during development to catch performance regressions early.
+3. **Testing**: Enable the profiler during development to catch performance
+   regressions early.
 
-4. **Target FPS**: The game targets 60 FPS. Consistent frame times around 16.67ms indicate smooth performance.
+4. **Target FPS**: The game targets 60 FPS. Consistent frame times around
+   16.67ms indicate smooth performance.
 
 ## Future Enhancements
 

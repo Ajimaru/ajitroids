@@ -83,4 +83,3 @@ print(f"\n✅ Version successfully updated to {version}")
 print(f"   Next steps:")
 print(f"   1. git add VERSION modul/_version.py pyproject.toml")
 print(f"   2. git commit -m 'version bump to {version}'")
-

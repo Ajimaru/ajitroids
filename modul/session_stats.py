@@ -8,7 +8,7 @@ class SessionStats:
     def __init__(self):
         self.reset()
         self.session_start_time = time.time()
-        
+
     def reset(self):
         """Reset statistics for a new game."""
         self.game_start_time = time.time()
@@ -23,12 +23,12 @@ class SessionStats:
         self.highest_level = 0
         self.total_lives_lost = 0
         self.total_playtime = 0.0
-        
+
     def start_game(self):
         """Mark the start of a new game."""
         self.game_start_time = time.time()
         self.games_played += 1
-        
+
     def end_game(self, final_score, final_level):
         """Record stats at game end."""
         self.total_score += final_score
@@ -36,46 +36,46 @@ class SessionStats:
         self.highest_level = max(self.highest_level, final_level)
         game_duration = time.time() - self.game_start_time
         self.total_playtime += game_duration
-        
+
     def record_asteroid_destroyed(self):
         """Increment asteroid destruction counter."""
         self.total_asteroids_destroyed += 1
-        
+
     def record_enemy_destroyed(self):
         """Increment enemy destruction counter."""
         self.total_enemies_destroyed += 1
-        
+
     def record_boss_defeated(self):
         """Increment boss defeat counter."""
         self.total_bosses_defeated += 1
-        
+
     def record_powerup_collected(self):
         """Increment powerup collection counter."""
         self.total_powerups_collected += 1
-        
+
     def record_shot_fired(self):
         """Increment shot fired counter."""
         self.total_shots_fired += 1
-        
+
     def record_life_lost(self):
         """Increment lives lost counter."""
         self.total_lives_lost += 1
-        
+
     def get_session_duration(self):
         """Get total session duration in seconds."""
         return time.time() - self.session_start_time
-        
+
     def get_average_score(self):
         """Calculate average score per game."""
         return self.total_score / max(1, self.games_played)
-        
+
     def get_accuracy(self):
         """Calculate shot accuracy (targets destroyed / shots fired)."""
         if self.total_shots_fired == 0:
             return 0.0
         total_hits = self.total_asteroids_destroyed + self.total_enemies_destroyed
         return (total_hits / self.total_shots_fired) * 100
-        
+
     def get_summary(self):
         """Get a dictionary of all statistics."""
         return {
@@ -92,14 +92,14 @@ class SessionStats:
             'total_playtime': self.total_playtime,
             'session_duration': self.get_session_duration(),
         }
-        
+
     def format_time(self, seconds):
         """Format seconds into HH:MM:SS."""
         hours = int(seconds // 3600)
         minutes = int((seconds % 3600) // 60)
         secs = int(seconds % 60)
         return f"{hours:02d}:{minutes:02d}:{secs:02d}"
-        
+
     def get_formatted_summary(self):
         """Get a formatted string representation of stats."""
         stats = self.get_summary()

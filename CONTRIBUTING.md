@@ -1,13 +1,16 @@
 # Contributing Guidelines
 
-Thank you for your interest in contributing to this project! We welcome and appreciate all kinds of contributions. Below are a few guidelines to help you get started.
+Thank you for your interest in contributing to this project! We welcome and
+appreciate all kinds of contributions. Below are a few guidelines to help you
+get started.
 
 ## How to Contribute
 
 ### Reporting Issues
 
 - Search existing issues before creating a new one.
-- Include clear steps to reproduce, expected vs. actual behavior, and relevant logs or screenshots.
+- Include clear steps to reproduce, expected vs. actual behavior, and relevant
+  logs or screenshots.
 - Use a descriptive title.
 
 ### Suggesting Enhancements

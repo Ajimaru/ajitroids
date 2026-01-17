@@ -15,7 +15,7 @@ class HelpScreen:
         self.section_font = None
         self.text_font = None
         self.small_font = None
-        
+
         self.shortcuts = [
             ("GAME CONTROLS", [
                 ("Arrow Keys", "Control ship (rotation and thrust)"),
@@ -32,7 +32,7 @@ class HelpScreen:
                 ("F11", "Toggle fullscreen"),
             ]),
         ]
-        
+
         self.background_alpha = 200
 
     def _ensure_fonts(self):
@@ -97,7 +97,7 @@ class HelpScreen:
         # Draw shortcuts in columns
         y_pos = 140
         x_left = SCREEN_WIDTH / 2 - 350
-        
+
         for section_title, shortcuts in self.shortcuts:
             # Section title
             section_surface = self.section_font.render(
@@ -113,7 +113,7 @@ class HelpScreen:
                 # Key name (highlighted)
                 key_surface = self.text_font.render(key, True, (255, 255, 0))
                 screen.blit(key_surface, (x_left + 20, y_pos))
-                
+
                 # Description
                 desc_surface = self.text_font.render(
                     f"- {description}",
@@ -121,9 +121,9 @@ class HelpScreen:
                     (200, 200, 200),
                 )
                 screen.blit(desc_surface, (x_left + 250, y_pos))
-                
+
                 y_pos += 35
-            
+
             y_pos += 20
 
         # Tips section
@@ -139,7 +139,7 @@ class HelpScreen:
             "• Unlock new ships by reaching level 50",
             "• Check achievements menu for special challenges",
         ]
-        
+
         for tip in tips:
             tip_surface = self.text_font.render(tip, True, (180, 180, 180))
             screen.blit(tip_surface, (x_left + 20, y_pos))

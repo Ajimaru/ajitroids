@@ -1,10 +1,12 @@
 # Settings
 
-This document describes the configuration system and available settings in Ajitroids.
+This document describes the configuration system and available settings in
+Ajitroids.
 
 ## Settings System
 
-Ajitroids uses a JSON-based settings system that persists user preferences between game sessions.
+Ajitroids uses a JSON-based settings system that persists user preferences
+between game sessions.
 
 ## Settings File Location
 
@@ -62,6 +64,7 @@ pygame.display.set_mode((width, height), pygame.FULLSCREEN)
 ```
 
 **Options:**
+
 - `false`: Windowed mode (default)
 - `true`: Fullscreen mode
 
@@ -73,6 +76,7 @@ settings.video.resolution = [1920, 1080]
 ```
 
 **Common options:**
+
 - `[1280, 720]`: 720p (default)
 - `[1920, 1080]`: 1080p
 - `[2560, 1440]`: 1440p
@@ -86,6 +90,7 @@ settings.video.vsync = True
 ```
 
 **Options:**
+
 - `true`: Enable VSync (default)
 - `false`: Disable VSync
 
@@ -97,6 +102,7 @@ settings.video.fps_display = True
 ```
 
 **Options:**
+
 - `false`: Hidden (default)
 - `true`: Show FPS in corner
 
@@ -109,8 +115,7 @@ settings.video.fps_display = True
 settings.audio.master_volume = 0.7  # 0.0 to 1.0
 ```
 
-**Range:** 0.0 (muted) to 1.0 (max)
-**Default:** 0.7
+**Range:** 0.0 (muted) to 1.0 (max) **Default:** 0.7
 
 #### Music Volume
 
@@ -120,8 +125,7 @@ settings.audio.music_volume = 0.5
 pygame.mixer.music.set_volume(settings.audio.music_volume)
 ```
 
-**Range:** 0.0 (muted) to 1.0 (max)
-**Default:** 0.5
+**Range:** 0.0 (muted) to 1.0 (max) **Default:** 0.5
 
 #### Sound Effects Volume
 
@@ -130,8 +134,7 @@ pygame.mixer.music.set_volume(settings.audio.music_volume)
 settings.audio.sfx_volume = 0.8
 ```
 
-**Range:** 0.0 (muted) to 1.0 (max)
-**Default:** 0.8
+**Range:** 0.0 (muted) to 1.0 (max) **Default:** 0.8
 
 #### Enable/Disable Audio
 
@@ -153,6 +156,7 @@ settings.gameplay.difficulty = "hard"
 ```
 
 **Options:**
+
 - `"easy"`: More lives, slower enemies
 - `"normal"`: Balanced gameplay (default)
 - `"hard"`: Fewer lives, faster enemies
@@ -165,6 +169,7 @@ settings.gameplay.screen_shake = True
 ```
 
 **Options:**
+
 - `true`: Enable screen shake (default)
 - `false`: Disable screen shake
 
@@ -176,6 +181,7 @@ settings.gameplay.particle_effects = True
 ```
 
 **Options:**
+
 - `true`: Enable particles (default)
 - `false`: Disable particles (better performance)
 
@@ -192,6 +198,7 @@ settings.controls.shoot = "SPACE"
 ```
 
 **Default bindings:**
+
 - `rotate_left`: LEFT arrow
 - `rotate_right`: RIGHT arrow
 - `thrust`: UP arrow
@@ -359,10 +366,13 @@ ASTEROID_KINDS = 3
 ASTEROID_SPAWN_RATE = 0.8
 ```
 
-These constants are not user-configurable but can be modified for development/modding.
+These constants are not user-configurable but can be modified for
+development/modding.
 
 ## Next Steps
 
-- [Pygame Integration](pygame-integration.md): How settings integrate with Pygame
-- [Configuration Reference](../reference/configuration.md): Complete settings reference
+- [Pygame Integration](pygame-integration.md): How settings integrate with
+  Pygame
+- [Configuration Reference](../reference/configuration.md): Complete settings
+  reference
 - [Contributing](../development/contributing.md): Modifying default settings

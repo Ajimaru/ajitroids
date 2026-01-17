@@ -4,7 +4,8 @@ This document describes the release process for Ajitroids.
 
 ## Release Workflow
 
-Ajitroids uses an automated release workflow with GitHub Actions and `setuptools-scm` for version management.
+Ajitroids uses an automated release workflow with GitHub Actions and
+`setuptools-scm` for version management.
 
 ## Version Management
 
@@ -41,6 +42,7 @@ Commits on `main` without a tag get a dev version:
 ```
 
 This includes:
+
 - Last tag version: `1.2.3`
 - Commits since tag: `.dev5`
 - Git hash: `+g1234567`
@@ -68,15 +70,18 @@ Update `CHANGELOG.md` with all changes since last release:
 ## [1.2.3] - 2024-01-15
 
 ### Added
+
 - New power-up: Shield
 - Achievement system
 - Boss fight in level 5
 
 ### Changed
+
 - Improved asteroid collision detection
 - Updated UI styling
 
 ### Fixed
+
 - Fixed player respawn bug
 - Corrected sound volume issue
 ```
@@ -118,6 +123,7 @@ git tag -a v1.2.3 -m "Release version 1.2.3"
 ```
 
 Tag message format:
+
 ```
 Release version 1.2.3
 
@@ -151,7 +157,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 jobs:
   release:
@@ -181,6 +187,7 @@ python -m build
 ```
 
 This creates:
+
 - `dist/ajitroids-1.2.3.tar.gz` (source)
 - `dist/ajitroids-1.2.3-py3-none-any.whl` (wheel)
 
@@ -247,39 +254,45 @@ twine upload dist/*
 ## Release Notes Format
 
 ### Title
+
 ```
 Release v1.2.3 - Feature Name
 ```
 
 ### Body
+
 ```markdown
 ## What's New in 1.2.3
 
 ### 🎮 New Features
+
 - Feature 1 description
 - Feature 2 description
 
 ### 🐛 Bug Fixes
+
 - Bug fix 1
 - Bug fix 2
 
 ### 🔧 Improvements
+
 - Improvement 1
 - Improvement 2
 
 ### 📚 Documentation
+
 - Doc update 1
 
 ### 🙏 Contributors
+
 Thanks to @username1, @username2 for contributions!
 
 ## Installation
 
-\`\`\`bash
-pip install ajitroids==1.2.3
-\`\`\`
+\`\`\`bash pip install ajitroids==1.2.3 \`\`\`
 
 ## Full Changelog
+
 See [CHANGELOG.md](CHANGELOG.md) for details.
 ```
 
@@ -292,6 +305,7 @@ See [CHANGELOG.md](CHANGELOG.md) for details.
 ```
 
 Changes:
+
 - Bug fixes only
 - No new features
 - No breaking changes
@@ -303,6 +317,7 @@ Changes:
 ```
 
 Changes:
+
 - New features
 - Bug fixes
 - Backward compatible
@@ -314,6 +329,7 @@ Changes:
 ```
 
 Changes:
+
 - Breaking API changes
 - Major refactoring
 - New features and fixes
@@ -323,17 +339,20 @@ Changes:
 For critical bugs in production:
 
 1. **Create hotfix branch** from release tag
+
    ```bash
    git checkout -b hotfix/1.2.4 v1.2.3
    ```
 
 2. **Fix the bug**
+
    ```bash
    # Make fix
    git commit -m "fix: critical bug description"
    ```
 
 3. **Tag hotfix release**
+
    ```bash
    git tag v1.2.4
    git push origin v1.2.4
@@ -355,6 +374,7 @@ print(f"Ajitroids version: {version}")
 ```
 
 Or via command line:
+
 ```bash
 python -c "from modul._version import version; print(version)"
 ```
@@ -375,6 +395,7 @@ When deprecating features:
 4. **Remove** in next major version
 
 Example:
+
 ```python
 import warnings
 
@@ -410,4 +431,5 @@ Announce releases through:
 
 - [Contributing Guide](contributing.md): How to contribute
 - [Testing](testing.md): Testing guidelines
-- [CHANGELOG](https://github.com/Ajimaru/ajitroids/blob/main/CHANGELOG.md): View all releases
+- [CHANGELOG](https://github.com/Ajimaru/ajitroids/blob/main/CHANGELOG.md): View
+  all releases

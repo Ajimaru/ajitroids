@@ -35,7 +35,7 @@ class AsteroidField:
             list(ASTEROID_TYPE_WEIGHTS.keys()),
             weights=list(ASTEROID_TYPE_WEIGHTS.values())
         )[0]
-        
+
         asteroid = Asteroid(position.x, position.y, radius, asteroid_type)
         asteroid.velocity = velocity
 

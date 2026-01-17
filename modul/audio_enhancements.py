@@ -39,7 +39,7 @@ class SoundTheme(Enum):
 
 class DynamicMusicSystem:
     """Manages dynamic music that changes based on game intensity"""
-    
+
     def __init__(self):
         self.current_intensity = IntensityLevel.CALM
         # Music tracks for different intensity levels
@@ -56,20 +56,20 @@ class DynamicMusicSystem:
         self.min_transition_time = 2.0  # Minimum seconds between transitions
         self.last_transition = 0.0
         self.enabled = True
-        
-    def calculate_intensity(self, asteroids_count: int, enemies_count: int, 
+
+    def calculate_intensity(self, asteroids_count: int, enemies_count: int,
                           boss_active: bool, score: int, level: int) -> IntensityLevel:
         """Calculate game intensity based on current game state"""
         if boss_active:
             return IntensityLevel.BOSS
-        
+
         # Calculate intensity score
         intensity_score = 0
         intensity_score += asteroids_count * 2
         intensity_score += enemies_count * 5
         intensity_score += (level - 1) * 3
         intensity_score += score // 10000
-        
+
         # Determine intensity level
         if intensity_score >= 30:
             return IntensityLevel.INTENSE
@@ -77,47 +77,47 @@ class DynamicMusicSystem:
             return IntensityLevel.NORMAL
         else:
             return IntensityLevel.CALM
-    
+
     def update(self, dt: float, asteroids_count: int, enemies_count: int,
                boss_active: bool, score: int, level: int, asset_path_func) -> bool:
         """Update music based on game intensity. Returns True if music changed."""
         if not self.enabled:
             return False
-            
+
         self.transition_cooldown -= dt
-        
+
         new_intensity = self.calculate_intensity(
             asteroids_count, enemies_count, boss_active, score, level
         )
-        
+
         # Only transition if cooldown expired and intensity changed
         if new_intensity != self.current_intensity and self.transition_cooldown <= 0:
             return self._transition_music(new_intensity, asset_path_func)
-        
+
         return False
-    
+
     def _transition_music(self, new_intensity: IntensityLevel, asset_path_func) -> bool:
         """Smoothly transition to new music track"""
         try:
             track = self.music_tracks[new_intensity]
-            
+
             # Fade out current music (non-blocking)
             pygame.mixer.music.fadeout(1000)
-            
+
             # Load and play new track
             pygame.mixer.music.load(asset_path_func(track))
             pygame.mixer.music.play(-1)
-            
+
             self.current_intensity = new_intensity
             self.transition_cooldown = self.min_transition_time
             self.last_transition = time.time()
-            
+
             print(f"Music transitioned to {new_intensity.value}")
             return True
         except Exception as e:
             print(f"Error transitioning music: {e}")
             return False
-    
+
     def set_enabled(self, enabled: bool):
         """Enable or disable dynamic music system"""
         self.enabled = enabled
@@ -125,7 +125,7 @@ class DynamicMusicSystem:
 
 class VoiceAnnouncement:
     """Manages voice announcements for game events"""
-    
+
     def __init__(self):
         self.announcement_queue: List[Tuple[str, float]] = []  # (text, priority)
         self.current_announcement: Optional[str] = None
@@ -135,7 +135,7 @@ class VoiceAnnouncement:
         self.enabled = True
         self.tts_engine = None
         self.tts_initialized = False
-        
+
         # Per-announcement type enable flags (defaults, can be overridden)
         self.announcement_enabled = {
             "level_up": True,
@@ -150,7 +150,7 @@ class VoiceAnnouncement:
             "achievement": True,
             "high_score": True,
         }
-        
+
         # Map of event types to announcement text
         self.announcements = {
             "level_up": "Level up!",
@@ -165,10 +165,10 @@ class VoiceAnnouncement:
             "achievement": "Achievement unlocked!",
             "high_score": "New high score!"
         }
-        
+
         # Announcement sounds (text-to-speech or pre-recorded)
         self.announcement_sounds: Dict[str, Optional[pygame.mixer.Sound]] = {}
-        
+
         # Initialize TTS engine if available
         if TTS_AVAILABLE:
             try:
@@ -180,81 +180,81 @@ class VoiceAnnouncement:
             except Exception as e:
                 print(f"Failed to initialize TTS engine: {e}")
                 self.tts_initialized = False
-        
+
     def trigger(self, event_type: str, priority: float = 5.0):
         """Trigger a voice announcement for a game event"""
         if not self.enabled or event_type not in self.announcements:
             return
-        
+
         # Check if this specific announcement type is enabled
         if not self.announcement_enabled.get(event_type, True):
             return
-        
+
         current_time = time.time()
         if current_time - self.last_announcement_time < self.min_announcement_gap:
             # Queue for later if too soon
             self.announcement_queue.append((event_type, priority))
             return
-        
+
         self._play_announcement(event_type)
-    
+
     def _play_announcement(self, event_type: str):
         """Play the announcement sound/voice"""
         try:
             announcement_text = self.announcements.get(event_type, "")
             print(f"🔊 Announcement: {announcement_text}")
-            
+
             # If we have a sound file for this announcement, play it
             if event_type in self.announcement_sounds:
                 sound = self.announcement_sounds[event_type]
                 if sound:
                     sound.play()
-            
+
             self.current_announcement = announcement_text
             self.announcement_timer = 2.0  # Display text for 2 seconds
             self.last_announcement_time = time.time()
-            
+
         except Exception as e:
             print(f"Error playing announcement: {e}")
-    
+
     def update(self, dt: float):
         """Update announcement system"""
         self.announcement_timer -= dt
-        
+
         if self.announcement_timer <= 0:
             self.current_announcement = None
-            
+
             # Process queued announcements
             if self.announcement_queue:
                 # Sort by priority (higher first) and play the highest priority
                 self.announcement_queue.sort(key=lambda x: x[1], reverse=True)
                 event_type, _ = self.announcement_queue.pop(0)
                 self._play_announcement(event_type)
-    
+
     def get_current_announcement(self) -> Optional[str]:
         """Get current announcement text for display"""
         return self.current_announcement
-    
+
     def set_enabled(self, enabled: bool):
         """Enable or disable voice announcements"""
         self.enabled = enabled
-    
+
     def set_announcement_type_enabled(self, event_type: str, enabled: bool):
         """Enable or disable a specific announcement type"""
         if event_type in self.announcement_enabled:
             self.announcement_enabled[event_type] = enabled
-    
+
     def update_from_settings(self, announcement_types: dict):
         """Update announcement type flags from settings"""
         for event_type, enabled in announcement_types.items():
             if event_type in self.announcement_enabled:
                 self.announcement_enabled[event_type] = enabled
-    
+
     def _generate_voice_file(self, text: str, output_path: str) -> bool:
         """Generate voice audio file using TTS"""
         if not self.tts_initialized or not self.tts_engine:
             return False
-        
+
         try:
             # Save to file
             self.tts_engine.save_to_file(text, output_path)
@@ -263,7 +263,7 @@ class VoiceAnnouncement:
         except Exception as e:
             print(f"Error generating voice file: {e}")
             return False
-    
+
     def load_announcement_sounds(self, asset_path_func):
         """Load or generate announcement sounds"""
         announcement_files = {
@@ -279,15 +279,15 @@ class VoiceAnnouncement:
             "achievement": "voice_achievement.wav",
             "high_score": "voice_high_score.wav"
         }
-        
+
         # Get assets directory
         assets_dir = Path(__file__).resolve().parent / "assets"
         assets_dir.mkdir(exist_ok=True)
-        
+
         for event_type, filename in announcement_files.items():
             try:
                 sound_path = asset_path_func(filename)
-                
+
                 # If file doesn't exist, try to generate it with TTS
                 if not os.path.exists(sound_path) and self.tts_initialized:
                     announcement_text = self.announcements.get(event_type, "")
@@ -296,7 +296,7 @@ class VoiceAnnouncement:
                         full_path = assets_dir / filename
                         if self._generate_voice_file(announcement_text, str(full_path)):
                             sound_path = str(full_path)
-                
+
                 # Load the sound file
                 if os.path.exists(sound_path):
                     self.announcement_sounds[event_type] = pygame.mixer.Sound(sound_path)
@@ -309,10 +309,10 @@ class VoiceAnnouncement:
 
 class SoundThemeManager:
     """Manages multiple sound themes (retro, sci-fi, orchestral)"""
-    
+
     def __init__(self):
         self.current_theme = SoundTheme.DEFAULT
-        
+
         # Define sound mappings for each theme
         # Format: {theme: {sound_name: filename}}
         self.theme_mappings = {
@@ -393,12 +393,12 @@ class SoundThemeManager:
                 "boss_music": "boss_music.mp3"
             }
         }
-    
+
     def get_sound_file(self, sound_name: str) -> str:
         """Get the appropriate sound file for the current theme"""
         theme_map = self.theme_mappings.get(self.current_theme, {})
         return theme_map.get(sound_name, self.theme_mappings[SoundTheme.DEFAULT].get(sound_name, ""))
-    
+
     def set_theme(self, theme: SoundTheme):
         """Change the current sound theme"""
         if theme in self.theme_mappings:
@@ -406,15 +406,15 @@ class SoundThemeManager:
             print(f"Sound theme changed to: {theme.value}")
             return True
         return False
-    
+
     def get_current_theme(self) -> SoundTheme:
         """Get the current sound theme"""
         return self.current_theme
-    
+
     def get_available_themes(self) -> List[SoundTheme]:
         """Get list of available sound themes"""
         return list(self.theme_mappings.keys())
-    
+
     def get_theme_description(self, theme: SoundTheme) -> str:
         """Get a description of a sound theme"""
         descriptions = {
@@ -428,13 +428,13 @@ class SoundThemeManager:
 
 class AudioEnhancementManager:
     """Main manager for all audio enhancements"""
-    
+
     def __init__(self):
         self.dynamic_music = DynamicMusicSystem()
         self.voice_announcements = VoiceAnnouncement()
         self.theme_manager = SoundThemeManager()
         self.low_health_announced = False
-        
+
     def update(self, dt: float, game_state: dict, asset_path_func):
         """Update all audio enhancement systems"""
         # Update dynamic music
@@ -448,34 +448,34 @@ class AudioEnhancementManager:
                 game_state.get("level", 1),
                 asset_path_func
             )
-        
+
         # Update voice announcements
         self.voice_announcements.update(dt)
-    
+
     def trigger_announcement(self, event_type: str, priority: float = 5.0):
         """Trigger a voice announcement"""
         self.voice_announcements.trigger(event_type, priority)
-    
+
     def get_announcement_text(self) -> Optional[str]:
         """Get current announcement text for display"""
         return self.voice_announcements.get_current_announcement()
-    
+
     def set_theme(self, theme: SoundTheme) -> bool:
         """Change sound theme"""
         return self.theme_manager.set_theme(theme)
-    
+
     def get_current_theme(self) -> SoundTheme:
         """Get current sound theme"""
         return self.theme_manager.get_current_theme()
-    
+
     def set_dynamic_music_enabled(self, enabled: bool):
         """Enable/disable dynamic music"""
         self.dynamic_music.set_enabled(enabled)
-    
+
     def set_voice_announcements_enabled(self, enabled: bool):
         """Enable/disable voice announcements"""
         self.voice_announcements.set_enabled(enabled)
-    
+
     def check_low_health(self, lives: int):
         """Check and trigger low health announcement if needed"""
         if lives == 1 and not self.low_health_announced:

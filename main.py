@@ -166,12 +166,12 @@ def main(args=None):
     sounds = Sounds()
 
     achievement_notifications.set_sounds(sounds)
-    
+
     # Initialize audio enhancements
     audio_enhancements = AudioEnhancementManager()
     audio_enhancements.set_dynamic_music_enabled(game_settings.dynamic_music_enabled)
     audio_enhancements.set_voice_announcements_enabled(game_settings.voice_announcements_enabled)
-    
+
     # Set sound theme
     try:
         sounds.set_theme(game_settings.sound_theme)
@@ -183,13 +183,13 @@ def main(args=None):
         # Explicitly set to default theme
         sounds.set_theme("default")
         audio_enhancements.set_theme(SoundTheme.DEFAULT)
-    
+
     # Load voice announcement sounds
     audio_enhancements.voice_announcements.load_announcement_sounds(asset_path)
-    
+
     # Update announcement types from settings
     audio_enhancements.voice_announcements.update_from_settings(game_settings.announcement_types)
-    
+
     # Wrap achievement unlock to trigger voice announcements
     original_unlock = achievement_system.unlock
     def achievement_unlock_with_announcement(achievement_name):
@@ -736,7 +736,7 @@ def main(args=None):
                 'enemies': current_enemy_ships
             }
             performance_profiler.update(dt, clock, object_groups)
-            
+
             # Update audio enhancements with game state
             game_state_dict = {
                 'asteroids_count': len(asteroids),
@@ -1056,7 +1056,7 @@ def main(args=None):
 
                     powerups_collected += 1
                     session_stats.record_powerup_collected()
-                    
+
                     # Trigger powerup announcement
                     if powerup.type == "shield":
                         audio_enhancements.trigger_announcement("shield_active", priority=6.0)
@@ -1147,23 +1147,23 @@ def main(args=None):
 
             achievement_notifications.update(dt)
             achievement_notifications.draw(screen)
-            
+
             # Draw voice announcement text
             announcement_text = audio_enhancements.get_announcement_text()
             if announcement_text:
                 announcement_font = pygame.font.Font(None, 48)
                 announcement_surf = announcement_font.render(announcement_text, True, (255, 215, 0))
                 announcement_rect = announcement_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT * 3 / 4))
-                
+
                 # Draw semi-transparent background
                 bg_padding = 20
                 bg_rect = announcement_rect.inflate(bg_padding * 2, bg_padding)
                 bg_surface = pygame.Surface(bg_rect.size, pygame.SRCALPHA)
                 bg_surface.fill((0, 0, 0, 180))
                 screen.blit(bg_surface, bg_rect.topleft)
-                
+
                 screen.blit(announcement_surf, announcement_rect)
-            
+
             # Check and trigger low health warning
             audio_enhancements.check_low_health(lives)
 

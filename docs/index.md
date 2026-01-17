@@ -1,31 +1,45 @@
 # Ajitroids Developer Documentation
 
-Welcome to the **Ajitroids** developer documentation! This comprehensive guide will help you understand, contribute to, and extend this modern remake of the classic Asteroids game.
+Welcome to the **Ajitroids** developer documentation! This comprehensive guide
+will help you understand, contribute to, and extend this modern remake of the
+classic Asteroids game.
 
 ## 🚀 What is Ajitroids?
 
-Ajitroids is an exciting remake of the classic arcade game Asteroids built with Pygame. It features modern graphics, sound effects, power-ups, boss fights, and much more. The project is designed with clean, object-oriented Python code that's easy to understand and extend.
+Ajitroids is an exciting remake of the classic arcade game Asteroids built with
+Pygame. It features modern graphics, sound effects, power-ups, boss fights, and
+much more. The project is designed with clean, object-oriented Python code
+that's easy to understand and extend.
 
 ## 📚 Documentation Structure
 
 ### For New Developers
 
-- **[Getting Started](getting-started.md)**: Set up your development environment and run the game
-- **[Architecture Overview](architecture/overview.md)**: Understand the high-level structure of the codebase
-- **[Contributing Guide](development/contributing.md)**: Learn how to contribute to the project
+- **[Getting Started](getting-started.md)**: Set up your development environment
+  and run the game
+- **[Architecture Overview](architecture/overview.md)**: Understand the
+  high-level structure of the codebase
+- **[Contributing Guide](development/contributing.md)**: Learn how to contribute
+  to the project
 
 ### For Contributors
 
-- **[Data Flow](architecture/data-flow.md)**: Understand how data moves through the game
-- **[Game Mechanics](architecture/game-mechanics.md)**: Learn about the game's core mechanics and algorithms
+- **[Data Flow](architecture/data-flow.md)**: Understand how data moves through
+  the game
+- **[Game Mechanics](architecture/game-mechanics.md)**: Learn about the game's
+  core mechanics and algorithms
 - **[Testing](development/testing.md)**: Write and run tests for your changes
-- **[Release Process](development/release-process.md)**: Understand how releases are made
+- **[Release Process](development/release-process.md)**: Understand how releases
+  are made
 
 ### API Reference
 
-- **[Python API](api/python.md)**: Auto-generated documentation for all Python modules
-- **[Configuration](reference/configuration.md)**: All configuration options explained
-- **[Dev Scripts](reference/cli-dev-scripts.md)**: Available development scripts and commands
+- **[Python API](api/python.md)**: Auto-generated documentation for all Python
+  modules
+- **[Configuration](reference/configuration.md)**: All configuration options
+  explained
+- **[Dev Scripts](reference/cli-dev-scripts.md)**: Available development scripts
+  and commands
 
 ## 🎮 Key Features
 
@@ -47,7 +61,8 @@ Ajitroids is an exciting remake of the classic arcade game Asteroids built with 
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](development/contributing.md) for details on:
+We welcome contributions! Please see our
+[Contributing Guide](development/contributing.md) for details on:
 
 - How to set up your development environment
 - Code style guidelines
@@ -56,7 +71,9 @@ We welcome contributions! Please see our [Contributing Guide](development/contri
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/Ajimaru/ajitroids/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License - see the
+[LICENSE](https://github.com/Ajimaru/ajitroids/blob/main/LICENSE) file for
+details.
 
 ## 🔗 Quick Links
 
@@ -66,4 +83,4 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 
 ---
 
-*Built with ❤️ and Pygame*
+_Built with ❤️ and Pygame_

@@ -96,7 +96,7 @@ class ReplayRecorder:
             'format': 'json',
             'compression': 'gzip',
         }
-        
+
     def stop_recording(self, final_score: int, final_level: int):
         """Stop recording and finalize metadata."""
         self.recording = False
@@ -110,7 +110,7 @@ class ReplayRecorder:
             'frame_count': len(self.frames),
             'event_count': len(self.events),
         })
-        
+
     def record_frame(self, game_state: Dict[str, Any], current_time: float):
         """Record a single frame of game state."""
         if not self.recording:
@@ -164,7 +164,7 @@ class ReplayRecorder:
             ),
         )
         self.frames.append(frame)
-        
+
     def record_event(
         self,
         event_type: str,
@@ -174,17 +174,17 @@ class ReplayRecorder:
         """Record a significant game event."""
         if not self.recording:
             return
-        
+
         # Calculate relative timestamp
         relative_time = _quantize_float(max(0, current_time - self.start_time))
-            
+
         event = GameEvent(
             timestamp=relative_time,
             event_type=event_type,
             data=data
         )
         self.events.append(event)
-        
+
     def save_replay(self, filename: Optional[str] = None) -> str:
         """Save the replay to a file."""
         try:
@@ -235,7 +235,7 @@ class ReplayRecorder:
                     separators=(",", ":"),
                     default=_json_default,
                 )
-                
+
             logger.info(f"Successfully saved replay to: {filepath}")
             return filepath
         except OSError as e:
@@ -248,7 +248,7 @@ class ReplayRecorder:
 
 class ReplayPlayer:
     """Plays back recorded game sessions."""
-    
+
     def __init__(self):
         self.playing = False
         self.paused = False
@@ -258,7 +258,7 @@ class ReplayPlayer:
         self.current_frame_index = 0
         self.playback_speed = 1.0
         self.start_playback_time = 0
-        
+
     def load_replay(self, filepath: str):
         """Load a replay from file."""
         try:
@@ -295,7 +295,7 @@ class ReplayPlayer:
         except Exception as e:
             logger.error(f"Failed to load replay '{filepath}': {e}")
             raise
-        
+
     def start_playback(self):
         """Start playing the replay."""
         if not self.frames:
@@ -305,13 +305,13 @@ class ReplayPlayer:
         self.paused = False
         self.current_frame_index = 0
         self.start_playback_time = time.time()
-        
+
     def stop_playback(self):
         """Stop playing the replay."""
         self.playing = False
         self.paused = False
         self.current_frame_index = 0
-        
+
     def toggle_pause(self):
         """Toggle pause state."""
         if not self.playing or not self.frames:
@@ -337,7 +337,7 @@ class ReplayPlayer:
         self.start_playback_time = time.time() - (resume_ts / safe_speed)
         if hasattr(self, "_paused_timestamp"):
             delattr(self, "_paused_timestamp")
-                
+
     def set_speed(self, speed: float):
         """Set playback speed (0.5x, 1x, 2x, etc.)."""
         if self.playing and not self.paused:
@@ -351,7 +351,7 @@ class ReplayPlayer:
             )
         else:
             self.playback_speed = speed
-            
+
     def get_current_timestamp(self) -> float:
         """Get current playback timestamp."""
         if self.paused:
@@ -361,27 +361,27 @@ class ReplayPlayer:
                 return 0.0
             return self.frames[self.current_frame_index].timestamp
         return (time.time() - self.start_playback_time) * self.playback_speed
-        
+
     def get_current_frame(self) -> Optional[GameFrame]:
         """Get the current frame based on playback time."""
         if not self.playing or not self.frames:
             return None
-            
+
         current_time = self.get_current_timestamp()
-        
+
         # Find the appropriate frame for current timestamp
         while (
             self.current_frame_index < len(self.frames) - 1 and
             self.frames[self.current_frame_index + 1].timestamp <= current_time
         ):
             self.current_frame_index += 1
-            
+
         if self.current_frame_index >= len(self.frames):
             self.stop_playback()
             return None
-            
+
         return self.frames[self.current_frame_index]
-        
+
     def seek_to_time(self, timestamp: float):
         """Seek to a specific time in the replay."""
         if not self.frames:
@@ -402,17 +402,17 @@ class ReplayPlayer:
         self.start_playback_time = time.time() - (
             timestamp / self.playback_speed
         )
-        
+
     def skip_forward(self, seconds: float = 5.0):
         """Skip forward by specified seconds."""
         current_time = self.get_current_timestamp()
         self.seek_to_time(current_time + seconds)
-        
+
     def skip_backward(self, seconds: float = 5.0):
         """Skip backward by specified seconds."""
         current_time = self.get_current_timestamp()
         self.seek_to_time(current_time - seconds)
-        
+
     def get_progress_percentage(self) -> float:
         """Get playback progress as percentage (0-100)."""
         if not self.frames:
@@ -424,10 +424,10 @@ class ReplayPlayer:
 
 class ReplayManager:
     """Manages replay files and provides listing/deletion capabilities."""
-    
+
     def __init__(self):
         self.replays_dir = "replays"
-        
+
     def _validate_filepath(self, filepath: str) -> bool:
         """Validate that filepath is within the replays directory."""
         try:
@@ -437,12 +437,12 @@ class ReplayManager:
         except Exception as e:
             logger.error(f"Error validating filepath '{filepath}': {e}")
             return False
-        
+
     def list_replays(self) -> List[Dict[str, Any]]:
         """List all available replay files."""
         if not os.path.exists(self.replays_dir):
             return []
-            
+
         replays = []
         for filename in os.listdir(self.replays_dir):
             if filename.endswith('.json') or filename.endswith('.json.gz'):
@@ -467,14 +467,14 @@ class ReplayManager:
                     logger.error(
                         f"Error reading replay '{filename}': {e}"
                     )
-                    
+
         # Sort by timestamp (newest first)
         replays.sort(
             key=lambda replay: replay['metadata'].get('start_time', 0),
             reverse=True,
         )
         return replays
-        
+
     def delete_replay(self, filepath: str):
         """Delete a replay file."""
         if not self._validate_filepath(filepath):
@@ -483,14 +483,14 @@ class ReplayManager:
                 filepath,
             )
             return
-            
+
         if os.path.exists(filepath):
             try:
                 os.remove(filepath)
                 logger.info(f"Deleted replay file: {filepath}")
             except Exception as e:
                 logger.error(f"Failed to delete replay file '{filepath}': {e}")
-            
+
     def get_replay_count(self) -> int:
         """Get the number of replay files."""
         return len(self.list_replays())
