@@ -8,8 +8,17 @@ This module provides three major audio enhancements:
 
 import pygame
 import time
+import os
+from pathlib import Path
 from typing import Optional, Dict, List, Tuple
 from enum import Enum
+
+try:
+    import pyttsx3
+    TTS_AVAILABLE = True
+except ImportError:
+    TTS_AVAILABLE = False
+    print("pyttsx3 not available - voice announcements will be text-only")
 
 
 class IntensityLevel(Enum):
@@ -124,6 +133,8 @@ class VoiceAnnouncement:
         self.min_announcement_gap = 1.5  # Minimum seconds between announcements
         self.last_announcement_time = 0.0
         self.enabled = True
+        self.tts_engine = None
+        self.tts_initialized = False
         
         # Map of event types to announcement text
         self.announcements = {
@@ -142,6 +153,18 @@ class VoiceAnnouncement:
         
         # Announcement sounds (text-to-speech or pre-recorded)
         self.announcement_sounds: Dict[str, Optional[pygame.mixer.Sound]] = {}
+        
+        # Initialize TTS engine if available
+        if TTS_AVAILABLE:
+            try:
+                self.tts_engine = pyttsx3.init()
+                # Configure TTS settings
+                self.tts_engine.setProperty('rate', 180)  # Speed of speech
+                self.tts_engine.setProperty('volume', 0.9)  # Volume (0.0 to 1.0)
+                self.tts_initialized = True
+            except Exception as e:
+                print(f"Failed to initialize TTS engine: {e}")
+                self.tts_initialized = False
         
     def trigger(self, event_type: str, priority: float = 5.0):
         """Trigger a voice announcement for a game event"""
@@ -197,8 +220,22 @@ class VoiceAnnouncement:
         """Enable or disable voice announcements"""
         self.enabled = enabled
     
+    def _generate_voice_file(self, text: str, output_path: str) -> bool:
+        """Generate voice audio file using TTS"""
+        if not self.tts_initialized or not self.tts_engine:
+            return False
+        
+        try:
+            # Save to file
+            self.tts_engine.save_to_file(text, output_path)
+            self.tts_engine.runAndWait()
+            return os.path.exists(output_path)
+        except Exception as e:
+            print(f"Error generating voice file: {e}")
+            return False
+    
     def load_announcement_sounds(self, asset_path_func):
-        """Load pre-recorded announcement sounds if available"""
+        """Load or generate announcement sounds"""
         announcement_files = {
             "level_up": "voice_level_up.wav",
             "boss_incoming": "voice_boss_incoming.wav",
@@ -213,12 +250,30 @@ class VoiceAnnouncement:
             "high_score": "voice_high_score.wav"
         }
         
+        # Get assets directory
+        assets_dir = Path(__file__).resolve().parent / "assets"
+        assets_dir.mkdir(exist_ok=True)
+        
         for event_type, filename in announcement_files.items():
             try:
                 sound_path = asset_path_func(filename)
-                self.announcement_sounds[event_type] = pygame.mixer.Sound(sound_path)
-            except:
-                # If file doesn't exist, announcement will be text-only
+                
+                # If file doesn't exist, try to generate it with TTS
+                if not os.path.exists(sound_path) and self.tts_initialized:
+                    announcement_text = self.announcements.get(event_type, "")
+                    if announcement_text:
+                        print(f"Generating voice for: {event_type}")
+                        full_path = assets_dir / filename
+                        if self._generate_voice_file(announcement_text, str(full_path)):
+                            sound_path = str(full_path)
+                
+                # Load the sound file
+                if os.path.exists(sound_path):
+                    self.announcement_sounds[event_type] = pygame.mixer.Sound(sound_path)
+                else:
+                    self.announcement_sounds[event_type] = None
+            except Exception as e:
+                print(f"Error loading announcement sound {event_type}: {e}")
                 self.announcement_sounds[event_type] = None
 
 
