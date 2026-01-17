@@ -497,7 +497,7 @@ class TestOptionsMenu:
         """Test OptionsMenu initializes correctly"""
         menu = OptionsMenu(mock_settings, mock_sounds)
         assert menu.title == "OPTIONS"
-        assert len(menu.items) == 7
+        assert len(menu.items) == 8
         assert "Music:" in menu.items[0].text
         assert "Sound:" in menu.items[1].text
         assert "Music Volume:" in menu.items[2].text

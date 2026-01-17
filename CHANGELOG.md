@@ -2,6 +2,34 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## v0.24.0 (2026-01-17)
+
+### Added
+
+- Text-to-speech voice announcements (pyttsx3-based) with generated WAV
+  fallbacks for environments without TTS.
+- `VoiceAnnouncementsMenu` in `Options` to toggle individual announcement types.
+
+### Changed
+
+- Per-announcement-type enable flags added to settings and `VoiceAnnouncement`
+  (defaults: `new_weapon`, `shield_active`, `low_health`, `powerup` = OFF).
+- Announcement display moved from upper third to lower third of the screen for
+  improved readability.
+- `update_version.py` script and `VERSION` file added to centralize version
+  maintenance; `modul/_version.py` now generated from `VERSION`.
+
+### Removed / Chore
+
+- Removed `VERSION_MANAGEMENT.md` (documentation consolidated into workflow).
+- Moved `update_version.py` into `modul/` and updated `.gitignore` to ignore
+  generated `modul/_version.py`.
+
+### Notes
+
+- Many gameplay polishing changes and audio fixes landed in prior v0.23.0; this
+  release focuses on voice announcement UX, settings, and release tooling.
+
 ## v0.23.0 (2026-01-16)
 
 ### Fixed
@@ -13,9 +41,9 @@
 
 ### Changed
 
-- Asteroid scoring is type-aware via multipliers (ice 0.9x, metal 1.5x,
-  crystal 0.6x) on top of size-based base points; metal asteroids use a warmer
-  brass color for better contrast against ice blue.
+- Asteroid scoring is type-aware via multipliers (ice 0.9x, metal 1.5x, crystal
+  0.6x) on top of size-based base points; metal asteroids use a warmer brass
+  color for better contrast against ice blue.
 - Pre-commit now runs the full Pytest suite; pytest hook uses `python3` for
   reliability.
 
