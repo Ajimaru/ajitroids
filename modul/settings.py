@@ -10,9 +10,18 @@ class Settings:
         self.difficulty = "normal"
         self.music_volume = 0.5
         self.sound_volume = 0.5
+        self.dynamic_music_enabled = True
+        self.voice_announcements_enabled = True
+        self.sound_theme = "default"
         self.load()
         print(
-            f"Settings after loading: Music={self.music_on}, Sound={self.sound_on}, Fullscreen={self.fullscreen}, Music Volume={self.music_volume}, Sound Volume={self.sound_volume}"
+            f"Settings after loading: "
+            f"Music={self.music_on}, Sound={self.sound_on}, "
+            f"Fullscreen={self.fullscreen}, "
+            f"Music Volume={self.music_volume}, Sound Volume={self.sound_volume}, "
+            f"Dynamic Music={self.dynamic_music_enabled}, "
+            f"Voice Announcements={self.voice_announcements_enabled}, "
+            f"Theme={self.sound_theme}"
         )
 
     def save(self):
@@ -22,6 +31,9 @@ class Settings:
             "fullscreen": self.fullscreen,
             "music_volume": self.music_volume,
             "sound_volume": self.sound_volume,
+            "dynamic_music_enabled": self.dynamic_music_enabled,
+            "voice_announcements_enabled": self.voice_announcements_enabled,
+            "sound_theme": self.sound_theme,
         }
 
         try:
@@ -48,6 +60,9 @@ class Settings:
                 # Preserve constructor defaults (0.5) when values are missing
                 self.music_volume = settings_data.get("music_volume", self.music_volume)
                 self.sound_volume = settings_data.get("sound_volume", self.sound_volume)
+                self.dynamic_music_enabled = settings_data.get("dynamic_music_enabled", True)
+                self.voice_announcements_enabled = settings_data.get("voice_announcements_enabled", True)
+                self.sound_theme = settings_data.get("sound_theme", "default")
                 print("Settings loaded")
             return True
         except Exception as e:

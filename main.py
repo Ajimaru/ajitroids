@@ -43,6 +43,7 @@ from modul.stats_dashboard import StatsDashboard
 from modul.replay_system import ReplayRecorder, ReplayPlayer, ReplayManager
 from modul.replay_ui import ReplayListMenu, ReplayViewer
 from modul.performance_profiler import PerformanceProfiler
+from modul.audio_enhancements import AudioEnhancementManager, SoundTheme
 
 
 class GameSettings:
@@ -164,6 +165,35 @@ def main(args=None):
     sounds = Sounds()
 
     achievement_notifications.set_sounds(sounds)
+    
+    # Initialize audio enhancements
+    audio_enhancements = AudioEnhancementManager()
+    audio_enhancements.set_dynamic_music_enabled(game_settings.dynamic_music_enabled)
+    audio_enhancements.set_voice_announcements_enabled(game_settings.voice_announcements_enabled)
+    
+    # Set sound theme
+    try:
+        sounds.set_theme(game_settings.sound_theme)
+        # Use getattr for safe enum conversion
+        theme_enum = getattr(SoundTheme, game_settings.sound_theme.upper(), SoundTheme.DEFAULT)
+        audio_enhancements.set_theme(theme_enum)
+    except (KeyError, ValueError, AttributeError) as e:
+        print(f"Invalid theme setting: {e}. Using default theme.")
+        # Explicitly set to default theme
+        sounds.set_theme("default")
+        audio_enhancements.set_theme(SoundTheme.DEFAULT)
+    
+    # Load voice announcement sounds
+    audio_enhancements.voice_announcements.load_announcement_sounds(asset_path)
+    
+    # Wrap achievement unlock to trigger voice announcements
+    original_unlock = achievement_system.unlock
+    def achievement_unlock_with_announcement(achievement_name):
+        result = original_unlock(achievement_name)
+        if result:
+            audio_enhancements.trigger_announcement("achievement", priority=8.0)
+        return result
+    achievement_system.unlock = achievement_unlock_with_announcement
 
     pygame.time.delay(200)
 
@@ -683,6 +713,16 @@ def main(args=None):
                 'enemies': current_enemy_ships
             }
             performance_profiler.update(dt, clock, object_groups)
+            
+            # Update audio enhancements with game state
+            game_state_dict = {
+                'asteroids_count': len(asteroids),
+                'enemies_count': len(current_enemy_ships),
+                'boss_active': boss_active,
+                'score': score,
+                'level': level
+            }
+            audio_enhancements.update(dt, game_state_dict, asset_path)
 
             starfield.update(dt)
             starfield.draw(screen)
@@ -750,6 +790,7 @@ def main(args=None):
                             logger.error(f"Failed to save replay: {e}")
 
                         sounds.play_game_over()
+                        audio_enhancements.trigger_announcement("game_over", priority=10.0)
                         game_over_screen.set_score(score)
                         game_over_screen.fade_in = True
                         game_over_screen.background_alpha = 0
@@ -940,6 +981,7 @@ def main(args=None):
                         asteroid.kill()
                     print(f"Boss fight started at level {current_level}!")
                     sounds.play_boss_music()
+                    audio_enhancements.trigger_announcement("boss_incoming", priority=10.0)
 
                 level = current_level
 
@@ -963,6 +1005,7 @@ def main(args=None):
                     level_up_text = f"LEVEL {level}!"
 
                 sounds.play_level_up()
+                audio_enhancements.trigger_announcement("level_up", priority=8.0)
 
                 print(
                     f"Level up! Now level {level}, asteroids: {asteroid_field.asteroid_count}, interval: {asteroid_field.spawn_interval}"
@@ -990,13 +1033,19 @@ def main(args=None):
 
                     powerups_collected += 1
                     session_stats.record_powerup_collected()
-
+                    
+                    # Trigger powerup announcement
                     if powerup.type == "shield":
+                        audio_enhancements.trigger_announcement("shield_active", priority=6.0)
                         shields_used += 1
                     elif powerup.type == "triple_shot":
+                        audio_enhancements.trigger_announcement("new_weapon", priority=6.0)
                         triple_shots_used += 1
                     elif powerup.type == "speed_boost":
+                        audio_enhancements.trigger_announcement("powerup", priority=5.0)
                         speed_boosts_used += 1
+                    else:
+                        audio_enhancements.trigger_announcement("powerup", priority=5.0)
 
                     if powerups_collected >= 250 and not achievement_system.is_unlocked("Power User"):
                         achievement_system.unlock("Power User")
@@ -1067,12 +1116,33 @@ def main(args=None):
 
                             lives += 1
                             sounds.play_extra_life()
+                            audio_enhancements.trigger_announcement("boss_defeated", priority=10.0)
+                            audio_enhancements.trigger_announcement("extra_life", priority=9.0)
 
                             boss_defeated_timer = 3.0
                             boss_defeated_message = "BOSS DEFEATED! +1 LIFE!"
 
             achievement_notifications.update(dt)
             achievement_notifications.draw(screen)
+            
+            # Draw voice announcement text
+            announcement_text = audio_enhancements.get_announcement_text()
+            if announcement_text:
+                announcement_font = pygame.font.Font(None, 48)
+                announcement_surf = announcement_font.render(announcement_text, True, (255, 215, 0))
+                announcement_rect = announcement_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4))
+                
+                # Draw semi-transparent background
+                bg_padding = 20
+                bg_rect = announcement_rect.inflate(bg_padding * 2, bg_padding)
+                bg_surface = pygame.Surface(bg_rect.size, pygame.SRCALPHA)
+                bg_surface.fill((0, 0, 0, 180))
+                screen.blit(bg_surface, bg_rect.topleft)
+                
+                screen.blit(announcement_surf, announcement_rect)
+            
+            # Check and trigger low health warning
+            audio_enhancements.check_low_health(lives)
 
             # Draw performance profiler overlay
             performance_profiler.draw(screen)

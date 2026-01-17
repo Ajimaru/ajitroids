@@ -1,6 +1,7 @@
 import pygame
 import os
 from pathlib import Path
+from modul.audio_enhancements import SoundThemeManager, SoundTheme
 
 
 def asset_path(name: str) -> str:
@@ -54,6 +55,8 @@ class Sounds:
         self.menu_select = None
         self.level_up = None
         self.master_volume = 0.5  # Default to mid volume for consistent toggle behavior
+        self.theme_manager = SoundThemeManager()
+        self.current_theme = SoundTheme.DEFAULT
         try:
             self.shoot = pygame.mixer.Sound(asset_path("shoot.wav"))
         except:
@@ -300,3 +303,63 @@ class Sounds:
                 sound = getattr(self, attr_name)
                 if sound:
                     sound.set_volume(slider_value)
+    
+    def set_theme(self, theme_name: str) -> bool:
+        """Change sound theme and reload all sounds"""
+        try:
+            # Convert string to SoundTheme enum safely
+            theme = getattr(SoundTheme, theme_name.upper(), None)
+            if theme is None:
+                print(f"Invalid theme: {theme_name}")
+                return False
+            
+            if self.theme_manager.set_theme(theme):
+                self.current_theme = theme
+                # Reload all sounds with new theme
+                self._reload_all_sounds()
+                print(f"Sound theme changed to: {theme_name}")
+                return True
+            return False
+        except (AttributeError, ValueError) as e:
+            print(f"Error setting theme {theme_name}: {e}")
+            return False
+    
+    def _reload_all_sounds(self):
+        """Reload all sound effects with current theme"""
+        # Get themed sound files
+        sound_mappings = {
+            'shoot': 'shoot',
+            'explosion': 'explosion',
+            'player_death': 'player_death',
+            'menu_move': 'menu_move',
+            'menu_select': 'menu_select',
+            'laser_shoot': 'laser_shoot',
+            'rocket_shoot': 'rocket_shoot',
+            'boss_spawn': 'boss_spawn',
+            'boss_death': 'boss_death',
+            'powerup': 'powerup',
+            'shield_activate': 'shield_activate',
+            'level_up': 'level_up',
+            'game_over': 'game_over',
+            'player_hit': 'player_hit',
+        }
+        
+        for attr_name, sound_name in sound_mappings.items():
+            try:
+                sound_file = self.theme_manager.get_sound_file(sound_name)
+                if sound_file:
+                    sound = pygame.mixer.Sound(asset_path(sound_file))
+                    setattr(self, attr_name, sound)
+                    # Apply current volume
+                    sound.set_volume(self.master_volume)
+            except Exception as e:
+                print(f"Could not load {sound_name} for theme: {e}")
+                setattr(self, attr_name, None)
+    
+    def get_current_theme(self) -> str:
+        """Get current sound theme name"""
+        return self.current_theme.value
+    
+    def get_available_themes(self) -> list:
+        """Get list of available theme names"""
+        return [theme.value for theme in self.theme_manager.get_available_themes()]
