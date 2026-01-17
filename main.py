@@ -26,6 +26,7 @@ from modul.menu import (
     GameOverScreen,
     DifficultyMenu,
     SoundTestMenu,
+    VoiceAnnouncementsMenu,
     AchievementsMenu,
     ShipSelectionMenu,
 )
@@ -186,6 +187,9 @@ def main(args=None):
     # Load voice announcement sounds
     audio_enhancements.voice_announcements.load_announcement_sounds(asset_path)
     
+    # Update announcement types from settings
+    audio_enhancements.voice_announcements.update_from_settings(game_settings.announcement_types)
+    
     # Wrap achievement unlock to trigger voice announcements
     original_unlock = achievement_system.unlock
     def achievement_unlock_with_announcement(achievement_name):
@@ -261,6 +265,7 @@ def main(args=None):
     options_menu = OptionsMenu(game_settings, sounds)
     sound_test_menu = SoundTestMenu()
     sound_test_menu.set_sounds(sounds)
+    voice_announcements_menu = VoiceAnnouncementsMenu(game_settings)
     credits_screen = CreditsScreen()
     game_over_screen = GameOverScreen()
     difficulty_menu = DifficultyMenu()
@@ -670,6 +675,24 @@ def main(args=None):
             elif action == "sound_test":
                 game_state = "sound_test"
                 sound_test_menu.activate()
+
+            elif action == "voice_announcements":
+                game_state = "voice_announcements"
+
+        elif game_state == "voice_announcements":
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+
+            action = voice_announcements_menu.update(dt, events)
+            if action:
+                result = voice_announcements_menu.handle_action(action)
+                if result == "options":
+                    # Update VoiceAnnouncement settings from saved settings
+                    audio_enhancements.voice_announcements.update_from_settings(game_settings.announcement_types)
+                    game_state = "options"
+                    options_menu.activate()
+
+            voice_announcements_menu.draw(screen)
 
         elif game_state == "sound_test":
             menu_starfield.update(dt)

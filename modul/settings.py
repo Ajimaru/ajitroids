@@ -13,6 +13,20 @@ class Settings:
         self.dynamic_music_enabled = True
         self.voice_announcements_enabled = True
         self.sound_theme = "default"
+        # Per-announcement type enable flags
+        self.announcement_types = {
+            "level_up": True,
+            "boss_incoming": True,
+            "boss_defeated": True,
+            "game_over": True,
+            "new_weapon": False,
+            "shield_active": False,
+            "low_health": False,
+            "powerup": False,
+            "extra_life": True,
+            "achievement": True,
+            "high_score": True,
+        }
         self.load()
         print(
             f"Settings after loading: "
@@ -34,6 +48,7 @@ class Settings:
             "dynamic_music_enabled": self.dynamic_music_enabled,
             "voice_announcements_enabled": self.voice_announcements_enabled,
             "sound_theme": self.sound_theme,
+            "announcement_types": self.announcement_types,
         }
 
         try:
@@ -63,6 +78,11 @@ class Settings:
                 self.dynamic_music_enabled = settings_data.get("dynamic_music_enabled", True)
                 self.voice_announcements_enabled = settings_data.get("voice_announcements_enabled", True)
                 self.sound_theme = settings_data.get("sound_theme", "default")
+                # Load announcement types with defaults from __init__
+                loaded_types = settings_data.get("announcement_types", {})
+                for key in self.announcement_types:
+                    if key in loaded_types:
+                        self.announcement_types[key] = loaded_types[key]
                 print("Settings loaded")
             return True
         except Exception as e:

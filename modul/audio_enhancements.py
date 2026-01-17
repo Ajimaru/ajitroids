@@ -136,6 +136,21 @@ class VoiceAnnouncement:
         self.tts_engine = None
         self.tts_initialized = False
         
+        # Per-announcement type enable flags (defaults, can be overridden)
+        self.announcement_enabled = {
+            "level_up": True,
+            "boss_incoming": True,
+            "boss_defeated": True,
+            "game_over": True,
+            "new_weapon": False,
+            "shield_active": False,
+            "low_health": False,
+            "powerup": False,
+            "extra_life": True,
+            "achievement": True,
+            "high_score": True,
+        }
+        
         # Map of event types to announcement text
         self.announcements = {
             "level_up": "Level up!",
@@ -169,6 +184,10 @@ class VoiceAnnouncement:
     def trigger(self, event_type: str, priority: float = 5.0):
         """Trigger a voice announcement for a game event"""
         if not self.enabled or event_type not in self.announcements:
+            return
+        
+        # Check if this specific announcement type is enabled
+        if not self.announcement_enabled.get(event_type, True):
             return
         
         current_time = time.time()
@@ -219,6 +238,17 @@ class VoiceAnnouncement:
     def set_enabled(self, enabled: bool):
         """Enable or disable voice announcements"""
         self.enabled = enabled
+    
+    def set_announcement_type_enabled(self, event_type: str, enabled: bool):
+        """Enable or disable a specific announcement type"""
+        if event_type in self.announcement_enabled:
+            self.announcement_enabled[event_type] = enabled
+    
+    def update_from_settings(self, announcement_types: dict):
+        """Update announcement type flags from settings"""
+        for event_type, enabled in announcement_types.items():
+            if event_type in self.announcement_enabled:
+                self.announcement_enabled[event_type] = enabled
     
     def _generate_voice_file(self, text: str, output_path: str) -> bool:
         """Generate voice audio file using TTS"""

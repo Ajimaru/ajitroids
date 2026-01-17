@@ -291,6 +291,7 @@ class OptionsMenu(Menu):
         self.add_item(f"Music Volume: {settings.music_volume * 100:.0f}%", "adjust_music_volume")
         self.add_item(f"Sound Volume: {settings.sound_volume * 100:.0f}%", "adjust_sound_volume")
         self.add_item("Fullscreen: ON" if settings.fullscreen else "Fullscreen: OFF", "toggle_fullscreen")
+        self.add_item("Voice Announcements...", "voice_announcements")
         self.add_item("Sound Test", "sound_test")
         self.add_item("Back", "back")
 
@@ -343,6 +344,9 @@ class OptionsMenu(Menu):
 
             self.items[4].text = "Fullscreen: ON" if self.settings.fullscreen else "Fullscreen: OFF"
             return None
+
+        elif action == "voice_announcements":
+            return "voice_announcements"
 
         elif action == "sound_test":
             return "sound_test"
@@ -524,6 +528,139 @@ class DifficultyMenu(Menu):
         self.add_item("Normal", "difficulty_normal", "N")
         self.add_item("Hard", "difficulty_hard", "S")
         self.add_item("Back", "main_menu", "Z")
+
+
+class VoiceAnnouncementsMenu:
+    """Menu to configure voice announcement toggles"""
+
+    def __init__(self, settings):
+        self.settings = settings
+        self.title = "Voice Announcements"
+        self.items = [
+            MenuItem("Level Up: ON", "toggle_level_up"),
+            MenuItem("Boss Incoming: ON", "toggle_boss_incoming"),
+            MenuItem("Boss Defeated: ON", "toggle_boss_defeated"),
+            MenuItem("Game Over: ON", "toggle_game_over"),
+            MenuItem("Extra Life: ON", "toggle_extra_life"),
+            MenuItem("Achievement: ON", "toggle_achievement"),
+            MenuItem("High Score: ON", "toggle_high_score"),
+            MenuItem("New Weapon: OFF", "toggle_new_weapon"),
+            MenuItem("Shield Active: OFF", "toggle_shield_active"),
+            MenuItem("Low Health: OFF", "toggle_low_health"),
+            MenuItem("PowerUp: OFF", "toggle_powerup"),
+            MenuItem("", None),
+            MenuItem("Back", "back"),
+        ]
+        self.current_selection = 0
+        self.fade_in = True
+        self.background_alpha = 0
+        self.update_menu_texts()
+
+    def update_menu_texts(self):
+        announcements = self.settings.announcement_types
+        self.items[0].text = f"Level Up: {'ON' if announcements.get('level_up', True) else 'OFF'}"
+        self.items[1].text = f"Boss Incoming: {'ON' if announcements.get('boss_incoming', True) else 'OFF'}"
+        self.items[2].text = f"Boss Defeated: {'ON' if announcements.get('boss_defeated', True) else 'OFF'}"
+        self.items[3].text = f"Game Over: {'ON' if announcements.get('game_over', True) else 'OFF'}"
+        self.items[4].text = f"Extra Life: {'ON' if announcements.get('extra_life', True) else 'OFF'}"
+        self.items[5].text = f"Achievement: {'ON' if announcements.get('achievement', True) else 'OFF'}"
+        self.items[6].text = f"High Score: {'ON' if announcements.get('high_score', True) else 'OFF'}"
+        self.items[7].text = f"New Weapon: {'ON' if announcements.get('new_weapon', False) else 'OFF'}"
+        self.items[8].text = f"Shield Active: {'ON' if announcements.get('shield_active', False) else 'OFF'}"
+        self.items[9].text = f"Low Health: {'ON' if announcements.get('low_health', False) else 'OFF'}"
+        self.items[10].text = f"PowerUp: {'ON' if announcements.get('powerup', False) else 'OFF'}"
+
+    def update(self, dt, events):
+        if self.fade_in:
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
+            if self.background_alpha >= MENU_BACKGROUND_ALPHA:
+                self.fade_in = False
+                self.background_alpha = MENU_BACKGROUND_ALPHA
+
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    self.current_selection -= 1
+                    if self.current_selection < 0:
+                        self.current_selection = len(self.items) - 1
+                    if self.items[self.current_selection].text == "":
+                        self.current_selection -= 1
+                        if self.current_selection < 0:
+                            self.current_selection = len(self.items) - 1
+
+                elif event.key == pygame.K_DOWN:
+                    self.current_selection += 1
+                    if self.current_selection >= len(self.items):
+                        self.current_selection = 0
+                    if self.items[self.current_selection].text == "":
+                        self.current_selection += 1
+                        if self.current_selection >= len(self.items):
+                            self.current_selection = 0
+
+                elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+                    return self.items[self.current_selection].action
+
+                elif event.key == pygame.K_ESCAPE:
+                    return "back"
+
+        return None
+
+    def handle_action(self, action):
+        if action == "back":
+            return "options"
+
+        # Toggle announcements
+        announcement_map = {
+            "toggle_level_up": "level_up",
+            "toggle_boss_incoming": "boss_incoming",
+            "toggle_boss_defeated": "boss_defeated",
+            "toggle_game_over": "game_over",
+            "toggle_extra_life": "extra_life",
+            "toggle_achievement": "achievement",
+            "toggle_high_score": "high_score",
+            "toggle_new_weapon": "new_weapon",
+            "toggle_shield_active": "shield_active",
+            "toggle_low_health": "low_health",
+            "toggle_powerup": "powerup",
+        }
+
+        if action in announcement_map:
+            announcement_type = announcement_map[action]
+            current_value = self.settings.announcement_types.get(announcement_type, True)
+            self.settings.announcement_types[announcement_type] = not current_value
+            self.settings.save()
+            self.update_menu_texts()
+
+        return None
+
+    def draw(self, screen):
+        background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+        background.fill((0, 0, 0, self.background_alpha))
+        screen.blit(background, (0, 0))
+
+        title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
+        title_surface = title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
+        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH / 2, 60))
+        screen.blit(title_surface, title_rect)
+
+        font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
+        start_y = 130
+
+        visible_count = 0
+        for i, item in enumerate(self.items):
+            if item.text == "":
+                visible_count += 0.5
+                continue
+
+            y = start_y + visible_count * MENU_ITEM_SPACING
+            is_selected = i == self.current_selection
+            color = MENU_SELECTED_COLOR if is_selected else MENU_UNSELECTED_COLOR
+
+            text_surface = font.render(item.text, True, pygame.Color(color))
+            text_rect = text_surface.get_rect(center=(SCREEN_WIDTH / 2, y))
+            screen.blit(text_surface, text_rect)
+
+            visible_count += 1
 
 
 class SoundTestMenu:
