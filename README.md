@@ -2,7 +2,7 @@
 
 # 🚀 Ajitroids
 
-[![Python](https://img.shields.io/badge/python-3.09%2B-blue.svg)](https://python.org)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://python.org)
 [![Latest Release](https://img.shields.io/github/v/release/Ajimaru/ajitroids?sort=semver)](https://github.com/Ajimaru/ajitroids/releases/latest)
 [![Coverage](https://codecov.io/gh/Ajimaru/ajitroids/graph/badge.svg?branch=main)](https://codecov.io/gh/Ajimaru/ajitroids)
 ![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids)
