@@ -6,7 +6,7 @@
 [![Latest Release](https://img.shields.io/github/v/release/Ajimaru/ajitroids?sort=semver)](https://github.com/Ajimaru/ajitroids/releases/latest)
 [![Coverage](https://codecov.io/gh/Ajimaru/ajitroids/graph/badge.svg?branch=main)](https://codecov.io/gh/Ajimaru/ajitroids)
 ![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids)
-[![Issues](https://img.shields.io/github/issues/Ajimaru/OctoPrint-TempETA)](https://github.com/Ajimaru/ajitroids/issues)
+[![Issues](https://img.shields.io/github/issues/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/issues)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Ajimaru/ajitroids/pulls)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Stars](https://img.shields.io/github/stars/Ajimaru/ajitroids)
