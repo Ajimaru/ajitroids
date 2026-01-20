@@ -10,3 +10,29 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+
+  # Keep Python dependencies up to date
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      python-dev-tools:
+        patterns:
+          - "black"
+          - "flake8"
+          - "isort"
+          - "pre-commit"
+          - "pytest"
+          - "pytest-*"
+          - "coverage"
+          - "pytest-cov"
+          - "build"
+      python-build-system:
+        patterns:
+          - "setuptools"
+          - "wheel"
+      python-runtime:
+        patterns:
+          - "typing_extensions"
