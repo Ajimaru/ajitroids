@@ -65,6 +65,8 @@ repos:
         name: prettier (markdown formatting)
         types: [markdown]
         args: ["--prose-wrap=always"]
+        exclude: |
+          (?x)^(docs/api/python\.md)$
 
   # Run the full test suite before committing
   - repo: local
