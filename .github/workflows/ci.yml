@@ -65,11 +65,11 @@ jobs:
       - name: Run tests (with coverage)
         if: ${{ matrix.run-coverage }}
         run: |
-          pytest -q --cov=ajitroids --cov-branch --cov-report=xml:coverage.xml
+          pytest -q --cov=modul --cov-branch --cov-report=xml:coverage.xml
 
       - name: Upload coverage to Codecov
         if: ${{ matrix.run-coverage && github.repository == 'Ajimaru/ajitroids' }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v5.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.xml
