@@ -47,5 +47,11 @@ of the game. All modules are located in the `modul/` directory.
 
 ## Auto-Generated Documentation
 
-::: modul handler: python options: members_order: source show_source: true
-show_root_heading: true show_root_toc_entry: true heading_level: 2
+::: modul
+    handler: python
+    options:
+        members_order: source
+        show_source: true
+    show_root_heading: true
+    show_root_toc_entry: true
+    heading_level: 2
