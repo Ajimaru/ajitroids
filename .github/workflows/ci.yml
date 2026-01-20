@@ -44,10 +44,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -65,53 +65,12 @@ jobs:
       - name: Run tests (with coverage)
         if: ${{ matrix.run-coverage }}
         run: |
-          pytest -q --cov=octoprint_uptime --cov-branch --cov-report=xml:coverage.xml
+          pytest -q --cov=ajitroids --cov-branch --cov-report=xml:coverage.xml
 
       - name: Upload coverage to Codecov
-        if: ${{ matrix.run-coverage && github.repository == 'Ajimaru/OctoPrint-Uptime' }}
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
+        if: ${{ matrix.run-coverage && github.repository == 'Ajimaru/ajitroids' }}
+        uses: codecov/codecov-action@v6
         with:
           files: coverage.xml
           flags: unittests
           fail_ci_if_error: false
-
-      - name: Run pre-commit
-        if: ${{ matrix.run-precommit }}
-        run: |
-          pre-commit run --all-files
-
-      - name: Build package
-        if: ${{ matrix.run-build }}
-        run: |
-          python -m build
-
-  octoprint-smoke:
-    name: Smoke (OctoPrint install + plugin install)
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
-
-      - name: Set up Python
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
-        with:
-          python-version: "3.10"
-          cache: pip
-
-      - name: Install OctoPrint
-        run: |
-          python -m pip install --upgrade pip
-          # Note: OctoPrint 1.12.x might not be available on PyPI yet.
-          # For install-smoke testing, use the latest available stable series.
-          python -m pip install "OctoPrint>=1.11.0,<2"
-
-      - name: Install plugin
-        run: |
-          python -m pip install .
-
-      - name: Smoke test plugin import
-        run: |
-          mkdir ../smoketest
-          cd ../smoketest
-          python -c "import octoprint_uptime; print(getattr(octoprint_uptime, '__version__', 'unknown'))"
