@@ -1,4 +1,3 @@
-<!-- markdownlint-disable MD013 -->
 
 # 🚀 Ajitroids
 
@@ -91,6 +90,7 @@ uv run main.py
 python main.py
 ```
 
+<!-- markdownlint-disable MD033 -->
 <details>
 <summary>🔧 Development Setup</summary>
 
@@ -148,6 +148,7 @@ mkdocs serve
 ```
 
 </details>
+<!-- markdownlint-enable MD033 -->
 
 ### Method 3: Install from Source Archive
 
@@ -200,6 +201,7 @@ ajitroids
 - **3**: 2.0x playback speed
 - **ESC**: Exit replay viewer
 
+<!-- markdownlint-disable MD033 -->
 <details>
 <summary>💻 Command-Line Options</summary>
 
@@ -227,6 +229,7 @@ python main.py --log-file game.log
 ```
 
 </details>
+<!-- markdownlint-enable MD033 -->
 
 ## 🚀 Spaceships
 

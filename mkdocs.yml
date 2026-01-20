@@ -67,3 +67,4 @@ nav:
   - Reference:
       - Configuration: reference/configuration.md
       - Dev scripts: reference/cli-dev-scripts.md
+      - Performance: reference/performance-profiler.md
