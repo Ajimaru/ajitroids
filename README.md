@@ -76,10 +76,10 @@ ajitroids
 
 ### Method 2: Clone from Git (For Development)
 
-![Open Issues](https://img.shields.io/github/issues/Ajimaru/ajitroids)
-![Closed Issues](https://img.shields.io/github/issues-closed-raw/Ajimaru/ajitroids)
-![Open PRs](https://img.shields.io/github/issues-pr/Ajimaru/ajitroids)
-![Closed PRs](https://img.shields.io/github/issues-pr-closed/Ajimaru/ajitroids)
+[![Open Issues](https://img.shields.io/github/issues/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/issues?q=is%3Aissue%20state%3Aopen)
+[![Closed Issues](https://img.shields.io/github/issues-closed-raw/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/issues?q=is%3Aissue%20state%3Aclosed)
+[![Open PRs](https://img.shields.io/github/issues-pr/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/pulls?q=is%3Aopen+is%3Apr+)
+[![Closed PRs](https://img.shields.io/github/issues-pr-closed/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/pulls?q=is%3Apr+is%3Aclosed)
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
 ![Commit Activity (year)](https://img.shields.io/github/commit-activity/y/Ajimaru/ajitroids)
