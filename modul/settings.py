@@ -1,6 +1,9 @@
 import json
 import os
 
+# Runtime singleton assigned when Settings() is constructed
+current_settings = None
+
 
 class Settings:
     def __init__(self):
@@ -27,7 +30,28 @@ class Settings:
             "achievement": True,
             "high_score": True,
         }
+        # Controls mapping: use readable pygame key constant names (e.g. "K_LEFT", "K_SPACE")
+        # Actions: rotate_left, rotate_right, thrust, reverse, shoot, switch_weapon, pause
+        self.controls = {
+            "rotate_left": "K_LEFT",
+            "rotate_right": "K_RIGHT",
+            "thrust": "K_UP",
+            "reverse": "K_DOWN",
+            "shoot": "K_SPACE",
+            "switch_weapon": "K_b",
+            "pause": "K_ESCAPE",
+        }
+
+        # Language selection: 'en' default, add 'de' for German
+        self.language = "en"
+        # TTS preferences: selected voice id/name and voice language (defaults to UI language)
+        # `tts_voice` can be an engine-specific id or a human-friendly name; empty means engine default
+        self.tts_voice = ""
+        self.tts_voice_language = self.language
         self.load()
+        # Register this instance as the active settings for runtime consumers
+        global current_settings
+        current_settings = self
         print(
             f"Settings after loading: "
             f"Music={self.music_on}, Sound={self.sound_on}, "
@@ -49,6 +73,10 @@ class Settings:
             "voice_announcements_enabled": self.voice_announcements_enabled,
             "sound_theme": self.sound_theme,
             "announcement_types": self.announcement_types,
+            "controls": self.controls,
+            "language": self.language,
+            "tts_voice": self.tts_voice,
+            "tts_voice_language": self.tts_voice_language,
         }
 
         try:
@@ -83,6 +111,16 @@ class Settings:
                 for key in self.announcement_types:
                     if key in loaded_types:
                         self.announcement_types[key] = loaded_types[key]
+                # Load controls mapping with defaults
+                loaded_controls = settings_data.get("controls", {})
+                for key in self.controls:
+                    if key in loaded_controls:
+                        self.controls[key] = loaded_controls[key]
+                # Load language selection
+                self.language = settings_data.get("language", self.language)
+                # Load TTS preferences
+                self.tts_voice = settings_data.get("tts_voice", self.tts_voice)
+                self.tts_voice_language = settings_data.get("tts_voice_language", self.tts_voice_language)
                 print("Settings loaded")
             return True
         except Exception as e:
