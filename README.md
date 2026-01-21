@@ -1,6 +1,6 @@
 # 🚀 Ajitroids
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Ajimaru/ajitroids/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Ajimaru/ajitroids#-license)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://python.org)
 ![Top Language](https://img.shields.io/github/languages/top/Ajimaru/ajitroids)
 [![Latest Release](https://img.shields.io/github/v/release/Ajimaru/ajitroids?sort=semver)](https://github.com/Ajimaru/ajitroids/releases/latest)
