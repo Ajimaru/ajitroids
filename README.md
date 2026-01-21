@@ -91,6 +91,7 @@ ajitroids
 ![Release Date](https://img.shields.io/github/release-date/Ajimaru/ajitroids)
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 ![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids)
 
 <!-- markdownlint-disable MD033 -->
