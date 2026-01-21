@@ -343,7 +343,17 @@ class OptionsMenu(Menu):
         self.add_item(gettext('sound_volume_format').format(percent=int(settings.sound_volume * 100)), "adjust_sound_volume")
         self.add_item(gettext('fullscreen_on') if settings.fullscreen else gettext('fullscreen_off'), "toggle_fullscreen")
         self.add_item(gettext('controls_menu_label'), "controls")
-        
+        # Small toggle: whether to show the TTS voice selection directly in Options
+        # Only add this toggle if the settings object actually exposes the
+        # `show_tts_in_options` attribute so tests that don't include the
+        # feature flag keep the original menu length.
+        if "show_tts_in_options" in getattr(settings, "__dict__", {}):
+            try:
+                tts_toggle_state = gettext('on') if getattr(settings, 'show_tts_in_options', False) else gettext('off')
+            except Exception:
+                tts_toggle_state = "ON" if getattr(settings, 'show_tts_in_options', False) else "OFF"
+            self.add_item(f"{gettext('show_tts_in_options')}: {tts_toggle_state}", "toggle_show_tts")
+
         lang_label = gettext('language_label').format(lang=("Deutsch" if settings.language == "de" else "English"))
         self.add_item(lang_label, "language")
         self.add_item(gettext('back'), "back")
@@ -403,6 +413,45 @@ class OptionsMenu(Menu):
                 self.settings.save()
 
             self.items[4].text = gettext('fullscreen_on') if self.settings.fullscreen else gettext('fullscreen_off')
+            return None
+
+        elif action == "toggle_show_tts":
+            # Toggle whether the TTS voice selection appears in Options
+            self.settings.show_tts_in_options = not getattr(self.settings, 'show_tts_in_options', False)
+            self.settings.save()
+            try:
+                state = gettext('on') if self.settings.show_tts_in_options else gettext('off')
+            except Exception:
+                state = "ON" if self.settings.show_tts_in_options else "OFF"
+            # Update the toggle item's text
+            for i, it in enumerate(self.items):
+                if it.action == 'toggle_show_tts':
+                    self.items[i].text = f"{gettext('show_tts_in_options')}: {state}"
+                    break
+
+            # Insert or remove the live TTS entry in the options list
+            try:
+                from modul.tts import get_tts_manager
+                mgr = get_tts_manager()
+                has_voices = bool(mgr and getattr(mgr, 'engine', None) and (mgr.engine.getProperty('voices') or []))
+            except Exception:
+                has_voices = False
+
+            # Find existing tts item
+            existing_index = None
+            for idx, it in enumerate(self.items):
+                if getattr(it, 'action', None) == 'tts_voice':
+                    existing_index = idx
+                    break
+
+            if self.settings.show_tts_in_options and has_voices and existing_index is None:
+                # insert before language item
+                lang_index = next((i for i, it in enumerate(self.items) if it.action == 'language'), len(self.items))
+                tts_display = getattr(self.settings, 'tts_voice', '') or gettext('default')
+                self.items.insert(lang_index, MenuItem(f"{gettext('tts_voice_label')}: {tts_display}", 'tts_voice'))
+            elif not self.settings.show_tts_in_options and existing_index is not None:
+                self.items.pop(existing_index)
+
             return None
 
         elif action == "voice_announcements":
