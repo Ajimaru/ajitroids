@@ -343,20 +343,7 @@ class OptionsMenu(Menu):
         self.add_item(gettext('sound_volume_format').format(percent=int(settings.sound_volume * 100)), "adjust_sound_volume")
         self.add_item(gettext('fullscreen_on') if settings.fullscreen else gettext('fullscreen_off'), "toggle_fullscreen")
         self.add_item(gettext('controls_menu_label'), "controls")
-        # TTS voice selection: show chosen voice or Default (only if system voices available)
-        try:
-            from modul.tts import get_tts_manager
-            mgr = get_tts_manager()
-            has_voices = bool(mgr and getattr(mgr, "engine", None) and (mgr.engine.getProperty("voices") or []))
-        except Exception:
-            has_voices = False
-
-        if has_voices:
-            try:
-                tts_voice_display = settings.tts_voice if getattr(settings, "tts_voice", "") else gettext("default")
-            except Exception:
-                tts_voice_display = gettext("default")
-            self.add_item(f"{gettext('tts_voice_label')}: {tts_voice_display}", "tts_voice")
+        
         lang_label = gettext('language_label').format(lang=("Deutsch" if settings.language == "de" else "English"))
         self.add_item(lang_label, "language")
         self.add_item(gettext('back'), "back")
@@ -861,6 +848,8 @@ class VoiceAnnouncementsMenu:
             MenuItem(gettext("shield_active") + ": OFF", "toggle_shield_active"),
             MenuItem(gettext("low_health") + ": OFF", "toggle_low_health"),
             MenuItem(gettext("powerup") + ": OFF", "toggle_powerup"),
+            # TTS voice selection (if available)
+            MenuItem(gettext("tts_voice_label") + f": {getattr(settings, 'tts_voice', '') or gettext('default')}", "tts_voice"),
             MenuItem("", None),
             MenuItem(gettext("back"), "back"),
         ]
@@ -949,6 +938,10 @@ class VoiceAnnouncementsMenu:
             self.settings.announcement_types[announcement_type] = not current_value
             self.settings.save()
             self.update_menu_texts()
+
+        # Open TTS voice selection
+        if action == "tts_voice":
+            return "tts_voice"
 
         return None
 

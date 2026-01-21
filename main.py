@@ -710,6 +710,9 @@ def main(args=None):
                     audio_enhancements.voice_announcements.update_from_settings(game_settings.announcement_types)
                     game_state = "options"
                     options_menu.activate()
+                elif result == "tts_voice":
+                    game_state = "tts_voice"
+                    tts_voice_menu.activate()
 
         elif game_state == "controls":
             menu_starfield.update(dt)
