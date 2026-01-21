@@ -1,16 +1,20 @@
 # 🚀 Ajitroids
 
-[![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://python.org)
-[![Latest Release](https://img.shields.io/github/v/release/Ajimaru/ajitroids?sort=semver)](https://github.com/Ajimaru/ajitroids/releases/latest)
-[![Coverage](https://codecov.io/gh/Ajimaru/ajitroids/graph/badge.svg?branch=main)](https://codecov.io/gh/Ajimaru/ajitroids)
-![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids)
-[![Issues](https://img.shields.io/github/issues/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/issues)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Ajimaru/ajitroids/pulls)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Stars](https://img.shields.io/github/stars/Ajimaru/ajitroids)
-![Forks](https://img.shields.io/github/forks/Ajimaru/ajitroids)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://python.org)
+![Top Language](https://img.shields.io/github/languages/top/Ajimaru/ajitroids)
+[![Latest Release](https://img.shields.io/github/v/release/Ajimaru/ajitroids?sort=semver)](https://github.com/Ajimaru/ajitroids/releases/latest)
+![Downloads](https://img.shields.io/github/downloads/Ajimaru/ajitroids/total.svg)
+![Maintenance](https://img.shields.io/maintenance/yes/2026)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Ajimaru/ajitroids/pulls)
 
-[A modern Asteroids remake built with Pygame]
+![Stars](https://img.shields.io/github/stars/Ajimaru/ajitroids?style=social)
+![Forks](https://img.shields.io/github/forks/Ajimaru/ajitroids?style=social)
+![Watchers](https://img.shields.io/github/watchers/Ajimaru/ajitroids?style=social)
+
+---
+
+***A modern Asteroids remake built with Pygame***
 
 ![Ajitroids Screenshot](docs/assets/screenshots/Ajitroids_title.png)
 
@@ -72,6 +76,28 @@ ajitroids
 
 ### Method 2: Clone from Git (For Development)
 
+![Open Issues](https://img.shields.io/github/issues/Ajimaru/ajitroids)
+![Closed Issues](https://img.shields.io/github/issues-closed-raw/Ajimaru/ajitroids)
+![Open PRs](https://img.shields.io/github/issues-pr/Ajimaru/ajitroids)
+![Closed PRs](https://img.shields.io/github/issues-pr-closed/Ajimaru/ajitroids)
+
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
+![Commit Activity (year)](https://img.shields.io/github/commit-activity/y/Ajimaru/ajitroids)
+![Last Commit](https://img.shields.io/github/last-commit/Ajimaru/ajitroids)
+
+![Build Status](https://img.shields.io/github/actions/workflow/status/Ajimaru/ajitroids/ci.yml)
+[![Coverage](https://codecov.io/gh/Ajimaru/ajitroids/graph/badge.svg?branch=main)](https://codecov.io/gh/Ajimaru/ajitroids)
+[![CI](https://github.com/Ajimaru/ajitroids/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Ajimaru/ajitroids/actions/workflows/ci.yml?query=branch%3Amain)
+![Release Date](https://img.shields.io/github/release-date/Ajimaru/ajitroids)
+
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids)
+
+<!-- markdownlint-disable MD033 -->
+
+<details>
+<summary>🔧 Development Setup</summary>
+
 ```bash
 # Clone the repository
 git clone https://github.com/Ajimaru/ajitroids.git
@@ -88,10 +114,6 @@ uv run main.py
 # or  pip
 python main.py
 ```
-
-<!-- markdownlint-disable MD033 -->
-<details>
-<summary>🔧 Development Setup</summary>
 
 If you plan to contribute or develop for Ajitroids, set up the development
 environment with pre-commit hooks:
@@ -119,7 +141,7 @@ pre-commit run --all-files
 </details>
 
 <details>
-<summary>📚 Documentation</summary>
+<summary>📚 Development Documentation</summary>
 
 Comprehensive developer documentation is available:
 
@@ -147,9 +169,10 @@ mkdocs serve
 ```
 
 </details>
-<!-- markdownlint-enable MD033 -->
 
 ### Method 3: Install from Source Archive
+
+<details>
 
 If you downloaded a source archive (.tar.gz) from releases (prefer
 `ajitroids-latest.tar.gz`):
@@ -161,6 +184,10 @@ pip install ajitroids-latest.tar.gz
 # Run the game via the installed console script
 ajitroids
 ```
+
+</details>
+
+<!-- markdownlint-enable MD033 -->
 
 ## 🌟 Gameplay
 
@@ -201,6 +228,7 @@ ajitroids
 - **ESC**: Exit replay viewer
 
 <!-- markdownlint-disable MD033 -->
+
 <details>
 <summary>💻 Command-Line Options</summary>
 
@@ -228,7 +256,6 @@ python main.py --log-file game.log
 ```
 
 </details>
-<!-- markdownlint-enable MD033 -->
 
 ## 🚀 Spaceships
 
