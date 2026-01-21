@@ -1,26 +1,26 @@
 import pygame
 import random
 from modul.asteroid import Asteroid
-from modul.constants import *
+import modul.constants as C
 
 
 class AsteroidField:
     edges = [
         [
             pygame.Vector2(1, 0),
-            lambda y: pygame.Vector2(-ASTEROID_MAX_RADIUS, y * SCREEN_HEIGHT),
+            lambda y: pygame.Vector2(-C.ASTEROID_MAX_RADIUS, y * C.SCREEN_HEIGHT),
         ],
         [
             pygame.Vector2(-1, 0),
-            lambda y: pygame.Vector2(SCREEN_WIDTH + ASTEROID_MAX_RADIUS, y * SCREEN_HEIGHT),
+            lambda y: pygame.Vector2(C.SCREEN_WIDTH + C.ASTEROID_MAX_RADIUS, y * C.SCREEN_HEIGHT),
         ],
         [
             pygame.Vector2(0, 1),
-            lambda x: pygame.Vector2(x * SCREEN_WIDTH, -ASTEROID_MAX_RADIUS),
+            lambda x: pygame.Vector2(x * C.SCREEN_WIDTH, -C.ASTEROID_MAX_RADIUS),
         ],
         [
             pygame.Vector2(0, -1),
-            lambda x: pygame.Vector2(x * SCREEN_WIDTH, SCREEN_HEIGHT + ASTEROID_MAX_RADIUS),
+            lambda x: pygame.Vector2(x * C.SCREEN_WIDTH, C.SCREEN_HEIGHT + C.ASTEROID_MAX_RADIUS),
         ],
     ]
 
@@ -32,8 +32,8 @@ class AsteroidField:
     def spawn(self, radius, position, velocity):
         # Randomly select asteroid type based on weights
         asteroid_type = random.choices(
-            list(ASTEROID_TYPE_WEIGHTS.keys()),
-            weights=list(ASTEROID_TYPE_WEIGHTS.values())
+            list(C.ASTEROID_TYPE_WEIGHTS.keys()),
+            weights=list(C.ASTEROID_TYPE_WEIGHTS.values())
         )[0]
 
         asteroid = Asteroid(position.x, position.y, radius, asteroid_type)
@@ -63,4 +63,4 @@ class AsteroidField:
 
         velocity = direction.rotate(random.uniform(-45, 45)) * random.uniform(30, 70)
 
-        self.spawn(ASTEROID_MAX_RADIUS, position, velocity)
+        self.spawn(C.ASTEROID_MAX_RADIUS, position, velocity)

@@ -1,6 +1,6 @@
 import pygame
 import random
-from modul.constants import *
+import modul.constants as C
 
 
 class Particle(pygame.sprite.Sprite):
@@ -31,7 +31,7 @@ class Particle(pygame.sprite.Sprite):
 
     @classmethod
     def create_ship_explosion(cls, x, y):
-        for _ in range(EXPLOSION_PARTICLES):
+        for _ in range(C.EXPLOSION_PARTICLES):
             angle = random.uniform(0, 360)
             speed = random.uniform(100, 200)
             particle = cls(x, y, "white")
@@ -40,8 +40,8 @@ class Particle(pygame.sprite.Sprite):
 
     @classmethod
     def create_asteroid_explosion(cls, x, y):
-        for _ in range(EXPLOSION_PARTICLES):
-            color = random.choice(PARTICLE_COLORS)
+        for _ in range(C.EXPLOSION_PARTICLES):
+            color = random.choice(C.PARTICLE_COLORS)
             particle = cls(x, y, color)
             speed = random.uniform(50, 150)
             angle = random.uniform(0, 360)

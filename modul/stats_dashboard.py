@@ -32,7 +32,12 @@ class StatsDashboard:
 
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key in (pygame.K_ESCAPE, pygame.K_SPACE):
+                from modul import input_utils
+                pause_key = input_utils.get_action_keycode("pause")
+                shoot_key = input_utils.get_action_keycode("shoot")
+                if ((pause_key is not None and event.key == pause_key)
+                        or event.key in (pygame.K_ESCAPE, pygame.K_SPACE)
+                        or (shoot_key is not None and event.key == shoot_key)):
                     return "back"
         return None
 
@@ -44,7 +49,13 @@ class StatsDashboard:
         screen.blit(background, (0, 0))
 
         # Title
-        title_surf = self.title_font.render("SESSION STATISTICS", True, pygame.Color(MENU_TITLE_COLOR))
+        try:
+            from modul.i18n import gettext
+        except Exception:
+            def gettext(k):
+                return k
+
+        title_surf = self.title_font.render(gettext("session_statistics"), True, pygame.Color(MENU_TITLE_COLOR))
         title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, 60))
         screen.blit(title_surf, title_rect)
 
@@ -54,15 +65,15 @@ class StatsDashboard:
         left_x = SCREEN_WIDTH / 4
         y_pos = 140
 
-        self._draw_section(screen, "GAME STATS", left_x, y_pos)
+        self._draw_section(screen, gettext("game_stats"), left_x, y_pos)
         y_pos += 50
 
         game_stats = [
-            ("Games Played", f"{stats.get('games_played', 0)}"),
-            ("Highest Score", f"{stats.get('highest_score', 0):,}"),
-            ("Average Score", f"{stats.get('average_score', 0.0):.0f}"),
-            ("Highest Level", f"{stats.get('highest_level', 0)}"),
-            ("Total Playtime", self.session_stats.format_time(stats.get('total_playtime', 0.0))),
+            (gettext("games_played"), f"{stats.get('games_played', 0)}"),
+            (gettext("highest_score"), f"{stats.get('highest_score', 0):,}"),
+            (gettext("average_score"), f"{stats.get('average_score', 0.0):.0f}"),
+            (gettext("highest_level"), f"{stats.get('highest_level', 0)}"),
+            (gettext("total_playtime"), self.session_stats.format_time(stats.get('total_playtime', 0.0))),
         ]
 
         for label, value in game_stats:
@@ -73,15 +84,15 @@ class StatsDashboard:
         right_x = SCREEN_WIDTH * 3 / 4
         y_pos = 140
 
-        self._draw_section(screen, "COMBAT STATS", right_x, y_pos)
+        self._draw_section(screen, gettext("combat_stats"), right_x, y_pos)
         y_pos += 50
 
         combat_stats = [
-            ("Asteroids Destroyed", f"{stats['total_asteroids_destroyed']:,}"),
-            ("Enemies Destroyed", f"{stats['total_enemies_destroyed']:,}"),
-            ("Bosses Defeated", f"{stats['total_bosses_defeated']}"),
-            ("Power-ups Collected", f"{stats['total_powerups_collected']:,}"),
-            ("Lives Lost", f"{stats['total_lives_lost']}"),
+            (gettext("asteroids_destroyed"), f"{stats['total_asteroids_destroyed']:,}"),
+            (gettext("enemies_destroyed"), f"{stats['total_enemies_destroyed']:,}"),
+            (gettext("bosses_defeated"), f"{stats['total_bosses_defeated']}"),
+            (gettext("powerups_collected"), f"{stats['total_powerups_collected']:,}"),
+            (gettext("lives_lost"), f"{stats['total_lives_lost']}"),
         ]
 
         for label, value in combat_stats:
@@ -95,13 +106,13 @@ class StatsDashboard:
         # Session duration
         y_pos = 560
         session_time = self.session_stats.format_time(stats['session_duration'])
-        time_text = f"Session Duration: {session_time}"
+        time_text = gettext("session_duration_format").format(time=session_time)
         time_surf = self.section_font.render(time_text, True, (100, 200, 255))
         time_rect = time_surf.get_rect(center=(SCREEN_WIDTH / 2, y_pos))
         screen.blit(time_surf, time_rect)
 
         # Footer instructions
-        footer_text = "Press ESC or SPACE to return"
+        footer_text = gettext("press_esc_space_return")
         footer_surf = self.small_font.render(footer_text, True, (150, 150, 150))
         footer_rect = footer_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 30))
         screen.blit(footer_surf, footer_rect)
@@ -124,6 +135,11 @@ class StatsDashboard:
 
     def _draw_progress_bars(self, screen, stats, y_pos):
         """Draw visual progress bars for key metrics."""
+        try:
+            from modul.i18n import gettext
+        except Exception:
+            def gettext(k):
+                return k
         bar_width = 400
         bar_height = 30
         center_x = SCREEN_WIDTH / 2
@@ -132,7 +148,7 @@ class StatsDashboard:
         accuracy = self.session_stats.get_accuracy()
         y = y_pos
 
-        label_surf = self.text_font.render("Accuracy", True, (255, 255, 255))
+        label_surf = self.text_font.render(gettext("accuracy"), True, (255, 255, 255))
         label_rect = label_surf.get_rect(center=(center_x, y - 25))
         screen.blit(label_surf, label_rect)
 
@@ -146,7 +162,7 @@ class StatsDashboard:
         # Average score vs highest score indicator
         y = y_pos + 80
 
-        label_surf = self.text_font.render("Performance", True, (255, 255, 255))
+        label_surf = self.text_font.render(gettext("performance"), True, (255, 255, 255))
         label_rect = label_surf.get_rect(center=(center_x, y - 25))
         screen.blit(label_surf, label_rect)
 
@@ -158,7 +174,7 @@ class StatsDashboard:
         self._draw_bar(screen, center_x - bar_width / 2, y, bar_width, bar_height,
                       performance, 100, (100, 100, 255), (100, 255, 100))
 
-        perf_text = f"{performance:.0f}% (Avg/Best)"
+        perf_text = gettext("performance_ratio_format").format(performance=performance)
         perf_surf = self.small_font.render(perf_text, True, (255, 255, 255))
         perf_rect = perf_surf.get_rect(center=(center_x, y + bar_height / 2))
         screen.blit(perf_surf, perf_rect)

@@ -1,26 +1,26 @@
 import pygame
 import math
 import random
-from modul.constants import *
+import modul.constants as C
 from modul.circleshape import CircleShape
 from modul.particle import Particle
 
 
 class Boss(CircleShape):
     def __init__(self, level):
-        super().__init__(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, BOSS_RADIUS)
+        super().__init__(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2, C.BOSS_RADIUS)
         self.boss_level = level // 10
-        self.max_health = BOSS_BASE_HEALTH + (self.boss_level - 1) * BOSS_HEALTH_PER_LEVEL
+        self.max_health = C.BOSS_BASE_HEALTH + (self.boss_level - 1) * C.BOSS_HEALTH_PER_LEVEL
         self.health = self.max_health
-        self.color = BOSS_COLOR
+        self.color = C.BOSS_COLOR
         self.pulse_timer = 0
         self.rotation = 0
         self.velocity = pygame.Vector2(0, 0)
-        self.target_position = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+        self.target_position = pygame.Vector2(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2)
         self.movement_timer = 0
         self.movement_phase = "center"
         self.attack_timer = 0
-        self.attack_interval = BOSS_ATTACK_INTERVAL
+        self.attack_interval = C.BOSS_ATTACK_INTERVAL
         self.attack_pattern = 0
         self.hit_flash = 0
         self.death_timer = -1
@@ -29,7 +29,7 @@ class Boss(CircleShape):
     def update(self, dt, player_position=None):
         if self.death_timer >= 0:
             self.death_timer += dt
-            if self.death_timer >= BOSS_DEATH_DURATION:
+            if self.death_timer >= C.BOSS_DEATH_DURATION:
                 self.kill()
                 return
             if not self.death_particles_emitted:
@@ -58,17 +58,17 @@ class Boss(CircleShape):
             self.movement_phase = "center"
             self.movement_timer = 0
         if self.movement_phase == "center":
-            target = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-            self._move_towards(target, BOSS_MOVE_SPEED, dt)
+            target = pygame.Vector2(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2)
+            self._move_towards(target, C.BOSS_MOVE_SPEED, dt)
         elif self.movement_phase == "random":
             if self.movement_timer % 1.5 < dt:
                 margin = 100
                 self.target_position = pygame.Vector2(
-                    random.randint(margin, SCREEN_WIDTH - margin), random.randint(margin, SCREEN_HEIGHT - margin)
+                    random.randint(margin, C.SCREEN_WIDTH - margin), random.randint(margin, C.SCREEN_HEIGHT - margin)
                 )
-            self._move_towards(self.target_position, BOSS_MOVE_SPEED * 0.7, dt)
+            self._move_towards(self.target_position, C.BOSS_MOVE_SPEED * 0.7, dt)
         elif self.movement_phase == "chase" and player_position:
-            self._move_towards(player_position, BOSS_MOVE_SPEED * 1.2, dt)
+            self._move_towards(player_position, C.BOSS_MOVE_SPEED * 1.2, dt)
 
     def _move_towards(self, target, speed, dt):
         direction = target - self.position
@@ -83,14 +83,14 @@ class Boss(CircleShape):
         if self.position.x < margin:
             self.position.x = margin
             self.velocity.x = abs(self.velocity.x) * 0.5
-        elif self.position.x > SCREEN_WIDTH - margin:
-            self.position.x = SCREEN_WIDTH - margin
+        elif self.position.x > C.SCREEN_WIDTH - margin:
+            self.position.x = C.SCREEN_WIDTH - margin
             self.velocity.x = -abs(self.velocity.x) * 0.5
         if self.position.y < margin:
             self.position.y = margin
             self.velocity.y = abs(self.velocity.y) * 0.5
-        elif self.position.y > SCREEN_HEIGHT - margin:
-            self.position.y = SCREEN_HEIGHT - margin
+        elif self.position.y > C.SCREEN_HEIGHT - margin:
+            self.position.y = C.SCREEN_HEIGHT - margin
             self.velocity.y = -abs(self.velocity.y) * 0.5
 
     def _update_attack(self, dt):
@@ -130,7 +130,7 @@ class Boss(CircleShape):
 
     def _draw_boss_shape(self, screen, color):
         if self.death_timer >= 0:
-            alpha = int(255 * (1 - self.death_timer / BOSS_DEATH_DURATION))
+            alpha = int(255 * (1 - self.death_timer / C.BOSS_DEATH_DURATION))
             pulsating_radius = self.radius * (1 + 0.5 * math.sin(self.death_timer * 10))
             temp_surface = pygame.Surface((pulsating_radius * 2, pulsating_radius * 2), pygame.SRCALPHA)
             pygame.draw.circle(temp_surface, (*color, alpha), (pulsating_radius, pulsating_radius), pulsating_radius)

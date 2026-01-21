@@ -206,6 +206,29 @@ settings.controls.shoot = "SPACE"
 - `switch_weapon`: B
 - `pause`: ESCAPE
 
+### Gamepad / Joystick bindings
+
+Controls can also be bound to gamepad inputs. Bindings saved in
+`settings.controls` may contain joystick identifiers using the following
+readable formats:
+
+- `JOY{n}_BUTTON{b}` — button `b` on joystick `n` (e.g. `JOY0_BUTTON1`)
+- `JOY{n}_AXIS{a}_POS` / `JOY{n}_AXIS{a}_NEG` — positive/negative deflection on
+  axis `a`
+- `JOY{n}_HAT{h}_UP|DOWN|LEFT|RIGHT` — D-pad (hat) directions
+
+The game detects and persists these readable strings; the input layer will
+recognize them at runtime.
+
+### Language / Localization
+
+Ajitroids supports runtime language selection. Set the language code in
+`settings.language` (e.g. `"en"` or `"de"`) and the UI will load the
+corresponding JSON locale from `modul/locales/`.
+
+The Controls menu and other UI elements are localized; when changing
+`settings.language`, call `settings.save()` and restart the UI where necessary.
+
 ## Settings API
 
 ### Loading Settings

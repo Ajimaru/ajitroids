@@ -162,13 +162,19 @@ class PerformanceProfiler:
         x_offset = overlay_x + 10
 
         # Title
-        title = self.font.render("Performance Profiler", True, self.text_color)
+        try:
+            from modul.i18n import gettext
+        except Exception:
+            def gettext(k):
+                return k
+        title = self.font.render(gettext("performance_profiler"), True, self.text_color)
         screen.blit(title, (x_offset, y_offset))
         y_offset += 30
 
         # FPS metrics
+        fps_label = gettext("fps")
         fps_text = self.font_small.render(
-            f"FPS: {current_fps:.1f} (avg: {avg_fps:.1f})",
+            f"{fps_label}: {current_fps:.1f} (avg: {avg_fps:.1f})",
             True,
             fps_color,
         )
@@ -176,8 +182,9 @@ class PerformanceProfiler:
         y_offset += 20
 
         # Frame time metrics
+        frame_label = gettext("frame_time")
         frame_time_text = self.font_small.render(
-            f"Frame: {current_frame_time:.2f}ms (avg: {avg_frame_time:.2f}ms)",
+            f"{frame_label}: {current_frame_time:.2f}ms (avg: {avg_frame_time:.2f}ms)",
             True,
             self.frame_time_color,
         )
@@ -191,7 +198,7 @@ class PerformanceProfiler:
             y_offset,
             self.fps_history,
             60,
-            "FPS",
+            gettext("fps"),
             self.fps_color,
         )
         y_offset += self.graph_height + 15
@@ -199,7 +206,7 @@ class PerformanceProfiler:
         # Object counts
         y_offset += 5
         counts_title = self.font_small.render(
-            "Object Counts:",
+            gettext("object_counts"),
             True,
             self.text_color,
         )
@@ -218,7 +225,7 @@ class PerformanceProfiler:
 
         # Total
         total_text = self.font_small.render(
-            f"Total Objects: {self.object_counts['total']}",
+            f"{gettext('total_objects')}: {self.object_counts['total']}",
             True,
             self.text_color,
         )
@@ -227,7 +234,7 @@ class PerformanceProfiler:
         # Draw hint at bottom
         hint_y = overlay_y + overlay_height - 20
         hint = self.font_small.render(
-            "Press F12 to toggle",
+            gettext("press_f12_to_toggle"),
             True,
             (150, 150, 150),
         )

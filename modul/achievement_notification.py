@@ -68,7 +68,13 @@ class AchievementNotification:
         screen.blit(bg_surface, (rect_x, rect_y))
 
         header_color = (255, 215, 0, alpha)
-        header_text = "ACHIEVEMENT UNLOCKED!"
+        try:
+            from modul.i18n import gettext
+        except Exception:
+            def gettext(k):
+                return k
+
+        header_text = gettext("achievement_unlocked")
         header_surf = self.title_font.render(header_text, True, header_color)
         header_rect = header_surf.get_rect(center=(rect_x + notification_width // 2, rect_y + 20))
 

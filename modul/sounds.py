@@ -59,23 +59,23 @@ class Sounds:
         self.current_theme = SoundTheme.DEFAULT
         try:
             self.shoot = pygame.mixer.Sound(asset_path("shoot.wav"))
-        except:
-            print("Shoot sound could not be loaded")
+        except Exception as e:
+            print(f"Shoot sound could not be loaded: {e}")
         try:
             self.explosion = pygame.mixer.Sound(asset_path("explosion.wav"))
-        except:
-            print("Explosion sound could not be loaded")
+        except Exception as e:
+            print(f"Explosion sound could not be loaded: {e}")
         try:
             self.player_death = pygame.mixer.Sound(asset_path("player_hit.wav"))
-        except:
-            print("Player-Death sound could not be loaded")
+        except Exception as e:
+            print(f"Player-Death sound could not be loaded: {e}")
         try:
             self.menu_move = pygame.mixer.Sound(asset_path("menu_select.wav"))
             self.menu_select = pygame.mixer.Sound(asset_path("menu_confirm.wav"))
-        except:
+        except Exception as e:
             self.menu_move = None
             self.menu_select = None
-            print("Menu sounds could not be loaded")
+            print(f"Menu sounds could not be loaded: {e}")
         try:
             pygame.mixer.music.load(asset_path("background.mp3"))
         except Exception as e:
@@ -88,47 +88,49 @@ class Sounds:
     def load_new_sounds(self):
         try:
             self.laser_shoot = pygame.mixer.Sound(asset_path("laser_shoot.wav"))
-        except:
+        except Exception as e:
             self.laser_shoot = None
-            print("Laser shoot sound could not be loaded")
+            print(f"Laser shoot sound could not be loaded: {e}")
         try:
             self.rocket_shoot = pygame.mixer.Sound(asset_path("rocket_shoot.wav"))
-        except:
+        except Exception as e:
             self.rocket_shoot = None
-            print("Rocket shoot sound could not be loaded")
+            print(f"Rocket shoot sound could not be loaded: {e}")
         try:
             self.boss_spawn = pygame.mixer.Sound(asset_path("boss_spawn.wav"))
-        except:
+        except Exception as e:
             self.boss_spawn = None
-            print("Boss spawn sound could not be loaded")
+            print(f"Boss spawn sound could not be loaded: {e}")
         try:
             self.boss_death = pygame.mixer.Sound(asset_path("boss_death.wav"))
-        except:
+        except Exception as e:
             self.boss_death = None
+            print(f"Boss death sound could not be loaded: {e}")
         try:
             self.powerup = pygame.mixer.Sound(asset_path("powerup.wav"))
-        except:
+        except Exception as e:
             self.powerup = None
-            print("PowerUp sound could not be loaded")
+            print(f"PowerUp sound could not be loaded: {e}")
         try:
             self.shield_activate = pygame.mixer.Sound(asset_path("shield_hit.wav"))
-        except:
+        except Exception as e:
             self.shield_activate = None
+            print(f"Shield-Activate sound could not be loaded: {e}")
         try:
             self.level_up = pygame.mixer.Sound(asset_path("level_up.wav"))
-        except:
+        except Exception as e:
             self.level_up = None
-            print("Level-Up sound could not be loaded")
+            print(f"Level-Up sound could not be loaded: {e}")
         try:
             self.game_over = pygame.mixer.Sound(asset_path("game_over.wav"))
-        except:
+        except Exception as e:
             self.game_over = None
-            print("Game-Over sound could not be loaded")
+            print(f"Game-Over sound could not be loaded: {e}")
         try:
             self.player_hit = pygame.mixer.Sound(asset_path("player_hit.wav"))
-        except:
+        except Exception as e:
             self.player_hit = None
-            print("Player-Hit sound could not be loaded")
+            print(f"Player-Hit sound could not be loaded: {e}")
 
     def play_shoot(self):
         if self.sound_on and self.shoot:
@@ -151,10 +153,6 @@ class Sounds:
             self.menu_select.play()
 
     def play_level_up(self):
-        if self.sound_on and self.level_up:
-            self.level_up.play()
-
-    def play_achievement(self):
         if self.sound_on and self.level_up:
             self.level_up.play()
 

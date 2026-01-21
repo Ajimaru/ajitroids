@@ -43,29 +43,35 @@ class ReplayListMenu:
                 self.fade_in = False
                 self.background_alpha = MENU_BACKGROUND_ALPHA
 
+        # Allow mapped keys for pause/select via input_utils
+        from modul import input_utils
+        pause_key = input_utils.get_action_keycode("pause")
+        shoot_key = input_utils.get_action_keycode("shoot")
+
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+                if (pause_key is not None and event.key == pause_key) or event.key == pygame.K_ESCAPE:
                     return {"action": "back"}
-                elif event.key == pygame.K_UP and len(self.replays) > 0:
-                    self.selected_index = (self.selected_index - 1) % len(
-                        self.replays
-                    )
-                elif event.key == pygame.K_DOWN and len(self.replays) > 0:
-                    self.selected_index = (self.selected_index + 1) % len(
-                        self.replays
-                    )
-                elif event.key in (pygame.K_RETURN, pygame.K_SPACE) and len(
-                    self.replays
-                ) > 0:
+
+                if event.key == pygame.K_UP and len(self.replays) > 0:
+                    self.selected_index = (self.selected_index - 1) % len(self.replays)
+                    continue
+
+                if event.key == pygame.K_DOWN and len(self.replays) > 0:
+                    self.selected_index = (self.selected_index + 1) % len(self.replays)
+                    continue
+
+                # Play selected (Enter, Space or mapped shoot)
+                if ((event.key in (pygame.K_RETURN, pygame.K_SPACE)
+                        or (shoot_key is not None and event.key == shoot_key))
+                        and len(self.replays) > 0):
                     return {
                         "action": "play_replay",
-                        "filepath": self.replays[self.selected_index][
-                            'filepath'
-                        ],
+                        "filepath": self.replays[self.selected_index]["filepath"],
                     }
-                elif event.key == pygame.K_DELETE and len(self.replays) > 0:
-                    filepath = self.replays[self.selected_index]['filepath']
+
+                if event.key == pygame.K_DELETE and len(self.replays) > 0:
+                    filepath = self.replays[self.selected_index]["filepath"]
                     self.replay_manager.delete_replay(filepath)
                     self.replays = self.replay_manager.list_replays()
                     if self.selected_index >= len(self.replays):
@@ -81,21 +87,19 @@ class ReplayListMenu:
         screen.blit(background, (0, 0))
 
         # Title
-        title_surf = self.title_font.render(
-            "REPLAY BROWSER",
-            True,
-            pygame.Color(MENU_TITLE_COLOR),
-        )
+        try:
+            from modul.i18n import gettext
+        except Exception:
+            def gettext(k):
+                return k
+
+        title_surf = self.title_font.render(gettext("replay_browser"), True, pygame.Color(MENU_TITLE_COLOR))
         title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, 60))
         screen.blit(title_surf, title_rect)
 
         if not self.replays:
             # No replays message
-            no_replays_surf = self.text_font.render(
-                "No replays found",
-                True,
-                (200, 200, 200),
-            )
+            no_replays_surf = self.text_font.render(gettext("no_replays_found"), True, (200, 200, 200))
             no_replays_rect = no_replays_surf.get_rect(
                 center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
             )
@@ -151,9 +155,7 @@ class ReplayListMenu:
                     break
 
         # Instructions
-        instructions = [
-            "UP/DOWN: Navigate | ENTER: Play | DELETE: Remove | ESC: Back"
-        ]
+        instructions = [gettext("replay_instructions")]
 
         y_pos = SCREEN_HEIGHT - 60
         for instruction in instructions:
@@ -178,12 +180,16 @@ class ReplayViewer:
 
     def update(self, dt, events):
         """Update replay viewer state."""
+        from modul import input_utils
+        pause_key = input_utils.get_action_keycode("pause")
+        shoot_key = input_utils.get_action_keycode("shoot")
+
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+                if (pause_key is not None and event.key == pause_key) or event.key == pygame.K_ESCAPE:
                     self.replay_player.stop_playback()
                     return "back"
-                elif event.key == pygame.K_SPACE:
+                elif (shoot_key is not None and event.key == shoot_key) or event.key == pygame.K_SPACE:
                     self.replay_player.toggle_pause()
                 elif event.key == pygame.K_LEFT:
                     self.replay_player.skip_backward(5.0)
@@ -200,6 +206,11 @@ class ReplayViewer:
 
     def draw_hud(self, screen):
         """Draw replay HUD with controls and info."""
+        try:
+            from modul.i18n import gettext
+        except Exception:
+            def gettext(k):
+                return k
         # Draw control bar at bottom
         bar_height = 80
         bar_y = SCREEN_HEIGHT - bar_height
@@ -211,7 +222,7 @@ class ReplayViewer:
         screen.blit(overlay, (0, bar_y))
 
         # Playback status
-        status = "PAUSED" if self.replay_player.paused else "PLAYING"
+        status = gettext("paused") if self.replay_player.paused else gettext("playing")
         status_color = (
             (255, 200, 0) if self.replay_player.paused else (0, 255, 0)
         )
@@ -251,12 +262,12 @@ class ReplayViewer:
         screen.blit(time_surf, time_rect)
 
         # Speed indicator
-        speed_text = f"Speed: {self.replay_player.playback_speed}x"
+        speed_text = gettext("replay_speed_format").format(speed=self.replay_player.playback_speed)
         speed_surf = self.small_font.render(speed_text, True, (200, 200, 200))
         screen.blit(speed_surf, (SCREEN_WIDTH - 150, bar_y + 10))
 
         # Controls hint
-        controls = "SPACE: Pause | ←/→: Skip | 1/2/3: Speed | ESC: Exit"
+        controls = gettext("replay_controls")
         controls_surf = self.small_font.render(controls, True, (150, 150, 150))
         controls_rect = controls_surf.get_rect(
             center=(SCREEN_WIDTH / 2, bar_y + 65)
@@ -264,6 +275,6 @@ class ReplayViewer:
         screen.blit(controls_surf, controls_rect)
 
         # Replay indicator in top-right
-        replay_text = "REPLAY"
+        replay_text = gettext("replay_label")
         replay_surf = self.title_font.render(replay_text, True, (255, 0, 0))
         screen.blit(replay_surf, (SCREEN_WIDTH - 200, 20))

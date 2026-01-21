@@ -1,18 +1,18 @@
 import pygame
 import math
-from modul.constants import *
+import modul.constants as C
 from modul.circleshape import CircleShape
 
 
 class BossProjectile(CircleShape):
     def __init__(self, x, y, velocity, projectile_type="normal"):
-        super().__init__(x, y, BOSS_PROJECTILE_RADIUS)
+        super().__init__(x, y, C.BOSS_PROJECTILE_RADIUS)
         self.position = pygame.Vector2(x, y)
         self.velocity = velocity
         self.type = projectile_type
         self.lifetime = 5.0
         self.damage = 1
-        self.color = BOSS_PROJECTILE_COLORS.get(self.type, BOSS_COLOR)
+        self.color = C.BOSS_PROJECTILE_COLORS.get(self.type, C.BOSS_COLOR)
         self.rotation = 0
         self.rotation_speed = 180
 
@@ -24,9 +24,9 @@ class BossProjectile(CircleShape):
             self.kill()
         if (
             self.position.x < -20
-            or self.position.x > SCREEN_WIDTH + 20
+            or self.position.x > C.SCREEN_WIDTH + 20
             or self.position.y < -20
-            or self.position.y > SCREEN_HEIGHT + 20
+            or self.position.y > C.SCREEN_HEIGHT + 20
         ):
             self.kill()
 

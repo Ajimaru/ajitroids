@@ -2,7 +2,7 @@ import pygame
 import json
 import os
 import math
-from modul.constants import *
+import modul.constants as C
 
 
 class ShipManager:
@@ -65,7 +65,8 @@ class ShipManager:
                 with open(self.ships_file, "r") as f:
                     data = json.load(f)
                     return data.get("unlocked_ships", [])
-            except:
+            except Exception as e:
+                print(f"Error loading ships file {self.ships_file}: {e}")
                 return []
         return []
 
@@ -262,8 +263,17 @@ class ShipRenderer:
 
     @staticmethod
     def draw_question_mark(screen, x, y, scale, color):
+        try:
+            from modul.i18n import gettext
+        except Exception:
+            def gettext(k):
+                return k
+
         font = pygame.font.Font(None, int(36 * scale))
-        text = font.render("?", True, color)
+        symbol = gettext("question_mark")
+        if not symbol:
+            symbol = "?"
+        text = font.render(symbol, True, color)
         text_rect = text.get_rect(center=(x, y))
         screen.blit(text, text_rect)
 

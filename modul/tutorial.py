@@ -1,21 +1,32 @@
 import pygame
 import math
-from modul.constants import *
-from modul.starfield import MenuStarfield
+import modul.constants as C
+
+# Ensure `MenuStarfield` is available at module level so tests can patch it
+try:
+    from modul.starfield import MenuStarfield  # type: ignore
+except Exception:
+    MenuStarfield = None
 
 
 class Tutorial:
     def __init__(self):
+        try:
+            from modul.i18n import gettext
+        except Exception:
+            def gettext(k):
+                return k
+
         self.pages = [
             {
                 "title": "Basics",
                 "content": [
-                    "• Move your spaceship with the arrow keys",
-                    "• Shoot with the spacebar",
-                    "• Rotate with left / right arrow keys",
-                    "• Move forward / backward with up / down arrow keys",
+                    gettext("tutorial_move"),
+                    gettext("tutorial_shoot"),
+                    gettext("tutorial_rotate"),
+                    gettext("tutorial_thrust"),
                     "• Destroy asteroids for points!",
-                    "• Press B to switch weapons",
+                    gettext("tutorial_switch_b"),
                     "",
                     "• Large asteroids break into smaller pieces",
                     "• Collect power-ups for special abilities",
@@ -125,11 +136,12 @@ class Tutorial:
         self.font_content = pygame.font.Font(None, 28)
         self.font_navigation = pygame.font.Font(None, 24)
 
+        # Use the module-level `MenuStarfield` symbol so tests can patch it.
         try:
-            from starfield import MenuStarfield
-
+            if MenuStarfield is None:
+                raise ImportError("No MenuStarfield available")
             self.starfield = MenuStarfield(num_stars=80)
-        except ImportError:
+        except Exception:
             self.starfield = None
             print("Could not import starfield")
 
@@ -160,7 +172,13 @@ class Tutorial:
 
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE or event.key == pygame.K_SPACE:
+                from modul import input_utils
+                pause_key = input_utils.get_action_keycode("pause")
+                shoot_key = input_utils.get_action_keycode("shoot")
+                if ((pause_key is not None and event.key == pause_key)
+                        or event.key == pygame.K_ESCAPE
+                        or (shoot_key is not None and event.key == shoot_key)
+                        or event.key == pygame.K_SPACE):
                     return "back"
 
                 elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
@@ -189,7 +207,7 @@ class Tutorial:
 
         title_color = (100, 200, 255) if alpha == 255 else (100, 200, 255, alpha)
         title_surface = self.font_title.render(page["title"], True, title_color)
-        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH / 2, y_offset))
+        title_rect = title_surface.get_rect(center=(C.SCREEN_WIDTH / 2, y_offset))
 
         if alpha < 255:
             title_surface.set_alpha(alpha)
@@ -205,7 +223,7 @@ class Tutorial:
             if (line.startswith("[") and "]" in line) or (
                 ":" in line and any(weapon in line for weapon in ["STANDARD", "LASER", "ROCKET", "SHOTGUN"])
             ):
-                self.draw_colored_line(screen, line, SCREEN_WIDTH // 2, y_offset)
+                self.draw_colored_line(screen, line, C.SCREEN_WIDTH // 2, y_offset)
             else:
                 color = (255, 255, 255)
 
@@ -223,26 +241,30 @@ class Tutorial:
                 if alpha < 255:
                     content_surface.set_alpha(alpha)
 
-                content_rect = content_surface.get_rect(center=(SCREEN_WIDTH / 2, y_offset))
+                content_rect = content_surface.get_rect(center=(C.SCREEN_WIDTH / 2, y_offset))
                 screen.blit(content_surface, content_rect)
 
             y_offset += 35
 
-        nav_y = SCREEN_HEIGHT - 80
+        nav_y = C.SCREEN_HEIGHT - 80
 
         page_info = f"Page {self.current_page + 1} of {len(self.pages)}"
         page_surface = self.font_navigation.render(page_info, True, (150, 150, 150))
-        page_rect = page_surface.get_rect(center=(SCREEN_WIDTH / 2, nav_y))
+        page_rect = page_surface.get_rect(center=(C.SCREEN_WIDTH / 2, nav_y))
         screen.blit(page_surface, page_rect)
 
-        nav_text = "LEFT / RIGHT to navigate or SPACE to go Back"
+        try:
+            from modul.i18n import gettext
+            nav_text = gettext("tutorial_nav")
+        except Exception:
+            nav_text = "LEFT / RIGHT to navigate or SPACE to go Back"
         nav_surface = self.font_navigation.render(nav_text, True, (100, 100, 100))
-        nav_rect = nav_surface.get_rect(center=(SCREEN_WIDTH / 2, nav_y + 30))
+        nav_rect = nav_surface.get_rect(center=(C.SCREEN_WIDTH / 2, nav_y + 30))
         screen.blit(nav_surface, nav_rect)
 
         progress_width = 300
         progress_height = 4
-        progress_x = (SCREEN_WIDTH - progress_width) // 2
+        progress_x = (C.SCREEN_WIDTH - progress_width) // 2
         progress_y = nav_y - 30
 
         pygame.draw.rect(screen, (50, 50, 50), (progress_x, progress_y, progress_width, progress_height))
