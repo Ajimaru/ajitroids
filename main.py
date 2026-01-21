@@ -8,7 +8,11 @@ import time
 import argparse
 import logging
 import sys
-from modul.constants import *
+import modul.constants as C
+# Backwards-compatibility: expose uppercase constants into module globals
+for _const_name in dir(C):
+    if _const_name.isupper():
+        globals()[_const_name] = getattr(C, _const_name)
 from modul.player import Player
 from modul.asteroid import Asteroid, EnemyShip
 from modul.asteroidfield import AsteroidField
@@ -27,8 +31,11 @@ from modul.menu import (
     DifficultyMenu,
     SoundTestMenu,
     VoiceAnnouncementsMenu,
+        TTSVoiceMenu,
     AchievementsMenu,
     ShipSelectionMenu,
+    ControlsMenu,
+    LanguageMenu,
 )
 from modul.ships import ship_manager
 from modul.tutorial import Tutorial
@@ -266,6 +273,10 @@ def main(args=None):
     sound_test_menu = SoundTestMenu()
     sound_test_menu.set_sounds(sounds)
     voice_announcements_menu = VoiceAnnouncementsMenu(game_settings)
+    tts_voice_menu = TTSVoiceMenu(game_settings)
+    controls_menu = ControlsMenu(game_settings)
+    language_menu = LanguageMenu(game_settings)
+    # TTS voice menu created above
     credits_screen = CreditsScreen()
     game_over_screen = GameOverScreen()
     difficulty_menu = DifficultyMenu()
@@ -679,6 +690,14 @@ def main(args=None):
             elif action == "voice_announcements":
                 game_state = "voice_announcements"
 
+            elif action == "controls":
+                game_state = "controls"
+                controls_menu.activate()
+
+            elif action == "language":
+                game_state = "language"
+                language_menu.activate()
+
         elif game_state == "voice_announcements":
             menu_starfield.update(dt)
             menu_starfield.draw(screen)
@@ -691,6 +710,28 @@ def main(args=None):
                     audio_enhancements.voice_announcements.update_from_settings(game_settings.announcement_types)
                     game_state = "options"
                     options_menu.activate()
+
+        elif game_state == "controls":
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+
+            action = controls_menu.update(dt, events)
+            controls_menu.draw(screen)
+
+            if action == "options":
+                game_state = "options"
+                options_menu.activate()
+
+        elif game_state == "language":
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+
+            action = language_menu.update(dt, events)
+            language_menu.draw(screen)
+
+            if action == "options":
+                game_state = "options"
+                options_menu.activate()
 
             voice_announcements_menu.draw(screen)
 
