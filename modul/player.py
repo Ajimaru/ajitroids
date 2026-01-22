@@ -18,12 +18,12 @@ try:
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - provide minimal runtime stub
     class _InputUtilsStub:  # pylint: disable=too-few-public-methods
         @staticmethod
-        def is_action_pressed(name):
+        def is_action_pressed(_name):
             """Return False for action state in tests or missing runtime helpers."""
             return False
 
         @staticmethod
-        def get_action_keycode(name):
+        def get_action_keycode(_name):
             """Return None for mapped keycodes when runtime helpers unavailable."""
             return None
 

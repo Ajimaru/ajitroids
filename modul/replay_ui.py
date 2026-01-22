@@ -21,7 +21,7 @@ try:
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - minimal stub for tests
     class _InputUtilsStub:
         @staticmethod
-        def get_action_keycode(name):
+        def get_action_keycode(_name):
             """Return None as a placeholder for mapped keycodes in tests."""
             return None
 
@@ -189,8 +189,8 @@ class ReplayViewer:
         self.text_font = pygame.font.Font(None, 32)
         self.small_font = pygame.font.Font(None, 24)
 
-    def update(self, dt, events):
-        """Update replay viewer state."""
+    def update(self, _dt, events):
+        """Update replay viewer state. `_dt` is accepted for API compatibility."""
         pause_key = input_utils.get_action_keycode("pause")
         shoot_key = input_utils.get_action_keycode("shoot")
 

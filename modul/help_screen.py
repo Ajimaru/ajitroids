@@ -10,7 +10,7 @@ try:
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - provide minimal stub for tests
     class _InputUtilsStub:
         @staticmethod
-        def get_action_keycode(name):
+        def get_action_keycode(_name):
             return None
 
     input_utils = _InputUtilsStub()
@@ -80,8 +80,8 @@ class HelpScreen:
         """Deactivate the help screen."""
         self.active = False
 
-    def update(self, dt, events):
-        """Update help screen state."""
+    def update(self, _dt, events):
+        """Update help screen state. `_dt` accepted for API compatibility."""
         if self.active:
             self._ensure_fonts()
 

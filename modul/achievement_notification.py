@@ -34,8 +34,8 @@ class AchievementNotification:
         self.desc_font = pygame.font.Font(None, 20)
         self.sound_played = False
 
-    def update(self, dt):
-        """TODO: add docstring."""
+    def update(self, _dt):
+        """Update animation progress; `_dt` accepted for API compatibility."""
         current_time = time.time()
         elapsed = current_time - self.start_time
 

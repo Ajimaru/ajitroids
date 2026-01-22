@@ -78,8 +78,11 @@ class Boss(CircleShape):
         elif self.movement_phase == "chase" and player_position:
             self._move_towards(player_position, C.BOSS_MOVE_SPEED * 1.2, dt)
 
-    def _move_towards(self, target, speed, dt):
-        """TODO: add docstring."""
+    def _move_towards(self, target, speed, _dt):
+        """Move the boss toward `target` at given `speed`.
+
+        The `_dt` parameter is unused but accepted for API compatibility.
+        """
         direction = target - self.position
         if direction.length() > 0:
             direction = direction.normalize()
@@ -125,9 +128,6 @@ class Boss(CircleShape):
         self.health -= damage
         self.hit_flash = 0.1
         for _ in range(3):
-            angle = random.uniform(0, 2 * math.pi)
-            speed = random.uniform(50, 150)
-            velocity = pygame.Vector2(math.cos(angle), math.sin(angle)) * speed
             Particle.create_asteroid_explosion(self.position.x, self.position.y)
         if self.health <= 0 and self.death_timer < 0:
             self.death_timer = 0

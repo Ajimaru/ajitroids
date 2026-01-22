@@ -25,7 +25,7 @@ try:
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - provide minimal stub for tests
     class _InputUtilsStub:
         @staticmethod
-        def get_action_keycode(name):
+        def get_action_keycode(_name):
             """Return None for keycodes when input utils are not available."""
             return None
 
