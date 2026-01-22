@@ -20,7 +20,7 @@ class HighscoreManager:
         """TODO: add docstring."""
         try:
             if os.path.exists(C.HIGHSCORE_FILE):
-                with open(C.HIGHSCORE_FILE, "r") as f:
+                with open(C.HIGHSCORE_FILE, "r", encoding="utf-8") as f:
                     self.highscores = json.load(f)
             else:
                 self.highscores = [
@@ -38,7 +38,7 @@ class HighscoreManager:
     def save_highscores(self):
         """TODO: add docstring."""
         try:
-            with open(C.HIGHSCORE_FILE, "w") as f:
+            with open(C.HIGHSCORE_FILE, "w", encoding="utf-8") as f:
                 json.dump(self.highscores, f)
         except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error saving highscores: {e}")

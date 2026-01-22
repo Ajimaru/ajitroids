@@ -26,11 +26,15 @@ def _quantize(value, ndigits: int = QUANTIZE_DIGITS):
     return value
 
 
-def _open_replay(path: str, mode: str = "rt"):
-    """Open replay file with gzip support based on extension."""
+def _open_replay(path: str, mode: str = "rt", encoding: str = "utf-8"):
+    """Open replay file with gzip support based on extension.
+
+    When opening text-mode replay files, pass an explicit `encoding` to avoid
+    platform-dependent defaults.
+    """
     if path.endswith(".gz"):
-        return gzip.open(path, mode)
-    return open(path, mode)
+        return gzip.open(path, mode, encoding=encoding)
+    return open(path, mode, encoding=encoding)
 
 
 def _quantize_float(value: float) -> float:

@@ -53,7 +53,7 @@ class AchievementSystem:
     def load_unlocked_achievements(self):
         """TODO: add docstring."""
         try:
-            with open(self.achievements_file, "r") as file:
+            with open(self.achievements_file, "r", encoding="utf-8") as file:
                 data = json.load(file)
                 for item in data:
                     if item.get("unlocked", False):
@@ -77,7 +77,7 @@ class AchievementSystem:
             if achievement.unlocked
         ]
         if unlocked_achievements:
-            with open(self.achievements_file, "w") as file:
+            with open(self.achievements_file, "w", encoding="utf-8") as file:
                 json.dump(unlocked_achievements, file, indent=4)
             print(f"Unlocked achievements saved: {len(unlocked_achievements)} entries")
         else:

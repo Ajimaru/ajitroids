@@ -67,7 +67,7 @@ class ShipManager:
         """TODO: add docstring."""
         if os.path.exists(self.ships_file):
             try:
-                with open(self.ships_file, "r") as f:
+                with open(self.ships_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
                     return data.get("unlocked_ships", [])
             except Exception as e:  # pylint: disable=broad-exception-caught
@@ -79,7 +79,7 @@ class ShipManager:
         """TODO: add docstring."""
         data = {"unlocked_ships": self.unlocked_ships}
         try:
-            with open(self.ships_file, "w") as f:
+            with open(self.ships_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
         except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error saving ships: {e}")
