@@ -2,16 +2,28 @@
 
 import math
 import random
+<<<<<<< HEAD
 import pygame
+=======
+
+import pygame
+
+>>>>>>> origin/main
 import modul.constants as C
 from modul.circleshape import CircleShape
 from modul.particle import Particle
 
 
 class Boss(CircleShape):
+<<<<<<< HEAD
     """Boss enemy with health, movement, and attack patterns."""
     def __init__(self, level):
         """Initialize boss with level-based stats."""
+=======
+    """TODO: add docstring."""
+    def __init__(self, level):
+        """TODO: add docstring."""
+>>>>>>> origin/main
         super().__init__(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2, C.BOSS_RADIUS)
         self.boss_level = level // 10
         self.max_health = C.BOSS_BASE_HEALTH + (self.boss_level - 1) * C.BOSS_HEALTH_PER_LEVEL
@@ -31,7 +43,11 @@ class Boss(CircleShape):
         self.death_particles_emitted = False
 
     def update(self, dt, player_position=None):
+<<<<<<< HEAD
         """Update boss state, movement, and attacks."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         if self.death_timer >= 0:
             self.death_timer += dt
             if self.death_timer >= C.BOSS_DEATH_DURATION:
@@ -52,7 +68,11 @@ class Boss(CircleShape):
         self._constrain_to_screen()
 
     def _update_movement(self, dt, player_position):
+<<<<<<< HEAD
         """Update boss movement based on current phase."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         self.movement_timer += dt
         if self.movement_phase == "center" and self.movement_timer >= 3.0:
             self.movement_phase = "random"
@@ -89,7 +109,11 @@ class Boss(CircleShape):
             self.velocity *= 0.9
 
     def _constrain_to_screen(self):
+<<<<<<< HEAD
         """Keep boss within screen boundaries."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         margin = self.radius
         if self.position.x < margin:
             self.position.x = margin
@@ -105,7 +129,11 @@ class Boss(CircleShape):
             self.velocity.y = -abs(self.velocity.y) * 0.5
 
     def _update_attack(self, dt):
+<<<<<<< HEAD
         """Update attack timer and trigger attacks."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         self.attack_timer += dt
         if self.attack_timer >= self.attack_interval:
             self.attack()
@@ -113,7 +141,11 @@ class Boss(CircleShape):
             self.attack_pattern = (self.attack_pattern + 1) % 3
 
     def attack(self):
+<<<<<<< HEAD
         """Generate attack pattern data."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         if self.attack_pattern == 0:
             return {"type": "circle", "count": 8 + self.boss_level * 2}
         elif self.attack_pattern == 1:
@@ -122,7 +154,11 @@ class Boss(CircleShape):
             return {"type": "targeted", "count": 3 + self.boss_level}
 
     def take_damage(self, damage):
+<<<<<<< HEAD
         """Apply damage and handle death."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         self.health -= damage
         self.hit_flash = 0.1
         for _ in range(3):
@@ -133,7 +169,11 @@ class Boss(CircleShape):
         return False
 
     def draw(self, screen):
+<<<<<<< HEAD
         """Draw the boss with health bar."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         color = self.color
         if self.hit_flash > 0:
             color = (255, 255, 255)
@@ -141,7 +181,11 @@ class Boss(CircleShape):
         self._draw_health_bar(screen)
 
     def _draw_boss_shape(self, screen, color):
+<<<<<<< HEAD
         """Draw the boss's visual shape."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         if self.death_timer >= 0:
             alpha = int(255 * (1 - self.death_timer / C.BOSS_DEATH_DURATION))
             pulsating_radius = self.radius * (1 + 0.5 * math.sin(self.death_timer * 10))
@@ -168,7 +212,11 @@ class Boss(CircleShape):
             pygame.draw.circle(screen, color, satellite_pos, satellite_radius)
 
     def _draw_health_bar(self, screen):
+<<<<<<< HEAD
         """Draw the boss's health bar."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         if self.death_timer >= 0:
             return
         bar_width = self.radius * 2.5

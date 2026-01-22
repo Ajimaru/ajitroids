@@ -12,9 +12,15 @@ from modul.replay_system import ReplayManager, ReplayPlayer
 try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
+<<<<<<< HEAD
     def gettext(key):
         """Fallback translation: return the given key unchanged."""
         return key
+=======
+    def gettext(k):
+        """Fallback translation: return the given key unchanged."""
+        return k
+>>>>>>> origin/main
 
 try:
     from modul import input_utils
@@ -32,7 +38,11 @@ class ReplayListMenu:
     """Menu for listing and selecting replays."""
 
     def __init__(self, replay_manager: ReplayManager):
+<<<<<<< HEAD
         """Initialize replay list menu."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         self.replay_manager = replay_manager
         self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
         self.text_font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
@@ -183,7 +193,11 @@ class ReplayViewer:
     """Viewer for playing back replays."""
 
     def __init__(self, replay_player: ReplayPlayer):
+<<<<<<< HEAD
         """Initialize replay viewer."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         self.replay_player = replay_player
         self.title_font = pygame.font.Font(None, 48)
         self.text_font = pygame.font.Font(None, 32)
@@ -268,6 +282,7 @@ class ReplayViewer:
         screen.blit(time_surf, time_rect)
 
         # Speed indicator
+<<<<<<< HEAD
         template = gettext("replay_speed_format")
         try:
             # Defensive formatting: if the template doesn't accept 'speed', fall back
@@ -275,6 +290,9 @@ class ReplayViewer:
         except Exception:
             # Fallback to a safe default that includes the numeric speed
             speed_text = f"{self.replay_player.playback_speed}x"
+=======
+        speed_text = gettext("replay_speed_format").format(speed=self.replay_player.playback_speed)
+>>>>>>> origin/main
         speed_surf = self.small_font.render(speed_text, True, (200, 200, 200))
         screen.blit(speed_surf, (SCREEN_WIDTH - 150, bar_y + 10))
 

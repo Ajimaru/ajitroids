@@ -3,13 +3,23 @@
 import json
 import math
 import os
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
 import pygame
 try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
+<<<<<<< HEAD
     def gettext(key):
         """Fallback translation function returning the key when unavailable."""
         return key
+=======
+    def gettext(k):
+        """Fallback translation function returning the key when unavailable."""
+        return k
+>>>>>>> origin/main
 
 
 class ShipManager:
@@ -168,6 +178,7 @@ class ShipManager:
 
     def check_all_ships_unlocked(self, achievement_system):
         """Trigger achievement when all ships are unlocked."""
+<<<<<<< HEAD
         # Consider the default 'standard' ship which is always available.
         # Trigger the achievement when every non-default ship is present in
         # the unlocked_ships list.
@@ -175,6 +186,9 @@ class ShipManager:
             ship_id == "standard" or ship_id in self.unlocked_ships for ship_id in self.ships
         )
         if all_non_default:
+=======
+        if len(self.unlocked_ships) == len(self.ships):
+>>>>>>> origin/main
             achievement_system.unlock("Fleet Commander")
 
 
@@ -298,8 +312,12 @@ class ShipRenderer:
         """Draw a question mark symbol for unknown ship types."""
         font = pygame.font.Font(None, int(36 * scale))
         symbol = gettext("question_mark")
+<<<<<<< HEAD
         # Treat the untranslated key as missing (gettext often returns the key)
         if not symbol or symbol == "question_mark":
+=======
+        if not symbol:
+>>>>>>> origin/main
             symbol = "?"
         text = font.render(symbol, True, color)
         text_rect = text.get_rect(center=(x, y))

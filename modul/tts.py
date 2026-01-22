@@ -4,6 +4,7 @@ import logging
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
+<<<<<<< HEAD
 import collections.abc
 
 try:
@@ -12,16 +13,29 @@ except ImportError:
     PYTTSX3 = None
 else:
     PYTTSX3 = pyttsx3
+=======
+
+try:
+    import pyttsx3
+except Exception:  # pylint: disable=broad-exception-caught
+    pyttsx3 = None
+>>>>>>> origin/main
 
 from .settings import current_settings
 
 
 class TTSManager:
+<<<<<<< HEAD
     """Manages text-to-speech functionality using pyttsx3."""
 
     def __init__(self):
         """Initialize the TTS manager with settings and engine setup."""
         self.logger = logging.getLogger(__name__)
+=======
+    """TODO: add docstring."""
+    def __init__(self):
+        """TODO: add docstring."""
+>>>>>>> origin/main
         self.engine = None
         self.voice = ""
         self.language = getattr(current_settings, "language", "en")
@@ -38,11 +52,18 @@ class TTSManager:
         self._executor = ThreadPoolExecutor(max_workers=1)
         self._lock = threading.Lock()
 
+<<<<<<< HEAD
         if PYTTSX3 and self.enabled:
             try:
                 self.engine = PYTTSX3.init()
                 voices_prop = self.engine.getProperty("voices")
                 voices = list(voices_prop) if isinstance(voices_prop, collections.abc.Iterable) else []
+=======
+        if pyttsx3 and self.enabled:
+            try:
+                self.engine = pyttsx3.init()
+                voices = self.engine.getProperty("voices") or []
+>>>>>>> origin/main
                 selected = None
                 if self.preferred_voice:
                     for v in voices:
@@ -52,6 +73,7 @@ class TTSManager:
                             selected = v
                             break
                 if not selected and self.preferred_voice_lang:
+<<<<<<< HEAD
                     selected = self._find_voice_by_language(voices, self.preferred_voice_lang)
                 if selected:
                     try:
@@ -91,6 +113,36 @@ class TTSManager:
 
     def _do_speak(self, text: str):
         """Execute text-to-speech in a background thread."""
+=======
+                    for v in voices:
+                        langs = getattr(v, "languages", []) or []
+                        for lang_item in langs:
+                            try:
+                                # languages can be bytes or strings
+                                if isinstance(lang_item, (bytes, bytearray)):
+                                    ls = lang_item.decode()
+                                else:
+                                    ls = str(lang_item)
+                                if self.preferred_voice_lang in ls:
+                                    selected = v
+                                    break
+                            except Exception:  # pylint: disable=broad-exception-caught
+                                continue
+                        if selected:
+                            break
+                if selected:
+                    try:
+                        self.engine.setProperty("voice", selected.id)
+                        self.voice = selected.id
+                    except Exception:  # pylint: disable=broad-exception-caught
+                        pass
+            except Exception:  # pylint: disable=broad-exception-caught
+                self.engine = None
+
+    def _do_speak(self, text: str):
+        # Worker method: runs in background thread
+        """TODO: add docstring."""
+>>>>>>> origin/main
         try:
             with self._lock:
                 if not self.engine:
@@ -106,7 +158,12 @@ class TTSManager:
             logging.exception("TTS worker failed")
 
     def speak(self, text: str):
+<<<<<<< HEAD
         """Enqueue text for speech synthesis in background."""
+=======
+        # Enqueue speak work on background thread and return immediately
+        """TODO: add docstring."""
+>>>>>>> origin/main
         if not self.enabled:
             return
         try:
@@ -128,9 +185,12 @@ class TTSManager:
             if not self.engine:
                 return []
             raw = self.engine.getProperty("voices") or []
+<<<<<<< HEAD
             # Ensure raw is iterable
             if not isinstance(raw, collections.abc.Iterable):
                 raw = [raw]
+=======
+>>>>>>> origin/main
             for v in raw:
                 try:
                     vid = getattr(v, "id", None) or getattr(v, "name", str(v))
@@ -165,6 +225,7 @@ class TTSManager:
                 return True
 
             # Try to find matching voice by id or name
+<<<<<<< HEAD
             voices_prop = self.engine.getProperty("voices")
             if isinstance(voices_prop, collections.abc.Iterable):
                 voices = list(voices_prop)
@@ -172,6 +233,9 @@ class TTSManager:
                 voices = [voices_prop]
             else:
                 voices = []
+=======
+            voices = self.engine.getProperty("voices") or []
+>>>>>>> origin/main
             selected = None
             for v in voices:
                 vid = getattr(v, "id", "")
@@ -182,9 +246,14 @@ class TTSManager:
 
             if selected:
                 try:
+<<<<<<< HEAD
                     voice_id = getattr(selected, "id", "")
                     self.engine.setProperty("voice", voice_id)
                     self.voice = voice_id
+=======
+                    self.engine.setProperty("voice", selected.id)
+                    self.voice = selected.id
+>>>>>>> origin/main
                     return True
                 except Exception:  # pylint: disable=broad-exception-caught
                     logging.exception("Failed to set TTS voice")
@@ -196,6 +265,7 @@ class TTSManager:
             return False
 
 
+<<<<<<< HEAD
 # Module-level singleton lock and instance
 _tts_manager_lock = threading.Lock()
 _TTS_MANAGER_INSTANCE = None
@@ -210,3 +280,15 @@ def get_tts_manager():
                 # initialize once while holding the lock
                 _TTS_MANAGER_INSTANCE = TTSManager()
     return _TTS_MANAGER_INSTANCE
+=======
+# Module-level singleton
+_tts_manager = None
+
+
+def get_tts_manager():
+    """TODO: add docstring."""
+    global _tts_manager
+    if _tts_manager is None:
+        _tts_manager = TTSManager()
+    return _tts_manager
+>>>>>>> origin/main

@@ -11,7 +11,13 @@ import time
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+<<<<<<< HEAD
 import pygame
+=======
+
+import pygame
+
+>>>>>>> origin/main
 try:
     import pyttsx3 as ttsdriver
     TTS_AVAILABLE = True
@@ -40,7 +46,11 @@ class DynamicMusicSystem:
     """Manages dynamic music that changes based on game intensity"""
 
     def __init__(self):
+<<<<<<< HEAD
         """Initialize dynamic music system."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         self.current_intensity = IntensityLevel.CALM
         # Music tracks for different intensity levels
         # Note: Currently using the same track for CALM/NORMAL/INTENSE as only one background
@@ -127,7 +137,11 @@ class VoiceAnnouncement:
     """Manages voice announcements for game events"""
 
     def __init__(self):
+<<<<<<< HEAD
         """Initialize voice announcement system."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         self.announcement_queue: List[Tuple[str, float]] = []  # (text, priority)
         self.current_announcement: Optional[str] = None
         self.announcement_timer = 0.0
@@ -312,7 +326,11 @@ class SoundThemeManager:
     """Manages multiple sound themes (retro, sci-fi, orchestral)"""
 
     def __init__(self):
+<<<<<<< HEAD
         """Initialize sound theme manager."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         self.current_theme = SoundTheme.DEFAULT
 
         # Define sound mappings for each theme
@@ -432,7 +450,11 @@ class AudioEnhancementManager:
     """Main manager for all audio enhancements"""
 
     def __init__(self):
+<<<<<<< HEAD
         """Initialize the audio enhancement manager with subsystems."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         self.dynamic_music = DynamicMusicSystem()
         self.voice_announcements = VoiceAnnouncement()
         self.theme_manager = SoundThemeManager()

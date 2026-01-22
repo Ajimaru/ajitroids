@@ -2,15 +2,27 @@
 
 import math
 import random
+<<<<<<< HEAD
 import pygame
+=======
+
+import pygame
+
+>>>>>>> origin/main
 import modul.constants as C
 from modul.circleshape import CircleShape
 
 
 class PowerUp(CircleShape):
+<<<<<<< HEAD
     """Represents a power-up item that can be collected by the player."""
     def __init__(self, x, y, powerup_type=None):
         """Initialize a power-up with position and type."""
+=======
+    """TODO: add docstring."""
+    def __init__(self, x, y, powerup_type=None):
+        """TODO: add docstring."""
+>>>>>>> origin/main
         super().__init__(x, y, C.POWERUP_RADIUS)
         self.position = pygame.Vector2(x, y)
         self.type = powerup_type if powerup_type else random.choice(C.POWERUP_TYPES)
@@ -20,7 +32,11 @@ class PowerUp(CircleShape):
         self.lifetime = C.POWERUP_LIFETIME
 
     def update(self, dt):
+<<<<<<< HEAD
         """Update power-up position, rotation, and lifetime."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         self.position += self.velocity * dt
         self.rotation += 90 * dt
 
@@ -29,7 +45,11 @@ class PowerUp(CircleShape):
             self.kill()
 
     def draw(self, screen):
+<<<<<<< HEAD
         """Draw the power-up with pulsing effect based on lifetime."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         pulse_scale = 1.0
         if self.lifetime <= 3.0:
             pulse_frequency = 2.0 + (3.0 - self.lifetime) * 2

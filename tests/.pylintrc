@@ -3,4 +3,9 @@
 # Tests often intentionally use fixtures, redefined names, and protected members.
 
 [MESSAGES CONTROL]
+<<<<<<< HEAD
 disable=unused-argument,redefined-outer-name,protected-access,import-outside-toplevel,missing-module-docstring,missing-class-docstring,missing-function-docstring,no-member,broad-exception-caught
+=======
+disable=W0613,W0621,W0212,C0415,C0114,C0115,C0116,E1101,W1514
+
+>>>>>>> origin/main

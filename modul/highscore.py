@@ -10,9 +10,15 @@ import modul.constants as C
 try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
+<<<<<<< HEAD
     def gettext(key):
         """Fallback translation function returning key when i18n is unavailable."""
         return key
+=======
+    def gettext(k):
+        """Fallback translation function returning key when i18n is unavailable."""
+        return k
+>>>>>>> origin/main
 
 
 class HighscoreManager:
@@ -39,6 +45,7 @@ class HighscoreManager:
                 self.save_highscores()
         except (OSError, json.JSONDecodeError) as e:  # fallback for file/parse errors
             print(f"Error loading highscores: {e}")
+<<<<<<< HEAD
             # Fallback: generate entries using the same logic as the default
             # initialization so names and scores are consistent.
             self.highscores = [
@@ -48,6 +55,9 @@ class HighscoreManager:
                 }
                 for i in range(C.HIGHSCORE_MAX_ENTRIES)
             ]
+=======
+            self.highscores = [{"name": "AAA", "score": 1000 - i * 100} for i in range(C.HIGHSCORE_MAX_ENTRIES)]
+>>>>>>> origin/main
 
     def save_highscores(self):
         """Persist highscores to disk, handling IO errors."""
@@ -58,13 +68,21 @@ class HighscoreManager:
             print(f"Error saving highscores: {e}")
 
     def is_highscore(self, score):
+<<<<<<< HEAD
         """Check if the score qualifies as a highscore."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         if len(self.highscores) < C.HIGHSCORE_MAX_ENTRIES:
             return True
         return score > self.highscores[-1]["score"]
 
     def add_highscore(self, name, score):
+<<<<<<< HEAD
         """Add a new highscore entry."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         name = name.upper()[:C.HIGHSCORE_NAME_LENGTH]
         name = "".join(c for c in name if c in C.HIGHSCORE_ALLOWED_CHARS)
         name = name.ljust(C.HIGHSCORE_NAME_LENGTH, "A")
@@ -81,9 +99,15 @@ class HighscoreManager:
 
 
 class HighscoreInput:
+<<<<<<< HEAD
     """Handles input for entering highscore name."""
     def __init__(self, score):
         """Initialize highscore input with score."""
+=======
+    """TODO: add docstring."""
+    def __init__(self, score):
+        """TODO: add docstring."""
+>>>>>>> origin/main
         self.score = score
         self.name = ["A", "A", "A"]
         self.current_pos = 0
@@ -91,7 +115,11 @@ class HighscoreInput:
         self.font = pygame.font.Font(None, 64)
 
     def update(self, events):
+<<<<<<< HEAD
         """Update input based on events."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
@@ -101,7 +129,11 @@ class HighscoreInput:
                 if event.key == pygame.K_BACKSPACE:
                     self.current_pos = max(0, self.current_pos - 1)
 
+<<<<<<< HEAD
                 if event.key == pygame.K_RIGHT:
+=======
+                elif event.key == pygame.K_RIGHT:
+>>>>>>> origin/main
                     self.current_pos = min(C.HIGHSCORE_NAME_LENGTH - 1, self.current_pos + 1)
 
                 if event.key == pygame.K_LEFT:
@@ -122,7 +154,11 @@ class HighscoreInput:
         return None
 
     def draw(self, screen):
+<<<<<<< HEAD
         """Draw the highscore input screen."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         overlay = pygame.Surface((C.SCREEN_WIDTH, C.SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 200))
         screen.blit(overlay, (0, 0))
@@ -176,9 +212,15 @@ class HighscoreInput:
 
 
 class HighscoreDisplay:
+<<<<<<< HEAD
     """Displays the highscore list."""
     def __init__(self, highscore_manager):
         """Initialize highscore display."""
+=======
+    """TODO: add docstring."""
+    def __init__(self, highscore_manager):
+        """TODO: add docstring."""
+>>>>>>> origin/main
         self.highscore_manager = highscore_manager
         self.font_title = pygame.font.Font(None, 64)
         self.font_entry = pygame.font.Font(None, 36)
@@ -195,7 +237,11 @@ class HighscoreDisplay:
         self.input_cooldown = 0
 
     def update(self, dt, events):
+<<<<<<< HEAD
         """Update fade-in animation and button hover effects."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / 0.5)
             if self.background_alpha >= 200:
@@ -221,7 +267,11 @@ class HighscoreDisplay:
         return None
 
     def draw(self, screen):
+<<<<<<< HEAD
         """Draw the highscore display screen."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         overlay = pygame.Surface((C.SCREEN_WIDTH, C.SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, self.background_alpha))
         screen.blit(overlay, (0, 0))

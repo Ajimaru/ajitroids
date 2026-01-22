@@ -7,6 +7,7 @@ This is a conservative automated helper: it finds lines containing
 Run this only when you accept suppressing those specific warnings.
 """
 from pathlib import Path
+<<<<<<< HEAD
 import logging
 
 
@@ -19,6 +20,11 @@ def process(path: Path) -> bool:
     Returns:
         bool: True if the file was changed, False otherwise.
     """
+=======
+
+
+def process(path: Path) -> bool:
+>>>>>>> origin/main
     src = path.read_text(encoding="utf-8")
     lines = src.splitlines()
     changed = False
@@ -34,14 +40,22 @@ def process(path: Path) -> bool:
 
 
 def main():
+<<<<<<< HEAD
     """Scan Python files in the 'modul' directory and mark broad exception handlers with a pylint disable comment."""
+=======
+>>>>>>> origin/main
     changed_files = []
     for p in sorted(Path("modul").glob("**/*.py")):
         try:
             if process(p):
                 changed_files.append(str(p))
+<<<<<<< HEAD
         except OSError:
             logging.exception("Failed processing %s", p)
+=======
+        except Exception:
+            continue
+>>>>>>> origin/main
     if changed_files:
         print("Updated files:")
         for f in changed_files:

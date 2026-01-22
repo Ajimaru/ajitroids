@@ -6,6 +6,7 @@ This script prepends a one-line module docstring to each Python file in
 to fix Pylint C0114/C0115 quickly and safely.
 """
 from pathlib import Path
+<<<<<<< HEAD
 import re
 import ast
 import logging
@@ -28,11 +29,22 @@ def process(path: Path) -> bool:
 
     Returns True if a docstring was added, otherwise False.
     """
+=======
+
+
+def needs_docstring(src: str) -> bool:
+    s = src.lstrip()
+    return not (s.startswith('"') or s.startswith("''"))
+
+
+def process(path: Path) -> bool:
+>>>>>>> origin/main
     src = path.read_text(encoding='utf-8')
     if not needs_docstring(src):
         return False
     name = path.stem
     doc = f'"""Module modul.{name} — minimal module docstring."""\n\n'
+<<<<<<< HEAD
     # Preserve a leading shebang and optional encoding declaration
     lines = src.splitlines(keepends=True)
     insert_idx = 0
@@ -44,18 +56,29 @@ def process(path: Path) -> bool:
 
     new_src = ''.join(lines[:insert_idx] + [doc] + lines[insert_idx:])
     path.write_text(new_src, encoding='utf-8')
+=======
+    path.write_text(doc + src, encoding='utf-8')
+>>>>>>> origin/main
     return True
 
 
 def main():
+<<<<<<< HEAD
     """Scan Python files in 'modul/' and add minimal module docstrings if missing."""
+=======
+>>>>>>> origin/main
     changed = []
     for p in sorted(Path('modul').glob('*.py')):
         try:
             if process(p):
                 changed.append(str(p))
+<<<<<<< HEAD
         except OSError as e:
             logger.warning("Skipping file %s due to OSError: %s", p, e, exc_info=True)
+=======
+        except Exception:
+            continue
+>>>>>>> origin/main
 
     if changed:
         print('Added docstrings to:')

@@ -1,21 +1,39 @@
 """Help screen showing keyboard shortcuts and game information."""
 import pygame
+<<<<<<< HEAD
 from modul.constants import SCREEN_HEIGHT, SCREEN_WIDTH
+=======
+
+from modul.constants import SCREEN_HEIGHT, SCREEN_WIDTH
+
+
+# Module-level optional runtime helpers to satisfy linters (C0415)
+>>>>>>> origin/main
 try:
     from modul import input_utils  # type: ignore
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - provide minimal stub for tests
     class _InputUtilsStub:
         @staticmethod
         def get_action_keycode(_name):
+<<<<<<< HEAD
             """Stub for get_action_keycode; returns None."""
             return None
 
     input_utils = _InputUtilsStub()
+=======
+            return None
+
+    input_utils = _InputUtilsStub()
+
+>>>>>>> origin/main
 try:
     from modul.i18n import gettext  # type: ignore
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback for tests
     def gettext(k):
+<<<<<<< HEAD
         """Fallback gettext function that returns the input key unchanged."""
+=======
+>>>>>>> origin/main
         return k
 
 
@@ -23,7 +41,11 @@ class HelpScreen:
     """Display keyboard shortcuts and game help."""
 
     def __init__(self):
+<<<<<<< HEAD
         """Initialize the help screen with fonts and shortcut data."""
+=======
+        """TODO: add docstring."""
+>>>>>>> origin/main
         self.active = False
 
         # Fonts are initialized lazily to avoid crashes when HelpScreen is
