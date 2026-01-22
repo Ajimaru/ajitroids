@@ -1,22 +1,15 @@
 """Tests for boss behavior and related mechanics."""
 
-import random
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-import pytest
 import pygame
+import pytest
 
 from modul.boss import Boss
-from modul.constants import (
-    BOSS_ATTACK_INTERVAL,
-    BOSS_BASE_HEALTH,
-    BOSS_COLOR,
-    BOSS_DEATH_DURATION,
-    BOSS_HEALTH_PER_LEVEL,
-    BOSS_RADIUS,
-    SCREEN_HEIGHT,
-    SCREEN_WIDTH,
-)
+from modul.constants import (BOSS_ATTACK_INTERVAL, BOSS_BASE_HEALTH,
+                             BOSS_COLOR, BOSS_DEATH_DURATION,
+                             BOSS_HEALTH_PER_LEVEL, BOSS_RADIUS, SCREEN_HEIGHT,
+                             SCREEN_WIDTH)
 
 
 @pytest.fixture

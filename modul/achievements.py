@@ -1,3 +1,5 @@
+"""Module modul.achievements — minimal module docstring."""
+
 import json
 
 

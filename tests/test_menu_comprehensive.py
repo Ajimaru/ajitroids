@@ -1,16 +1,15 @@
 """Comprehensive tests for menu screens and menu behavior."""
 
-from unittest.mock import Mock, MagicMock, patch, call
+from unittest.mock import Mock, patch
 
-import pytest
 import pygame
+import pytest
 
-from modul.menu import (
-    MenuItem, Menu, MainMenu, PauseMenu, TutorialScreen, OptionsMenu,
-    CreditsScreen, GameOverScreen, DifficultyMenu, SoundTestMenu,
-    AchievementsMenu, ShipSelectionMenu
-)
 from modul.constants import CREDITS_LINE_SPACING, SCREEN_HEIGHT, SCREEN_WIDTH
+from modul.menu import (AchievementsMenu, CreditsScreen, DifficultyMenu,
+                        GameOverScreen, MainMenu, Menu, MenuItem, OptionsMenu,
+                        PauseMenu, ShipSelectionMenu, SoundTestMenu,
+                        TutorialScreen)
 
 
 @pytest.fixture(autouse=True)

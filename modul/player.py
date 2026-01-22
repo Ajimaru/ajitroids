@@ -1,12 +1,14 @@
 """Player class, input handling and player-related mechanics."""
 
+import math
+
 import pygame
+
 import modul.constants as C
 from modul.circleshape import CircleShape
+from modul.ships import ShipRenderer, ship_manager
 from modul.shot import Shot
 from modul.sounds import Sounds
-from modul.ships import ship_manager, ShipRenderer
-import math
 
 
 class Player(CircleShape):

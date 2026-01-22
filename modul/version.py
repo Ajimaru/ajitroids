@@ -11,7 +11,8 @@ from importlib import metadata
 
 def _fallback_version() -> str:
     try:
-        from modul._version import __version__ as generated_version  # type: ignore
+        from modul._version import \
+            __version__ as generated_version  # type: ignore
 
         return generated_version
     except Exception:

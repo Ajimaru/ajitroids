@@ -1,8 +1,9 @@
 """Stats Dashboard UI for displaying detailed game statistics."""
 import pygame
-import math
-from modul.constants import SCREEN_WIDTH, SCREEN_HEIGHT, MENU_TITLE_FONT_SIZE, MENU_ITEM_FONT_SIZE
-from modul.constants import MENU_TITLE_COLOR, MENU_BACKGROUND_ALPHA, MENU_TRANSITION_SPEED
+
+from modul.constants import (MENU_BACKGROUND_ALPHA, MENU_TITLE_COLOR,
+                             MENU_TITLE_FONT_SIZE, MENU_TRANSITION_SPEED,
+                             SCREEN_HEIGHT, SCREEN_WIDTH)
 
 
 class StatsDashboard:

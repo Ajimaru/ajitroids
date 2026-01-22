@@ -1,31 +1,24 @@
-import random
+"""Module modul.asteroid — minimal module docstring."""
+
 import math
+import random
+
 import pygame
+
 from modul.circleshape import CircleShape
-from modul.constants import (
-    ASTEROID_VERTICES,
-    ASTEROID_IRREGULARITY,
-    ASTEROID_MIN_RADIUS,
-    COLLISION_DEBUG,
-    POWERUP_SPAWN_CHANCE,
-    POWERUP_MAX_COUNT,
-    PLAYER_RADIUS,
-    SCREEN_WIDTH,
-    SCREEN_HEIGHT,
-    ASTEROID_TYPE_NORMAL,
-    ASTEROID_TYPE_ICE,
-    ASTEROID_TYPE_METAL,
-    ASTEROID_TYPE_CRYSTAL,
-    ASTEROID_TYPES,
-    ASTEROID_TYPE_COLORS,
-    ASTEROID_ICE_VELOCITY_MULTIPLIER,
-    ASTEROID_METAL_HEALTH,
-    ASTEROID_CRYSTAL_SPLIT_COUNT,
-)
-from modul.shot import Shot
-from modul.powerup import PowerUp
-from modul.particle import Particle
+from modul.constants import (ASTEROID_CRYSTAL_SPLIT_COUNT,
+                             ASTEROID_ICE_VELOCITY_MULTIPLIER,
+                             ASTEROID_IRREGULARITY, ASTEROID_METAL_HEALTH,
+                             ASTEROID_MIN_RADIUS, ASTEROID_TYPE_COLORS,
+                             ASTEROID_TYPE_CRYSTAL, ASTEROID_TYPE_ICE,
+                             ASTEROID_TYPE_METAL, ASTEROID_TYPE_NORMAL,
+                             ASTEROID_TYPES, ASTEROID_VERTICES,
+                             COLLISION_DEBUG, PLAYER_RADIUS, POWERUP_MAX_COUNT,
+                             POWERUP_SPAWN_CHANCE, SCREEN_HEIGHT, SCREEN_WIDTH)
 from modul.groups import collidable, drawable, updatable
+from modul.particle import Particle
+from modul.powerup import PowerUp
+from modul.shot import Shot
 
 
 class Asteroid(CircleShape):

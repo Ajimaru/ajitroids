@@ -1,8 +1,7 @@
 """Projectile (Shot) implementation used by the player and enemies."""
 
 import pygame
-import math
-from typing import Optional, Union
+
 import modul.constants as C
 from modul.circleshape import CircleShape
 

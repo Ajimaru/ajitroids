@@ -6,12 +6,13 @@ This module provides three major audio enhancements:
 3. Sound Themes - Multiple audio packs (retro, sci-fi, orchestral)
 """
 
-import pygame
-import time
 import os
-from pathlib import Path
-from typing import Optional, Dict, List, Tuple
+import time
 from enum import Enum
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+import pygame
 
 try:
     import pyttsx3

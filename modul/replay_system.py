@@ -1,11 +1,11 @@
 """Replay system for recording and playing back game sessions."""
 import gzip
 import json
+import logging
 import os
 import time
-import logging
-from dataclasses import dataclass, field, asdict
-from typing import List, Dict, Any, Optional, cast, TextIO
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, List, Optional, TextIO, cast
 
 logger = logging.getLogger(__name__)
 

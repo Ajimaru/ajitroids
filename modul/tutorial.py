@@ -1,7 +1,7 @@
 """Tutorial screens and tutorial page management."""
 
 import pygame
-import math
+
 import modul.constants as C
 
 # Ensure `MenuStarfield` is available at module level so tests can patch it

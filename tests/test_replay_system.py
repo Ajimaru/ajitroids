@@ -1,13 +1,14 @@
 """Tests for replay recording, playback and replay UI."""
 
-import os
 import json
-import tempfile
+import os
 from unittest.mock import MagicMock, patch
 
-import pytest
 import pygame
-from modul.replay_system import ReplayRecorder, ReplayPlayer, ReplayManager, GameFrame, GameEvent
+import pytest
+
+from modul.replay_system import (GameEvent, GameFrame, ReplayManager,
+                                 ReplayPlayer, ReplayRecorder)
 from modul.replay_ui import ReplayListMenu, ReplayViewer
 
 

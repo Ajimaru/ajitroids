@@ -1,7 +1,11 @@
-import pygame
+"""Module modul.sounds — minimal module docstring."""
+
 import os
 from pathlib import Path
-from modul.audio_enhancements import SoundThemeManager, SoundTheme
+
+import pygame
+
+from modul.audio_enhancements import SoundTheme, SoundThemeManager
 
 
 def asset_path(name: str) -> str:

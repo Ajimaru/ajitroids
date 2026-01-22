@@ -1,12 +1,14 @@
 """Tests for powerup effects and interactions with player."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-import pytest
 import pygame
+import pytest
+
+from modul.constants import (RAPID_FIRE_DURATION, SHIELD_DURATION,
+                             TRIPLE_SHOT_DURATION, WEAPON_LASER,
+                             WEAPON_MISSILE, WEAPON_SHOTGUN)
 from modul.player import Player
-from modul.powerup import PowerUp
-from modul.constants import RAPID_FIRE_DURATION, SHIELD_DURATION, TRIPLE_SHOT_DURATION, WEAPON_LASER, WEAPON_MISSILE, WEAPON_SHOTGUN
 
 
 @pytest.fixture

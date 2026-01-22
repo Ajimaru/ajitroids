@@ -1,7 +1,7 @@
 """Tests for the CircleShape utility."""
 
-import pytest
 import pygame
+import pytest
 
 from modul.circleshape import CircleShape
 

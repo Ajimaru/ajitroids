@@ -1,3 +1,5 @@
+"""Module modul.menu — minimal module docstring."""
+
 # flake8: noqa
 # pylint: disable=all
 # pyright: reportUndefinedVariable=false
@@ -6,13 +8,14 @@ import math
 
 import pygame
 
-from modul.version import __version__
 import modul.constants as C
+from modul.version import __version__
+
 # Backwards-compatibility: expose uppercase constants into module globals
 for _const_name in dir(C):
     if _const_name.isupper():
         globals()[_const_name] = getattr(C, _const_name)
-from modul.ships import ship_manager, ShipRenderer
+from modul.ships import ShipRenderer, ship_manager
 
 sounds = None
 

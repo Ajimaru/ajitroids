@@ -1,8 +1,10 @@
 """Power-up entities and their behaviors."""
 
-import pygame
-import random
 import math
+import random
+
+import pygame
+
 import modul.constants as C
 from modul.circleshape import CircleShape
 

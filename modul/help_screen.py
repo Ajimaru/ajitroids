@@ -1,6 +1,7 @@
 """Help screen showing keyboard shortcuts and game information."""
 import pygame
-from modul.constants import SCREEN_WIDTH, SCREEN_HEIGHT
+
+from modul.constants import SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 class HelpScreen:

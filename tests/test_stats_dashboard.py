@@ -2,8 +2,8 @@
 
 from unittest.mock import MagicMock
 
-import pytest
 import pygame
+import pytest
 
 from modul.session_stats import SessionStats
 from modul.stats_dashboard import StatsDashboard
@@ -99,7 +99,7 @@ def test_stats_dashboard_draw(session_stats):
     assert True
 
 
-def test_stats_dashboard_with_no_games(session_stats):
+def test_stats_dashboard_with_no_games(_session_stats):
     """Test stats dashboard with no games played."""
     stats = SessionStats()
     dashboard = StatsDashboard(stats)

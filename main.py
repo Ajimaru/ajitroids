@@ -1,57 +1,49 @@
 # flake8: noqa
 # pyright: reportUndefinedVariable=false, reportWildcardImportFromLibrary=false
-from modul.version import __version__
-import pygame
-import math
-import random
-import time
 import argparse
 import logging
+import math
+import random
 import sys
+import time
+
+import pygame
+
 import modul.constants as C
+from modul.version import __version__
+
 # Backwards-compatibility: expose uppercase constants into module globals
 for _const_name in dir(C):
     if _const_name.isupper():
         globals()[_const_name] = getattr(C, _const_name)
-from modul.player import Player
+from modul.achievement_notification import AchievementNotificationManager
+from modul.achievements import AchievementSystem
 from modul.asteroid import Asteroid, EnemyShip
 from modul.asteroidfield import AsteroidField
-from modul.shot import Shot
-from modul.particle import Particle
-from modul.sounds import Sounds, asset_path
-from modul.starfield import Starfield, MenuStarfield
-from modul.powerup import PowerUp
-from modul.highscore import HighscoreManager, HighscoreInput, HighscoreDisplay
-from modul.menu import (
-    MainMenu,
-    PauseMenu,
-    OptionsMenu,
-    CreditsScreen,
-    GameOverScreen,
-    DifficultyMenu,
-    SoundTestMenu,
-    VoiceAnnouncementsMenu,
-        TTSVoiceMenu,
-    AchievementsMenu,
-    ShipSelectionMenu,
-    ControlsMenu,
-    LanguageMenu,
-)
-from modul.ships import ship_manager
-from modul.tutorial import Tutorial
-from modul.settings import Settings
+from modul.audio_enhancements import AudioEnhancementManager, SoundTheme
 from modul.boss import Boss
 from modul.bossprojectile import BossProjectile
-from modul.achievements import AchievementSystem
-from modul.achievement_notification import AchievementNotificationManager
 from modul.groups import collidable, drawable, updatable
 from modul.help_screen import HelpScreen
-from modul.session_stats import SessionStats
-from modul.stats_dashboard import StatsDashboard
-from modul.replay_system import ReplayRecorder, ReplayPlayer, ReplayManager
-from modul.replay_ui import ReplayListMenu, ReplayViewer
+from modul.highscore import HighscoreDisplay, HighscoreInput, HighscoreManager
+from modul.menu import (AchievementsMenu, ControlsMenu, CreditsScreen,
+                        DifficultyMenu, GameOverScreen, LanguageMenu, MainMenu,
+                        OptionsMenu, PauseMenu, ShipSelectionMenu,
+                        SoundTestMenu, TTSVoiceMenu, VoiceAnnouncementsMenu)
+from modul.particle import Particle
 from modul.performance_profiler import PerformanceProfiler
-from modul.audio_enhancements import AudioEnhancementManager, SoundTheme
+from modul.player import Player
+from modul.powerup import PowerUp
+from modul.replay_system import ReplayManager, ReplayPlayer, ReplayRecorder
+from modul.replay_ui import ReplayListMenu, ReplayViewer
+from modul.session_stats import SessionStats
+from modul.settings import Settings
+from modul.ships import ship_manager
+from modul.shot import Shot
+from modul.sounds import Sounds, asset_path
+from modul.starfield import MenuStarfield, Starfield
+from modul.stats_dashboard import StatsDashboard
+from modul.tutorial import Tutorial
 
 
 class GameSettings:

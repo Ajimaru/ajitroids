@@ -2,8 +2,10 @@
 
 import json
 import os
-import pygame
 import random
+
+import pygame
+
 import modul.constants as C
 
 

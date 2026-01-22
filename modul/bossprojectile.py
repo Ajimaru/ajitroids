@@ -1,7 +1,9 @@
 """Projectile class used by Boss entities."""
 
-import pygame
 import math
+
+import pygame
+
 import modul.constants as C
 from modul.circleshape import CircleShape
 

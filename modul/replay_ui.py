@@ -1,15 +1,14 @@
 """Replay UI for listing and playing back replays."""
-import pygame
-from modul.constants import SCREEN_WIDTH, SCREEN_HEIGHT
-from modul.constants import MENU_TITLE_FONT_SIZE, MENU_ITEM_FONT_SIZE
-from modul.constants import (
-    MENU_TITLE_COLOR,
-    MENU_SELECTED_COLOR,
-    MENU_UNSELECTED_COLOR,
-)
-from modul.constants import MENU_BACKGROUND_ALPHA, MENU_TRANSITION_SPEED
-from modul.replay_system import ReplayManager, ReplayPlayer
 from datetime import datetime
+
+import pygame
+
+from modul.constants import (MENU_BACKGROUND_ALPHA, MENU_ITEM_FONT_SIZE,
+                             MENU_SELECTED_COLOR, MENU_TITLE_COLOR,
+                             MENU_TITLE_FONT_SIZE, MENU_TRANSITION_SPEED,
+                             MENU_UNSELECTED_COLOR, SCREEN_HEIGHT,
+                             SCREEN_WIDTH)
+from modul.replay_system import ReplayManager, ReplayPlayer
 
 
 class ReplayListMenu:

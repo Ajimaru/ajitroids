@@ -1,10 +1,10 @@
 """Ship definitions, persistence and rendering helpers."""
 
-import pygame
 import json
-import os
 import math
-import modul.constants as C
+import os
+
+import pygame
 
 
 class ShipManager:

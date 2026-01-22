@@ -1,8 +1,10 @@
 """Boss enemy behavior, spawning and attack logic."""
 
-import pygame
 import math
 import random
+
+import pygame
+
 import modul.constants as C
 from modul.circleshape import CircleShape
 from modul.particle import Particle

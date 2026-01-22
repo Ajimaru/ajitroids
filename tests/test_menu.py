@@ -1,6 +1,4 @@
 import pytest
-import pygame
-from modul.menu import Menu
 
 
 @pytest.fixture(autouse=True)
@@ -10,8 +8,8 @@ def init_pygame(monkeypatch):
     monkeypatch.setenv("SDL_AUDIODRIVER", "dummy")
     """Tests for the simple Menu class behavior."""
 
-    import pytest
     import pygame
+    import pytest
 
     from modul.menu import Menu
 

@@ -1,9 +1,11 @@
 """AsteroidField generation and management."""
 
-import pygame
 import random
-from modul.asteroid import Asteroid
+
+import pygame
+
 import modul.constants as C
+from modul.asteroid import Asteroid
 
 
 class AsteroidField:

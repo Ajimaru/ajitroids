@@ -1,7 +1,9 @@
 """Particle effects used for explosions and visual feedback."""
 
-import pygame
 import random
+
+import pygame
+
 import modul.constants as C
 
 

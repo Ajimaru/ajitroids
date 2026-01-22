@@ -1,3 +1,5 @@
+"""Module modul.tts — minimal module docstring."""
+
 import logging
 import threading
 from concurrent.futures import ThreadPoolExecutor
