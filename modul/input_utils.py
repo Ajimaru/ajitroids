@@ -134,7 +134,7 @@ def is_action_pressed(action: str) -> bool:
                     hat = int(parts[1][3:])
                     hat_val = joy.get_hat(hat)
                     if len(parts) > 2:
-                        dirs = parts[2].split("_")
+                        dirs = parts[2].split("/")
                         x, y = hat_val
                         for d in dirs:
                             if d == "UP" and y != 1:
