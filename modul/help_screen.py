@@ -56,7 +56,7 @@ class HelpScreen:
         self.background_alpha = 200
 
     def _ensure_fonts(self):
-        """TODO: add docstring."""
+        """Ensure pygame fonts are initialized and cached on the instance."""
         if not pygame.font.get_init():
             pygame.font.init()
         if self.title_font is None:

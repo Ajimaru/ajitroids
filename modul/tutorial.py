@@ -17,6 +17,7 @@ try:
     from modul.i18n import gettext  # type: ignore
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback for tests
     def gettext(k):
+        """Fallback gettext returning the key when i18n is unavailable."""
         return k
 
 try:
@@ -25,6 +26,7 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - provide minimal
     class _InputUtilsStub:
         @staticmethod
         def get_action_keycode(name):
+            """Return None for keycodes when input utils are not available."""
             return None
 
     input_utils = _InputUtilsStub()
@@ -166,23 +168,23 @@ class Tutorial:
             print("Could not import starfield")
 
     def next_page(self):
-        """TODO: add docstring."""
+        """Advance to the next tutorial page, starting transition animation."""
         if self.current_page < len(self.pages) - 1:
             self.start_transition(self.current_page + 1)
 
     def previous_page(self):
-        """TODO: add docstring."""
+        """Go back to the previous tutorial page, starting transition."""
         if self.current_page > 0:
             self.start_transition(self.current_page - 1)
 
     def start_transition(self, target_page):
-        """TODO: add docstring."""
+        """Begin a page transition animation toward `target_page`."""
         self.transitioning = True
         self.target_page = target_page
         self.transition_timer = 0
 
     def update(self, dt, events):
-        """TODO: add docstring."""
+        """Process input events and update transition state for the tutorial."""
         if hasattr(self, "starfield") and self.starfield:
             self.starfield.update(dt)
 
@@ -215,7 +217,7 @@ class Tutorial:
         return None
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Render the current tutorial page and navigation UI to `screen`."""
         screen.fill((0, 0, 0))
 
         if hasattr(self, "starfield") and self.starfield:
@@ -294,8 +296,7 @@ class Tutorial:
         pygame.draw.rect(screen, (100, 200, 255), (progress_x, progress_y, progress_fill_width, progress_height))
 
     def draw_colored_line(self, screen, line, x, y):
-
-        """TODO: add docstring."""
+        """Render a colored title/content line used in tutorial pages."""
         if line.startswith("[") and "]" in line:
             bracket_end = line.find("]") + 1
             name_part = line[:bracket_end]

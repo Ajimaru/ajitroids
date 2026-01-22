@@ -11,6 +11,7 @@ try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
     def gettext(k):
+        """Fallback translation returning the passed key when i18n is missing."""
         return k
 
 

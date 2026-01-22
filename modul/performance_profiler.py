@@ -17,6 +17,7 @@ try:
     from modul.i18n import gettext  # type: ignore
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback for tests
     def gettext(k):
+        """Fallback translation function used during tests."""
         return k
 
 

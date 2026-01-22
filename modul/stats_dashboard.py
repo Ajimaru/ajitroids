@@ -8,6 +8,7 @@ try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
     def gettext(k):
+        """Fallback gettext used in tests when i18n is not available."""
         return k
 
 try:
@@ -16,6 +17,7 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - minimal stub fo
     class _InputUtilsStub:
         @staticmethod
         def get_action_keycode(name):
+            """Return None for mapped keys when input utilities are unavailable."""
             return None
 
     input_utils = _InputUtilsStub()

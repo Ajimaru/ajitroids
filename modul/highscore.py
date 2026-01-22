@@ -11,18 +11,19 @@ try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
     def gettext(k):
+        """Fallback translation function returning key when i18n is unavailable."""
         return k
 
 
 class HighscoreManager:
-    """TODO: add docstring."""
+    """Manage loading, saving and querying highscores."""
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize highscore manager and load persisted highscores."""
         self.highscores = []
         self.load_highscores()
 
     def load_highscores(self):
-        """TODO: add docstring."""
+        """Load highscores from disk or initialize defaults."""
         try:
             if os.path.exists(C.HIGHSCORE_FILE):
                 with open(C.HIGHSCORE_FILE, "r", encoding="utf-8") as f:
@@ -41,7 +42,7 @@ class HighscoreManager:
             self.highscores = [{"name": "AAA", "score": 1000 - i * 100} for i in range(C.HIGHSCORE_MAX_ENTRIES)]
 
     def save_highscores(self):
-        """TODO: add docstring."""
+        """Persist highscores to disk, handling IO errors."""
         try:
             with open(C.HIGHSCORE_FILE, "w", encoding="utf-8") as f:
                 json.dump(self.highscores, f)
@@ -117,7 +118,6 @@ class HighscoreInput:
         overlay = pygame.Surface((C.SCREEN_WIDTH, C.SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 200))
         screen.blit(overlay, (0, 0))
-
 
         title_text = self.font.render(gettext("new_highscore"), True, pygame.Color("white"))
         screen.blit(
@@ -217,7 +217,6 @@ class HighscoreDisplay:
         overlay = pygame.Surface((C.SCREEN_WIDTH, C.SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, self.background_alpha))
         screen.blit(overlay, (0, 0))
-
 
         title_text = self.font_title.render(gettext("highscores"), True, pygame.Color("white"))
         screen.blit(title_text, (C.SCREEN_WIDTH // 2 - title_text.get_width() // 2, 50))

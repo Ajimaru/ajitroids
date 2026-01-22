@@ -9,13 +9,14 @@ try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
     def gettext(k):
+        """Fallback translation function returning the key when unavailable."""
         return k
 
 
 class ShipManager:
-    """TODO: add docstring."""
+    """Manage ship definitions, persistence and unlocks."""
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize ship manager and load unlocked ships from disk."""
         self.ships_file = "ships.json"
         self.unlocked_ships = self.load_unlocked_ships()
 
@@ -69,7 +70,7 @@ class ShipManager:
         self.current_ship = "standard"
 
     def load_unlocked_ships(self):
-        """TODO: add docstring."""
+        """Load the list of unlocked ships from the ships file on disk."""
         if os.path.exists(self.ships_file):
             try:
                 with open(self.ships_file, "r", encoding="utf-8") as f:
@@ -81,7 +82,7 @@ class ShipManager:
         return []
 
     def save_unlocked_ships(self):
-        """TODO: add docstring."""
+        """Persist the unlocked ships list to disk, handling IO errors."""
         data = {"unlocked_ships": self.unlocked_ships}
         try:
             with open(self.ships_file, "w", encoding="utf-8") as f:
@@ -90,7 +91,7 @@ class ShipManager:
             print(f"Error saving ships: {e}")
 
     def unlock_ship(self, ship_id):
-        """TODO: add docstring."""
+        """Mark a ship as unlocked and persist the change."""
         if ship_id not in self.unlocked_ships and ship_id in self.ships:
             self.unlocked_ships.append(ship_id)
             self.ships[ship_id]["unlocked"] = True
@@ -99,7 +100,7 @@ class ShipManager:
         return False
 
     def unlock_ship_with_notification(self, ship_id, notification_callback=None):
-        """TODO: add docstring."""
+        """Unlock a ship and call the optional notification callback."""
         if self.unlock_ship(ship_id):
             ship_name = self.ships[ship_id]["name"]
             print(f"🚀 {ship_name} unlocked!")
@@ -109,7 +110,7 @@ class ShipManager:
         return False
 
     def check_unlock_conditions(self, level, difficulty, notification_callback=None):
-        """TODO: add docstring."""
+        """Check level/difficulty unlock conditions and notify if unlocked."""
         unlocked_any = False
 
         if level >= 50:
@@ -140,44 +141,44 @@ class ShipManager:
         return unlocked_any
 
     def get_ship_data(self, ship_id):
-        """TODO: add docstring."""
+        """Return the ship data dictionary for `ship_id` or the standard ship."""
         return self.ships.get(ship_id, self.ships["standard"])
 
     def get_available_ships(self):
-        """TODO: add docstring."""
+        """Return the list of available ship IDs."""
         return list(self.ships.keys())
 
     def get_unlocked_ships(self):
-        """TODO: add docstring."""
+        """Return a list of currently unlocked ship IDs (including standard)."""
         return ["standard"] + [ship_id for ship_id in self.unlocked_ships if ship_id in self.ships]
 
     def set_current_ship(self, ship_id):
-        """TODO: add docstring."""
+        """Set the currently selected ship if unlocked."""
         if ship_id in self.ships and self.ships[ship_id]["unlocked"]:
             self.current_ship = ship_id
             return True
         return False
 
     def get_current_ship_data(self):
-        """TODO: add docstring."""
+        """Return the data for the currently selected ship."""
         return self.get_ship_data(self.current_ship)
 
     def is_ship_unlocked(self, ship_id):
-        """TODO: add docstring."""
+        """Return whether the given ship_id is unlocked."""
         return ship_id in self.ships and self.ships[ship_id]["unlocked"]
 
     def check_all_ships_unlocked(self, achievement_system):
-        """TODO: add docstring."""
+        """Trigger achievement when all ships are unlocked."""
         if len(self.unlocked_ships) == len(self.ships):
             achievement_system.unlock("Fleet Commander")
 
 
 class ShipRenderer:
-    """TODO: add docstring."""
+    """Utility class that draws different ship shapes to a surface."""
 
     @staticmethod
     def draw_ship(screen, x, y, rotation, ship_type, scale=1.0, color=(255, 255, 255)):
-        """TODO: add docstring."""
+        """Draw the specified `ship_type` at position with rotation and color."""
         if ship_type == "triangle" or ship_type == "standard":
             ShipRenderer.draw_triangle_ship(screen, x, y, rotation, scale, color)
         elif ship_type == "arrow":
@@ -191,7 +192,7 @@ class ShipRenderer:
 
     @staticmethod
     def draw_triangle_ship(screen, x, y, rotation, scale, color):
-        """TODO: add docstring."""
+        """Draw the triangle/standard ship shape with rotation and scale."""
         points = [(0, -15 * scale), (-12 * scale, 15 * scale), (12 * scale, 15 * scale)]
 
         rotated_points = []
@@ -206,7 +207,7 @@ class ShipRenderer:
 
     @staticmethod
     def draw_arrow_ship(screen, x, y, rotation, scale, color):
-        """TODO: add docstring."""
+        """Draw an arrow-shaped ship used for the speedster."""
         points = [
             (0, -18 * scale),
             (-9 * scale, 3 * scale),
@@ -228,7 +229,7 @@ class ShipRenderer:
 
     @staticmethod
     def draw_heavy_ship(screen, x, y, rotation, scale, color):
-        """TODO: add docstring."""
+        """Draw the heavy cruiser ship shape with decorative details."""
         points = [
             (0, -12 * scale),
             (-18 * scale, 0),
@@ -258,7 +259,7 @@ class ShipRenderer:
 
     @staticmethod
     def draw_destroyer_ship(screen, x, y, rotation, scale, color):
-        """TODO: add docstring."""
+        """Draw the destroyer ship shape including weapon nodes."""
         points = [
             (0, -15 * scale),
             (-9 * scale, 0),
@@ -289,7 +290,7 @@ class ShipRenderer:
 
     @staticmethod
     def draw_question_mark(screen, x, y, scale, color):
-        """TODO: add docstring."""
+        """Draw a question mark symbol for unknown ship types."""
         font = pygame.font.Font(None, int(36 * scale))
         symbol = gettext("question_mark")
         if not symbol:
