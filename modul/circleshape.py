@@ -18,11 +18,9 @@ class CircleShape(pygame.sprite.Sprite):
 
     def draw(self, screen):
         """TODO: add docstring."""
-        pass
 
     def update(self, dt):
         """TODO: add docstring."""
-        pass
 
     def collides_with(self, other):
         """TODO: add docstring."""

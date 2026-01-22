@@ -85,7 +85,6 @@ class AchievementSystem:
 
     def load_achievements(self):
         """TODO: add docstring."""
-        pass
 
     def save_achievements(self):
         """TODO: add docstring."""

@@ -8,10 +8,7 @@ creates a backup with the suffix `.bak` before modifying each file.
 Usage: python3 scripts/add_missing_docstrings.py
 """
 import ast
-import io
-import os
 from pathlib import Path
-
 
 PLACEHOLDER = 'TODO: add docstring.'
 
