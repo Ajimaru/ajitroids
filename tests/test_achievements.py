@@ -1,9 +1,10 @@
 """Tests for achievements and achievement system."""
 
-import pytest
 import json
 import os
+import pytest
 from unittest.mock import MagicMock, patch, mock_open
+
 from modul.achievements import Achievement, AchievementSystem
 
 

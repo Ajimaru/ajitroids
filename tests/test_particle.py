@@ -2,6 +2,7 @@
 
 import pytest
 import pygame
+
 from modul.particle import Particle
 from modul.constants import EXPLOSION_PARTICLES
 

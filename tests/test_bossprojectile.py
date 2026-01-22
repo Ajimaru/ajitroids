@@ -3,6 +3,7 @@
 import pytest
 import pygame
 from unittest.mock import patch, MagicMock
+
 from modul.bossprojectile import BossProjectile
 from modul.constants import *
 

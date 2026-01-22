@@ -1,9 +1,11 @@
 """Tests for the Performance Profiler module."""
 
+from collections import deque
+
 import pytest
 import pygame
 from unittest.mock import MagicMock, patch
-from collections import deque
+
 from modul.performance_profiler import PerformanceProfiler
 
 

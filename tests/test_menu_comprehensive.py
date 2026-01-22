@@ -3,6 +3,7 @@
 import pytest
 import pygame
 from unittest.mock import Mock, MagicMock, patch, call
+
 from modul.menu import (
     MenuItem, Menu, MainMenu, PauseMenu, TutorialScreen, OptionsMenu,
     CreditsScreen, GameOverScreen, DifficultyMenu, SoundTestMenu,

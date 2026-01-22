@@ -1,7 +1,7 @@
 """Tests ensuring the main module imports and basic structures."""
 
-import sys
 import os
+import sys
 import unittest.mock
 
 # Add the project root to the path so we can import main

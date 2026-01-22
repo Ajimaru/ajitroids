@@ -3,6 +3,7 @@
 import pytest
 import pygame
 from unittest.mock import patch
+
 from modul.asteroid import Asteroid, EnemyShip
 from modul.constants import ASTEROID_MIN_RADIUS, ASTEROID_MAX_RADIUS, ASTEROID_VERTICES
 from modul.shot import Shot

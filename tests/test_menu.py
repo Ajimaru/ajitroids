@@ -12,6 +12,7 @@ def init_pygame(monkeypatch):
 
     import pytest
     import pygame
+
     from modul.menu import Menu
 
 

@@ -1,9 +1,11 @@
 """Tests for boss behavior and related mechanics."""
 
+import random
+
 import pytest
 import pygame
-import random
 from unittest.mock import patch, MagicMock
+
 from modul.boss import Boss
 from modul.constants import *
 

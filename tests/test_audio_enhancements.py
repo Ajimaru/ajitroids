@@ -2,6 +2,7 @@
 
 import pytest
 from unittest.mock import patch, MagicMock, call
+
 from modul.audio_enhancements import (
     DynamicMusicSystem,
     VoiceAnnouncement,

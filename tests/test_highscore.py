@@ -1,10 +1,12 @@
 """Tests for highscore manager and displays."""
 
+import json
+import os
+import sys
+
 import pytest
 import pygame
-import os
-import json
-import sys
+
 from modul.highscore import HighscoreManager, HighscoreInput, HighscoreDisplay
 from modul.constants import HIGHSCORE_FILE, HIGHSCORE_MAX_ENTRIES, HIGHSCORE_NAME_LENGTH
 

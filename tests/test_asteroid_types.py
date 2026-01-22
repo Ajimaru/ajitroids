@@ -2,6 +2,7 @@
 
 import pytest
 import pygame
+
 from modul.asteroid import Asteroid
 from modul.constants import (
     ASTEROID_MIN_RADIUS,
