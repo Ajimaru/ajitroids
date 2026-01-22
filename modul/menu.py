@@ -211,11 +211,12 @@ class MainMenu(Menu):
         self.add_item(gettext("highscores"), "highscores")
         self.add_item(gettext("statistics"), "statistics")
         self.add_item(gettext("achievements"), "achievements")
-        # Tests expect the Options item to appear as German "Optionen".
-        # Use the German locale for this single label to match existing test expectations.
+        # Use the user's current locale for the Options label; fall back to
+        # gettext("options") if unavailable. Tests that depended on a German
+        # label should be adapted to the active locale.
         try:
             from modul.i18n import t
-            options_label = t("options", "de")
+            options_label = t("options")
         except Exception:  # pylint: disable=broad-exception-caught
             options_label = gettext("options")
         self.add_item(options_label, "options")
@@ -1154,30 +1155,31 @@ class TTSVoiceMenu(Menu):
                 self.settings.tts_voice = vid
                 # Try to derive language from available voices
                 try:
-                        from modul.tts import get_tts_manager
-                        manager = get_tts_manager()
-                        if manager and getattr(manager, "engine", None):
-                            voices = manager.engine.getProperty("voices") or []
-                            for v in voices:
-                                if getattr(v, "id", None) == vid or getattr(v, "name", None) == vid:
-                                    langs = getattr(v, "languages", []) or []
-                                    for lang in langs:
-                                        try:
-                                            l = lang.decode() if isinstance(lang, (bytes, bytearray)) else str(lang)
-                                            # pick primary subtag like 'en' from en_US
-                                            if len(l) >= 2:
-                                                code = l[:2]
-                                                self.settings.tts_voice_language = code
-                                                break
-                                        except Exception:  # pylint: disable=broad-exception-caught
-                                            continue
-                                    break
-                        # Attempt to apply the voice immediately to the running manager
-                        try:
-                            if manager:
-                                manager.set_preferred_voice(vid, self.settings.tts_voice_language)
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            pass
+                    from modul.tts import get_tts_manager
+
+                    manager = get_tts_manager()
+                    if manager and getattr(manager, "engine", None):
+                        voices = manager.engine.getProperty("voices") or []
+                        for v in voices:
+                            if getattr(v, "id", None) == vid or getattr(v, "name", None) == vid:
+                                langs = getattr(v, "languages", []) or []
+                                for lang in langs:
+                                    try:
+                                        l = lang.decode() if isinstance(lang, (bytes, bytearray)) else str(lang)
+                                        # pick primary subtag like 'en' from en_US
+                                        if len(l) >= 2:
+                                            code = l[:2]
+                                            self.settings.tts_voice_language = code
+                                            break
+                                    except Exception:  # pylint: disable=broad-exception-caught
+                                        continue
+                                break
+                    # Attempt to apply the voice immediately to the running manager
+                    try:
+                        if manager:
+                            manager.set_preferred_voice(vid, self.settings.tts_voice_language)
+                    except Exception:  # pylint: disable=broad-exception-caught
+                        pass
                 except Exception:  # pylint: disable=broad-exception-caught
                     pass
             # Persist selection

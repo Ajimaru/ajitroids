@@ -6,39 +6,51 @@ definition it detects arguments that are never used in the function body and
 renames them by prefixing an underscore. It writes changes back in-place.
 """
 import ast
+import re
+import logging
 from pathlib import Path
 
 
 def process_file(path: Path) -> bool:
     src = path.read_text(encoding="utf-8")
     tree = ast.parse(src)
-    edits = []  # (offset, old, new)
+    edits = []  # (lineno0, old_line, new_line)
 
+    lines = src.splitlines()
     for node in tree.body:
-        if isinstance(node, ast.FunctionDef):
-            arg_names = [a.arg for a in node.args.args]
-            # collect all names used in function body
-            used = set()
+        if not isinstance(node, ast.FunctionDef):
+            continue
 
-            for n in ast.walk(node):
-                if isinstance(n, ast.Name):
-                    used.add(n.id)
+        arg_names = [a.arg for a in node.args.args]
+        # collect all names used in function body
+        used = set()
+        for n in ast.walk(node):
+            if isinstance(n, ast.Name):
+                used.add(n.id)
 
-            for arg in arg_names:
-                if arg not in used and not arg.startswith("_"):
-                    # rename in the source by replacing the parameter name
-                    # in the function signature only (safe because unused)
-                    # naive string replace scoped to the def line
-                    def_line = src.splitlines()[node.lineno - 1]
-                    if f"{arg}" in def_line:
-                        new_line = def_line.replace(arg, f"_{arg}")
-                        edits.append((node.lineno - 1, def_line, new_line))
+        unused = [arg for arg in arg_names if arg not in used and not arg.startswith("_")]
+        if not unused:
+            continue
+
+        lineno0 = node.lineno - 1
+        if lineno0 < 0 or lineno0 >= len(lines):
+            continue
+
+        def_line = lines[lineno0]
+        # Build a regex that matches whole-word occurrences of the unused args
+        pattern = r"\b(" + "|".join(re.escape(a) for a in unused) + r")\b"
+
+        def _repl(m):
+            return "_" + m.group(1)
+
+        new_line = re.sub(pattern, _repl, def_line)
+        if new_line != def_line:
+            edits.append((lineno0, def_line, new_line))
 
     if not edits:
         return False
 
-    lines = src.splitlines()
-    for lineno, old, new in sorted(edits, reverse=False):
+    for lineno, old, new in sorted(edits, key=lambda x: x[0]):
         if lines[lineno] == old:
             lines[lineno] = new
 
@@ -53,8 +65,7 @@ def main():
             if process_file(p):
                 changed.append(str(p))
         except Exception:
-            # skip problematic files
-            continue
+            logging.exception("Failed processing %s", p)
 
     if changed:
         print("Updated files:")

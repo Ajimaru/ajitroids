@@ -39,7 +39,15 @@ class HighscoreManager:
                 self.save_highscores()
         except (OSError, json.JSONDecodeError) as e:  # fallback for file/parse errors
             print(f"Error loading highscores: {e}")
-            self.highscores = [{"name": "AAA", "score": 1000 - i * 100} for i in range(C.HIGHSCORE_MAX_ENTRIES)]
+            # Fallback: generate entries using the same logic as the default
+            # initialization so names and scores are consistent.
+            self.highscores = [
+                {
+                    "name": "".join(random.choice(C.HIGHSCORE_ALLOWED_CHARS) for _ in range(C.HIGHSCORE_NAME_LENGTH)),
+                    "score": (C.HIGHSCORE_MAX_ENTRIES - i) * 1000,
+                }
+                for i in range(C.HIGHSCORE_MAX_ENTRIES)
+            ]
 
     def save_highscores(self):
         """Persist highscores to disk, handling IO errors."""

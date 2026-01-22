@@ -169,7 +169,13 @@ class ShipManager:
 
     def check_all_ships_unlocked(self, achievement_system):
         """Trigger achievement when all ships are unlocked."""
-        if len(self.unlocked_ships) == len(self.ships):
+        # Consider the default 'standard' ship which is always available.
+        # Trigger the achievement when every non-default ship is present in
+        # the unlocked_ships list.
+        all_non_default = all(
+            ship_id == "standard" or ship_id in self.unlocked_ships for ship_id in self.ships
+        )
+        if all_non_default:
             achievement_system.unlock("Fleet Commander")
 
 
@@ -293,7 +299,8 @@ class ShipRenderer:
         """Draw a question mark symbol for unknown ship types."""
         font = pygame.font.Font(None, int(36 * scale))
         symbol = gettext("question_mark")
-        if not symbol:
+        # Treat the untranslated key as missing (gettext often returns the key)
+        if not symbol or symbol == "question_mark":
             symbol = "?"
         text = font.render(symbol, True, color)
         text_rect = text.get_rect(center=(x, y))

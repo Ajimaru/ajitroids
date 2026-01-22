@@ -7,6 +7,7 @@ This is a conservative automated helper: it finds lines containing
 Run this only when you accept suppressing those specific warnings.
 """
 from pathlib import Path
+import logging
 
 
 def process(path: Path) -> bool:
@@ -31,7 +32,7 @@ def main():
             if process(p):
                 changed_files.append(str(p))
         except Exception:
-            continue
+            logging.exception("Failed processing %s", p)
     if changed_files:
         print("Updated files:")
         for f in changed_files:

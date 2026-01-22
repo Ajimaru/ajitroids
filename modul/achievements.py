@@ -89,7 +89,9 @@ class AchievementSystem:
 
     def load_achievements(self):
         """TODO: add docstring."""
-
+        # Delegate to existing loader that reads unlocked achievements from file.
+        # Keep this method for compatibility and potential future expansion.
+        return self.load_unlocked_achievements()
     def save_achievements(self):
         """TODO: add docstring."""
         self.save_unlocked_achievements()

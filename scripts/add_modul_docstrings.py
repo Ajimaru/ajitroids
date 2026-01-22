@@ -10,7 +10,14 @@ from pathlib import Path
 
 def needs_docstring(src: str) -> bool:
     s = src.lstrip()
-    return not (s.startswith('"') or s.startswith("''"))
+    # Recognize single- or triple-quoted module docstrings with either
+    # single or double quote styles.
+    return not (
+        s.startswith("'''")
+        or s.startswith('"""')
+        or s.startswith("'")
+        or s.startswith('"')
+    )
 
 
 def process(path: Path) -> bool:

@@ -85,10 +85,9 @@ def process_file(path: Path):
 def backup_and_write(path: Path, lines):
     bak = path.with_suffix(path.suffix + '.bak')
     if not bak.exists():
+        # Preserve original by renaming it to .bak, then write new content
         path.rename(bak)
-        bak.write_text(''.join(lines), encoding='utf-8')
-        # restore to original filename
-        bak.rename(path)
+        path.write_text(''.join(lines), encoding='utf-8')
     else:
         # fallback: write directly but keep original as .orig
         orig = path.with_suffix(path.suffix + '.orig')

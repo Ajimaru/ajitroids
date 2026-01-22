@@ -172,11 +172,16 @@ class TTSManager:
 
 # Module-level singleton
 _tts_manager = None
+_tts_manager_lock = threading.Lock()
 
 
 def get_tts_manager():
     """TODO: add docstring."""
     global _tts_manager
+    # Double-checked locking to avoid race conditions during lazy init.
     if _tts_manager is None:
-        _tts_manager = TTSManager()
+        with _tts_manager_lock:
+            if _tts_manager is None:
+                # initialize once while holding the lock
+                _tts_manager = TTSManager()
     return _tts_manager
