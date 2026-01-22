@@ -474,7 +474,7 @@ class TutorialScreen:
         screen.blit(background, (0, 0))
 
 <<<<<<< HEAD
-        title_surf = gettext("tutorial_title") and self.title_font.render(gettext("tutorial_title"), True, pygame.Color(C.MENU_TITLE_COLOR))
+        title_surf = self.title_font.render(gettext("tutorial_title"), True, pygame.Color(C.MENU_TITLE_COLOR))
 =======
         try:
             from modul.i18n import gettext
