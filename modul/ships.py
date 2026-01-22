@@ -168,11 +168,10 @@ class ShipManager:
 
 
 class ShipRenderer:
+    """TODO: add docstring."""
 
     @staticmethod
-    """TODO: add docstring."""
     def draw_ship(screen, x, y, rotation, ship_type, scale=1.0, color=(255, 255, 255)):
-
         """TODO: add docstring."""
         if ship_type == "triangle" or ship_type == "standard":
             ShipRenderer.draw_triangle_ship(screen, x, y, rotation, scale, color)
