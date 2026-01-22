@@ -6,19 +6,21 @@ This script prepends a one-line module docstring to each Python file in
 to fix Pylint C0114/C0115 quickly and safely.
 """
 from pathlib import Path
+import re
+import ast
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def needs_docstring(src: str) -> bool:
     """Return True if the given source string lacks a module docstring."""
-    s = src.lstrip()
-    # Recognize single- or triple-quoted module docstrings with either
-    # single or double quote styles.
-    return not (
-        s.startswith("'''")
-        or s.startswith('"""')
-        or s.startswith("'")
-        or s.startswith('"')
-    )
+    try:
+        module = ast.parse(src)
+    except SyntaxError:
+        # If the file is invalid Python, be conservative and don't add a docstring
+        return False
+    return ast.get_docstring(module) is None
 
 
 def process(path: Path) -> bool:
@@ -31,7 +33,17 @@ def process(path: Path) -> bool:
         return False
     name = path.stem
     doc = f'"""Module modul.{name} — minimal module docstring."""\n\n'
-    path.write_text(doc + src, encoding='utf-8')
+    # Preserve a leading shebang and optional encoding declaration
+    lines = src.splitlines(keepends=True)
+    insert_idx = 0
+    if lines and lines[0].startswith('#!'):
+        insert_idx = 1
+    # If the next line is an encoding declaration, keep it before the docstring
+    if insert_idx < len(lines) and re.search(r'coding[:=]', lines[insert_idx]):
+        insert_idx += 1
+
+    new_src = ''.join(lines[:insert_idx] + [doc] + lines[insert_idx:])
+    path.write_text(new_src, encoding='utf-8')
     return True
 
 
@@ -42,8 +54,8 @@ def main():
         try:
             if process(p):
                 changed.append(str(p))
-        except OSError:
-            continue
+        except OSError as e:
+            logger.warning("Skipping file %s due to OSError: %s", p, e, exc_info=True)
 
     if changed:
         print('Added docstrings to:')

@@ -291,13 +291,19 @@ class Sounds:
     def play_enemy_shoot(self):
         """Play enemy shoot sound effect."""
         if self.sound_on:
+            # Prefer boss_attack when available; fall back to shoot only if boss_attack is missing or fails
+            played = False
             if hasattr(self, "boss_attack") and self.boss_attack:
                 try:
                     self.boss_attack.play()
-                except Exception:
+                    played = True
+                except pygame.error:
+                    played = False
+            if not played and hasattr(self, "shoot") and self.shoot:
+                try:
+                    self.shoot.play()
+                except pygame.error:
                     pass
-            if self.shoot:
-                self.shoot.play()
 
     def play_player_hit(self):
         """Play player hit sound effect."""

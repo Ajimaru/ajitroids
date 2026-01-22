@@ -40,7 +40,7 @@ def main():
         try:
             if process(p):
                 changed_files.append(str(p))
-        except (OSError, IOError):
+        except OSError:
             logging.exception("Failed processing %s", p)
     if changed_files:
         print("Updated files:")

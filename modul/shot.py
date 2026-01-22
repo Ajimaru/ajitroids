@@ -65,7 +65,13 @@ class Shot(CircleShape):
     def draw(self, screen):
         """Draw shot on screen."""
         if self.shot_type == C.WEAPON_LASER:
-            end_pos = self.position + self.velocity.normalize() * 20
+            # Guard against zero-length velocity before normalizing
+            if self.velocity.length() > 0:
+                direction = self.velocity.normalize()
+            else:
+                # fallback: point to the right if velocity is zero
+                direction = pygame.Vector2(1, 0)
+            end_pos = self.position + direction * 20
             pos_tuple = (int(self.position[0]), int(self.position[1]))
             end_pos_tuple = (int(end_pos[0]), int(end_pos[1]))
             pygame.draw.line(screen, self.color, pos_tuple, end_pos_tuple, 3)
@@ -73,7 +79,12 @@ class Shot(CircleShape):
             pos_tuple = (int(self.position[0]), int(self.position[1]))
             pygame.draw.circle(screen, self.color, pos_tuple, self.radius)
 
-            tail_end = self.position - self.velocity.normalize() * 8
+            # Guard against zero-length velocity before normalizing
+            if self.velocity.length() > 0:
+                tail_dir = self.velocity.normalize()
+            else:
+                tail_dir = pygame.Vector2(0, 1)
+            tail_end = self.position - tail_dir * 8
             tail_end_tuple = (int(tail_end[0]), int(tail_end[1]))
             pygame.draw.line(screen, (255, 128, 0), pos_tuple, tail_end_tuple, 2)
         else:

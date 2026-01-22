@@ -268,7 +268,13 @@ class ReplayViewer:
         screen.blit(time_surf, time_rect)
 
         # Speed indicator
-        speed_text = gettext("replay_speed_format").format(speed=self.replay_player.playback_speed)
+        template = gettext("replay_speed_format")
+        try:
+            # Defensive formatting: if the template doesn't accept 'speed', fall back
+            speed_text = template.format(speed=self.replay_player.playback_speed)
+        except Exception:
+            # Fallback to a safe default that includes the numeric speed
+            speed_text = f"{self.replay_player.playback_speed}x"
         speed_surf = self.small_font.render(speed_text, True, (200, 200, 200))
         screen.blit(speed_surf, (SCREEN_WIDTH - 150, bar_y + 10))
 

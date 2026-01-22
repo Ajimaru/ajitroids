@@ -18,6 +18,24 @@ SOUNDS = None
 CREDITS_SCROLL_SPEED = 40  # pixels per second (adjust to desired scroll speed)
 
 
+def _gettext(key):
+    """Return translated string for `key` or the key itself if i18n unavailable.
+
+    This helper centralizes the common try/except import pattern used across
+    the module: it attempts to import and call `modul.i18n.gettext` and
+    falls back to returning the key unchanged when the i18n module is not
+    available (for tests or minimal environments).
+    """
+    try:
+        from modul.i18n import gettext as _g
+        return _g(key)
+    except Exception:
+        return key
+
+# Backwards-compatibility: expose a `gettext` name to call the helper
+gettext = _gettext
+
+
 class MenuItem:
     """Represents a selectable item in a menu."""
     def __init__(self, text, action, shortcut=None):
@@ -198,13 +216,6 @@ class MainMenu(Menu):
     """Main menu for the game."""
     def __init__(self):
         """Initialize the main menu with all items."""
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(key):
-                """Return the key unchanged (fallback)."""
-                return key
-
         super().__init__("AJITROIDS")
         self.add_item(gettext("start_game"), "start_game")
         self.add_item(gettext("tutorial"), "tutorial")
@@ -238,18 +249,8 @@ class PauseMenu(Menu):
     """Pause menu shown during gameplay."""
     def __init__(self):
         """Initialize the pause menu with items."""
-        try:
-            from modul.i18n import gettext
-            title = gettext("pause").upper()
-        except Exception:  # pylint: disable=broad-exception-caught
-            title = "PAUSE"
+        title = _gettext("pause").upper()
         super().__init__(title)
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """Return the key unchanged (fallback)."""
-                return k
         self.add_item(gettext("resume"), "continue")
         self.add_item(gettext("restart"), "restart")
         self.add_item(gettext("main_menu"), "main_menu")
@@ -260,12 +261,7 @@ class PauseMenu(Menu):
 
         # Show common keyboard shortcuts while paused
         shortcuts_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE * 0.8))
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
+        # Use module-level gettext helper
 
         shortcuts = [
             gettext("shortcut_arrow_up_accelerate"),
@@ -321,14 +317,7 @@ class TutorialScreen:
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
-
-        title_surf = self.title_font.render(gettext("tutorial_title"), True, pygame.Color(C.MENU_TITLE_COLOR))
+        title_surf = gettext("tutorial_title") and self.title_font.render(gettext("tutorial_title"), True, pygame.Color(C.MENU_TITLE_COLOR))
         title_rect = title_surf.get_rect(center=(C.SCREEN_WIDTH / 2, 100))
         screen.blit(title_surf, title_rect)
 
@@ -362,12 +351,7 @@ class OptionsMenu(Menu):
         super().__init__("OPTIONS")
         self.settings = settings
         self.sounds = sounds
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """Return the key unchanged (fallback)."""
-                return k
+        # Use module-level gettext helper
 
         music_state = gettext("on") if settings.music_on else gettext("off")
         sound_state = gettext("on") if settings.sound_on else gettext("off")
@@ -382,10 +366,7 @@ class OptionsMenu(Menu):
         # `show_tts_in_options` attribute so tests that don't include the
         # feature flag keep the original menu length.
         if "show_tts_in_options" in getattr(settings, "__dict__", {}):
-            try:
-                tts_toggle_state = gettext('on') if getattr(settings, 'show_tts_in_options', False) else gettext('off')
-            except Exception:  # pylint: disable=broad-exception-caught
-                tts_toggle_state = "ON" if getattr(settings, 'show_tts_in_options', False) else "OFF"
+            tts_toggle_state = gettext('on') if getattr(settings, 'show_tts_in_options', False) else gettext('off')
             self.add_item(f"{gettext('show_tts_in_options')}: {tts_toggle_state}", "toggle_show_tts")
 
         lang_label = gettext('language_label').format(lang=("Deutsch" if settings.language == "de" else "English"))
@@ -394,12 +375,7 @@ class OptionsMenu(Menu):
 
     def handle_action(self, action, sounds):
         """Handle actions triggered by menu item selection."""
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
+        # Use module-level gettext helper
         if action == "toggle_music":
             self.settings.music_on = not self.settings.music_on
             self.settings.save()
@@ -521,12 +497,7 @@ class OptionsMenu(Menu):
                         self.settings.save()
                         if self.sounds:
                             self.sounds.set_music_volume(self.settings.music_volume)
-                        try:
-                            from modul.i18n import gettext
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            def gettext(k):
-                                """Return the key unchanged (fallback)."""
-                                return k
+                        # use module-level gettext
                         self.items[self.selected_index].text = (
                             gettext('music_volume_format').format(
                                 percent=int(self.settings.music_volume * 100)
@@ -537,12 +508,7 @@ class OptionsMenu(Menu):
                         self.settings.save()
                         if self.sounds:
                             self.sounds.set_effects_volume(self.settings.sound_volume)
-                        try:
-                            from modul.i18n import gettext
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            def gettext(k):
-                                """TODO: add docstring."""
-                                return k
+                        # use module-level gettext
                         self.items[self.selected_index].text = (
                             gettext('sound_volume_format').format(
                                 percent=int(self.settings.sound_volume * 100)
@@ -554,12 +520,7 @@ class OptionsMenu(Menu):
                         self.settings.save()
                         if self.sounds:
                             self.sounds.set_music_volume(self.settings.music_volume)
-                        try:
-                            from modul.i18n import gettext
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            def gettext(k):
-                                """TODO: add docstring."""
-                                return k
+                        # use module-level gettext
                         self.items[self.selected_index].text = (
                             gettext('music_volume_format').format(
                                 percent=int(self.settings.music_volume * 100)
@@ -570,12 +531,7 @@ class OptionsMenu(Menu):
                         self.settings.save()
                         if self.sounds:
                             self.sounds.set_effects_volume(self.settings.sound_volume)
-                        try:
-                            from modul.i18n import gettext
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            def gettext(k):
-                                """TODO: add docstring."""
-                                return k
+                        # use module-level gettext
                         self.items[self.selected_index].text = (
                             gettext('sound_volume_format').format(
                                 percent=int(self.settings.sound_volume * 100)
@@ -652,26 +608,26 @@ class CreditsScreen:
             ]
         )
 
+        # Render each credits line centered below the title, with scrolling
+        margin = 20
+        line_spacing = self.text_font.get_linesize() + 4
+        # start below the title and apply scroll position
+        current_y = title_rect.bottom + margin + self.scroll_position
+        for line in credits_lines:
+            surf = self.text_font.render(line, True, pygame.Color("white"))
+            rect = surf.get_rect(centerx=C.SCREEN_WIDTH / 2, y=current_y)
+            screen.blit(surf, rect)
+            current_y += line_spacing
+
 
 class ControlsMenu(Menu):
     """Menu for remapping and displaying controls."""
     def __init__(self, settings):
         """Initialize the controls menu with settings."""
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """Return the key unchanged (fallback)."""
-                return k
         super().__init__(gettext("controls").upper())
         self.settings = settings
         # Define action order for display
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
+        # use module-level gettext helper
 
         self.actions = [
             ("rotate_left", gettext("rotate_left")),
@@ -686,12 +642,6 @@ class ControlsMenu(Menu):
             key_name = self.settings.controls.get(action_key, "")
             display = f"{label}: {key_name}"
             self.add_item(display, action_key)
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
         self.add_item(gettext("back"), "back")
         self.capturing = False
         self.capture_action = None
@@ -711,12 +661,7 @@ class ControlsMenu(Menu):
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.capturing = False
                     self.capture_action = None
-                    try:
-                        from modul.i18n import gettext
-                    except Exception:  # pylint: disable=broad-exception-caught
-                        def gettext(k):
-                            """TODO: add docstring."""
-                            return k
+                    # Use module-level gettext helper
                     self.message = gettext("binding_cancelled")
                     return None
 
@@ -772,12 +717,7 @@ class ControlsMenu(Menu):
                 # Check for duplicates
                 for a_key, _ in self.actions:
                     if self.settings.controls.get(a_key) == new_name:
-                        try:
-                            from modul.i18n import gettext
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            def gettext(k):
-                                """TODO: add docstring."""
-                                return k
+                        # use module-level gettext helper
                         self.message = gettext("key_already_assigned").format(key=new_name)
                         return None
 
@@ -786,12 +726,7 @@ class ControlsMenu(Menu):
                 self.settings.save()
                 self.capturing = False
                 self.capture_action = None
-                try:
-                    from modul.i18n import gettext
-                except Exception:  # pylint: disable=broad-exception-caught
-                    def gettext(k):
-                        """TODO: add docstring."""
-                        return k
+                # use module-level gettext helper
                 self.message = gettext("bound_key").format(key=new_name)
                 return None
             return None
@@ -806,12 +741,6 @@ class ControlsMenu(Menu):
                 if result == action_key:
                     self.capturing = True
                     self.capture_action = action_key
-                    try:
-                        from modul.i18n import gettext
-                    except Exception:  # pylint: disable=broad-exception-caught
-                        def gettext(k):
-                            """TODO: add docstring."""
-                            return k
                     # show the user-friendly action label if available
                     action_label = dict(self.actions).get(action_key, action_key)
                     self.message = gettext("press_new_key_for").format(action=action_label)
@@ -824,7 +753,7 @@ class ControlsMenu(Menu):
         if self.message:
             font = pygame.font.Font(None, 22)
             msg = font.render(self.message, True, (200, 200, 200))
-            rect = msg.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 40))
+            rect = msg.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT - 40))
             screen.blit(msg, rect)
 
 

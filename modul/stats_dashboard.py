@@ -100,11 +100,11 @@ class StatsDashboard:
         y_pos += 50
 
         combat_stats = [
-            (gettext("asteroids_destroyed"), f"{stats['total_asteroids_destroyed']:,}"),
-            (gettext("enemies_destroyed"), f"{stats['total_enemies_destroyed']:,}"),
-            (gettext("bosses_defeated"), f"{stats['total_bosses_defeated']}"),
-            (gettext("powerups_collected"), f"{stats['total_powerups_collected']:,}"),
-            (gettext("lives_lost"), f"{stats['total_lives_lost']}"),
+            (gettext("asteroids_destroyed"), f"{stats.get('total_asteroids_destroyed', 0):,}"),
+            (gettext("enemies_destroyed"), f"{stats.get('total_enemies_destroyed', 0):,}"),
+            (gettext("bosses_defeated"), f"{stats.get('total_bosses_defeated', 0)}"),
+            (gettext("powerups_collected"), f"{stats.get('total_powerups_collected', 0):,}"),
+            (gettext("lives_lost"), f"{stats.get('total_lives_lost', 0)}"),
         ]
 
         for label, value in combat_stats:

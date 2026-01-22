@@ -57,10 +57,11 @@ def process_file(path: Path):
     # module docstring
     if ast.get_docstring(tree) is None:
         changed = True
-        # Re-parse to keep AST line numbers in sync with modified source
+        # Actually insert the module docstring
+        lines = add_module_docstring(lines, tree)
+        # Rebuild src and re-parse tree to keep AST line numbers in sync
         src = ''.join(lines)
         tree = ast.parse(src)
-        changed = True
 
     inserts = collect_inserts(tree)
     if not inserts:
@@ -111,7 +112,7 @@ def main():
     changed_files = []
     for p in sorted(root.rglob('*.py')):
         # skip __pycache__ or hidden
-        if any(part.startswith('.') for part in p.parts):
+        if any(part.startswith('.') or part == '__pycache__' for part in p.parts):
             continue
         if process_file(p):
             changed_files.append(str(p))

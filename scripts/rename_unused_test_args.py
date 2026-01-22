@@ -20,7 +20,7 @@ def process_file(path: Path) -> bool:
     """
     src = path.read_text(encoding="utf-8")
     tree = ast.parse(src)
-    edits = []  # (lineno0, old_line, new_line)
+    edits = []  # (start_lineno0, end_lineno0, old_lines, new_lines)
 
     lines = src.splitlines()
     for node in tree.body:
@@ -28,37 +28,54 @@ def process_file(path: Path) -> bool:
             continue
 
         arg_names = [a.arg for a in node.args.args]
-        # collect all names used in function body
+        # collect all names used in function body (exclude decorators)
         used = set()
-        for n in ast.walk(node):
-            if isinstance(n, ast.Name):
-                used.add(n.id)
+        for stmt in node.body:
+            for n in ast.walk(stmt):
+                if isinstance(n, ast.Name):
+                    used.add(n.id)
 
         unused = [arg for arg in arg_names if arg not in used and not arg.startswith("_")]
         if not unused:
             continue
 
-        lineno0 = node.lineno - 1
-        if lineno0 < 0 or lineno0 >= len(lines):
+        # Determine the range of lines that make up the function signature
+        start = node.lineno - 1
+        if start < 0 or start >= len(lines):
+            continue
+        end = getattr(node, "end_lineno", None)
+        if end is None:
+            # Fallback: use the line before the first statement in the body
+            if node.body:
+                end = node.body[0].lineno - 1
+            else:
+                end = start
+        else:
+            end = end - 1
+        if end < start:
             continue
 
-        def_line = lines[lineno0]
+        sig_lines = lines[start:end + 1]
+        sig_text = "\n".join(sig_lines)
+
         # Build a regex that matches whole-word occurrences of the unused args
         pattern = r"\b(" + "|".join(re.escape(a) for a in unused) + r")\b"
 
         def _repl(m):
             return "_" + m.group(1)
 
-        new_line = re.sub(pattern, _repl, def_line)
-        if new_line != def_line:
-            edits.append((lineno0, def_line, new_line))
+        new_sig_text = re.sub(pattern, _repl, sig_text)
+        if new_sig_text != sig_text:
+            new_sig_lines = new_sig_text.split("\n")
+            edits.append((start, end, sig_lines, new_sig_lines))
 
     if not edits:
         return False
 
-    for lineno, old, new in sorted(edits, key=lambda x: x[0]):
-        if lines[lineno] == old:
-            lines[lineno] = new
+    for item in sorted(edits, key=lambda x: x[0]):
+        start, end, old_lines, new_lines = item
+        if lines[start:end + 1] == old_lines:
+            lines[start:end + 1] = new_lines
 
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return True

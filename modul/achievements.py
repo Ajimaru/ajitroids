@@ -81,11 +81,21 @@ class AchievementSystem:
             if achievement.unlocked
         ]
         if unlocked_achievements:
-            with open(self.achievements_file, "w", encoding="utf-8") as file:
-                json.dump(unlocked_achievements, file, indent=4)
-            print(f"Unlocked achievements saved: {len(unlocked_achievements)} entries")
+            try:
+                with open(self.achievements_file, "w", encoding="utf-8") as file:
+                    json.dump(unlocked_achievements, file, indent=4)
+                print(f"Unlocked achievements saved: {len(unlocked_achievements)} entries")
+            except OSError as e:
+                print(f"Failed to save achievements to {self.achievements_file}: {e}")
         else:
-            print("No unlocked achievements to save")
+            # When there are no unlocked achievements, write an empty list
+            # to avoid leaving a stale file with previous data.
+            try:
+                with open(self.achievements_file, "w", encoding="utf-8") as file:
+                    json.dump([], file, indent=4)
+                print(f"No unlocked achievements; wrote empty list to {self.achievements_file}")
+            except OSError as e:
+                print(f"Failed to write empty achievements file {self.achievements_file}: {e}")
 
     def load_achievements(self):
         """Load achievements (delegates to load_unlocked_achievements)."""
