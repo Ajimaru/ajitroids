@@ -1,10 +1,8 @@
 """Tests for Settings persistence and defaults."""
 
-import json
-import os
-
 import pytest
-
+import os
+import json
 from modul.settings import Settings
 
 

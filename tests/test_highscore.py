@@ -4,12 +4,11 @@ import json
 import os
 import sys
 
-import pygame
 import pytest
+import pygame
 
-from modul.constants import (HIGHSCORE_FILE, HIGHSCORE_MAX_ENTRIES,
-                             HIGHSCORE_NAME_LENGTH)
-from modul.highscore import HighscoreDisplay, HighscoreInput, HighscoreManager
+from modul.highscore import HighscoreManager, HighscoreInput, HighscoreDisplay
+from modul.constants import HIGHSCORE_FILE, HIGHSCORE_MAX_ENTRIES, HIGHSCORE_NAME_LENGTH
 
 
 @pytest.fixture(autouse=True)

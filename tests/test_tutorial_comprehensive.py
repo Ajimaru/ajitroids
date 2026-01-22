@@ -1,12 +1,11 @@
 """Tests for the tutorial screens and tutorial content."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, MagicMock, patch
 
-import pygame
 import pytest
-
-from modul.constants import SCREEN_HEIGHT, SCREEN_WIDTH
+import pygame
 from modul.tutorial import Tutorial
+from modul.constants import SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 @pytest.fixture(autouse=True)

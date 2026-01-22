@@ -1,10 +1,10 @@
 """Tests for asteroid field generation and behavior."""
 
-import pygame
 import pytest
+import pygame
 
-from modul.asteroid import Asteroid
 from modul.asteroidfield import AsteroidField
+from modul.asteroid import Asteroid
 from modul.constants import ASTEROID_MAX_RADIUS
 
 

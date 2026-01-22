@@ -1,14 +1,12 @@
 """Tests for boss projectiles and their behavior."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch, MagicMock
 
-import pygame
 import pytest
+import pygame
 
 from modul.bossprojectile import BossProjectile
-from modul.constants import (BOSS_COLOR, BOSS_PROJECTILE_COLORS,
-                             BOSS_PROJECTILE_RADIUS, SCREEN_HEIGHT,
-                             SCREEN_WIDTH)
+from modul.constants import BOSS_COLOR, BOSS_PROJECTILE_COLORS, BOSS_PROJECTILE_RADIUS, SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 @pytest.fixture

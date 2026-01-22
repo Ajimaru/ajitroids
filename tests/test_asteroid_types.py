@@ -1,15 +1,21 @@
 """Tests for asteroid type constants and asteroid behavior."""
 
-import pygame
 import pytest
+import pygame
 
 from modul.asteroid import Asteroid
-from modul.constants import (ASTEROID_CRYSTAL_SPLIT_COUNT,
-                             ASTEROID_ICE_VELOCITY_MULTIPLIER,
-                             ASTEROID_MAX_RADIUS, ASTEROID_METAL_HEALTH,
-                             ASTEROID_MIN_RADIUS, ASTEROID_TYPE_COLORS,
-                             ASTEROID_TYPE_CRYSTAL, ASTEROID_TYPE_ICE,
-                             ASTEROID_TYPE_METAL, ASTEROID_TYPE_NORMAL)
+from modul.constants import (
+    ASTEROID_MIN_RADIUS,
+    ASTEROID_MAX_RADIUS,
+    ASTEROID_TYPE_NORMAL,
+    ASTEROID_TYPE_ICE,
+    ASTEROID_TYPE_METAL,
+    ASTEROID_TYPE_CRYSTAL,
+    ASTEROID_TYPE_COLORS,
+    ASTEROID_ICE_VELOCITY_MULTIPLIER,
+    ASTEROID_METAL_HEALTH,
+    ASTEROID_CRYSTAL_SPLIT_COUNT,
+)
 from modul.powerup import PowerUp
 
 
