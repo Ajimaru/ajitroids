@@ -1,8 +1,9 @@
 """Tests for the tutorial screens and tutorial content."""
 
+from unittest.mock import Mock, MagicMock, patch
+
 import pytest
 import pygame
-from unittest.mock import Mock, MagicMock, patch
 from modul.tutorial import Tutorial
 from modul.constants import *
 

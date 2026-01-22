@@ -1,8 +1,9 @@
 """Tests for powerup effects and interactions with player."""
 
+from unittest.mock import patch, MagicMock
+
 import pytest
 import pygame
-from unittest.mock import patch, MagicMock
 from modul.player import Player
 from modul.powerup import PowerUp
 from modul.constants import *

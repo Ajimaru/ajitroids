@@ -1,8 +1,10 @@
 """Tests for stats dashboard functionality."""
 
+from unittest.mock import MagicMock
+
 import pytest
 import pygame
-from unittest.mock import MagicMock
+
 from modul.session_stats import SessionStats
 from modul.stats_dashboard import StatsDashboard
 

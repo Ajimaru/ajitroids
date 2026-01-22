@@ -2,8 +2,9 @@
 
 import json
 import os
-import pytest
 from unittest.mock import MagicMock, patch, mock_open
+
+import pytest
 
 from modul.achievements import Achievement, AchievementSystem
 

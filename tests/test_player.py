@@ -1,9 +1,10 @@
 """Tests for Player class behavior and mechanics."""
 
+from unittest.mock import patch, MagicMock
+
 import pytest
 import pygame
 import math
-from unittest.mock import patch, MagicMock
 from modul.player import Player
 from modul.constants import *
 
