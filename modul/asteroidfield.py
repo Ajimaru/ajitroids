@@ -51,8 +51,6 @@ class AsteroidField:
         self.spawn_timer += dt
 
         if self.spawn_timer >= self.spawn_interval:
-            from modul.asteroid import Asteroid
-
             asteroid_count = len([obj for obj in Asteroid.containers[0]])
 
             if asteroid_count < self.asteroid_count:

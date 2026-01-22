@@ -261,8 +261,6 @@ class EnemyShip(CircleShape):
     def kill(self):
         """TODO: add docstring."""
         super().kill()
-        from modul.particle import Particle
-
         Particle.create_ship_explosion(self.position.x, self.position.y)
         if self in collidable:
             collidable.remove(self)

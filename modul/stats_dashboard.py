@@ -4,6 +4,21 @@ import pygame
 from modul.constants import (MENU_BACKGROUND_ALPHA, MENU_TITLE_COLOR,
                              MENU_TITLE_FONT_SIZE, MENU_TRANSITION_SPEED,
                              SCREEN_HEIGHT, SCREEN_WIDTH)
+try:
+    from modul.i18n import gettext
+except Exception:  # pragma: no cover - fallback when i18n unavailable
+    def gettext(k):
+        return k
+
+try:
+    from modul import input_utils
+except Exception:  # pragma: no cover - minimal stub for tests
+    class _InputUtilsStub:
+        @staticmethod
+        def get_action_keycode(name):
+            return None
+
+    input_utils = _InputUtilsStub()
 
 
 class StatsDashboard:
@@ -34,7 +49,6 @@ class StatsDashboard:
 
         for event in events:
             if event.type == pygame.KEYDOWN:
-                from modul import input_utils
                 pause_key = input_utils.get_action_keycode("pause")
                 shoot_key = input_utils.get_action_keycode("shoot")
                 if ((pause_key is not None and event.key == pause_key)
@@ -51,13 +65,6 @@ class StatsDashboard:
         screen.blit(background, (0, 0))
 
         # Title
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
-
         title_surf = self.title_font.render(gettext("session_statistics"), True, pygame.Color(MENU_TITLE_COLOR))
         title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, 60))
         screen.blit(title_surf, title_rect)
@@ -138,12 +145,7 @@ class StatsDashboard:
 
     def _draw_progress_bars(self, screen, stats, y_pos):
         """Draw visual progress bars for key metrics."""
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
+        
         bar_width = 400
         bar_height = 30
         center_x = SCREEN_WIDTH / 2

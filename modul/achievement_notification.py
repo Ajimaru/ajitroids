@@ -24,6 +24,12 @@ from modul.constants import \
 from modul.constants import \
     generate_default_highscores as generate_default_highscores
 
+try:
+    from modul.i18n import gettext
+except Exception:  # pragma: no cover - fallback when i18n unavailable
+    def gettext(k):
+        return k
+
 
 class AchievementNotification:
     """TODO: add docstring."""
@@ -95,13 +101,6 @@ class AchievementNotification:
         screen.blit(bg_surface, (rect_x, rect_y))
 
         header_color = (255, 215, 0, alpha)
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
-
         header_text = gettext("achievement_unlocked")
         header_surf = self.title_font.render(header_text, True, header_color)
         header_rect = header_surf.get_rect(center=(rect_x + notification_width // 2, rect_y + 20))

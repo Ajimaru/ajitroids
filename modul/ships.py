@@ -5,6 +5,11 @@ import math
 import os
 
 import pygame
+try:
+    from modul.i18n import gettext
+except Exception:  # pragma: no cover - fallback when i18n unavailable
+    def gettext(k):
+        return k
 
 
 class ShipManager:
@@ -285,13 +290,6 @@ class ShipRenderer:
     @staticmethod
     def draw_question_mark(screen, x, y, scale, color):
         """TODO: add docstring."""
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
-
         font = pygame.font.Font(None, int(36 * scale))
         symbol = gettext("question_mark")
         if not symbol:

@@ -7,6 +7,11 @@ import random
 import pygame
 
 import modul.constants as C
+try:
+    from modul.i18n import gettext
+except Exception:  # pragma: no cover - fallback when i18n unavailable
+    def gettext(k):
+        return k
 
 
 class HighscoreManager:
@@ -113,12 +118,6 @@ class HighscoreInput:
         overlay.fill((0, 0, 0, 200))
         screen.blit(overlay, (0, 0))
 
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
 
         title_text = self.font.render(gettext("new_highscore"), True, pygame.Color("white"))
         screen.blit(
@@ -219,12 +218,6 @@ class HighscoreDisplay:
         overlay.fill((0, 0, 0, self.background_alpha))
         screen.blit(overlay, (0, 0))
 
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
 
         title_text = self.font_title.render(gettext("highscores"), True, pygame.Color("white"))
         screen.blit(title_text, (C.SCREEN_WIDTH // 2 - title_text.get_width() // 2, 50))

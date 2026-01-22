@@ -23,6 +23,26 @@ class Player(CircleShape):
         self.invincible_timer = 0
         self.sounds = Sounds()
         self.shield_active = False
+        try:
+            from modul import input_utils
+        except Exception:  # pragma: no cover - minimal stub for runtime when unavailable
+            class _InputUtilsStub:
+                @staticmethod
+                def is_action_pressed(name):
+                    return False
+
+                @staticmethod
+                def get_action_keycode(name):
+                    return None
+
+            input_utils = _InputUtilsStub()
+
+        try:
+            from modul.i18n import gettext
+        except Exception:  # pragma: no cover - fallback when i18n unavailable
+            def gettext(k):
+                return k
+
         self.shield_timer = 0
         self.triple_shot_active = False
         self.triple_shot_timer = 0

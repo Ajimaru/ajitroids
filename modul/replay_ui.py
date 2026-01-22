@@ -9,6 +9,21 @@ from modul.constants import (MENU_BACKGROUND_ALPHA, MENU_ITEM_FONT_SIZE,
                              MENU_UNSELECTED_COLOR, SCREEN_HEIGHT,
                              SCREEN_WIDTH)
 from modul.replay_system import ReplayManager, ReplayPlayer
+try:
+    from modul.i18n import gettext
+except Exception:  # pragma: no cover - fallback when i18n unavailable
+    def gettext(k):
+        return k
+
+try:
+    from modul import input_utils
+except Exception:  # pragma: no cover - minimal stub for tests
+    class _InputUtilsStub:
+        @staticmethod
+        def get_action_keycode(name):
+            return None
+
+    input_utils = _InputUtilsStub()
 
 
 class ReplayListMenu:
@@ -44,7 +59,6 @@ class ReplayListMenu:
                 self.background_alpha = MENU_BACKGROUND_ALPHA
 
         # Allow mapped keys for pause/select via input_utils
-        from modul import input_utils
         pause_key = input_utils.get_action_keycode("pause")
         shoot_key = input_utils.get_action_keycode("shoot")
 
@@ -87,13 +101,6 @@ class ReplayListMenu:
         screen.blit(background, (0, 0))
 
         # Title
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
-
         title_surf = self.title_font.render(gettext("replay_browser"), True, pygame.Color(MENU_TITLE_COLOR))
         title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, 60))
         screen.blit(title_surf, title_rect)
@@ -182,7 +189,6 @@ class ReplayViewer:
 
     def update(self, dt, events):
         """Update replay viewer state."""
-        from modul import input_utils
         pause_key = input_utils.get_action_keycode("pause")
         shoot_key = input_utils.get_action_keycode("shoot")
 
@@ -208,12 +214,7 @@ class ReplayViewer:
 
     def draw_hud(self, screen):
         """Draw replay HUD with controls and info."""
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
+        # use module-level gettext
         # Draw control bar at bottom
         bar_height = 80
         bar_y = SCREEN_HEIGHT - bar_height
