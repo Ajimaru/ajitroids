@@ -4,21 +4,24 @@ from modul import settings as settings_mod
 
 
 def key_name_to_keycode(name: str) -> Optional[int]:
-    """Convert a readable pygame key name like 'K_SPACE' or 'space' to a pygame key constant."""
+    """Convert a readable pygame key name (e.g. 'K_SPACE' or 'space')
+    to a pygame key constant.
+    """
     if not name:
         return None
 
     # If already a pygame constant name like 'K_SPACE'
-    try:
-        if hasattr(pygame, name):
+    # `hasattr` is safe and should not raise; directly check
+    if hasattr(pygame, name):
+        try:
             return getattr(pygame, name)
-    except Exception:
-        pass
+        except AttributeError:
+            pass
 
     # Try pygame.key.key_code for common names like 'space', 'left'
     try:
         return pygame.key.key_code(name)
-    except Exception:
+    except (AttributeError, ValueError):
         return None
 
 
@@ -26,7 +29,7 @@ def keycode_to_display_name(keycode: int) -> str:
     """Return a human-friendly name for a pygame keycode."""
     try:
         return pygame.key.name(keycode)
-    except Exception:
+    except (AttributeError, TypeError):
         return str(keycode)
 
 
@@ -43,8 +46,9 @@ _DEFAULT_ACTION_TO_KEY = {
 
 
 def get_action_keycode(action: str) -> Optional[int]:
-    """Get the pygame keycode for an action using current settings if available,
-    otherwise fall back to defaults."""
+    """Get the pygame keycode for an action using current settings when
+    available; otherwise fall back to defaults.
+    """
     # Prefer runtime settings singleton when present
     settings = getattr(settings_mod, "current_settings", None)
     key_name = None
@@ -59,7 +63,9 @@ def get_action_keycode(action: str) -> Optional[int]:
 
 
 def get_action_binding(action: str) -> Optional[str]:
-    """Return raw readable binding (keyboard name or JOY... string) for action."""
+    """Return raw readable binding (keyboard name or JOY... string)
+    for the given action.
+    """
     settings = getattr(settings_mod, "current_settings", None)
     binding = None
     if settings and hasattr(settings, "controls"):
@@ -76,13 +82,16 @@ def is_action_pressed(action: str) -> bool:
         return False
 
     try:
-        # Joystick binding patterns: JOY{n}_BUTTON{b}, JOY{n}_AXIS{a}_POS/NEG, JOY{n}_HAT{h}_UP/LEFT
+        # Joystick binding patterns:
+        #  - JOY{n}_BUTTON{b}
+        #  - JOY{n}_AXIS{a}_POS/NEG
+        #  - JOY{n}_HAT{h}_UP/LEFT
         if binding.startswith("JOY"):
             parts = binding.split("_")
             joy_part = parts[0]
             try:
                 joy_id = int(joy_part[3:])
-            except Exception:
+            except ValueError:
                 return False
 
             if pygame.joystick.get_count() <= joy_id:
@@ -91,13 +100,14 @@ def is_action_pressed(action: str) -> bool:
             try:
                 joy.init()
             except Exception:
-                pass
+                # Some joysticks may not initialize; treat as not pressed
+                return False
 
             if len(parts) >= 2 and parts[1].startswith("BUTTON"):
                 try:
                     btn = int(parts[1][6:])
                     return bool(joy.get_button(btn))
-                except Exception:
+                except (ValueError, IndexError, AttributeError):
                     return False
 
             if len(parts) >= 2 and parts[1].startswith("AXIS"):
@@ -108,7 +118,7 @@ def is_action_pressed(action: str) -> bool:
                     if direction == "POS":
                         return val >= 0.6
                     return val <= -0.6
-                except Exception:
+                except (ValueError, IndexError, AttributeError):
                     return False
 
             if len(parts) >= 2 and parts[1].startswith("HAT"):
@@ -129,7 +139,7 @@ def is_action_pressed(action: str) -> bool:
                                 return False
                         return True
                     return hat_val != (0, 0)
-                except Exception:
+                except (ValueError, IndexError, AttributeError):
                     return False
 
             return False
@@ -141,7 +151,8 @@ def is_action_pressed(action: str) -> bool:
         keys = pygame.key.get_pressed()
         try:
             return bool(keys[keycode])
-        except Exception:
+        except (IndexError, TypeError):
             return False
     except Exception:
+        # Unexpected errors in input handling should be treated as not-pressed
         return False

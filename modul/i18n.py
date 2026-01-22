@@ -15,7 +15,7 @@ def load_locale(lang_code: str):
             data = json.load(f)
             _locales_cache[lang_code] = data
             return data
-    except Exception:
+    except (OSError, json.JSONDecodeError):
         # Fallback to English
         if lang_code != "en":
             return load_locale("en")
@@ -28,7 +28,10 @@ def t(key: str, lang_code: str = "en"):
 
 
 def gettext(key: str):
-    """Get localized string for current settings language, fallback to English."""
+    """Get localized string for current settings language, fallback to English.
+
+    This consults the runtime `current_settings.language` when available.
+    """
     try:
         from modul import settings as settings_mod
 
@@ -36,5 +39,6 @@ def gettext(key: str):
         if lang and getattr(lang, "language", None):
             return t(key, lang.language)
     except Exception:
+        # If settings cannot be inspected, fall back to English
         pass
     return t(key, "en")
