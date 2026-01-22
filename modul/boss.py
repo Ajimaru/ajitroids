@@ -1,35 +1,42 @@
-import pygame
+"""Boss enemy behavior, spawning and attack logic."""
+
 import math
 import random
-from modul.constants import *
+
+import pygame
+
+import modul.constants as C
 from modul.circleshape import CircleShape
 from modul.particle import Particle
 
 
 class Boss(CircleShape):
+    """TODO: add docstring."""
     def __init__(self, level):
-        super().__init__(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, BOSS_RADIUS)
+        """TODO: add docstring."""
+        super().__init__(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2, C.BOSS_RADIUS)
         self.boss_level = level // 10
-        self.max_health = BOSS_BASE_HEALTH + (self.boss_level - 1) * BOSS_HEALTH_PER_LEVEL
+        self.max_health = C.BOSS_BASE_HEALTH + (self.boss_level - 1) * C.BOSS_HEALTH_PER_LEVEL
         self.health = self.max_health
-        self.color = BOSS_COLOR
+        self.color = C.BOSS_COLOR
         self.pulse_timer = 0
         self.rotation = 0
         self.velocity = pygame.Vector2(0, 0)
-        self.target_position = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+        self.target_position = pygame.Vector2(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2)
         self.movement_timer = 0
         self.movement_phase = "center"
         self.attack_timer = 0
-        self.attack_interval = BOSS_ATTACK_INTERVAL
+        self.attack_interval = C.BOSS_ATTACK_INTERVAL
         self.attack_pattern = 0
         self.hit_flash = 0
         self.death_timer = -1
         self.death_particles_emitted = False
 
     def update(self, dt, player_position=None):
+        """TODO: add docstring."""
         if self.death_timer >= 0:
             self.death_timer += dt
-            if self.death_timer >= BOSS_DEATH_DURATION:
+            if self.death_timer >= C.BOSS_DEATH_DURATION:
                 self.kill()
                 return
             if not self.death_particles_emitted:
@@ -47,6 +54,7 @@ class Boss(CircleShape):
         self._constrain_to_screen()
 
     def _update_movement(self, dt, player_position):
+        """TODO: add docstring."""
         self.movement_timer += dt
         if self.movement_phase == "center" and self.movement_timer >= 3.0:
             self.movement_phase = "random"
@@ -58,19 +66,23 @@ class Boss(CircleShape):
             self.movement_phase = "center"
             self.movement_timer = 0
         if self.movement_phase == "center":
-            target = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-            self._move_towards(target, BOSS_MOVE_SPEED, dt)
+            target = pygame.Vector2(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2)
+            self._move_towards(target, C.BOSS_MOVE_SPEED, dt)
         elif self.movement_phase == "random":
             if self.movement_timer % 1.5 < dt:
                 margin = 100
                 self.target_position = pygame.Vector2(
-                    random.randint(margin, SCREEN_WIDTH - margin), random.randint(margin, SCREEN_HEIGHT - margin)
+                    random.randint(margin, C.SCREEN_WIDTH - margin), random.randint(margin, C.SCREEN_HEIGHT - margin)
                 )
-            self._move_towards(self.target_position, BOSS_MOVE_SPEED * 0.7, dt)
+            self._move_towards(self.target_position, C.BOSS_MOVE_SPEED * 0.7, dt)
         elif self.movement_phase == "chase" and player_position:
-            self._move_towards(player_position, BOSS_MOVE_SPEED * 1.2, dt)
+            self._move_towards(player_position, C.BOSS_MOVE_SPEED * 1.2, dt)
 
-    def _move_towards(self, target, speed, dt):
+    def _move_towards(self, target, speed, _dt):
+        """Move the boss toward `target` at given `speed`.
+
+        The `_dt` parameter is unused but accepted for API compatibility.
+        """
         direction = target - self.position
         if direction.length() > 0:
             direction = direction.normalize()
@@ -79,21 +91,23 @@ class Boss(CircleShape):
             self.velocity *= 0.9
 
     def _constrain_to_screen(self):
+        """TODO: add docstring."""
         margin = self.radius
         if self.position.x < margin:
             self.position.x = margin
             self.velocity.x = abs(self.velocity.x) * 0.5
-        elif self.position.x > SCREEN_WIDTH - margin:
-            self.position.x = SCREEN_WIDTH - margin
+        elif self.position.x > C.SCREEN_WIDTH - margin:
+            self.position.x = C.SCREEN_WIDTH - margin
             self.velocity.x = -abs(self.velocity.x) * 0.5
         if self.position.y < margin:
             self.position.y = margin
             self.velocity.y = abs(self.velocity.y) * 0.5
-        elif self.position.y > SCREEN_HEIGHT - margin:
-            self.position.y = SCREEN_HEIGHT - margin
+        elif self.position.y > C.SCREEN_HEIGHT - margin:
+            self.position.y = C.SCREEN_HEIGHT - margin
             self.velocity.y = -abs(self.velocity.y) * 0.5
 
     def _update_attack(self, dt):
+        """TODO: add docstring."""
         self.attack_timer += dt
         if self.attack_timer >= self.attack_interval:
             self.attack()
@@ -101,6 +115,7 @@ class Boss(CircleShape):
             self.attack_pattern = (self.attack_pattern + 1) % 3
 
     def attack(self):
+        """TODO: add docstring."""
         if self.attack_pattern == 0:
             return {"type": "circle", "count": 8 + self.boss_level * 2}
         elif self.attack_pattern == 1:
@@ -109,12 +124,10 @@ class Boss(CircleShape):
             return {"type": "targeted", "count": 3 + self.boss_level}
 
     def take_damage(self, damage):
+        """TODO: add docstring."""
         self.health -= damage
         self.hit_flash = 0.1
         for _ in range(3):
-            angle = random.uniform(0, 2 * math.pi)
-            speed = random.uniform(50, 150)
-            velocity = pygame.Vector2(math.cos(angle), math.sin(angle)) * speed
             Particle.create_asteroid_explosion(self.position.x, self.position.y)
         if self.health <= 0 and self.death_timer < 0:
             self.death_timer = 0
@@ -122,6 +135,7 @@ class Boss(CircleShape):
         return False
 
     def draw(self, screen):
+        """TODO: add docstring."""
         color = self.color
         if self.hit_flash > 0:
             color = (255, 255, 255)
@@ -129,8 +143,9 @@ class Boss(CircleShape):
         self._draw_health_bar(screen)
 
     def _draw_boss_shape(self, screen, color):
+        """TODO: add docstring."""
         if self.death_timer >= 0:
-            alpha = int(255 * (1 - self.death_timer / BOSS_DEATH_DURATION))
+            alpha = int(255 * (1 - self.death_timer / C.BOSS_DEATH_DURATION))
             pulsating_radius = self.radius * (1 + 0.5 * math.sin(self.death_timer * 10))
             temp_surface = pygame.Surface((pulsating_radius * 2, pulsating_radius * 2), pygame.SRCALPHA)
             pygame.draw.circle(temp_surface, (*color, alpha), (pulsating_radius, pulsating_radius), pulsating_radius)
@@ -155,6 +170,7 @@ class Boss(CircleShape):
             pygame.draw.circle(screen, color, satellite_pos, satellite_radius)
 
     def _draw_health_bar(self, screen):
+        """TODO: add docstring."""
         if self.death_timer >= 0:
             return
         bar_width = self.radius * 2.5

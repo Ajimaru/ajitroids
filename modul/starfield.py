@@ -1,40 +1,62 @@
-import random
-import pygame
+"""Starfield background rendering utilities."""
+
 import math
-from modul.constants import *
+import random
+
+import pygame
+
+import modul.constants as C
 
 
 class Star:
+    """TODO: add docstring."""
     def __init__(self):
-        self.position = pygame.Vector2(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT))
-        self.size = random.choice(STAR_SIZES)
-        self.color = random.choice(STAR_COLORS)
+        """TODO: add docstring."""
+        self.position = pygame.Vector2(random.randint(0, C.SCREEN_WIDTH), random.randint(0, C.SCREEN_HEIGHT))
+        self.size = random.choice(C.STAR_SIZES)
+        self.color = random.choice(C.STAR_COLORS)
         self.twinkle_timer = random.random() * 2 * math.pi
+        # Initialize current color to a valid RGB tuple so that draw() can
+        # always rely on `current_color` existing (avoid W0201 warnings).
+        try:
+            color_obj = pygame.Color(self.color)
+            self.current_color = [color_obj.r, color_obj.g, color_obj.b]
+        except (ValueError, TypeError):
+            # Fallback to white if color parsing fails
+            self.current_color = [255, 255, 255]
 
     def update(self, dt):
+        """TODO: add docstring."""
         self.twinkle_timer += dt
         brightness = abs(math.sin(self.twinkle_timer))
         self.current_color = [int(c * brightness) for c in pygame.Color(self.color)]
 
     def draw(self, screen):
+        """TODO: add docstring."""
         pygame.draw.circle(screen, self.current_color, self.position, self.size)
 
 
 class Starfield:
+    """TODO: add docstring."""
     def __init__(self):
-        self.stars = [Star() for _ in range(STAR_COUNT)]
+        """TODO: add docstring."""
+        self.stars = [Star() for _ in range(C.STAR_COUNT)]
 
     def update(self, dt):
+        """TODO: add docstring."""
         for star in self.stars:
             star.update(dt)
 
     def draw(self, screen):
+        """TODO: add docstring."""
         for star in self.stars:
             star.draw(screen)
 
 
 class MenuStarfield:
+    """TODO: add docstring."""
     def __init__(self, num_stars=150):
+        """TODO: add docstring."""
         self.stars = []
         self.speed = 0.4
         self.respawn_counter = 0
@@ -43,22 +65,23 @@ class MenuStarfield:
         self.respawn_delay_max = 0.2
         for _ in range(num_stars):
             if random.random() < 0.7:
-                distance = random.uniform(50, SCREEN_WIDTH / 2)
+                distance = random.uniform(50, C.SCREEN_WIDTH / 2)
                 angle = random.random() * 2 * math.pi
-                x = SCREEN_WIDTH / 2 + math.cos(angle) * distance
-                y = SCREEN_HEIGHT / 2 + math.sin(angle) * distance
+                x = C.SCREEN_WIDTH / 2 + math.cos(angle) * distance
+                y = C.SCREEN_HEIGHT / 2 + math.sin(angle) * distance
             else:
                 distance = random.random() * 50
                 angle = random.random() * 2 * math.pi
-                x = SCREEN_WIDTH / 2 + math.cos(angle) * distance
-                y = SCREEN_HEIGHT / 2 + math.sin(angle) * distance
+                x = C.SCREEN_WIDTH / 2 + math.cos(angle) * distance
+                y = C.SCREEN_HEIGHT / 2 + math.sin(angle) * distance
             z = random.randint(1, 8)
             brightness = random.uniform(100, 255)
             self.stars.append([x, y, z, brightness])
 
     def update(self, dt):
-        center_x = SCREEN_WIDTH / 2
-        center_y = SCREEN_HEIGHT / 2
+        """TODO: add docstring."""
+        center_x = C.SCREEN_WIDTH / 2
+        center_y = C.SCREEN_HEIGHT / 2
         stars_to_respawn = []
         for star in self.stars:
             dx = star[0] - center_x
@@ -66,7 +89,7 @@ class MenuStarfield:
             speed_factor = (star[2] / 2) * self.speed * dt * 60
             star[0] += dx * speed_factor * 0.01
             star[1] += dy * speed_factor * 0.01
-            if star[0] < -50 or star[0] > SCREEN_WIDTH + 50 or star[1] < -50 or star[1] > SCREEN_HEIGHT + 50:
+            if star[0] < -50 or star[0] > C.SCREEN_WIDTH + 50 or star[1] < -50 or star[1] > C.SCREEN_HEIGHT + 50:
                 stars_to_respawn.append(star)
         self.respawn_delay -= dt
         if self.respawn_delay <= 0 and stars_to_respawn:
@@ -81,6 +104,7 @@ class MenuStarfield:
                 star[3] = random.uniform(100, 255)
 
     def draw(self, screen):
+        """TODO: add docstring."""
         for star in self.stars:
             try:
                 if len(star) >= 4:
@@ -88,14 +112,14 @@ class MenuStarfield:
                     if not all(isinstance(val, (int, float)) for val in [x, y, z, brightness]):
                         continue
                     scale = 200 / (z + 200)
-                    screen_x = SCREEN_WIDTH / 2 + (x - SCREEN_WIDTH / 2) * scale
-                    screen_y = SCREEN_HEIGHT / 2 + (y - SCREEN_HEIGHT / 2) * scale
+                    screen_x = C.SCREEN_WIDTH / 2 + (x - C.SCREEN_WIDTH / 2) * scale
+                    screen_y = C.SCREEN_HEIGHT / 2 + (y - C.SCREEN_HEIGHT / 2) * scale
                     size = max(1, int(3 * scale))
                     color_value = min(255, int(brightness * scale))
                     color = (color_value, color_value, color_value)
                     if (
-                        0 <= screen_x < SCREEN_WIDTH
-                        and 0 <= screen_y < SCREEN_HEIGHT
+                        0 <= screen_x < C.SCREEN_WIDTH
+                        and 0 <= screen_y < C.SCREEN_HEIGHT
                         and isinstance(screen_x, (int, float))
                         and isinstance(screen_y, (int, float))
                     ):

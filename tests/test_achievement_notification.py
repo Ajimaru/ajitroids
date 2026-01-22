@@ -1,8 +1,13 @@
-import pytest
-import pygame
+"""Tests for achievement notification behavior and manager."""
+
 import time
-from unittest.mock import MagicMock, patch
-from modul.achievement_notification import AchievementNotification, AchievementNotificationManager
+from unittest.mock import MagicMock
+
+import pygame
+import pytest
+
+from modul.achievement_notification import (AchievementNotification,
+                                            AchievementNotificationManager)
 from modul.constants import SCREEN_WIDTH
 
 

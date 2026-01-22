@@ -1,10 +1,24 @@
-import pygame
+"""Achievement notification visuals and manager."""
+
 import time
-from modul.constants import ARCADE_MODE_BONUS_TIME as ARCADE_MODE_BONUS_TIME, ARCADE_MODE_TIME as ARCADE_MODE_TIME, ASTEROID_COUNT_PER_LEVEL as ASTEROID_COUNT_PER_LEVEL, ASTEROID_IRREGULARITY as ASTEROID_IRREGULARITY, ASTEROID_KINDS as ASTEROID_KINDS, ASTEROID_MAX_RADIUS as ASTEROID_MAX_RADIUS, ASTEROID_MIN_RADIUS as ASTEROID_MIN_RADIUS, ASTEROID_SPAWN_RATE as ASTEROID_SPAWN_RATE, ASTEROID_VERTICES as ASTEROID_VERTICES, BASE_ASTEROID_COUNT as BASE_ASTEROID_COUNT, BASE_SPAWN_INTERVAL as BASE_SPAWN_INTERVAL, BOSS_ATTACK_INTERVAL as BOSS_ATTACK_INTERVAL, BOSS_BASE_HEALTH as BOSS_BASE_HEALTH, BOSS_COLOR as BOSS_COLOR, BOSS_DEATH_DURATION as BOSS_DEATH_DURATION, BOSS_HEALTH_PER_LEVEL as BOSS_HEALTH_PER_LEVEL, BOSS_LEVEL_INTERVAL as BOSS_LEVEL_INTERVAL, BOSS_MOVE_SPEED as BOSS_MOVE_SPEED, BOSS_PROJECTILE_COLORS as BOSS_PROJECTILE_COLORS, BOSS_PROJECTILE_RADIUS as BOSS_PROJECTILE_RADIUS, BOSS_PROJECTILE_SPEED as BOSS_PROJECTILE_SPEED, BOSS_RADIUS as BOSS_RADIUS, BOSS_SCORE as BOSS_SCORE, COLLISION_DEBUG as COLLISION_DEBUG, CREDITS_DEVELOPER as CREDITS_DEVELOPER, CREDITS_GAME_NAME as CREDITS_GAME_NAME, CREDITS_GRAPHICS as CREDITS_GRAPHICS, CREDITS_LINE_SPACING as CREDITS_LINE_SPACING, CREDITS_MASTERMIND as CREDITS_MASTERMIND, CREDITS_SCROLL_SPEED as CREDITS_SCROLL_SPEED, CREDITS_SOUND as CREDITS_SOUND, CREDITS_SPECIAL_THANKS as CREDITS_SPECIAL_THANKS, CREDITS_TITLE as CREDITS_TITLE, CREDITS_WEBSITE as CREDITS_WEBSITE, DEFAULT_HIGHSCORES as DEFAULT_HIGHSCORES, DIFFICULTY_EASY_ASTEROIDS as DIFFICULTY_EASY_ASTEROIDS, DIFFICULTY_EASY_INTERVAL as DIFFICULTY_EASY_INTERVAL, DIFFICULTY_HARD_ASTEROIDS as DIFFICULTY_HARD_ASTEROIDS, DIFFICULTY_HARD_INTERVAL as DIFFICULTY_HARD_INTERVAL, DIFFICULTY_NORMAL_ASTEROIDS as DIFFICULTY_NORMAL_ASTEROIDS, DIFFICULTY_NORMAL_INTERVAL as DIFFICULTY_NORMAL_INTERVAL, EXPLOSION_PARTICLES as EXPLOSION_PARTICLES, HIGHSCORE_ALLOWED_CHARS as HIGHSCORE_ALLOWED_CHARS, HIGHSCORE_DEFAULT_NAME as HIGHSCORE_DEFAULT_NAME, HIGHSCORE_FILE as HIGHSCORE_FILE, HIGHSCORE_MAX_ENTRIES as HIGHSCORE_MAX_ENTRIES, HIGHSCORE_NAME_LENGTH as HIGHSCORE_NAME_LENGTH, INVINCIBILITY_TIME as INVINCIBILITY_TIME, LASER_AMMO as LASER_AMMO, LEVEL_UP_DISPLAY_TIME as LEVEL_UP_DISPLAY_TIME, MAX_LEVEL as MAX_LEVEL, MENU_BACKGROUND_ALPHA as MENU_BACKGROUND_ALPHA, MENU_BUTTON_HEIGHT as MENU_BUTTON_HEIGHT, MENU_BUTTON_PADDING as MENU_BUTTON_PADDING, MENU_BUTTON_RADIUS as MENU_BUTTON_RADIUS, MENU_BUTTON_WIDTH as MENU_BUTTON_WIDTH, MENU_FADE_SPEED as MENU_FADE_SPEED, MENU_ITEM_FONT_SIZE as MENU_ITEM_FONT_SIZE, MENU_ITEM_SPACING as MENU_ITEM_SPACING, MENU_SELECTED_COLOR as MENU_SELECTED_COLOR, MENU_TITLE_COLOR as MENU_TITLE_COLOR, MENU_TITLE_FONT_SIZE as MENU_TITLE_FONT_SIZE, MENU_TRANSITION_SPEED as MENU_TRANSITION_SPEED, MENU_UNSELECTED_COLOR as MENU_UNSELECTED_COLOR, MISSILE_AMMO as MISSILE_AMMO, PARTICLE_COLORS as PARTICLE_COLORS, PLAYER_ACCELERATION as PLAYER_ACCELERATION, PLAYER_FRICTION as PLAYER_FRICTION, PLAYER_LIVES as PLAYER_LIVES, PLAYER_MAX_SPEED as PLAYER_MAX_SPEED, PLAYER_RADIUS as PLAYER_RADIUS, PLAYER_ROTATION_SPEED as PLAYER_ROTATION_SPEED, PLAYER_SHOOT_COOLDOWN as PLAYER_SHOOT_COOLDOWN, PLAYER_SHOOT_SPEED as PLAYER_SHOOT_SPEED, PLAYER_SPEED as PLAYER_SPEED, PLAYER_TURN_SPEED as PLAYER_TURN_SPEED, POINTS_PER_LEVEL as POINTS_PER_LEVEL, POWERUP_COLORS as POWERUP_COLORS, POWERUP_LIFETIME as POWERUP_LIFETIME, POWERUP_MAX_COUNT as POWERUP_MAX_COUNT, POWERUP_RADIUS as POWERUP_RADIUS, POWERUP_SPAWN_CHANCE as POWERUP_SPAWN_CHANCE, POWERUP_TYPES as POWERUP_TYPES, RAPID_FIRE_COOLDOWN as RAPID_FIRE_COOLDOWN, RAPID_FIRE_DURATION as RAPID_FIRE_DURATION, RESPAWN_POSITION_X as RESPAWN_POSITION_X, RESPAWN_POSITION_Y as RESPAWN_POSITION_Y, SCORE_LARGE as SCORE_LARGE, SCORE_MEDIUM as SCORE_MEDIUM, SCORE_SMALL as SCORE_SMALL, SCREEN_HEIGHT as SCREEN_HEIGHT, SCREEN_WIDTH as SCREEN_WIDTH, SHIELD_DURATION as SHIELD_DURATION, SHOTGUN_AMMO as SHOTGUN_AMMO, SHOT_RADIUS as SHOT_RADIUS, SPAWN_INTERVAL_REDUCTION as SPAWN_INTERVAL_REDUCTION, STAR_COLORS as STAR_COLORS, STAR_COUNT as STAR_COUNT, STAR_SIZES as STAR_SIZES, TRIPLE_SHOT_DURATION as TRIPLE_SHOT_DURATION, WEAPON_COLORS as WEAPON_COLORS, WEAPON_LASER as WEAPON_LASER, WEAPON_MISSILE as WEAPON_MISSILE, WEAPON_SHOTGUN as WEAPON_SHOTGUN, WEAPON_STANDARD as WEAPON_STANDARD, generate_default_highscores as generate_default_highscores, random as random
+
+import pygame
+
+# Only `SCREEN_WIDTH` is used in this module; remove other unused imports/aliases.
+from modul.constants import SCREEN_WIDTH
+
+try:
+    from modul.i18n import gettext
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
+    def gettext(k):
+        """Fallback translation returning the passed key when i18n is missing."""
+        return k
 
 
 class AchievementNotification:
+    """TODO: add docstring."""
     def __init__(self, achievement_name, achievement_description):
+        """TODO: add docstring."""
         self.name = achievement_name
         self.description = achievement_description
         self.display_time = 4.0
@@ -20,7 +34,8 @@ class AchievementNotification:
         self.desc_font = pygame.font.Font(None, 20)
         self.sound_played = False
 
-    def update(self, dt):
+    def update(self, _dt):
+        """Update animation progress; `_dt` accepted for API compatibility."""
         current_time = time.time()
         elapsed = current_time - self.start_time
 
@@ -44,9 +59,11 @@ class AchievementNotification:
         return True
 
     def _ease_out(self, t):
+        """TODO: add docstring."""
         return 1 - (1 - t) ** 3
 
     def draw(self, screen):
+        """TODO: add docstring."""
         if self.animation_progress <= 0:
             return
 
@@ -68,7 +85,7 @@ class AchievementNotification:
         screen.blit(bg_surface, (rect_x, rect_y))
 
         header_color = (255, 215, 0, alpha)
-        header_text = "ACHIEVEMENT UNLOCKED!"
+        header_text = gettext("achievement_unlocked")
         header_surf = self.title_font.render(header_text, True, header_color)
         header_rect = header_surf.get_rect(center=(rect_x + notification_width // 2, rect_y + 20))
 
@@ -98,15 +115,19 @@ class AchievementNotification:
 
 
 class AchievementNotificationManager:
+    """TODO: add docstring."""
     def __init__(self, sounds=None):
+        """TODO: add docstring."""
         self.notifications = []
         self.max_notifications = 3
         self.sounds = sounds
 
     def set_sounds(self, sounds):
+        """TODO: add docstring."""
         self.sounds = sounds
 
     def add_notification(self, achievement_name, achievement_description):
+        """TODO: add docstring."""
         for notification in self.notifications:
             if notification.name == achievement_name:
                 return
@@ -122,6 +143,7 @@ class AchievementNotificationManager:
 
     def update(self, dt):
 
+        """TODO: add docstring."""
         self.notifications = [notification for notification in self.notifications if notification.update(dt)]
 
         for i, notification in enumerate(self.notifications):
@@ -130,8 +152,10 @@ class AchievementNotificationManager:
             notification.current_y += (target_y - notification.current_y) * dt * 5
 
     def draw(self, screen):
+        """TODO: add docstring."""
         for notification in self.notifications:
             notification.draw(screen)
 
     def clear_all(self):
+        """TODO: add docstring."""
         self.notifications.clear()

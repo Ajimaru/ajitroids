@@ -1,7 +1,10 @@
-import pytest
+"""Tests for particle effects and particle behavior."""
+
 import pygame
-from modul.particle import Particle
+import pytest
+
 from modul.constants import EXPLOSION_PARTICLES
+from modul.particle import Particle
 
 
 @pytest.fixture(autouse=True)

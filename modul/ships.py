@@ -1,12 +1,22 @@
-import pygame
+"""Ship definitions, persistence and rendering helpers."""
+
 import json
-import os
 import math
-from modul.constants import *
+import os
+
+import pygame
+try:
+    from modul.i18n import gettext
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
+    def gettext(k):
+        """Fallback translation function returning the key when unavailable."""
+        return k
 
 
 class ShipManager:
+    """Manage ship definitions, persistence and unlocks."""
     def __init__(self):
+        """Initialize ship manager and load unlocked ships from disk."""
         self.ships_file = "ships.json"
         self.unlocked_ships = self.load_unlocked_ships()
 
@@ -60,24 +70,28 @@ class ShipManager:
         self.current_ship = "standard"
 
     def load_unlocked_ships(self):
+        """Load the list of unlocked ships from the ships file on disk."""
         if os.path.exists(self.ships_file):
             try:
-                with open(self.ships_file, "r") as f:
+                with open(self.ships_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
                     return data.get("unlocked_ships", [])
-            except:
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                print(f"Error loading ships file {self.ships_file}: {e}")
                 return []
         return []
 
     def save_unlocked_ships(self):
+        """Persist the unlocked ships list to disk, handling IO errors."""
         data = {"unlocked_ships": self.unlocked_ships}
         try:
-            with open(self.ships_file, "w") as f:
+            with open(self.ships_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error saving ships: {e}")
 
     def unlock_ship(self, ship_id):
+        """Mark a ship as unlocked and persist the change."""
         if ship_id not in self.unlocked_ships and ship_id in self.ships:
             self.unlocked_ships.append(ship_id)
             self.ships[ship_id]["unlocked"] = True
@@ -86,6 +100,7 @@ class ShipManager:
         return False
 
     def unlock_ship_with_notification(self, ship_id, notification_callback=None):
+        """Unlock a ship and call the optional notification callback."""
         if self.unlock_ship(ship_id):
             ship_name = self.ships[ship_id]["name"]
             print(f"🚀 {ship_name} unlocked!")
@@ -95,6 +110,7 @@ class ShipManager:
         return False
 
     def check_unlock_conditions(self, level, difficulty, notification_callback=None):
+        """Check level/difficulty unlock conditions and notify if unlocked."""
         unlocked_any = False
 
         if level >= 50:
@@ -125,36 +141,44 @@ class ShipManager:
         return unlocked_any
 
     def get_ship_data(self, ship_id):
+        """Return the ship data dictionary for `ship_id` or the standard ship."""
         return self.ships.get(ship_id, self.ships["standard"])
 
     def get_available_ships(self):
+        """Return the list of available ship IDs."""
         return list(self.ships.keys())
 
     def get_unlocked_ships(self):
+        """Return a list of currently unlocked ship IDs (including standard)."""
         return ["standard"] + [ship_id for ship_id in self.unlocked_ships if ship_id in self.ships]
 
     def set_current_ship(self, ship_id):
+        """Set the currently selected ship if unlocked."""
         if ship_id in self.ships and self.ships[ship_id]["unlocked"]:
             self.current_ship = ship_id
             return True
         return False
 
     def get_current_ship_data(self):
+        """Return the data for the currently selected ship."""
         return self.get_ship_data(self.current_ship)
 
     def is_ship_unlocked(self, ship_id):
+        """Return whether the given ship_id is unlocked."""
         return ship_id in self.ships and self.ships[ship_id]["unlocked"]
 
     def check_all_ships_unlocked(self, achievement_system):
+        """Trigger achievement when all ships are unlocked."""
         if len(self.unlocked_ships) == len(self.ships):
             achievement_system.unlock("Fleet Commander")
 
 
 class ShipRenderer:
+    """Utility class that draws different ship shapes to a surface."""
 
     @staticmethod
     def draw_ship(screen, x, y, rotation, ship_type, scale=1.0, color=(255, 255, 255)):
-
+        """Draw the specified `ship_type` at position with rotation and color."""
         if ship_type == "triangle" or ship_type == "standard":
             ShipRenderer.draw_triangle_ship(screen, x, y, rotation, scale, color)
         elif ship_type == "arrow":
@@ -168,6 +192,7 @@ class ShipRenderer:
 
     @staticmethod
     def draw_triangle_ship(screen, x, y, rotation, scale, color):
+        """Draw the triangle/standard ship shape with rotation and scale."""
         points = [(0, -15 * scale), (-12 * scale, 15 * scale), (12 * scale, 15 * scale)]
 
         rotated_points = []
@@ -182,6 +207,7 @@ class ShipRenderer:
 
     @staticmethod
     def draw_arrow_ship(screen, x, y, rotation, scale, color):
+        """Draw an arrow-shaped ship used for the speedster."""
         points = [
             (0, -18 * scale),
             (-9 * scale, 3 * scale),
@@ -203,6 +229,7 @@ class ShipRenderer:
 
     @staticmethod
     def draw_heavy_ship(screen, x, y, rotation, scale, color):
+        """Draw the heavy cruiser ship shape with decorative details."""
         points = [
             (0, -12 * scale),
             (-18 * scale, 0),
@@ -232,6 +259,7 @@ class ShipRenderer:
 
     @staticmethod
     def draw_destroyer_ship(screen, x, y, rotation, scale, color):
+        """Draw the destroyer ship shape including weapon nodes."""
         points = [
             (0, -15 * scale),
             (-9 * scale, 0),
@@ -262,8 +290,12 @@ class ShipRenderer:
 
     @staticmethod
     def draw_question_mark(screen, x, y, scale, color):
+        """Draw a question mark symbol for unknown ship types."""
         font = pygame.font.Font(None, int(36 * scale))
-        text = font.render("?", True, color)
+        symbol = gettext("question_mark")
+        if not symbol:
+            symbol = "?"
+        text = font.render(symbol, True, color)
         text_rect = text.get_rect(center=(x, y))
         screen.blit(text, text_rect)
 

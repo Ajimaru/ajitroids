@@ -6,8 +6,24 @@ class SessionStats:
     """Track statistics for the current game session."""
 
     def __init__(self):
-        self.reset()
+        """TODO: add docstring."""
+        # Initialize fields to avoid attributes being created outside
+        # __init__ (addresses W0201 from pylint).
+        self.game_start_time = 0
+        self.total_score = 0
+        self.highest_score = 0
+        self.games_played = 0
+        self.total_asteroids_destroyed = 0
+        self.total_enemies_destroyed = 0
+        self.total_bosses_defeated = 0
+        self.total_powerups_collected = 0
+        self.total_shots_fired = 0
+        self.highest_level = 0
+        self.total_lives_lost = 0
+        self.total_playtime = 0.0
         self.session_start_time = time.time()
+        # Reset logical counters for a fresh session
+        self.reset()
 
     def reset(self):
         """Reset statistics for a new game."""

@@ -1,7 +1,11 @@
-from modul.player import Player
-import pygame
-import pytest
+"""Tests for player respawn behavior."""
+
 from unittest.mock import patch
+
+import pygame
+
+from modul.player import Player
+
 
 @patch("pygame.mixer.init")
 def test_player_respawn(mock_mixer_init):

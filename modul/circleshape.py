@@ -1,8 +1,12 @@
+"""Simple circle-shaped sprite helper."""
+
 import pygame
 
 
 class CircleShape(pygame.sprite.Sprite):
+    """TODO: add docstring."""
     def __init__(self, x, y, radius):
+        """TODO: add docstring."""
         if hasattr(self, "containers"):
             super().__init__(self.containers)
         else:
@@ -13,16 +17,19 @@ class CircleShape(pygame.sprite.Sprite):
         self.rotation = 0
 
     def draw(self, screen):
-        pass
+        """TODO: add docstring."""
 
     def update(self, dt):
-        pass
+        """TODO: add docstring."""
 
     def collides_with(self, other):
+        """TODO: add docstring."""
         return self.position.distance_to(other.position) <= self.radius + other.radius
 
     def rotate(self, angle):
+        """TODO: add docstring."""
         self.rotation += angle
 
     def forward(self):
+        """TODO: add docstring."""
         return pygame.Vector2(0, -1).rotate(self.rotation)

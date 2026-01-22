@@ -1,0 +1,7 @@
+[MASTER]
+# Pylint configuration for tests only.
+# Tests often intentionally use fixtures, redefined names, and protected members.
+
+[MESSAGES CONTROL]
+disable=W0613,W0621,W0212,C0415,C0114,C0115,C0116,E1101,W1514
+

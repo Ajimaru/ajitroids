@@ -1,50 +1,49 @@
 # flake8: noqa
 # pyright: reportUndefinedVariable=false, reportWildcardImportFromLibrary=false
-from modul.version import __version__
-import pygame
-import math
-import random
-import time
 import argparse
 import logging
+import math
+import random
 import sys
-from modul.constants import *
-from modul.player import Player
+import time
+
+import pygame
+
+import modul.constants as C
+from modul.version import __version__
+
+# Backwards-compatibility: expose uppercase constants into module globals
+for _const_name in dir(C):
+    if _const_name.isupper():
+        globals()[_const_name] = getattr(C, _const_name)
+from modul.achievement_notification import AchievementNotificationManager
+from modul.achievements import AchievementSystem
 from modul.asteroid import Asteroid, EnemyShip
 from modul.asteroidfield import AsteroidField
-from modul.shot import Shot
-from modul.particle import Particle
-from modul.sounds import Sounds, asset_path
-from modul.starfield import Starfield, MenuStarfield
-from modul.powerup import PowerUp
-from modul.highscore import HighscoreManager, HighscoreInput, HighscoreDisplay
-from modul.menu import (
-    MainMenu,
-    PauseMenu,
-    OptionsMenu,
-    CreditsScreen,
-    GameOverScreen,
-    DifficultyMenu,
-    SoundTestMenu,
-    VoiceAnnouncementsMenu,
-    AchievementsMenu,
-    ShipSelectionMenu,
-)
-from modul.ships import ship_manager
-from modul.tutorial import Tutorial
-from modul.settings import Settings
+from modul.audio_enhancements import AudioEnhancementManager, SoundTheme
 from modul.boss import Boss
 from modul.bossprojectile import BossProjectile
-from modul.achievements import AchievementSystem
-from modul.achievement_notification import AchievementNotificationManager
 from modul.groups import collidable, drawable, updatable
 from modul.help_screen import HelpScreen
-from modul.session_stats import SessionStats
-from modul.stats_dashboard import StatsDashboard
-from modul.replay_system import ReplayRecorder, ReplayPlayer, ReplayManager
-from modul.replay_ui import ReplayListMenu, ReplayViewer
+from modul.highscore import HighscoreDisplay, HighscoreInput, HighscoreManager
+from modul.menu import (AchievementsMenu, ControlsMenu, CreditsScreen,
+                        DifficultyMenu, GameOverScreen, LanguageMenu, MainMenu,
+                        OptionsMenu, PauseMenu, ShipSelectionMenu,
+                        SoundTestMenu, TTSVoiceMenu, VoiceAnnouncementsMenu)
+from modul.particle import Particle
 from modul.performance_profiler import PerformanceProfiler
-from modul.audio_enhancements import AudioEnhancementManager, SoundTheme
+from modul.player import Player
+from modul.powerup import PowerUp
+from modul.replay_system import ReplayManager, ReplayPlayer, ReplayRecorder
+from modul.replay_ui import ReplayListMenu, ReplayViewer
+from modul.session_stats import SessionStats
+from modul.settings import Settings
+from modul.ships import ship_manager
+from modul.shot import Shot
+from modul.sounds import Sounds, asset_path
+from modul.starfield import MenuStarfield, Starfield
+from modul.stats_dashboard import StatsDashboard
+from modul.tutorial import Tutorial
 
 
 class GameSettings:
@@ -266,6 +265,10 @@ def main(args=None):
     sound_test_menu = SoundTestMenu()
     sound_test_menu.set_sounds(sounds)
     voice_announcements_menu = VoiceAnnouncementsMenu(game_settings)
+    tts_voice_menu = TTSVoiceMenu(game_settings)
+    controls_menu = ControlsMenu(game_settings)
+    language_menu = LanguageMenu(game_settings)
+    # TTS voice menu created above
     credits_screen = CreditsScreen()
     game_over_screen = GameOverScreen()
     difficulty_menu = DifficultyMenu()
@@ -679,6 +682,14 @@ def main(args=None):
             elif action == "voice_announcements":
                 game_state = "voice_announcements"
 
+            elif action == "controls":
+                game_state = "controls"
+                controls_menu.activate()
+
+            elif action == "language":
+                game_state = "language"
+                language_menu.activate()
+
         elif game_state == "voice_announcements":
             menu_starfield.update(dt)
             menu_starfield.draw(screen)
@@ -691,6 +702,31 @@ def main(args=None):
                     audio_enhancements.voice_announcements.update_from_settings(game_settings.announcement_types)
                     game_state = "options"
                     options_menu.activate()
+                elif result == "tts_voice":
+                    game_state = "tts_voice"
+                    tts_voice_menu.activate()
+
+        elif game_state == "controls":
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+
+            action = controls_menu.update(dt, events)
+            controls_menu.draw(screen)
+
+            if action == "options":
+                game_state = "options"
+                options_menu.activate()
+
+        elif game_state == "language":
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+
+            action = language_menu.update(dt, events)
+            language_menu.draw(screen)
+
+            if action == "options":
+                game_state = "options"
+                options_menu.activate()
 
             voice_announcements_menu.draw(screen)
 

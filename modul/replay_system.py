@@ -1,11 +1,11 @@
 """Replay system for recording and playing back game sessions."""
 import gzip
 import json
+import logging
 import os
 import time
-import logging
-from dataclasses import dataclass, field, asdict
-from typing import List, Dict, Any, Optional, cast, TextIO
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, List, Optional, TextIO, cast
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +26,15 @@ def _quantize(value, ndigits: int = QUANTIZE_DIGITS):
     return value
 
 
-def _open_replay(path: str, mode: str = "rt"):
-    """Open replay file with gzip support based on extension."""
+def _open_replay(path: str, mode: str = "rt", encoding: str = "utf-8"):
+    """Open replay file with gzip support based on extension.
+
+    When opening text-mode replay files, pass an explicit `encoding` to avoid
+    platform-dependent defaults.
+    """
     if path.endswith(".gz"):
-        return gzip.open(path, mode)
-    return open(path, mode)
+        return gzip.open(path, mode, encoding=encoding)
+    return open(path, mode, encoding=encoding)
 
 
 def _quantize_float(value: float) -> float:
@@ -72,6 +76,7 @@ class ReplayRecorder:
     """Records game sessions for later playback."""
 
     def __init__(self):
+        """TODO: add docstring."""
         self.recording = False
         self.frames: List[GameFrame] = []
         self.events: List[GameEvent] = []
@@ -220,11 +225,12 @@ class ReplayRecorder:
 
             def _json_default(obj):
                 # Best-effort conversion for common non-JSON objects
-                try:
-                    if hasattr(obj, "x") and hasattr(obj, "y"):
+                """TODO: add docstring."""
+                if hasattr(obj, "x") and hasattr(obj, "y"):
+                    try:
                         return {"x": float(obj.x), "y": float(obj.y)}
-                except Exception:
-                    pass
+                    except (TypeError, ValueError, AttributeError):
+                        pass
                 return str(obj)
 
             with cast(TextIO, _open_replay(filepath, 'wt')) as f:
@@ -236,13 +242,13 @@ class ReplayRecorder:
                     default=_json_default,
                 )
 
-            logger.info(f"Successfully saved replay to: {filepath}")
+            logger.info("Successfully saved replay to: %s", filepath)
             return filepath
         except OSError as e:
-            logger.error(f"Failed to save replay: {e}")
+            logger.error("Failed to save replay: %s", e)
             raise
-        except Exception as e:
-            logger.error(f"Unexpected error saving replay: {e}")
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.error("Unexpected error saving replay: %s", e)
             raise
 
 
@@ -250,6 +256,7 @@ class ReplayPlayer:
     """Plays back recorded game sessions."""
 
     def __init__(self):
+        """TODO: add docstring."""
         self.playing = False
         self.paused = False
         self.frames: List[GameFrame] = []
@@ -258,6 +265,9 @@ class ReplayPlayer:
         self.current_frame_index = 0
         self.playback_speed = 1.0
         self.start_playback_time = 0
+        # Track paused timestamp when toggling pause; initialize here to
+        # avoid attributes created outside __init__ (W0201).
+        self._paused_timestamp: Optional[float] = None
 
     def load_replay(self, filepath: str):
         """Load a replay from file."""
@@ -282,18 +292,18 @@ class ReplayPlayer:
             self.events.sort(key=lambda ev: ev.timestamp)
 
             self.current_frame_index = 0
-            logger.info(f"Successfully loaded replay: {filepath}")
+            logger.info("Successfully loaded replay: %s", filepath)
         except FileNotFoundError:
-            logger.error(f"Replay file not found: {filepath}")
+            logger.error("Replay file not found: %s", filepath)
             raise
         except json.JSONDecodeError as e:
-            logger.error(f"Invalid JSON in replay '{filepath}': {e}")
+            logger.error("Invalid JSON in replay '%s': %s", filepath, e)
             raise
         except KeyError as e:
-            logger.error(f"Missing field in replay '{filepath}': {e}")
+            logger.error("Missing field in replay '%s': %s", filepath, e)
             raise
-        except Exception as e:
-            logger.error(f"Failed to load replay '{filepath}': {e}")
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.error("Failed to load replay '%s': %s", filepath, e)
             raise
 
     def start_playback(self):
@@ -426,6 +436,7 @@ class ReplayManager:
     """Manages replay files and provides listing/deletion capabilities."""
 
     def __init__(self):
+        """TODO: add docstring."""
         self.replays_dir = "replays"
 
     def _validate_filepath(self, filepath: str) -> bool:
@@ -434,8 +445,8 @@ class ReplayManager:
             replays_abs = os.path.realpath(self.replays_dir)
             file_abs = os.path.realpath(filepath)
             return os.path.commonpath([replays_abs, file_abs]) == replays_abs
-        except Exception as e:
-            logger.error(f"Error validating filepath '{filepath}': {e}")
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.error("Error validating filepath '%s': %s", filepath, e)
             return False
 
     def list_replays(self) -> List[Dict[str, Any]]:
@@ -457,15 +468,21 @@ class ReplayManager:
                         })
                 except json.JSONDecodeError as e:
                     logger.warning(
-                        f"Skipping replay '{filename}': Invalid JSON - {e}"
+                        "Skipping replay '%s': Invalid JSON - %s",
+                        filename,
+                        e,
                     )
                 except KeyError as e:
                     logger.warning(
-                        f"Skipping replay '{filename}': Missing field - {e}"
+                        "Skipping replay '%s': Missing field - %s",
+                        filename,
+                        e,
                     )
-                except Exception as e:
+                except Exception as e:  # pylint: disable=broad-exception-caught
                     logger.error(
-                        f"Error reading replay '{filename}': {e}"
+                        "Error reading replay '%s': %s",
+                        filename,
+                        e,
                     )
 
         # Sort by timestamp (newest first)
@@ -487,9 +504,9 @@ class ReplayManager:
         if os.path.exists(filepath):
             try:
                 os.remove(filepath)
-                logger.info(f"Deleted replay file: {filepath}")
-            except Exception as e:
-                logger.error(f"Failed to delete replay file '{filepath}': {e}")
+                logger.info("Deleted replay file: %s", filepath)
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                logger.error("Failed to delete replay file '%s': %s", filepath, e)
 
     def get_replay_count(self) -> int:
         """Get the number of replay files."""

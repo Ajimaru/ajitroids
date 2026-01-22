@@ -1,7 +1,11 @@
-import pytest
+"""Tests for PowerUp class and behavior."""
+
 import pygame
+import pytest
+
+from modul.constants import (POWERUP_COLORS, POWERUP_LIFETIME, POWERUP_RADIUS,
+                             POWERUP_TYPES)
 from modul.powerup import PowerUp
-from modul.constants import POWERUP_TYPES, POWERUP_COLORS, POWERUP_RADIUS, POWERUP_LIFETIME
 
 
 @pytest.fixture(autouse=True)

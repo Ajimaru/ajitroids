@@ -1,15 +1,11 @@
 """Tests for audio enhancement features"""
 
-import pytest
-from unittest.mock import patch, MagicMock, call
-from modul.audio_enhancements import (
-    DynamicMusicSystem,
-    VoiceAnnouncement,
-    SoundThemeManager,
-    AudioEnhancementManager,
-    IntensityLevel,
-    SoundTheme
-)
+from unittest.mock import MagicMock, patch
+
+from modul.audio_enhancements import (AudioEnhancementManager,
+                                      DynamicMusicSystem, IntensityLevel,
+                                      SoundTheme, SoundThemeManager,
+                                      VoiceAnnouncement)
 
 
 class TestDynamicMusicSystem:

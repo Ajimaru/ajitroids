@@ -1,5 +1,9 @@
+"""Tests for the Sounds system and sound loading."""
+
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
+
 from modul.sounds import Sounds
 
 

@@ -1,5 +1,8 @@
-import pytest
+"""Tests for the CircleShape utility."""
+
 import pygame
+import pytest
+
 from modul.circleshape import CircleShape
 
 

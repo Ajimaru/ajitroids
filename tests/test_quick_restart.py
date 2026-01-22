@@ -1,7 +1,10 @@
 """Tests for quick restart functionality."""
-import pytest
+
+from unittest.mock import MagicMock
+
 import pygame
-from unittest.mock import MagicMock, patch
+import pytest
+
 from modul.menu import GameOverScreen
 
 

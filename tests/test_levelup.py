@@ -1,6 +1,9 @@
-from modul.player import Player
-import pytest
+"""Tests for player leveling and basic player properties."""
+
 from unittest.mock import patch
+
+from modul.player import Player
+
 
 @patch("pygame.mixer.init")
 def test_player_has_position(mock_mixer_init):

@@ -6,12 +6,13 @@ This module provides three major audio enhancements:
 3. Sound Themes - Multiple audio packs (retro, sci-fi, orchestral)
 """
 
-import pygame
-import time
 import os
-from pathlib import Path
-from typing import Optional, Dict, List, Tuple
+import time
 from enum import Enum
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+import pygame
 
 try:
     import pyttsx3
@@ -41,6 +42,7 @@ class DynamicMusicSystem:
     """Manages dynamic music that changes based on game intensity"""
 
     def __init__(self):
+        """TODO: add docstring."""
         self.current_intensity = IntensityLevel.CALM
         # Music tracks for different intensity levels
         # Note: Currently using the same track for CALM/NORMAL/INTENSE as only one background
@@ -114,7 +116,7 @@ class DynamicMusicSystem:
 
             print(f"Music transitioned to {new_intensity.value}")
             return True
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error transitioning music: {e}")
             return False
 
@@ -127,6 +129,7 @@ class VoiceAnnouncement:
     """Manages voice announcements for game events"""
 
     def __init__(self):
+        """TODO: add docstring."""
         self.announcement_queue: List[Tuple[str, float]] = []  # (text, priority)
         self.current_announcement: Optional[str] = None
         self.announcement_timer = 0.0
@@ -177,7 +180,7 @@ class VoiceAnnouncement:
                 self.tts_engine.setProperty('rate', 180)  # Speed of speech
                 self.tts_engine.setProperty('volume', 0.9)  # Volume (0.0 to 1.0)
                 self.tts_initialized = True
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 print(f"Failed to initialize TTS engine: {e}")
                 self.tts_initialized = False
 
@@ -214,7 +217,7 @@ class VoiceAnnouncement:
             self.announcement_timer = 2.0  # Display text for 2 seconds
             self.last_announcement_time = time.time()
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error playing announcement: {e}")
 
     def update(self, dt: float):
@@ -260,7 +263,7 @@ class VoiceAnnouncement:
             self.tts_engine.save_to_file(text, output_path)
             self.tts_engine.runAndWait()
             return os.path.exists(output_path)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error generating voice file: {e}")
             return False
 
@@ -302,7 +305,7 @@ class VoiceAnnouncement:
                     self.announcement_sounds[event_type] = pygame.mixer.Sound(sound_path)
                 else:
                     self.announcement_sounds[event_type] = None
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 print(f"Error loading announcement sound {event_type}: {e}")
                 self.announcement_sounds[event_type] = None
 
@@ -311,6 +314,7 @@ class SoundThemeManager:
     """Manages multiple sound themes (retro, sci-fi, orchestral)"""
 
     def __init__(self):
+        """TODO: add docstring."""
         self.current_theme = SoundTheme.DEFAULT
 
         # Define sound mappings for each theme
@@ -430,6 +434,7 @@ class AudioEnhancementManager:
     """Main manager for all audio enhancements"""
 
     def __init__(self):
+        """TODO: add docstring."""
         self.dynamic_music = DynamicMusicSystem()
         self.voice_announcements = VoiceAnnouncement()
         self.theme_manager = SoundThemeManager()

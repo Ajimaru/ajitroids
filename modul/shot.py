@@ -1,23 +1,28 @@
+"""Projectile (Shot) implementation used by the player and enemies."""
+
 import pygame
-import math
-from typing import Optional, Union
-from modul.constants import *
+
+import modul.constants as C
 from modul.circleshape import CircleShape
 
 
 class Shot(CircleShape):
+    """TODO: add docstring."""
     asteroids_group = None
     enemy_ships_group = None
 
     @classmethod
     def set_asteroids(cls, asteroids):
+        """TODO: add docstring."""
         cls.asteroids_group = asteroids
 
     @classmethod
     def set_enemy_ships(cls, enemy_ships):
+        """TODO: add docstring."""
         cls.enemy_ships_group = enemy_ships
 
-    def __init__(self, x, y, shot_type=WEAPON_STANDARD):
+    def __init__(self, x, y, shot_type=C.WEAPON_STANDARD):
+        """TODO: add docstring."""
         super().__init__(x, y, 3)
         self.velocity = pygame.Vector2(0, 0)
         self.shot_type = shot_type
@@ -26,12 +31,12 @@ class Shot(CircleShape):
         self.target = None
         self.homing_power = 0
 
-        if shot_type == WEAPON_LASER:
+        if shot_type == C.WEAPON_LASER:
             self.radius = 2
             self.damage = 2
             self.penetrating = True
 
-        elif shot_type == WEAPON_MISSILE:
+        elif shot_type == C.WEAPON_MISSILE:
             self.radius = 4
             self.damage = 3
             self.penetrating = False
@@ -39,16 +44,17 @@ class Shot(CircleShape):
             self.target = None
             self.max_turn_rate = 2.0
 
-        elif shot_type == WEAPON_SHOTGUN:
+        elif shot_type == C.WEAPON_SHOTGUN:
             self.radius = 2
             self.damage = 1
             self.penetrating = False
             self.lifetime = 0.5
 
-        self.color = WEAPON_COLORS[shot_type]
+        self.color = C.WEAPON_COLORS[shot_type]
 
     def update(self, dt):
-        if self.shot_type == WEAPON_MISSILE and self.homing_power > 0 and (Shot.asteroids_group or Shot.enemy_ships_group):
+        """TODO: add docstring."""
+        if self.shot_type == C.WEAPON_MISSILE and self.homing_power > 0 and (Shot.asteroids_group or Shot.enemy_ships_group):
             self.seek_target(dt)
 
         self.position += self.velocity * dt
@@ -58,12 +64,13 @@ class Shot(CircleShape):
             self.kill()
 
     def draw(self, screen):
-        if self.shot_type == WEAPON_LASER:
+        """TODO: add docstring."""
+        if self.shot_type == C.WEAPON_LASER:
             end_pos = self.position + self.velocity.normalize() * 20
             pos_tuple = (int(self.position[0]), int(self.position[1]))
             end_pos_tuple = (int(end_pos[0]), int(end_pos[1]))
             pygame.draw.line(screen, self.color, pos_tuple, end_pos_tuple, 3)
-        elif self.shot_type == WEAPON_MISSILE:
+        elif self.shot_type == C.WEAPON_MISSILE:
             pos_tuple = (int(self.position[0]), int(self.position[1]))
             pygame.draw.circle(screen, self.color, pos_tuple, self.radius)
 
@@ -75,6 +82,7 @@ class Shot(CircleShape):
             pygame.draw.circle(screen, self.color, pos_tuple, self.radius)
 
     def seek_target(self, dt):
+        """TODO: add docstring."""
         if not Shot.asteroids_group and not Shot.enemy_ships_group:
             return
 

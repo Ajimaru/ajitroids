@@ -1,7 +1,11 @@
-import pytest
-import os
+"""Tests for ShipManager persistence and Ship rendering utilities."""
+
 import json
+import os
+
 import pygame
+import pytest
+
 from modul.ships import ShipManager, ShipRenderer
 
 

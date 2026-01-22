@@ -1,8 +1,13 @@
-import pytest
+"""Tests for Shot class and projectile behavior."""
+
+from unittest.mock import MagicMock, patch
+
 import pygame
-from unittest.mock import patch, MagicMock
+import pytest
+
+from modul.constants import (WEAPON_COLORS, WEAPON_LASER, WEAPON_MISSILE,
+                             WEAPON_SHOTGUN, WEAPON_STANDARD)
 from modul.shot import Shot
-from modul.constants import *
 
 
 @pytest.fixture
