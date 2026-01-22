@@ -232,8 +232,7 @@ class EnemyShip(CircleShape):
 
     def split(self):
         """TODO: add docstring."""
-        from modul.particle import Particle
-
+        # Use module-level `Particle` imported at top
         Particle.create_ship_explosion(self.position.x, self.position.y)
         self.kill()
 

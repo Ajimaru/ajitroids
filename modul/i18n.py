@@ -5,6 +5,14 @@ import os
 
 _locales_cache = {}
 
+# Try to import the runtime settings module once at import time. Keep the
+# reference optional to avoid repeated dynamic imports inside `gettext()` and
+# to satisfy linters complaining about imports outside top-level (C0415).
+try:
+    from modul import settings as settings_mod  # type: ignore
+except Exception:  # pragma: no cover - optional runtime integration
+    settings_mod = None
+
 
 def load_locale(lang_code: str):
     """TODO: add docstring."""
@@ -37,9 +45,7 @@ def gettext(key: str):
     This consults the runtime `current_settings.language` when available.
     """
     try:
-        from modul import settings as settings_mod
-
-        lang = getattr(settings_mod, "current_settings", None)
+        lang = getattr(settings_mod, "current_settings", None) if settings_mod else None
         if lang and getattr(lang, "language", None):
             return t(key, lang.language)
     except Exception:  # pylint: disable=broad-exception-caught

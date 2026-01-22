@@ -4,6 +4,24 @@ import pygame
 from modul.constants import SCREEN_HEIGHT, SCREEN_WIDTH
 
 
+# Module-level optional runtime helpers to satisfy linters (C0415)
+try:
+    from modul import input_utils  # type: ignore
+except Exception:  # pragma: no cover - provide minimal stub for tests
+    class _InputUtilsStub:
+        @staticmethod
+        def get_action_keycode(name):
+            return None
+
+    input_utils = _InputUtilsStub()
+
+try:
+    from modul.i18n import gettext  # type: ignore
+except Exception:  # pragma: no cover - fallback for tests
+    def gettext(k):
+        return k
+
+
 class HelpScreen:
     """Display keyboard shortcuts and game help."""
 
@@ -69,7 +87,6 @@ class HelpScreen:
 
         for event in events:
             if event.type == pygame.KEYDOWN:
-                from modul import input_utils
                 pause_key = input_utils.get_action_keycode("pause")
                 if ((pause_key is not None and event.key == pause_key)
                         or event.key in (pygame.K_h, pygame.K_F1, pygame.K_ESCAPE)):
@@ -89,13 +106,6 @@ class HelpScreen:
         screen.blit(overlay, (0, 0))
 
         # Title
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
-
         title_label = gettext("help").upper()
         title_surface = self.title_font.render(title_label, True, (255, 215, 0))
         title_rect = title_surface.get_rect(center=(SCREEN_WIDTH / 2, 60))

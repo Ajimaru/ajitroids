@@ -9,15 +9,22 @@ version strings in multiple places.
 from importlib import metadata
 
 
+# Prefer generated version from setuptools-scm when available. Keep as a
+# module-level optional value to avoid repeated dynamic imports inside
+# functions and to satisfy linters complaining about imports outside
+# the top-level (C0415).
+try:
+    from modul._version import __version__ as _generated_version  # type: ignore
+except Exception:  # pragma: no cover - best-effort fallback, tested at runtime
+    _generated_version = None
+
+
 def _fallback_version() -> str:
     """TODO: add docstring."""
-    try:
-        from modul._version import \
-            __version__ as generated_version  # type: ignore
-
-        return generated_version
-    except Exception:  # pylint: disable=broad-exception-caught
-        return "0.0.0"
+    # Use the module-level cached generated version when present.
+    if _generated_version:
+        return _generated_version
+    return "0.0.0"
 
 
 try:

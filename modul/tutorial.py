@@ -11,17 +11,30 @@ except Exception:  # pylint: disable=broad-exception-caught
     MenuStarfield = None
 
 
+# Module-level runtime helpers to avoid imports inside methods and to satisfy
+# linters (C0415).
+try:
+    from modul.i18n import gettext  # type: ignore
+except Exception:  # pragma: no cover - fallback for tests
+    def gettext(k):
+        return k
+
+try:
+    from modul import input_utils  # type: ignore
+except Exception:  # pragma: no cover - provide minimal stub for tests
+    class _InputUtilsStub:
+        @staticmethod
+        def get_action_keycode(name):
+            return None
+
+    input_utils = _InputUtilsStub()
+
+
 class Tutorial:
     """TODO: add docstring."""
     def __init__(self):
         """TODO: add docstring."""
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
-
+        # Use module-level `gettext` bound at import time
         self.pages = [
             {
                 "title": "Basics",
@@ -181,7 +194,6 @@ class Tutorial:
 
         for event in events:
             if event.type == pygame.KEYDOWN:
-                from modul import input_utils
                 pause_key = input_utils.get_action_keycode("pause")
                 shoot_key = input_utils.get_action_keycode("shoot")
                 if ((pause_key is not None and event.key == pause_key)
@@ -263,11 +275,7 @@ class Tutorial:
         page_rect = page_surface.get_rect(center=(C.SCREEN_WIDTH / 2, nav_y))
         screen.blit(page_surface, page_rect)
 
-        try:
-            from modul.i18n import gettext
-            nav_text = gettext("tutorial_nav")
-        except Exception:  # pylint: disable=broad-exception-caught
-            nav_text = "LEFT / RIGHT to navigate or SPACE to go Back"
+        nav_text = gettext("tutorial_nav")
         nav_surface = self.font_navigation.render(nav_text, True, (100, 100, 100))
         nav_rect = nav_surface.get_rect(center=(C.SCREEN_WIDTH / 2, nav_y + 30))
         screen.blit(nav_surface, nav_rect)

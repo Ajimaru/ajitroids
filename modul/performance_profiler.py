@@ -12,6 +12,14 @@ from collections import deque
 import pygame
 
 
+# Optional i18n helper bound at import time to avoid imports inside methods
+try:
+    from modul.i18n import gettext  # type: ignore
+except Exception:  # pragma: no cover - fallback for tests
+    def gettext(k):
+        return k
+
+
 class PerformanceProfiler:
     """In-game performance monitoring and visualization."""
 
@@ -162,12 +170,6 @@ class PerformanceProfiler:
         x_offset = overlay_x + 10
 
         # Title
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
         title = self.font.render(gettext("performance_profiler"), True, self.text_color)
         screen.blit(title, (x_offset, y_offset))
         y_offset += 30

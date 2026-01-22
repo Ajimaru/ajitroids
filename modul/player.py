@@ -11,6 +11,29 @@ from modul.shot import Shot
 from modul.sounds import Sounds
 
 
+# Bind optional runtime helpers at module import time to avoid repeated
+# dynamic imports inside methods and to satisfy linters (C0415).
+try:
+    from modul import input_utils  # type: ignore
+except Exception:  # pragma: no cover - provide minimal runtime stub
+    class _InputUtilsStub:  # pylint: disable=too-few-public-methods
+        @staticmethod
+        def is_action_pressed(name):
+            return False
+
+        @staticmethod
+        def get_action_keycode(name):
+            return None
+
+    input_utils = _InputUtilsStub()
+
+try:
+    from modul.i18n import gettext  # type: ignore
+except Exception:  # pragma: no cover - fallback when i18n unavailable
+    def gettext(k):
+        return k
+
+
 class Player(CircleShape):
     """TODO: add docstring."""
     def __init__(self, x, y, ship_type="standard"):
@@ -23,25 +46,6 @@ class Player(CircleShape):
         self.invincible_timer = 0
         self.sounds = Sounds()
         self.shield_active = False
-        try:
-            from modul import input_utils
-        except Exception:  # pragma: no cover - minimal stub for runtime when unavailable
-            class _InputUtilsStub:
-                @staticmethod
-                def is_action_pressed(name):
-                    return False
-
-                @staticmethod
-                def get_action_keycode(name):
-                    return None
-
-            input_utils = _InputUtilsStub()
-
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pragma: no cover - fallback when i18n unavailable
-            def gettext(k):
-                return k
 
         self.shield_timer = 0
         self.triple_shot_active = False
@@ -115,7 +119,7 @@ class Player(CircleShape):
     def update(self, dt):
         # Use input utilities which consult runtime settings for remappable controls
         """TODO: add docstring."""
-        from modul import input_utils
+        # use module-level `input_utils` bound at import time
 
         current_speed = self.base_speed
         current_turn_speed = self.base_turn_speed
@@ -336,10 +340,6 @@ class Player(CircleShape):
     def draw_weapon_hud(self, screen):
         """TODO: add docstring."""
         font_small = pygame.font.Font(None, 18)
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            gettext = None
 
         weapons_panel_x = C.SCREEN_WIDTH - 120
         weapons_panel_y = 10
@@ -351,7 +351,7 @@ class Player(CircleShape):
         pygame.draw.rect(panel_surface, (60, 60, 60), (0, 0, panel_width, panel_height), 1)
         screen.blit(panel_surface, (weapons_panel_x, weapons_panel_y))
 
-        title_label = gettext("weapons") if gettext else "WEAPONS"
+        title_label = gettext("weapons")
         title_text = font_small.render(title_label, True, (200, 200, 200))
         screen.blit(title_text, (weapons_panel_x + 5, weapons_panel_y + 5))
 
@@ -402,6 +402,6 @@ class Player(CircleShape):
 
             y_offset += 25
 
-        hint_label = gettext("b_to_switch") if gettext else "B to Switch"
+        hint_label = gettext("b_to_switch")
         hint_text = font_small.render(hint_label, True, (120, 120, 120))
         screen.blit(hint_text, (weapons_panel_x + 5, weapons_panel_y + panel_height + 3))
