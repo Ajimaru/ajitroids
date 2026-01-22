@@ -101,12 +101,6 @@ class HelpScreen:
         y_pos = 140
         x_left = SCREEN_WIDTH / 2 - 350
 
-        try:
-            from modul.i18n import gettext
-        except Exception:
-            def gettext(k):
-                return k
-
         for section_title, shortcuts in self.shortcuts:
             # Section title
             section_surface = self.section_font.render(gettext(section_title.lower().replace(' ', '_')), True, (100, 200, 255))

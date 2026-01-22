@@ -1,6 +1,7 @@
 import logging
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from typing import Optional
 
 try:
     import pyttsx3
@@ -118,7 +119,7 @@ class TTSManager:
             logging.exception("Failed to list TTS voices")
         return voices
 
-    def set_preferred_voice(self, voice_id: str, voice_language: str = None):
+    def set_preferred_voice(self, voice_id: str, voice_language: Optional[str] = None):
         """Set the preferred voice on the engine and update the manager state.
 
         Pass an empty string to revert to the engine default.

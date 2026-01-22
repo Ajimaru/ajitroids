@@ -1460,7 +1460,11 @@ class SoundTestMenu:
                 self.playing_all_sounds = True
                 self.stop_all_sounds_thread = False
                 threading.Thread(target=play_all_sounds, daemon=True).start()
-                self.last_played = gettext("playing_all_sounds") if 'gettext' in globals() else "Playing all sounds..."
+                try:
+                    from modul.i18n import gettext as _gettext
+                    self.last_played = _gettext("playing_all_sounds")
+                except Exception:
+                    self.last_played = "Playing all sounds..."
                 self.last_played_timer = 8.0
 
         elif action == "back":
