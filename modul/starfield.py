@@ -9,36 +9,46 @@ import modul.constants as C
 
 
 class Star:
+    """TODO: add docstring."""
     def __init__(self):
+        """TODO: add docstring."""
         self.position = pygame.Vector2(random.randint(0, C.SCREEN_WIDTH), random.randint(0, C.SCREEN_HEIGHT))
         self.size = random.choice(C.STAR_SIZES)
         self.color = random.choice(C.STAR_COLORS)
         self.twinkle_timer = random.random() * 2 * math.pi
 
     def update(self, dt):
+        """TODO: add docstring."""
         self.twinkle_timer += dt
         brightness = abs(math.sin(self.twinkle_timer))
         self.current_color = [int(c * brightness) for c in pygame.Color(self.color)]
 
     def draw(self, screen):
+        """TODO: add docstring."""
         pygame.draw.circle(screen, self.current_color, self.position, self.size)
 
 
 class Starfield:
+    """TODO: add docstring."""
     def __init__(self):
+        """TODO: add docstring."""
         self.stars = [Star() for _ in range(C.STAR_COUNT)]
 
     def update(self, dt):
+        """TODO: add docstring."""
         for star in self.stars:
             star.update(dt)
 
     def draw(self, screen):
+        """TODO: add docstring."""
         for star in self.stars:
             star.draw(screen)
 
 
 class MenuStarfield:
+    """TODO: add docstring."""
     def __init__(self, num_stars=150):
+        """TODO: add docstring."""
         self.stars = []
         self.speed = 0.4
         self.respawn_counter = 0
@@ -61,6 +71,7 @@ class MenuStarfield:
             self.stars.append([x, y, z, brightness])
 
     def update(self, dt):
+        """TODO: add docstring."""
         center_x = C.SCREEN_WIDTH / 2
         center_y = C.SCREEN_HEIGHT / 2
         stars_to_respawn = []
@@ -85,6 +96,7 @@ class MenuStarfield:
                 star[3] = random.uniform(100, 255)
 
     def draw(self, screen):
+        """TODO: add docstring."""
         for star in self.stars:
             try:
                 if len(star) >= 4:

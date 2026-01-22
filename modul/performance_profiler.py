@@ -166,6 +166,7 @@ class PerformanceProfiler:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
         title = self.font.render(gettext("performance_profiler"), True, self.text_color)
         screen.blit(title, (x_offset, y_offset))

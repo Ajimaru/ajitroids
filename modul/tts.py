@@ -14,7 +14,9 @@ from .settings import current_settings
 
 
 class TTSManager:
+    """TODO: add docstring."""
     def __init__(self):
+        """TODO: add docstring."""
         self.engine = None
         self.voice = ""
         self.language = getattr(current_settings, "language", "en")
@@ -71,6 +73,7 @@ class TTSManager:
 
     def _do_speak(self, text: str):
         # Worker method: runs in background thread
+        """TODO: add docstring."""
         try:
             with self._lock:
                 if not self.engine:
@@ -87,6 +90,7 @@ class TTSManager:
 
     def speak(self, text: str):
         # Enqueue speak work on background thread and return immediately
+        """TODO: add docstring."""
         if not self.enabled:
             return
         try:
@@ -171,6 +175,7 @@ _tts_manager = None
 
 
 def get_tts_manager():
+    """TODO: add docstring."""
     global _tts_manager
     if _tts_manager is None:
         _tts_manager = TTSManager()

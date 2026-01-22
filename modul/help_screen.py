@@ -8,6 +8,7 @@ class HelpScreen:
     """Display keyboard shortcuts and game help."""
 
     def __init__(self):
+        """TODO: add docstring."""
         self.active = False
 
         # Fonts are initialized lazily to avoid crashes when HelpScreen is
@@ -37,6 +38,7 @@ class HelpScreen:
         self.background_alpha = 200
 
     def _ensure_fonts(self):
+        """TODO: add docstring."""
         if not pygame.font.get_init():
             pygame.font.init()
         if self.title_font is None:
@@ -91,6 +93,7 @@ class HelpScreen:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         title_label = gettext("help").upper()

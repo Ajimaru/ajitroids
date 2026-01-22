@@ -13,7 +13,9 @@ current_settings = None
 
 
 class Settings:
+    """TODO: add docstring."""
     def __init__(self):
+        """TODO: add docstring."""
         self.music_on = True
         self.sound_on = True
         self.fullscreen = False
@@ -75,6 +77,7 @@ class Settings:
         print(f"  Theme={self.sound_theme}")
 
     def save(self):
+        """TODO: add docstring."""
         settings_data = {
             "music_on": self.music_on,
             "sound_on": self.sound_on,
@@ -102,6 +105,7 @@ class Settings:
             return False
 
     def load(self):
+        """TODO: add docstring."""
         if not os.path.exists("settings.json"):
             print("No settings file found, using default values")
             return False

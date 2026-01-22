@@ -26,7 +26,9 @@ from modul.constants import \
 
 
 class AchievementNotification:
+    """TODO: add docstring."""
     def __init__(self, achievement_name, achievement_description):
+        """TODO: add docstring."""
         self.name = achievement_name
         self.description = achievement_description
         self.display_time = 4.0
@@ -43,6 +45,7 @@ class AchievementNotification:
         self.sound_played = False
 
     def update(self, dt):
+        """TODO: add docstring."""
         current_time = time.time()
         elapsed = current_time - self.start_time
 
@@ -66,9 +69,11 @@ class AchievementNotification:
         return True
 
     def _ease_out(self, t):
+        """TODO: add docstring."""
         return 1 - (1 - t) ** 3
 
     def draw(self, screen):
+        """TODO: add docstring."""
         if self.animation_progress <= 0:
             return
 
@@ -94,6 +99,7 @@ class AchievementNotification:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         header_text = gettext("achievement_unlocked")
@@ -126,15 +132,19 @@ class AchievementNotification:
 
 
 class AchievementNotificationManager:
+    """TODO: add docstring."""
     def __init__(self, sounds=None):
+        """TODO: add docstring."""
         self.notifications = []
         self.max_notifications = 3
         self.sounds = sounds
 
     def set_sounds(self, sounds):
+        """TODO: add docstring."""
         self.sounds = sounds
 
     def add_notification(self, achievement_name, achievement_description):
+        """TODO: add docstring."""
         for notification in self.notifications:
             if notification.name == achievement_name:
                 return
@@ -150,6 +160,7 @@ class AchievementNotificationManager:
 
     def update(self, dt):
 
+        """TODO: add docstring."""
         self.notifications = [notification for notification in self.notifications if notification.update(dt)]
 
         for i, notification in enumerate(self.notifications):
@@ -158,8 +169,10 @@ class AchievementNotificationManager:
             notification.current_y += (target_y - notification.current_y) * dt * 5
 
     def draw(self, screen):
+        """TODO: add docstring."""
         for notification in self.notifications:
             notification.draw(screen)
 
     def clear_all(self):
+        """TODO: add docstring."""
         self.notifications.clear()

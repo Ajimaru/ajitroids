@@ -9,6 +9,7 @@ from modul.asteroid import Asteroid
 
 
 class AsteroidField:
+    """TODO: add docstring."""
     edges = [
         [
             pygame.Vector2(1, 0),
@@ -29,12 +30,14 @@ class AsteroidField:
     ]
 
     def __init__(self):
+        """TODO: add docstring."""
         self.spawn_timer = 0
         self.asteroid_count = 5
         self.spawn_interval = 5.0
 
     def spawn(self, radius, position, velocity):
         # Randomly select asteroid type based on weights
+        """TODO: add docstring."""
         asteroid_type = random.choices(
             list(C.ASTEROID_TYPE_WEIGHTS.keys()),
             weights=list(C.ASTEROID_TYPE_WEIGHTS.values())
@@ -44,6 +47,7 @@ class AsteroidField:
         asteroid.velocity = velocity
 
     def update(self, dt):
+        """TODO: add docstring."""
         self.spawn_timer += dt
 
         if self.spawn_timer >= self.spawn_interval:
@@ -57,6 +61,7 @@ class AsteroidField:
             self.spawn_timer = 0
 
     def spawn_random(self):
+        """TODO: add docstring."""
         edge_index = random.randint(0, 3)
 
         rand_pos = random.random()

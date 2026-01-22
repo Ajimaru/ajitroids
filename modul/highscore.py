@@ -10,11 +10,14 @@ import modul.constants as C
 
 
 class HighscoreManager:
+    """TODO: add docstring."""
     def __init__(self):
+        """TODO: add docstring."""
         self.highscores = []
         self.load_highscores()
 
     def load_highscores(self):
+        """TODO: add docstring."""
         try:
             if os.path.exists(C.HIGHSCORE_FILE):
                 with open(C.HIGHSCORE_FILE, "r") as f:
@@ -33,6 +36,7 @@ class HighscoreManager:
             self.highscores = [{"name": "AAA", "score": 1000 - i * 100} for i in range(C.HIGHSCORE_MAX_ENTRIES)]
 
     def save_highscores(self):
+        """TODO: add docstring."""
         try:
             with open(C.HIGHSCORE_FILE, "w") as f:
                 json.dump(self.highscores, f)
@@ -40,11 +44,13 @@ class HighscoreManager:
             print(f"Error saving highscores: {e}")
 
     def is_highscore(self, score):
+        """TODO: add docstring."""
         if len(self.highscores) < C.HIGHSCORE_MAX_ENTRIES:
             return True
         return score > self.highscores[-1]["score"]
 
     def add_highscore(self, name, score):
+        """TODO: add docstring."""
         name = name.upper()[:C.HIGHSCORE_NAME_LENGTH]
         name = "".join(c for c in name if c in C.HIGHSCORE_ALLOWED_CHARS)
         name = name.ljust(C.HIGHSCORE_NAME_LENGTH, "A")
@@ -61,7 +67,9 @@ class HighscoreManager:
 
 
 class HighscoreInput:
+    """TODO: add docstring."""
     def __init__(self, score):
+        """TODO: add docstring."""
         self.score = score
         self.name = ["A", "A", "A"]
         self.current_pos = 0
@@ -69,6 +77,7 @@ class HighscoreInput:
         self.font = pygame.font.Font(None, 64)
 
     def update(self, events):
+        """TODO: add docstring."""
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
@@ -99,6 +108,7 @@ class HighscoreInput:
         return None
 
     def draw(self, screen):
+        """TODO: add docstring."""
         overlay = pygame.Surface((C.SCREEN_WIDTH, C.SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 200))
         screen.blit(overlay, (0, 0))
@@ -107,6 +117,7 @@ class HighscoreInput:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         title_text = self.font.render(gettext("new_highscore"), True, pygame.Color("white"))
@@ -158,7 +169,9 @@ class HighscoreInput:
 
 
 class HighscoreDisplay:
+    """TODO: add docstring."""
     def __init__(self, highscore_manager):
+        """TODO: add docstring."""
         self.highscore_manager = highscore_manager
         self.font_title = pygame.font.Font(None, 64)
         self.font_entry = pygame.font.Font(None, 36)
@@ -175,6 +188,7 @@ class HighscoreDisplay:
         self.input_cooldown = 0
 
     def update(self, dt, events):
+        """TODO: add docstring."""
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / 0.5)
             if self.background_alpha >= 200:
@@ -200,6 +214,7 @@ class HighscoreDisplay:
         return None
 
     def draw(self, screen):
+        """TODO: add docstring."""
         overlay = pygame.Surface((C.SCREEN_WIDTH, C.SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, self.background_alpha))
         screen.blit(overlay, (0, 0))
@@ -208,6 +223,7 @@ class HighscoreDisplay:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         title_text = self.font_title.render(gettext("highscores"), True, pygame.Color("white"))

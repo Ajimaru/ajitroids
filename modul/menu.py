@@ -21,7 +21,9 @@ sounds = None
 
 
 class MenuItem:
+    """TODO: add docstring."""
     def __init__(self, text, action):
+        """TODO: add docstring."""
         self.text = text
         self.action = action
         self.selected = False
@@ -30,6 +32,7 @@ class MenuItem:
         self.delay = 0
 
     def update(self, dt):
+        """TODO: add docstring."""
         target = 1.0 if self.selected else 0.0
         animation_speed = 12.0
         self.hover_animation = self.hover_animation + (target - self.hover_animation) * dt * animation_speed
@@ -40,6 +43,7 @@ class MenuItem:
                 self.opacity = 255
 
     def draw(self, screen, position, font):
+        """TODO: add docstring."""
         color = pygame.Color(C.MENU_UNSELECTED_COLOR)
         selected_color = pygame.Color(C.MENU_SELECTED_COLOR)
         r = max(0, min(255, int(color.r + (selected_color.r - color.r) * self.hover_animation)))
@@ -54,7 +58,9 @@ class MenuItem:
 
 
 class Menu:
+    """TODO: add docstring."""
     def __init__(self, title):
+        """TODO: add docstring."""
         self.title = title
         self.items = []
         self.selected_index = 0
@@ -66,6 +72,7 @@ class Menu:
         self.input_cooldown = 0
 
     def add_item(self, text, action, shortcut=None):
+        """TODO: add docstring."""
         item = MenuItem(text, action)
         item.shortcut = shortcut
         self.items.append(item)
@@ -73,6 +80,7 @@ class Menu:
             self.items[0].selected = True
 
     def activate(self):
+        """TODO: add docstring."""
         self.active = True
         self.fade_in = True
         self.background_alpha = 0
@@ -81,6 +89,7 @@ class Menu:
             item.delay = i * 0.1
 
     def update(self, dt, events):
+        """TODO: add docstring."""
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
             if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
@@ -145,6 +154,7 @@ class Menu:
         return None
 
     def _select_next(self):
+        """TODO: add docstring."""
         self.items[self.selected_index].selected = False
         self.selected_index = (self.selected_index + 1) % len(self.items)
         self.items[self.selected_index].selected = True
@@ -155,6 +165,7 @@ class Menu:
                 pass
 
     def _select_previous(self):
+        """TODO: add docstring."""
         self.items[self.selected_index].selected = False
         self.selected_index = (self.selected_index - 1) % len(self.items)
         self.items[self.selected_index].selected = True
@@ -165,6 +176,7 @@ class Menu:
                 pass
 
     def draw(self, screen):
+        """TODO: add docstring."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -182,11 +194,14 @@ class Menu:
 
 
 class MainMenu(Menu):
+    """TODO: add docstring."""
     def __init__(self):
+        """TODO: add docstring."""
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         super().__init__("AJITROIDS")
@@ -208,6 +223,7 @@ class MainMenu(Menu):
         self.add_item(gettext("exit"), "exit")
 
     def draw(self, screen):
+        """TODO: add docstring."""
         super().draw(screen)
 
         version_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE / 1.5))
@@ -217,7 +233,9 @@ class MainMenu(Menu):
 
 
 class PauseMenu(Menu):
+    """TODO: add docstring."""
     def __init__(self):
+        """TODO: add docstring."""
         try:
             from modul.i18n import gettext
             title = gettext("pause").upper()
@@ -228,12 +246,14 @@ class PauseMenu(Menu):
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
         self.add_item(gettext("resume"), "continue")
         self.add_item(gettext("restart"), "restart")
         self.add_item(gettext("main_menu"), "main_menu")
 
     def draw(self, screen):
+        """TODO: add docstring."""
         super().draw(screen)
 
         # Show common keyboard shortcuts while paused
@@ -242,6 +262,7 @@ class PauseMenu(Menu):
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         shortcuts = [
@@ -269,13 +290,16 @@ class PauseMenu(Menu):
 
 
 class TutorialScreen:
+    """TODO: add docstring."""
     def __init__(self):
+        """TODO: add docstring."""
         self.title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
         self.text_font = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE)
         self.background_alpha = 0
         self.fade_in = True
 
     def update(self, dt, events):
+        """TODO: add docstring."""
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
             if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
@@ -290,6 +314,7 @@ class TutorialScreen:
         return None
 
     def draw(self, screen):
+        """TODO: add docstring."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -298,6 +323,7 @@ class TutorialScreen:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         title_surf = self.title_font.render(gettext("tutorial_title"), True, pygame.Color(C.MENU_TITLE_COLOR))
@@ -328,7 +354,9 @@ class TutorialScreen:
 
 
 class OptionsMenu(Menu):
+    """TODO: add docstring."""
     def __init__(self, settings, sounds):
+        """TODO: add docstring."""
         super().__init__("OPTIONS")
         self.settings = settings
         self.sounds = sounds
@@ -336,6 +364,7 @@ class OptionsMenu(Menu):
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         music_state = gettext("on") if settings.music_on else gettext("off")
@@ -362,10 +391,12 @@ class OptionsMenu(Menu):
         self.add_item(gettext('back'), "back")
 
     def handle_action(self, action, sounds):
+        """TODO: add docstring."""
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
         if action == "toggle_music":
             self.settings.music_on = not self.settings.music_on
@@ -477,6 +508,7 @@ class OptionsMenu(Menu):
         return None
 
     def update(self, dt, events):
+        """TODO: add docstring."""
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -491,6 +523,7 @@ class OptionsMenu(Menu):
                             from modul.i18n import gettext
                         except Exception:  # pylint: disable=broad-exception-caught
                             def gettext(k):
+                                """TODO: add docstring."""
                                 return k
                         self.items[self.selected_index].text = gettext('music_volume_format').format(percent=int(self.settings.music_volume * 100))
                     elif self.items[self.selected_index].action == "adjust_sound_volume":
@@ -502,6 +535,7 @@ class OptionsMenu(Menu):
                             from modul.i18n import gettext
                         except Exception:  # pylint: disable=broad-exception-caught
                             def gettext(k):
+                                """TODO: add docstring."""
                                 return k
                         self.items[self.selected_index].text = gettext('sound_volume_format').format(percent=int(self.settings.sound_volume * 100))
                 elif event.key == pygame.K_RIGHT:
@@ -514,6 +548,7 @@ class OptionsMenu(Menu):
                             from modul.i18n import gettext
                         except Exception:  # pylint: disable=broad-exception-caught
                             def gettext(k):
+                                """TODO: add docstring."""
                                 return k
                         self.items[self.selected_index].text = gettext('music_volume_format').format(percent=int(self.settings.music_volume * 100))
                     elif self.items[self.selected_index].action == "adjust_sound_volume":
@@ -525,6 +560,7 @@ class OptionsMenu(Menu):
                             from modul.i18n import gettext
                         except Exception:  # pylint: disable=broad-exception-caught
                             def gettext(k):
+                                """TODO: add docstring."""
                                 return k
                         self.items[self.selected_index].text = gettext('sound_volume_format').format(percent=int(self.settings.sound_volume * 100))
         result = super().update(dt, events)
@@ -534,7 +570,9 @@ class OptionsMenu(Menu):
 
 
 class CreditsScreen:
+    """TODO: add docstring."""
     def __init__(self):
+        """TODO: add docstring."""
         self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
         self.text_font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE - 8)
         self.background_alpha = 0
@@ -542,6 +580,7 @@ class CreditsScreen:
         self.scroll_position = 250
 
     def update(self, dt, events):
+        """TODO: add docstring."""
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
             if self.background_alpha >= MENU_BACKGROUND_ALPHA:
@@ -558,6 +597,7 @@ class CreditsScreen:
         return None
 
     def draw(self, screen):
+        """TODO: add docstring."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -596,11 +636,14 @@ class CreditsScreen:
 
 
 class ControlsMenu(Menu):
+    """TODO: add docstring."""
     def __init__(self, settings):
+        """TODO: add docstring."""
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
         super().__init__(gettext("controls").upper())
         self.settings = settings
@@ -609,6 +652,7 @@ class ControlsMenu(Menu):
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         self.actions = [
@@ -628,6 +672,7 @@ class ControlsMenu(Menu):
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
         self.add_item(gettext("back"), "back")
         self.capturing = False
@@ -636,6 +681,7 @@ class ControlsMenu(Menu):
 
     def update(self, dt, events):
         # Refresh labels from settings
+        """TODO: add docstring."""
         for i, (action_key, label) in enumerate(self.actions):
             key_name = self.settings.controls.get(action_key, "")
             self.items[i].text = f"{label}: {key_name}"
@@ -651,6 +697,7 @@ class ControlsMenu(Menu):
                         from modul.i18n import gettext
                     except Exception:  # pylint: disable=broad-exception-caught
                         def gettext(k):
+                            """TODO: add docstring."""
                             return k
                     self.message = gettext("binding_cancelled")
                     return None
@@ -711,6 +758,7 @@ class ControlsMenu(Menu):
                             from modul.i18n import gettext
                         except Exception:  # pylint: disable=broad-exception-caught
                             def gettext(k):
+                                """TODO: add docstring."""
                                 return k
                         self.message = gettext("key_already_assigned").format(key=new_name)
                         return None
@@ -724,6 +772,7 @@ class ControlsMenu(Menu):
                     from modul.i18n import gettext
                 except Exception:  # pylint: disable=broad-exception-caught
                     def gettext(k):
+                        """TODO: add docstring."""
                         return k
                 self.message = gettext("bound_key").format(key=new_name)
                 return None
@@ -743,6 +792,7 @@ class ControlsMenu(Menu):
                         from modul.i18n import gettext
                     except Exception:  # pylint: disable=broad-exception-caught
                         def gettext(k):
+                            """TODO: add docstring."""
                             return k
                     # show the user-friendly action label if available
                     action_label = dict(self.actions).get(action_key, action_key)
@@ -751,6 +801,7 @@ class ControlsMenu(Menu):
         return None
 
     def draw(self, screen):
+        """TODO: add docstring."""
         super().draw(screen)
         if self.message:
             font = pygame.font.Font(None, 22)
@@ -760,11 +811,14 @@ class ControlsMenu(Menu):
 
 
 class LanguageMenu(Menu):
+    """TODO: add docstring."""
     def __init__(self, settings):
+        """TODO: add docstring."""
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
         super().__init__(gettext("language").upper())
         self.settings = settings
@@ -776,6 +830,7 @@ class LanguageMenu(Menu):
 
     def update(self, dt, events):
         # Refresh labels
+        """TODO: add docstring."""
         for i, (code, label) in enumerate(self.languages):
             sel = " (current)" if self.settings.language == code else ""
             self.items[i].text = f"{label}{sel}"
@@ -805,7 +860,9 @@ class LanguageMenu(Menu):
 
 
 class GameOverScreen:
+    """TODO: add docstring."""
     def __init__(self):
+        """TODO: add docstring."""
         self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
         self.text_font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
         self.background_alpha = 0
@@ -813,9 +870,11 @@ class GameOverScreen:
         self.final_score = 0
 
     def set_score(self, score):
+        """TODO: add docstring."""
         self.final_score = score
 
     def update(self, dt, events):
+        """TODO: add docstring."""
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
             if self.background_alpha >= MENU_BACKGROUND_ALPHA:
@@ -834,6 +893,7 @@ class GameOverScreen:
         return None
 
     def draw(self, screen):
+        """TODO: add docstring."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -842,6 +902,7 @@ class GameOverScreen:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
         title_surf = self.title_font.render(gettext("game_over").upper(), True, pygame.Color("red"))
         title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3))
@@ -864,11 +925,14 @@ class GameOverScreen:
 
 
 class DifficultyMenu(Menu):
+    """TODO: add docstring."""
     def __init__(self):
+        """TODO: add docstring."""
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
         super().__init__(gettext("difficulty").upper())
         self.add_item(gettext("difficulty_easy"), "difficulty_easy", "L")
@@ -881,11 +945,13 @@ class VoiceAnnouncementsMenu:
     """Menu to configure voice announcement toggles"""
 
     def __init__(self, settings):
+        """TODO: add docstring."""
         self.settings = settings
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
         self.title = gettext("voice_announcements")
         self.items = [
@@ -911,11 +977,13 @@ class VoiceAnnouncementsMenu:
         self.update_menu_texts()
 
     def update_menu_texts(self):
+        """TODO: add docstring."""
         announcements = self.settings.announcement_types
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         self.items[0].text = f"{gettext('level_up')}: {'ON' if announcements.get('level_up', True) else 'OFF'}"
@@ -931,6 +999,7 @@ class VoiceAnnouncementsMenu:
         self.items[10].text = f"{gettext('powerup')}: {'ON' if announcements.get('powerup', False) else 'OFF'}"
 
     def update(self, dt, events):
+        """TODO: add docstring."""
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
             if self.background_alpha >= MENU_BACKGROUND_ALPHA:
@@ -966,6 +1035,7 @@ class VoiceAnnouncementsMenu:
         return None
 
     def handle_action(self, action):
+        """TODO: add docstring."""
         if action == "back":
             return "options"
 
@@ -998,6 +1068,7 @@ class VoiceAnnouncementsMenu:
         return None
 
     def draw(self, screen):
+        """TODO: add docstring."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -1031,10 +1102,12 @@ class TTSVoiceMenu(Menu):
     """Menu to select a TTS voice from available system voices."""
 
     def __init__(self, settings):
+        """TODO: add docstring."""
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         super().__init__(gettext("tts_voice_label").upper())
@@ -1061,6 +1134,7 @@ class TTSVoiceMenu(Menu):
 
     def update(self, dt, events):
         # Use base menu navigation
+        """TODO: add docstring."""
         result = super().update(dt, events)
         if result:
             return result
@@ -1068,6 +1142,7 @@ class TTSVoiceMenu(Menu):
 
     def handle_action(self, action):
         # Expected action formats: 'tts_voice:<id>' or 'tts_voice:__default__'
+        """TODO: add docstring."""
         if action == "back":
             return "options"
         if action and action.startswith("tts_voice:"):
@@ -1111,11 +1186,14 @@ class TTSVoiceMenu(Menu):
 
 
 class SoundTestMenu:
+    """TODO: add docstring."""
     def __init__(self):
+        """TODO: add docstring."""
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
         self.title = gettext("sound_test")
         self.sounds = None
@@ -1162,6 +1240,7 @@ class SoundTestMenu:
         self.fade_in = False
 
     def activate(self):
+        """TODO: add docstring."""
         self.fade_in = True
         self.background_alpha = 0
         self.scroll_offset = 0
@@ -1171,9 +1250,11 @@ class SoundTestMenu:
         self.update_visible_items()
 
     def set_sounds(self, sounds):
+        """TODO: add docstring."""
         self.sounds = sounds
 
     def update_visible_items(self):
+        """TODO: add docstring."""
         self.visible_items = []
         start_index = self.scroll_offset
         end_index = min(start_index + self.max_visible_items, len(self.sound_items))
@@ -1187,6 +1268,7 @@ class SoundTestMenu:
             self.current_selection = 0
 
     def update(self, dt, events):
+        """TODO: add docstring."""
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
             if self.background_alpha >= MENU_BACKGROUND_ALPHA:
@@ -1243,6 +1325,7 @@ class SoundTestMenu:
         return None
 
     def handle_action(self, action):
+        """TODO: add docstring."""
         if not self.sounds:
             return None
 
@@ -1252,6 +1335,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("standard_shoot"))
             self.last_played_timer = 2.0
@@ -1265,6 +1349,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("laser_shoot"))
             self.last_played_timer = 2.0
@@ -1278,6 +1363,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("rocket_shoot"))
             self.last_played_timer = 2.0
@@ -1291,6 +1377,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("shotgun_shoot"))
             self.last_played_timer = 2.0
@@ -1304,6 +1391,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("triple_shoot"))
             self.last_played_timer = 2.0
@@ -1314,6 +1402,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("explosion"))
             self.last_played_timer = 2.0
@@ -1324,6 +1413,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("player_hit"))
             self.last_played_timer = 2.0
@@ -1334,6 +1424,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("powerup"))
             self.last_played_timer = 2.0
@@ -1344,6 +1435,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("shield_activate"))
             self.last_played_timer = 2.0
@@ -1357,6 +1449,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("weapon_pickup"))
             self.last_played_timer = 2.0
@@ -1367,6 +1460,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("boss_spawn"))
             self.last_played_timer = 2.0
@@ -1377,6 +1471,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("boss_death"))
             self.last_played_timer = 2.0
@@ -1390,6 +1485,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("boss_attack"))
             self.last_played_timer = 2.0
@@ -1400,6 +1496,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("level_up"))
             self.last_played_timer = 2.0
@@ -1410,6 +1507,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("game_over"))
             self.last_played_timer = 2.0
@@ -1420,6 +1518,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("menu_select"))
             self.last_played_timer = 2.0
@@ -1430,6 +1529,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
+                    """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("menu_confirm"))
             self.last_played_timer = 2.0
@@ -1439,6 +1539,7 @@ class SoundTestMenu:
             import time
 
             def play_all_sounds():
+                """TODO: add docstring."""
                 sound_list = [
                     ("Standard Shoot", self.sounds.play_shoot),
                     ("Explosion", self.sounds.play_explosion),
@@ -1481,6 +1582,7 @@ class SoundTestMenu:
         return None
 
     def draw(self, screen):
+        """TODO: add docstring."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -1496,6 +1598,7 @@ class SoundTestMenu:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         if self.scroll_offset > 0:
@@ -1567,7 +1670,9 @@ class SoundTestMenu:
 
 
 class AchievementsMenu(Menu):
+    """TODO: add docstring."""
     def __init__(self, achievement_system):
+        """TODO: add docstring."""
         super().__init__("AJITROIDS - ACHIEVEMENTS")
         self.achievement_system = achievement_system
         self.add_item("Back", "back")
@@ -1587,6 +1692,7 @@ class AchievementsMenu(Menu):
         }
 
     def draw(self, screen):
+        """TODO: add docstring."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -1658,6 +1764,7 @@ class AchievementsMenu(Menu):
         screen.blit(progress_surf, progress_rect)
 
     def update(self, dt, events):
+        """TODO: add docstring."""
         result = super().update(dt, events)
         if result:
             return result
@@ -1671,13 +1778,16 @@ class AchievementsMenu(Menu):
 
 
 class ShipSelectionMenu(Menu):
+    """TODO: add docstring."""
     def __init__(self):
+        """TODO: add docstring."""
         super().__init__("SHIP SELECTION")
         self.selected_ship_index = 0
         self.ships = ship_manager.get_available_ships()
         self.animation_time = 0
 
     def activate(self):
+        """TODO: add docstring."""
         super().activate()
         self.selected_ship_index = 0
         self.ships = ship_manager.get_available_ships()
@@ -1688,6 +1798,7 @@ class ShipSelectionMenu(Menu):
             self.selected_ship_index = 0
 
     def update(self, dt, events):
+        """TODO: add docstring."""
         self.animation_time += dt
 
         for event in events:
@@ -1708,6 +1819,7 @@ class ShipSelectionMenu(Menu):
         return None
 
     def draw(self, screen):
+        """TODO: add docstring."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))

@@ -10,6 +10,7 @@ class StatsDashboard:
     """Display detailed session statistics with visual elements."""
 
     def __init__(self, session_stats):
+        """TODO: add docstring."""
         self.session_stats = session_stats
         self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
         self.section_font = pygame.font.Font(None, 40)
@@ -54,6 +55,7 @@ class StatsDashboard:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         title_surf = self.title_font.render(gettext("session_statistics"), True, pygame.Color(MENU_TITLE_COLOR))
@@ -140,6 +142,7 @@ class StatsDashboard:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
         bar_width = 400
         bar_height = 30

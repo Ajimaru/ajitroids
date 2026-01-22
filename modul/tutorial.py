@@ -12,11 +12,14 @@ except Exception:  # pylint: disable=broad-exception-caught
 
 
 class Tutorial:
+    """TODO: add docstring."""
     def __init__(self):
+        """TODO: add docstring."""
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         self.pages = [
@@ -148,19 +151,23 @@ class Tutorial:
             print("Could not import starfield")
 
     def next_page(self):
+        """TODO: add docstring."""
         if self.current_page < len(self.pages) - 1:
             self.start_transition(self.current_page + 1)
 
     def previous_page(self):
+        """TODO: add docstring."""
         if self.current_page > 0:
             self.start_transition(self.current_page - 1)
 
     def start_transition(self, target_page):
+        """TODO: add docstring."""
         self.transitioning = True
         self.target_page = target_page
         self.transition_timer = 0
 
     def update(self, dt, events):
+        """TODO: add docstring."""
         if hasattr(self, "starfield") and self.starfield:
             self.starfield.update(dt)
 
@@ -194,6 +201,7 @@ class Tutorial:
         return None
 
     def draw(self, screen):
+        """TODO: add docstring."""
         screen.fill((0, 0, 0))
 
         if hasattr(self, "starfield") and self.starfield:
@@ -277,6 +285,7 @@ class Tutorial:
 
     def draw_colored_line(self, screen, line, x, y):
 
+        """TODO: add docstring."""
         if line.startswith("[") and "]" in line:
             bracket_end = line.find("]") + 1
             name_part = line[:bracket_end]

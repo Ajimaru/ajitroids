@@ -15,6 +15,7 @@ class ReplayListMenu:
     """Menu for listing and selecting replays."""
 
     def __init__(self, replay_manager: ReplayManager):
+        """TODO: add docstring."""
         self.replay_manager = replay_manager
         self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
         self.text_font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
@@ -90,6 +91,7 @@ class ReplayListMenu:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
 
         title_surf = self.title_font.render(gettext("replay_browser"), True, pygame.Color(MENU_TITLE_COLOR))
@@ -172,6 +174,7 @@ class ReplayViewer:
     """Viewer for playing back replays."""
 
     def __init__(self, replay_player: ReplayPlayer):
+        """TODO: add docstring."""
         self.replay_player = replay_player
         self.title_font = pygame.font.Font(None, 48)
         self.text_font = pygame.font.Font(None, 32)
@@ -209,6 +212,7 @@ class ReplayViewer:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
+                """TODO: add docstring."""
                 return k
         # Draw control bar at bottom
         bar_height = 80

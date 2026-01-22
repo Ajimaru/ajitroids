@@ -10,6 +10,7 @@ from importlib import metadata
 
 
 def _fallback_version() -> str:
+    """TODO: add docstring."""
     try:
         from modul._version import \
             __version__ as generated_version  # type: ignore

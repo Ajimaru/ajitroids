@@ -6,6 +6,7 @@ class SessionStats:
     """Track statistics for the current game session."""
 
     def __init__(self):
+        """TODO: add docstring."""
         self.reset()
         self.session_start_time = time.time()
 

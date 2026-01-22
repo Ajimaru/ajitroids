@@ -7,6 +7,7 @@ _locales_cache = {}
 
 
 def load_locale(lang_code: str):
+    """TODO: add docstring."""
     if lang_code in _locales_cache:
         return _locales_cache[lang_code]
 
@@ -25,6 +26,7 @@ def load_locale(lang_code: str):
 
 
 def t(key: str, lang_code: str = "en"):
+    """TODO: add docstring."""
     locale = load_locale(lang_code)
     return locale.get(key, key)
 
