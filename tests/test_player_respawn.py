@@ -1,3 +1,5 @@
+"""Tests for player respawn behavior."""
+
 from modul.player import Player
 import pygame
 import pytest

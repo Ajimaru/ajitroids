@@ -1,3 +1,5 @@
+"""Tests ensuring the main module imports and basic structures."""
+
 import sys
 import os
 import unittest.mock

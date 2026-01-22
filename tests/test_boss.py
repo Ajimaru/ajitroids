@@ -1,3 +1,5 @@
+"""Tests for boss behavior and related mechanics."""
+
 import pytest
 import pygame
 import random

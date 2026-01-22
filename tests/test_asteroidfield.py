@@ -1,3 +1,5 @@
+"""Tests for asteroid field generation and behavior."""
+
 import pytest
 import pygame
 from modul.asteroidfield import AsteroidField

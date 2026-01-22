@@ -1,3 +1,5 @@
+"""Tests for particle effects and particle behavior."""
+
 import pytest
 import pygame
 from modul.particle import Particle

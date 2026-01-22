@@ -1,3 +1,5 @@
+"""Tests for PowerUp class and behavior."""
+
 import pytest
 import pygame
 from modul.powerup import PowerUp

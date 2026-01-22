@@ -1,4 +1,5 @@
 """Tests for stats dashboard functionality."""
+
 import pytest
 import pygame
 from unittest.mock import MagicMock

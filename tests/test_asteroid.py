@@ -1,3 +1,5 @@
+"""Tests for asteroid behavior and related classes."""
+
 import pytest
 import pygame
 from unittest.mock import patch

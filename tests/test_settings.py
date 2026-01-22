@@ -1,3 +1,5 @@
+"""Tests for Settings persistence and defaults."""
+
 import pytest
 import os
 import json

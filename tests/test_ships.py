@@ -1,3 +1,5 @@
+"""Tests for ShipManager persistence and Ship rendering utilities."""
+
 import pytest
 import os
 import json

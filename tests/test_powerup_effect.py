@@ -1,3 +1,5 @@
+"""Tests for powerup effects and interactions with player."""
+
 import pytest
 import pygame
 from unittest.mock import patch, MagicMock

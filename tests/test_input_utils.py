@@ -1,3 +1,5 @@
+"""Tests for input utilities and action bindings."""
+
 import types
 import modul.input_utils as input_utils
 import modul.settings as settings_mod

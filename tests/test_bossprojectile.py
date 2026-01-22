@@ -1,3 +1,5 @@
+"""Tests for boss projectiles and their behavior."""
+
 import pytest
 import pygame
 from unittest.mock import patch, MagicMock

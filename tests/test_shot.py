@@ -1,3 +1,5 @@
+"""Tests for Shot class and projectile behavior."""
+
 import pytest
 import pygame
 from unittest.mock import patch, MagicMock

@@ -1,3 +1,5 @@
+"""Tests for highscore manager and displays."""
+
 import pytest
 import pygame
 import os

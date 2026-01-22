@@ -1,4 +1,5 @@
-"""Tests for replay system functionality."""
+"""Tests for replay recording, playback and replay UI."""
+
 import pytest
 import pygame
 import os

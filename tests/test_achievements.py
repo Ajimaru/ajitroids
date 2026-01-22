@@ -1,3 +1,5 @@
+"""Tests for achievements and achievement system."""
+
 import pytest
 import json
 import os

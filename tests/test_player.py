@@ -1,3 +1,5 @@
+"""Tests for Player class behavior and mechanics."""
+
 import pytest
 import pygame
 import math

@@ -1,3 +1,5 @@
+"""Tests for player leveling and basic player properties."""
+
 from modul.player import Player
 import pytest
 from unittest.mock import patch

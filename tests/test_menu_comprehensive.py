@@ -1,3 +1,5 @@
+"""Comprehensive tests for menu screens and menu behavior."""
+
 import pytest
 import pygame
 from unittest.mock import Mock, MagicMock, patch, call

@@ -1,4 +1,5 @@
 """Tests for quick restart functionality."""
+
 import pytest
 import pygame
 from unittest.mock import MagicMock, patch

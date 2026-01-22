@@ -1,3 +1,5 @@
+"""Tests for asteroid type constants and asteroid behavior."""
+
 import pytest
 import pygame
 from modul.asteroid import Asteroid

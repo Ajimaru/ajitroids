@@ -1,3 +1,5 @@
+"""Tests for achievement notification behavior and manager."""
+
 import pytest
 import pygame
 import time
