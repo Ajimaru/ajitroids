@@ -12,6 +12,12 @@ from pathlib import Path
 
 
 def process_file(path: Path) -> bool:
+    """Rename unused positional args in top-level functions by prefixing with _.
+
+    Parses the file, finds top-level FunctionDef args that aren't used in the
+    function body, updates the function definition line, and returns True if
+    the file was modified.
+    """
     src = path.read_text(encoding="utf-8")
     tree = ast.parse(src)
     edits = []  # (lineno0, old_line, new_line)
@@ -59,12 +65,18 @@ def process_file(path: Path) -> bool:
 
 
 def main():
+    """Main entry point.
+
+    Scan tests/ for Python files, run process_file() on each, log exceptions,
+    collect modified paths, and print a brief summary (updated files or
+    'No changes').
+    """
     changed = []
     for p in sorted(Path("tests").glob("**/*.py")):
         try:
             if process_file(p):
                 changed.append(str(p))
-        except Exception:
+        except (OSError, SyntaxError, UnicodeDecodeError):
             logging.exception("Failed processing %s", p)
 
     if changed:

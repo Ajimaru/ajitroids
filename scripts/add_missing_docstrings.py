@@ -14,6 +14,7 @@ PLACEHOLDER = 'TODO: add docstring.'
 
 
 def add_module_docstring(lines, module_node):
+    """Insert a placeholder docstring at the top of the module if missing."""
     if ast.get_docstring(module_node) is not None:
         return lines
     # Find insertion index after any shebang/encoding comments and module-level
@@ -27,6 +28,7 @@ def add_module_docstring(lines, module_node):
 
 
 def collect_inserts(tree):
+    """Collects nodes (classes and functions) missing docstrings for insertion."""
     inserts = []  # list of (lineno0, indent, docstring)
     for node in ast.walk(tree):
         if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -40,6 +42,7 @@ def collect_inserts(tree):
 
 
 def process_file(path: Path):
+    """Process a Python file to add placeholder docstrings where missing."""
     src = path.read_text(encoding='utf-8')
     try:
         tree = ast.parse(src)
@@ -53,7 +56,10 @@ def process_file(path: Path):
 
     # module docstring
     if ast.get_docstring(tree) is None:
-        lines = add_module_docstring(lines, tree)
+        changed = True
+        # Re-parse to keep AST line numbers in sync with modified source
+        src = ''.join(lines)
+        tree = ast.parse(src)
         changed = True
 
     inserts = collect_inserts(tree)
@@ -64,8 +70,7 @@ def process_file(path: Path):
 
     # prepare to insert in reverse order
     inserts_sorted = sorted(inserts, key=lambda x: x[0], reverse=True)
-    for lineno0, node in inserts_sorted:
-        # compute indentation based on current content at lineno0
+    for lineno0, _ in inserts_sorted:
         if lineno0 < 0 or lineno0 >= len(lines):
             indent = '    '
         else:
@@ -83,6 +88,7 @@ def process_file(path: Path):
 
 
 def backup_and_write(path: Path, lines):
+    """Create a backup of the file and write the updated lines to it."""
     bak = path.with_suffix(path.suffix + '.bak')
     if not bak.exists():
         # Preserve original by renaming it to .bak, then write new content
@@ -97,6 +103,7 @@ def backup_and_write(path: Path, lines):
 
 
 def main():
+    """Main entry point for adding missing docstrings to Python files in the modul directory."""
     root = Path('modul')
     if not root.exists():
         print('Directory modul/ not found; aborting.')

@@ -439,6 +439,12 @@ class TestMenu:
 class TestMainMenu:
     def test_mainmenu_initialization(self):
         """Test MainMenu initializes with correct items"""
+        # Force language to English for localization test
+        import modul.i18n as i18n
+        class DummySettings:
+            language = "en"
+        i18n.settings_mod = Mock()
+        i18n.settings_mod.current_settings = DummySettings()
         menu = MainMenu()
         assert menu.title == "AJITROIDS"
         assert len(menu.items) == 9  # Updated: added Replays and Statistics
@@ -448,7 +454,7 @@ class TestMainMenu:
         assert menu.items[3].text == "Highscores"
         assert menu.items[4].text == "Statistics"
         assert menu.items[5].text == "Achievements"
-        assert menu.items[6].text == "Optionen"
+        assert menu.items[6].text == "Options"
         assert menu.items[7].text == "Credits"
         assert menu.items[8].text == "Exit"
 
@@ -461,6 +467,11 @@ class TestMainMenu:
 class TestPauseMenu:
     def test_pausemenu_initialization(self):
         """Test PauseMenu initializes correctly"""
+        import modul.i18n as i18n
+        class DummySettings:
+            language = "en"
+        i18n.settings_mod = Mock()
+        i18n.settings_mod.current_settings = DummySettings()
         menu = PauseMenu()
         assert menu.title == "PAUSE"
         assert len(menu.items) == 3
@@ -498,6 +509,11 @@ class TestTutorialScreen:
 class TestOptionsMenu:
     def test_optionsmenu_initialization(self, mock_settings, mock_sounds):
         """Test OptionsMenu initializes correctly"""
+        import modul.i18n as i18n
+        class DummySettings:
+            language = "en"
+        i18n.settings_mod = Mock()
+        i18n.settings_mod.current_settings = DummySettings()
         menu = OptionsMenu(mock_settings, mock_sounds)
         assert menu.title == "OPTIONS"
         assert len(menu.items) == 8
@@ -708,6 +724,11 @@ class TestGameOverScreen:
 class TestDifficultyMenu:
     def test_difficultymenu_initialization(self):
         """Test DifficultyMenu initializes"""
+        import modul.i18n as i18n
+        class DummySettings:
+            language = "en"
+        i18n.settings_mod = Mock()
+        i18n.settings_mod.current_settings = DummySettings()
         menu = DifficultyMenu()
         assert menu.title == "DIFFICULTY"
         assert len(menu.items) == 4
@@ -728,6 +749,11 @@ class TestDifficultyMenu:
 class TestSoundTestMenu:
     def test_soundtestmenu_initialization(self):
         """Test SoundTestMenu initializes"""
+        import modul.i18n as i18n
+        class DummySettings:
+            language = "en"
+        i18n.settings_mod = Mock()
+        i18n.settings_mod.current_settings = DummySettings()
         menu = SoundTestMenu()
         assert menu.title == "SOUND TEST"
         assert menu.sounds is None
@@ -805,6 +831,11 @@ class TestSoundTestMenu:
 
     def test_soundtestmenu_handle_test_shoot(self, mock_sounds):
         """Test playing shoot sound"""
+        import modul.i18n as i18n
+        class DummySettings:
+            language = "en"
+        i18n.settings_mod = Mock()
+        i18n.settings_mod.current_settings = DummySettings()
         menu = SoundTestMenu()
         menu.set_sounds(mock_sounds)
         result = menu.handle_action("test_shoot")

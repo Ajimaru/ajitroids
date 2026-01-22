@@ -8,7 +8,6 @@ This module provides real-time performance metrics display including:
 """
 
 from collections import deque
-
 import pygame
 
 
@@ -125,7 +124,9 @@ class PerformanceProfiler:
             return
 
         # Initialize fonts if needed
-        if self.font is None:
+        if self.font is None or self.font_small is None:
+            if not pygame.font.get_init():
+                pygame.font.init()
             self.font = pygame.font.Font(None, 24)
             self.font_small = pygame.font.Font(None, 18)
 
@@ -257,6 +258,12 @@ class PerformanceProfiler:
         """
         if not data or len(data) < 2:
             return
+
+        # Ensure fonts are initialized
+        if self.font_small is None:
+            if not pygame.font.get_init():
+                pygame.font.init()
+            self.font_small = pygame.font.Font(None, 18)
 
         # Draw graph background
         graph_rect = pygame.Rect(x, y, self.graph_width, self.graph_height)

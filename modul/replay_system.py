@@ -76,7 +76,7 @@ class ReplayRecorder:
     """Records game sessions for later playback."""
 
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize the replay recorder."""
         self.recording = False
         self.frames: List[GameFrame] = []
         self.events: List[GameEvent] = []
@@ -224,8 +224,7 @@ class ReplayRecorder:
             }
 
             def _json_default(obj):
-                # Best-effort conversion for common non-JSON objects
-                """TODO: add docstring."""
+                """Convert non-JSON objects to serializable format."""
                 if hasattr(obj, "x") and hasattr(obj, "y"):
                     try:
                         return {"x": float(obj.x), "y": float(obj.y)}
@@ -256,7 +255,7 @@ class ReplayPlayer:
     """Plays back recorded game sessions."""
 
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize the replay player."""
         self.playing = False
         self.paused = False
         self.frames: List[GameFrame] = []
@@ -436,7 +435,7 @@ class ReplayManager:
     """Manages replay files and provides listing/deletion capabilities."""
 
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize the replay manager."""
         self.replays_dir = "replays"
 
     def _validate_filepath(self, filepath: str) -> bool:

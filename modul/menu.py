@@ -1,38 +1,37 @@
 """Module modul.menu — minimal module docstring."""
 
-# flake8: noqa
-# pylint: disable=all
-# pyright: reportUndefinedVariable=false
-# pyright: reportWildcardImportFromLibrary=false
 import math
-
 import pygame
-
 import modul.constants as C
 from modul.version import __version__
+from modul.ships import ShipRenderer, ship_manager
+from modul import input_utils
 
 # Backwards-compatibility: expose uppercase constants into module globals
 for _const_name in dir(C):
     if _const_name.isupper():
         globals()[_const_name] = getattr(C, _const_name)
-from modul.ships import ShipRenderer, ship_manager
 
-sounds = None
+SOUNDS = None
+
+# Menu-related constants (add or adjust as needed)
+CREDITS_SCROLL_SPEED = 40  # pixels per second (adjust to desired scroll speed)
 
 
 class MenuItem:
-    """TODO: add docstring."""
-    def __init__(self, text, action):
-        """TODO: add docstring."""
+    """Represents a selectable item in a menu."""
+    def __init__(self, text, action, shortcut=None):
+        """Initialize a MenuItem with text, action, and optional shortcut."""
         self.text = text
         self.action = action
         self.selected = False
         self.hover_animation = 0
         self.opacity = 255
         self.delay = 0
+        self.shortcut = shortcut
 
     def update(self, dt):
-        """TODO: add docstring."""
+        """Update the item's animation and opacity state."""
         target = 1.0 if self.selected else 0.0
         animation_speed = 12.0
         self.hover_animation = self.hover_animation + (target - self.hover_animation) * dt * animation_speed
@@ -42,15 +41,18 @@ class MenuItem:
                 self.delay = 0
                 self.opacity = 255
 
-    def draw(self, screen, position, font):
-        """TODO: add docstring."""
+    def draw(self, screen, position, font=None):
+        """Draw the menu item at the given position. Accepts optional font argument."""
         color = pygame.Color(C.MENU_UNSELECTED_COLOR)
         selected_color = pygame.Color(C.MENU_SELECTED_COLOR)
         r = max(0, min(255, int(color.r + (selected_color.r - color.r) * self.hover_animation)))
         g = max(0, min(255, int(color.g + (selected_color.g - color.g) * self.hover_animation)))
         b = max(0, min(255, int(color.b + (selected_color.b - color.b) * self.hover_animation)))
         size_multiplier = 1.0 + 0.2 * self.hover_animation
-        scaled_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE * size_multiplier))
+        if font is None:
+            scaled_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE * size_multiplier))
+        else:
+            scaled_font = font
         text_surface = scaled_font.render(self.text, True, (r, g, b))
         text_rect = text_surface.get_rect(center=(position[0], position[1]))
         screen.blit(text_surface, text_rect)
@@ -58,9 +60,9 @@ class MenuItem:
 
 
 class Menu:
-    """TODO: add docstring."""
-    def __init__(self, title):
-        """TODO: add docstring."""
+    """Base class for game menus with selectable items."""
+    def __init__(self, title, sounds=None):
+        """Initialize the menu with a title."""
         self.title = title
         self.items = []
         self.selected_index = 0
@@ -70,17 +72,17 @@ class Menu:
         self.active = False
         self.fade_in = False
         self.input_cooldown = 0
+        self.sounds = sounds
 
     def add_item(self, text, action, shortcut=None):
-        """TODO: add docstring."""
-        item = MenuItem(text, action)
-        item.shortcut = shortcut
+        """Add a new item to the menu."""
+        item = MenuItem(text, action, shortcut)
         self.items.append(item)
         if len(self.items) == 1:
             self.items[0].selected = True
 
     def activate(self):
-        """TODO: add docstring."""
+        """Activate the menu and start fade-in animation."""
         self.active = True
         self.fade_in = True
         self.background_alpha = 0
@@ -89,7 +91,7 @@ class Menu:
             item.delay = i * 0.1
 
     def update(self, dt, events):
-        """TODO: add docstring."""
+        """Update menu state and handle input events."""
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
             if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
@@ -102,7 +104,6 @@ class Menu:
         if self.input_cooldown > 0:
             self.input_cooldown -= dt
 
-        from modul import input_utils
         shoot_key = input_utils.get_action_keycode("shoot")
 
         for event in events:
@@ -154,29 +155,29 @@ class Menu:
         return None
 
     def _select_next(self):
-        """TODO: add docstring."""
+        """Select the next menu item."""
         self.items[self.selected_index].selected = False
         self.selected_index = (self.selected_index + 1) % len(self.items)
         self.items[self.selected_index].selected = True
-        if "sounds" in globals() or hasattr(self, "sounds"):
+        if hasattr(self, "sounds") and self.sounds:
             try:
-                sounds.play_menu_move()
+                self.sounds.play_menu_move()
             except Exception:  # pylint: disable=broad-exception-caught
                 pass
 
     def _select_previous(self):
-        """TODO: add docstring."""
+        """Select the previous menu item."""
         self.items[self.selected_index].selected = False
         self.selected_index = (self.selected_index - 1) % len(self.items)
         self.items[self.selected_index].selected = True
-        if "sounds" in globals() or hasattr(self, "sounds"):
+        if hasattr(self, "sounds") and self.sounds:
             try:
-                sounds.play_menu_move()
+                self.sounds.play_menu_move()
             except Exception:  # pylint: disable=broad-exception-caught
                 pass
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the menu and its items on the screen."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -190,19 +191,19 @@ class Menu:
         start_y = C.SCREEN_HEIGHT / 2 - total_height / 2
         for i, item in enumerate(self.items):
             position = (C.SCREEN_WIDTH / 2, start_y + i * C.MENU_ITEM_SPACING)
-            item.draw(screen, position, self.item_font)
+            item.draw(screen, position)
 
 
 class MainMenu(Menu):
-    """TODO: add docstring."""
+    """Main menu for the game."""
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize the main menu with all items."""
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
+            def gettext(key):
+                """Return the key unchanged (fallback)."""
+                return key
 
         super().__init__("AJITROIDS")
         self.add_item(gettext("start_game"), "start_game")
@@ -224,7 +225,7 @@ class MainMenu(Menu):
         self.add_item(gettext("exit"), "exit")
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the main menu and version info."""
         super().draw(screen)
 
         version_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE / 1.5))
@@ -234,9 +235,9 @@ class MainMenu(Menu):
 
 
 class PauseMenu(Menu):
-    """TODO: add docstring."""
+    """Pause menu shown during gameplay."""
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize the pause menu with items."""
         try:
             from modul.i18n import gettext
             title = gettext("pause").upper()
@@ -247,14 +248,14 @@ class PauseMenu(Menu):
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
-                """TODO: add docstring."""
+                """Return the key unchanged (fallback)."""
                 return k
         self.add_item(gettext("resume"), "continue")
         self.add_item(gettext("restart"), "restart")
         self.add_item(gettext("main_menu"), "main_menu")
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the pause menu and shortcuts."""
         super().draw(screen)
 
         # Show common keyboard shortcuts while paused
@@ -291,16 +292,16 @@ class PauseMenu(Menu):
 
 
 class TutorialScreen:
-    """TODO: add docstring."""
+    """Screen displaying tutorial instructions."""
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize fonts and state for the tutorial screen."""
         self.title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
         self.text_font = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE)
         self.background_alpha = 0
         self.fade_in = True
 
     def update(self, dt, events):
-        """TODO: add docstring."""
+        """Update fade-in and handle input for tutorial screen."""
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
             if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
@@ -315,7 +316,7 @@ class TutorialScreen:
         return None
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the tutorial instructions on the screen."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -355,9 +356,9 @@ class TutorialScreen:
 
 
 class OptionsMenu(Menu):
-    """TODO: add docstring."""
+    """Menu for adjusting game options and settings."""
     def __init__(self, settings, sounds):
-        """TODO: add docstring."""
+        """Initialize the options menu with settings and sounds."""
         super().__init__("OPTIONS")
         self.settings = settings
         self.sounds = sounds
@@ -365,7 +366,7 @@ class OptionsMenu(Menu):
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
-                """TODO: add docstring."""
+                """Return the key unchanged (fallback)."""
                 return k
 
         music_state = gettext("on") if settings.music_on else gettext("off")
@@ -392,7 +393,7 @@ class OptionsMenu(Menu):
         self.add_item(gettext('back'), "back")
 
     def handle_action(self, action, sounds):
-        """TODO: add docstring."""
+        """Handle actions triggered by menu item selection."""
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
@@ -437,10 +438,10 @@ class OptionsMenu(Menu):
 
             try:
                 if self.settings.fullscreen:
-                    pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+                    pygame.display.set_mode((C.SCREEN_WIDTH, C.SCREEN_HEIGHT), pygame.FULLSCREEN)
                     print("Fullscreen aktiviert")
                 else:
-                    pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+                    pygame.display.set_mode((C.SCREEN_WIDTH, C.SCREEN_HEIGHT))
                     print("Windowed mode activated")
             except Exception as e:  # pylint: disable=broad-exception-caught
                 print(f"Error switching screen mode: {e}")
@@ -509,7 +510,7 @@ class OptionsMenu(Menu):
         return None
 
     def update(self, dt, events):
-        """TODO: add docstring."""
+        """Update options menu and handle left/right/escape keys."""
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -524,9 +525,13 @@ class OptionsMenu(Menu):
                             from modul.i18n import gettext
                         except Exception:  # pylint: disable=broad-exception-caught
                             def gettext(k):
-                                """TODO: add docstring."""
+                                """Return the key unchanged (fallback)."""
                                 return k
-                        self.items[self.selected_index].text = gettext('music_volume_format').format(percent=int(self.settings.music_volume * 100))
+                        self.items[self.selected_index].text = (
+                            gettext('music_volume_format').format(
+                                percent=int(self.settings.music_volume * 100)
+                            )
+                        )
                     elif self.items[self.selected_index].action == "adjust_sound_volume":
                         self.settings.sound_volume = max(0.0, self.settings.sound_volume - 0.1)
                         self.settings.save()
@@ -538,7 +543,11 @@ class OptionsMenu(Menu):
                             def gettext(k):
                                 """TODO: add docstring."""
                                 return k
-                        self.items[self.selected_index].text = gettext('sound_volume_format').format(percent=int(self.settings.sound_volume * 100))
+                        self.items[self.selected_index].text = (
+                            gettext('sound_volume_format').format(
+                                percent=int(self.settings.sound_volume * 100)
+                            )
+                        )
                 elif event.key == pygame.K_RIGHT:
                     if self.items[self.selected_index].action == "adjust_music_volume":
                         self.settings.music_volume = min(1.0, self.settings.music_volume + 0.1)
@@ -551,7 +560,11 @@ class OptionsMenu(Menu):
                             def gettext(k):
                                 """TODO: add docstring."""
                                 return k
-                        self.items[self.selected_index].text = gettext('music_volume_format').format(percent=int(self.settings.music_volume * 100))
+                        self.items[self.selected_index].text = (
+                            gettext('music_volume_format').format(
+                                percent=int(self.settings.music_volume * 100)
+                            )
+                        )
                     elif self.items[self.selected_index].action == "adjust_sound_volume":
                         self.settings.sound_volume = min(1.0, self.settings.sound_volume + 0.1)
                         self.settings.save()
@@ -563,7 +576,11 @@ class OptionsMenu(Menu):
                             def gettext(k):
                                 """TODO: add docstring."""
                                 return k
-                        self.items[self.selected_index].text = gettext('sound_volume_format').format(percent=int(self.settings.sound_volume * 100))
+                        self.items[self.selected_index].text = (
+                            gettext('sound_volume_format').format(
+                                percent=int(self.settings.sound_volume * 100)
+                            )
+                        )
         result = super().update(dt, events)
         if result:
             return result
@@ -571,22 +588,22 @@ class OptionsMenu(Menu):
 
 
 class CreditsScreen:
-    """TODO: add docstring."""
+    """Screen displaying game credits."""
     def __init__(self):
-        """TODO: add docstring."""
-        self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
-        self.text_font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE - 8)
+        """Initialize fonts, state, and scroll position for credits."""
+        self.title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
+        self.text_font = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE - 8)
         self.background_alpha = 0
         self.fade_in = True
         self.scroll_position = 250
 
     def update(self, dt, events):
-        """TODO: add docstring."""
+        """Update fade-in, scroll credits, and handle input."""
         if self.fade_in:
-            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
-            if self.background_alpha >= MENU_BACKGROUND_ALPHA:
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
+            if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
                 self.fade_in = False
-                self.background_alpha = MENU_BACKGROUND_ALPHA
+                self.background_alpha = C.MENU_BACKGROUND_ALPHA
 
         self.scroll_position -= CREDITS_SCROLL_SPEED * dt
 
@@ -598,38 +615,38 @@ class CreditsScreen:
         return None
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the credits text on the screen."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_surf = self.title_font.render(CREDITS_TITLE, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, 100))
+        title_surf = self.title_font.render(C.CREDITS_TITLE, True, pygame.Color(C.MENU_TITLE_COLOR))
+        title_rect = title_surf.get_rect(center=(C.SCREEN_WIDTH / 2, 100))
         screen.blit(title_surf, title_rect)
 
-        credits = [
-            CREDITS_GAME_NAME,
+        credits_lines = [
+            C.CREDITS_GAME_NAME,
             "",
-            f"A game by {CREDITS_MASTERMIND}",
+            f"A game by {C.CREDITS_MASTERMIND}",
             "",
             "Programming",
-            CREDITS_DEVELOPER,
+            C.CREDITS_DEVELOPER,
             "",
             "Graphics & Design",
-            CREDITS_GRAPHICS,
+            C.CREDITS_GRAPHICS,
             "",
             "Sound & Music",
-            CREDITS_SOUND,
+            C.CREDITS_SOUND,
             "",
             "Special thanks to",
         ]
 
-        credits.extend(CREDITS_SPECIAL_THANKS)
+        credits_lines.extend(C.CREDITS_SPECIAL_THANKS)
 
-        credits.extend(
+        credits_lines.extend(
             [
                 "",
-                f"Download & Updates: {CREDITS_WEBSITE}",
+                f"Download & Updates: {C.CREDITS_WEBSITE}",
                 "",
                 "Thank you for playing!",
             ]
@@ -637,14 +654,14 @@ class CreditsScreen:
 
 
 class ControlsMenu(Menu):
-    """TODO: add docstring."""
+    """Menu for remapping and displaying controls."""
     def __init__(self, settings):
-        """TODO: add docstring."""
+        """Initialize the controls menu with settings."""
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
-                """TODO: add docstring."""
+                """Return the key unchanged (fallback)."""
                 return k
         super().__init__(gettext("controls").upper())
         self.settings = settings
@@ -848,24 +865,13 @@ class LanguageMenu(Menu):
                     return "options"
         return None
 
-        y = self.scroll_position
-        for line in credits:
-            text_surf = self.text_font.render(line, True, (255, 255, 255))
-            text_rect = text_surf.get_rect(center=(SCREEN_WIDTH / 2, y))
-            if y >= SCREEN_HEIGHT / 4:
-                screen.blit(text_surf, text_rect)
-            y += CREDITS_LINE_SPACING
-
-        if y < 0:
-            self.scroll_position = SCREEN_HEIGHT
-
 
 class GameOverScreen:
     """TODO: add docstring."""
     def __init__(self):
         """TODO: add docstring."""
-        self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
-        self.text_font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
+        self.title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
+        self.text_font = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE)
         self.background_alpha = 0
         self.fade_in = True
         self.final_score = 0
@@ -877,10 +883,10 @@ class GameOverScreen:
     def update(self, dt, events):
         """TODO: add docstring."""
         if self.fade_in:
-            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
-            if self.background_alpha >= MENU_BACKGROUND_ALPHA:
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
+            if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
                 self.fade_in = False
-                self.background_alpha = MENU_BACKGROUND_ALPHA
+                self.background_alpha = C.MENU_BACKGROUND_ALPHA
 
         for event in events:
             if event.type == pygame.KEYDOWN:
@@ -906,22 +912,22 @@ class GameOverScreen:
                 """TODO: add docstring."""
                 return k
         title_surf = self.title_font.render(gettext("game_over").upper(), True, pygame.Color("red"))
-        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3))
+        title_rect = title_surf.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 3))
         screen.blit(title_surf, title_rect)
 
         score_surf = self.text_font.render(gettext("your_score_format").format(score=self.final_score), True, (255, 255, 255))
-        score_rect = score_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
+        score_rect = score_surf.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2))
         screen.blit(score_surf, score_rect)
         instruction1 = self.text_font.render(gettext("press_space_highscores"), True, (200, 200, 200))
-        instruction1_rect = instruction1.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 60))
+        instruction1_rect = instruction1.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2 + 60))
         screen.blit(instruction1, instruction1_rect)
 
         instruction2 = self.text_font.render(gettext("press_r_restart"), True, (200, 200, 200))
-        instruction2_rect = instruction2.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 100))
+        instruction2_rect = instruction2.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2 + 100))
         screen.blit(instruction2, instruction2_rect)
 
         instruction3 = self.text_font.render(gettext("press_esc_main_menu"), True, (200, 200, 200))
-        instruction3_rect = instruction3.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 140))
+        instruction3_rect = instruction3.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2 + 140))
         screen.blit(instruction3, instruction3_rect)
 
 
@@ -1002,10 +1008,10 @@ class VoiceAnnouncementsMenu:
     def update(self, dt, events):
         """TODO: add docstring."""
         if self.fade_in:
-            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
-            if self.background_alpha >= MENU_BACKGROUND_ALPHA:
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
+            if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
                 self.fade_in = False
-                self.background_alpha = MENU_BACKGROUND_ALPHA
+                self.background_alpha = C.MENU_BACKGROUND_ALPHA
 
         for event in events:
             if event.type == pygame.KEYDOWN:
@@ -1074,12 +1080,12 @@ class VoiceAnnouncementsMenu:
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
-        title_surface = title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH / 2, 60))
+        title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
+        title_surface = title_font.render(self.title, True, pygame.Color(C.MENU_TITLE_COLOR))
+        title_rect = title_surface.get_rect(center=(C.SCREEN_WIDTH / 2, 60))
         screen.blit(title_surface, title_rect)
 
-        font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
+        font = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE)
         start_y = 130
 
         visible_count = 0
@@ -1088,12 +1094,12 @@ class VoiceAnnouncementsMenu:
                 visible_count += 0.5
                 continue
 
-            y = start_y + visible_count * MENU_ITEM_SPACING
+            y = start_y + visible_count * C.MENU_ITEM_SPACING
             is_selected = i == self.current_selection
-            color = MENU_SELECTED_COLOR if is_selected else MENU_UNSELECTED_COLOR
+            color = C.MENU_SELECTED_COLOR if is_selected else C.MENU_UNSELECTED_COLOR
 
             text_surface = font.render(item.text, True, pygame.Color(color))
-            text_rect = text_surface.get_rect(center=(SCREEN_WIDTH / 2, y))
+            text_rect = text_surface.get_rect(center=(C.SCREEN_WIDTH / 2, y))
             screen.blit(text_surface, text_rect)
 
             visible_count += 1
@@ -1272,10 +1278,10 @@ class SoundTestMenu:
     def update(self, dt, events):
         """TODO: add docstring."""
         if self.fade_in:
-            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
-            if self.background_alpha >= MENU_BACKGROUND_ALPHA:
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
+            if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
                 self.fade_in = False
-                self.background_alpha = MENU_BACKGROUND_ALPHA
+                self.background_alpha = C.MENU_BACKGROUND_ALPHA
 
         if self.last_played_timer > 0:
             self.last_played_timer -= dt
@@ -1542,14 +1548,16 @@ class SoundTestMenu:
 
             def play_all_sounds():
                 """TODO: add docstring."""
-                sound_list = [
-                    ("Standard Shoot", self.sounds.play_shoot),
-                    ("Explosion", self.sounds.play_explosion),
-                    ("Player Hit", self.sounds.play_player_hit),
-                    ("PowerUp", self.sounds.play_powerup),
-                    ("Level Up", self.sounds.play_level_up),
-                    ("Game Over", self.sounds.play_game_over),
-                ]
+                sound_list = []
+                if self.sounds is not None:
+                    sound_list = [
+                        ("Standard Shoot", self.sounds.play_shoot),
+                        ("Explosion", self.sounds.play_explosion),
+                        ("Player Hit", self.sounds.play_player_hit),
+                        ("PowerUp", self.sounds.play_powerup),
+                        ("Level Up", self.sounds.play_level_up),
+                        ("Game Over", self.sounds.play_game_over),
+                    ]
 
                 for name, sound_func in sound_list:
                     if self.stop_all_sounds_thread:
@@ -1589,12 +1597,12 @@ class SoundTestMenu:
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
-        title_surface = title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH / 2, 60))
+        title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
+        title_surface = title_font.render(self.title, True, pygame.Color(C.MENU_TITLE_COLOR))
+        title_rect = title_surface.get_rect(center=(C.SCREEN_WIDTH / 2, 60))
         screen.blit(title_surface, title_rect)
 
-        indicator_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.7))
+        indicator_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE * 0.7))
 
         try:
             from modul.i18n import gettext
@@ -1605,21 +1613,20 @@ class SoundTestMenu:
 
         if self.scroll_offset > 0:
             up_text = indicator_font.render(gettext("scroll_up"), True, pygame.Color("yellow"))
-            up_rect = up_text.get_rect(center=(SCREEN_WIDTH / 2, 100))
+            up_rect = up_text.get_rect(center=(C.SCREEN_WIDTH / 2, 100))
             screen.blit(up_text, up_rect)
 
         if self.scroll_offset + self.max_visible_items < len(self.sound_items):
             down_text = indicator_font.render(gettext("scroll_down"), True, pygame.Color("yellow"))
-            down_rect = down_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100))
+            down_rect = down_text.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT - 100))
             screen.blit(down_text, down_rect)
 
-        font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
-        small_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.9))
+        small_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE * 0.9))
         start_y = 130
 
         visible_item_count = 0
 
-        for i, (text, action) in enumerate(self.visible_items):
+        for i, (text, _) in enumerate(self.visible_items):
             current_y = start_y + visible_item_count * 35
 
             if text == "":
@@ -1628,7 +1635,7 @@ class SoundTestMenu:
 
             is_selected = i == self.current_selection
 
-            base_color = MENU_UNSELECTED_COLOR
+            base_color = C.MENU_UNSELECTED_COLOR
             if "Shoot" in text:
                 base_color = "lightblue"
             elif text in ["Explosion", "Player Hit", "PowerUp", "Shield Activate", "Weapon Pickup"]:
@@ -1643,31 +1650,31 @@ class SoundTestMenu:
                 base_color = "white"
 
             if is_selected:
-                color = MENU_SELECTED_COLOR
-                scaled_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 1.1))
+                color = C.MENU_SELECTED_COLOR
+                scaled_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE * 1.1))
                 surface = scaled_font.render(f"► {text}", True, pygame.Color(color))
             else:
                 color = base_color
                 surface = small_font.render(f"  {text}", True, pygame.Color(color))
 
-            text_rect = surface.get_rect(center=(SCREEN_WIDTH / 2, current_y))
+            text_rect = surface.get_rect(center=(C.SCREEN_WIDTH / 2, current_y))
             screen.blit(surface, text_rect)
 
             visible_item_count += 1
 
         if self.last_played:
-            played_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.8))
+            played_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE * 0.8))
 
             played_text = played_font.render(self.last_played, True, pygame.Color("lightgreen"))
-            played_rect = played_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 128))
+            played_rect = played_text.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT - 128))
             screen.blit(played_text, played_rect)
 
         instructions = ["UP / DOWN to Navigate - ENTER to play sound - SPACE to go back"]
 
-        instruction_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.65))
+        instruction_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE * 0.65))
         for i, instruction in enumerate(instructions):
             text = instruction_font.render(instruction, True, pygame.Color("lightgray"))
-            text_rect = text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 70 + i * 25))
+            text_rect = text.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT - 70 + i * 25))
             screen.blit(text, text_rect)
 
 
@@ -1699,17 +1706,17 @@ class AchievementsMenu(Menu):
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_surf = self.title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 12))
+        title_surf = self.title_font.render(self.title, True, pygame.Color(C.MENU_TITLE_COLOR))
+        title_rect = title_surf.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 12))
         screen.blit(title_surf, title_rect)
 
-        start_y = SCREEN_HEIGHT / 5
+        start_y = C.SCREEN_HEIGHT / 5
         achievement_spacing = 80
         graphics_font = pygame.font.Font(None, 18)
         name_font = pygame.font.Font(None, 28)
 
         achievements_per_column = 6
-        column_width = SCREEN_WIDTH / 2
+        column_width = C.SCREEN_WIDTH / 2
         left_column_x = column_width / 2
         right_column_x = column_width + column_width / 2
 
@@ -1733,6 +1740,7 @@ class AchievementsMenu(Menu):
                 graphic_color = pygame.Color("lightgreen")
             else:
                 name_color = pygame.Color("gray")
+                graphic_color = pygame.Color("gray")
 
             if is_unlocked and achievement.name in self.achievement_graphics:
                 graphics = self.achievement_graphics[achievement.name]
@@ -1753,16 +1761,16 @@ class AchievementsMenu(Menu):
             name_rect = name_surf.get_rect(topleft=(name_x, current_y))
             screen.blit(name_surf, name_rect)
 
-        back_button_y = SCREEN_HEIGHT - 80
+        back_button_y = C.SCREEN_HEIGHT - 80
         for i, item in enumerate(self.items):
-            item_rect = item.draw(screen, (SCREEN_WIDTH / 2, back_button_y + i * MENU_ITEM_SPACING), self.item_font)
+            item.draw(screen, (C.SCREEN_WIDTH / 2, back_button_y + i * C.MENU_ITEM_SPACING))
 
         unlocked_count = sum(1 for achievement in self.achievement_system.achievements if achievement.unlocked)
         total_count = len(self.achievement_system.achievements)
         progress_text = f"Progress: {unlocked_count}/{total_count} Achievements unlocked"
         progress_font = pygame.font.Font(None, 20)
         progress_surf = progress_font.render(progress_text, True, pygame.Color("lightblue"))
-        progress_rect = progress_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 12 + 35))
+        progress_rect = progress_surf.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 12 + 35))
         screen.blit(progress_surf, progress_rect)
 
     def update(self, dt, events):
@@ -1826,13 +1834,13 @@ class ShipSelectionMenu(Menu):
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_surf = self.title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, 80))
+        title_surf = self.title_font.render(self.title, True, pygame.Color(C.MENU_TITLE_COLOR))
+        title_rect = title_surf.get_rect(center=(C.SCREEN_WIDTH / 2, 80))
         screen.blit(title_surf, title_rect)
 
-        ship_y = SCREEN_HEIGHT / 2 - 50
+        ship_y = C.SCREEN_HEIGHT / 2 - 50
         ship_spacing = 200
-        start_x = SCREEN_WIDTH / 2 - (len(self.ships) - 1) * ship_spacing / 2
+        start_x = C.SCREEN_WIDTH / 2 - (len(self.ships) - 1) * ship_spacing / 2
 
         for i, ship_id in enumerate(self.ships):
             ship_data = ship_manager.get_ship_data(ship_id)
@@ -1876,14 +1884,14 @@ class ShipSelectionMenu(Menu):
         selected_ship = self.ships[self.selected_ship_index]
         ship_data = ship_manager.get_ship_data(selected_ship)
 
-        detail_y = SCREEN_HEIGHT - 200
+        detail_y = C.SCREEN_HEIGHT - 200
         detail_font = pygame.font.Font(None, 28)
         small_font = pygame.font.Font(None, 24)
 
         if ship_data["unlocked"]:
 
             desc_surf = detail_font.render(ship_data["description"], True, (255, 255, 255))
-            desc_rect = desc_surf.get_rect(center=(SCREEN_WIDTH / 2, detail_y))
+            desc_rect = desc_surf.get_rect(center=(C.SCREEN_WIDTH / 2, detail_y))
             screen.blit(desc_surf, desc_rect)
 
             props = [
@@ -1894,7 +1902,7 @@ class ShipSelectionMenu(Menu):
 
             for i, prop in enumerate(props):
                 prop_surf = small_font.render(prop, True, (200, 200, 200))
-                prop_rect = prop_surf.get_rect(center=(SCREEN_WIDTH / 2, detail_y + 40 + i * 25))
+                prop_rect = prop_surf.get_rect(center=(C.SCREEN_WIDTH / 2, detail_y + 40 + i * 25))
                 screen.blit(prop_surf, prop_rect)
 
         instruction_font = pygame.font.Font(None, 20)
@@ -1902,5 +1910,5 @@ class ShipSelectionMenu(Menu):
 
         for i, instruction in enumerate(instructions):
             instr_surf = instruction_font.render(instruction, True, (150, 150, 150))
-            instr_rect = instr_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 60 + i * 20))
+            instr_rect = instr_surf.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT - 60 + i * 20))
             screen.blit(instr_surf, instr_rect)

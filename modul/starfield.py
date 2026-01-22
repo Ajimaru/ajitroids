@@ -9,9 +9,9 @@ import modul.constants as C
 
 
 class Star:
-    """TODO: add docstring."""
+    """Represents a twinkling star."""
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize star with random properties."""
         self.position = pygame.Vector2(random.randint(0, C.SCREEN_WIDTH), random.randint(0, C.SCREEN_HEIGHT))
         self.size = random.choice(C.STAR_SIZES)
         self.color = random.choice(C.STAR_COLORS)
@@ -26,37 +26,37 @@ class Star:
             self.current_color = [255, 255, 255]
 
     def update(self, dt):
-        """TODO: add docstring."""
+        """Update star twinkling effect."""
         self.twinkle_timer += dt
         brightness = abs(math.sin(self.twinkle_timer))
         self.current_color = [int(c * brightness) for c in pygame.Color(self.color)]
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw star on screen."""
         pygame.draw.circle(screen, self.current_color, self.position, self.size)
 
 
 class Starfield:
-    """TODO: add docstring."""
+    """Manages background starfield."""
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize starfield with stars."""
         self.stars = [Star() for _ in range(C.STAR_COUNT)]
 
     def update(self, dt):
-        """TODO: add docstring."""
+        """Update all stars."""
         for star in self.stars:
             star.update(dt)
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw all stars."""
         for star in self.stars:
             star.draw(screen)
 
 
 class MenuStarfield:
-    """TODO: add docstring."""
+    """Manages animated starfield for menus."""
     def __init__(self, num_stars=150):
-        """TODO: add docstring."""
+        """Initialize menu starfield."""
         self.stars = []
         self.speed = 0.4
         self.respawn_counter = 0
@@ -79,7 +79,7 @@ class MenuStarfield:
             self.stars.append([x, y, z, brightness])
 
     def update(self, dt):
-        """TODO: add docstring."""
+        """Update starfield animation."""
         center_x = C.SCREEN_WIDTH / 2
         center_y = C.SCREEN_HEIGHT / 2
         stars_to_respawn = []
@@ -104,7 +104,7 @@ class MenuStarfield:
                 star[3] = random.uniform(100, 255)
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw starfield on screen."""
         for star in self.stars:
             try:
                 if len(star) >= 4:

@@ -1,5 +1,3 @@
-"""Module modul.update_version — minimal module docstring."""
-
 #!/usr/bin/env python3
 """Update _version.py and pyproject.toml from VERSION file
 
@@ -21,9 +19,9 @@ version_parts = re.match(r'^(\d+)\.(\d+)\.(\d+)(?:\.(.+))?$', version)
 if version_parts:
     major, minor, patch, dev = version_parts.groups()
     if dev:
-        version_tuple = f"({major}, {minor}, {patch}, '{dev}')"
+        VERSION_TUPLE = f"({major}, {minor}, {patch}, '{dev}')"
     else:
-        version_tuple = f"({major}, {minor}, {patch})"
+        VERSION_TUPLE = f"({major}, {minor}, {patch})"
 else:
     raise ValueError(f"Invalid version format: {version}")
 
@@ -46,21 +44,21 @@ if TYPE_CHECKING:
     from typing import Tuple
     from typing import Union
 
-    VERSION_TUPLE = Tuple[Union[int, str], ...]
+    VERSION_TUPLE_TYPE = Tuple[Union[int, str], ...]
     COMMIT_ID = Union[str, None]
 else:
-    VERSION_TUPLE = object
+    VERSION_TUPLE_TYPE = object
     COMMIT_ID = object
 
 version: str
 __version__: str
-__version_tuple__: VERSION_TUPLE
-version_tuple: VERSION_TUPLE
+__version_tuple__: VERSION_TUPLE_TYPE
+version_tuple: VERSION_TUPLE_TYPE
 commit_id: COMMIT_ID
 __commit_id__: COMMIT_ID
 
 __version__ = version = '{version}'
-__version_tuple__ = version_tuple = {version_tuple}
+__version_tuple__ = version_tuple = {VERSION_TUPLE}
 
 __commit_id__ = commit_id = None
 '''
@@ -82,6 +80,6 @@ pyproject_content = re.sub(
 pyproject.write_text(pyproject_content)
 print(f"✓ Updated pyproject.toml fallback_version to {version}")
 print(f"\n✅ Version successfully updated to {version}")
-print(f"   Next steps:")
-print(f"   1. git add VERSION modul/_version.py pyproject.toml")
+print("   Next steps:")
+print("   1. git add VERSION modul/_version.py pyproject.toml")
 print(f"   2. git commit -m 'version bump to {version}'")

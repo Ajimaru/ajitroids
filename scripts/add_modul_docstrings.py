@@ -9,6 +9,7 @@ from pathlib import Path
 
 
 def needs_docstring(src: str) -> bool:
+    """Return True if the given source string lacks a module docstring."""
     s = src.lstrip()
     # Recognize single- or triple-quoted module docstrings with either
     # single or double quote styles.
@@ -21,6 +22,10 @@ def needs_docstring(src: str) -> bool:
 
 
 def process(path: Path) -> bool:
+    """Add a minimal module docstring to the given file if it lacks one.
+
+    Returns True if a docstring was added, otherwise False.
+    """
     src = path.read_text(encoding='utf-8')
     if not needs_docstring(src):
         return False
@@ -31,12 +36,13 @@ def process(path: Path) -> bool:
 
 
 def main():
+    """Scan Python files in 'modul/' and add minimal module docstrings if missing."""
     changed = []
     for p in sorted(Path('modul').glob('*.py')):
         try:
             if process(p):
                 changed.append(str(p))
-        except Exception:
+        except OSError:
             continue
 
     if changed:

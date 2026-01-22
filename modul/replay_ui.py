@@ -12,9 +12,9 @@ from modul.replay_system import ReplayManager, ReplayPlayer
 try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
-    def gettext(k):
+    def gettext(key):
         """Fallback translation: return the given key unchanged."""
-        return k
+        return key
 
 try:
     from modul import input_utils
@@ -32,7 +32,7 @@ class ReplayListMenu:
     """Menu for listing and selecting replays."""
 
     def __init__(self, replay_manager: ReplayManager):
-        """TODO: add docstring."""
+        """Initialize replay list menu."""
         self.replay_manager = replay_manager
         self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
         self.text_font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
@@ -183,7 +183,7 @@ class ReplayViewer:
     """Viewer for playing back replays."""
 
     def __init__(self, replay_player: ReplayPlayer):
-        """TODO: add docstring."""
+        """Initialize replay viewer."""
         self.replay_player = replay_player
         self.title_font = pygame.font.Font(None, 48)
         self.text_font = pygame.font.Font(None, 32)

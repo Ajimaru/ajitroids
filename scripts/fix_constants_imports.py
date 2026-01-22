@@ -25,7 +25,7 @@ for p in files:
     # find the closing parenthesis for that import (naive but sufficient)
     idx = m.end()
     depth = 1
-    end = None
+    end_pos = None
     while idx < len(s):
         c = s[idx]
         if c == '(':
@@ -33,22 +33,22 @@ for p in files:
         elif c == ')':
             depth -= 1
             if depth == 0:
-                end = idx
+                end_pos = idx
                 break
         idx += 1
-    if end is None:
+    if end_pos is None:
         # can't parse, skip
         continue
-    import_block = s[m.start(): end+1]
+    import_block = s[m.start(): end_pos+1]
     # extract names from import block
     names = re.findall(r"([A-Z][A-Z0-9_]{2,})", import_block)
     if not names:
         continue
     # compute used names in file excluding the import block
-    s_excl = s[:m.start()] + s[end+1:]
+    s_excl = s[:m.start()] + s[end_pos+1:]
     used = set()
     for name in names:
-        if re.search(r"\b{}\b".format(re.escape(name)), s_excl):
+        if re.search(fr"\b{re.escape(name)}\b", s_excl):
             used.add(name)
     if set(names) == used:
         continue  # no change
@@ -57,17 +57,17 @@ for p in files:
         # format as a single-line import if short, else multi-line
         used_list = sorted(used)
         if len(used_list) <= 6:
-            new_import = f"from modul.constants import {', '.join(used_list)}"
+            NEW_IMPORT = f"from modul.constants import {', '.join(used_list)}"
         else:
             lines = ["from modul.constants import ("]
             for n in used_list:
                 lines.append(f"    {n},")
             lines.append(")")
-            new_import = "\n".join(lines)
+            NEW_IMPORT = "\n".join(lines)
     else:
-        new_import = ""  # remove import entirely
+        NEW_IMPORT = ""  # remove import entirely
     # replace in source
-    new_s = s[:m.start()] + new_import + s[end+1:]
+    new_s = s[:m.start()] + NEW_IMPORT + s[end_pos+1:]
     if new_s != s:
         p.write_text(new_s)
         changed.append(str(p.relative_to(ROOT)))

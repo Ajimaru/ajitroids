@@ -1,24 +1,26 @@
 """Achievement notification visuals and manager."""
 
 import time
-
 import pygame
-
-# Only `SCREEN_WIDTH` is used in this module; remove other unused imports/aliases.
 from modul.constants import SCREEN_WIDTH
-
 try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
-    def gettext(k):
+    def gettext(key):
         """Fallback translation returning the passed key when i18n is missing."""
-        return k
+        return key
 
 
 class AchievementNotification:
-    """TODO: add docstring."""
+    """Visual notification for unlocked achievements, including animation and display logic."""
+
     def __init__(self, achievement_name, achievement_description):
-        """TODO: add docstring."""
+        """Initialize an AchievementNotification.
+
+        Args:
+            achievement_name (str): Achievement name.
+            achievement_description (str): Achievement description.
+        """
         self.name = achievement_name
         self.description = achievement_description
         self.display_time = 4.0
@@ -59,11 +61,11 @@ class AchievementNotification:
         return True
 
     def _ease_out(self, t):
-        """TODO: add docstring."""
+        """Ease out cubic animation function."""
         return 1 - (1 - t) ** 3
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the achievement notification on the screen with fade effects."""
         if self.animation_progress <= 0:
             return
 
@@ -115,19 +117,19 @@ class AchievementNotification:
 
 
 class AchievementNotificationManager:
-    """TODO: add docstring."""
+    """Manages achievement notifications display and animation."""
     def __init__(self, sounds=None):
-        """TODO: add docstring."""
+        """Initialize the achievement notification manager."""
         self.notifications = []
         self.max_notifications = 3
         self.sounds = sounds
 
     def set_sounds(self, sounds):
-        """TODO: add docstring."""
+        """Set the sounds object for playing achievement sounds."""
         self.sounds = sounds
 
     def add_notification(self, achievement_name, achievement_description):
-        """TODO: add docstring."""
+        """Add a new achievement notification if not already present."""
         for notification in self.notifications:
             if notification.name == achievement_name:
                 return
@@ -142,8 +144,7 @@ class AchievementNotificationManager:
         print(f"Achievement notification added: {achievement_name}")
 
     def update(self, dt):
-
-        """TODO: add docstring."""
+        """Update all notifications and remove expired ones."""
         self.notifications = [notification for notification in self.notifications if notification.update(dt)]
 
         for i, notification in enumerate(self.notifications):
@@ -152,10 +153,10 @@ class AchievementNotificationManager:
             notification.current_y += (target_y - notification.current_y) * dt * 5
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw all active notifications on the screen."""
         for notification in self.notifications:
             notification.draw(screen)
 
     def clear_all(self):
-        """TODO: add docstring."""
+        """Clear all active notifications."""
         self.notifications.clear()

@@ -1,7 +1,6 @@
 """Tutorial screens and tutorial page management."""
 
 import pygame
-
 import modul.constants as C
 
 # Ensure `MenuStarfield` is available at module level so tests can patch it
@@ -33,9 +32,9 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - provide minimal
 
 
 class Tutorial:
-    """TODO: add docstring."""
+    """Manages tutorial pages and navigation."""
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize tutorial with pages."""
         # initialize attributes created later to avoid W0201
         self.target_page = 0
         # Use module-level `gettext` bound at import time

@@ -3,14 +3,13 @@
 import json
 import math
 import os
-
 import pygame
 try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
-    def gettext(k):
+    def gettext(key):
         """Fallback translation function returning the key when unavailable."""
-        return k
+        return key
 
 
 class ShipManager:

@@ -6,7 +6,7 @@ class SessionStats:
     """Track statistics for the current game session."""
 
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize session statistics with default values."""
         # Initialize fields to avoid attributes being created outside
         # __init__ (addresses W0201 from pylint).
         self.game_start_time = 0

@@ -7,9 +7,9 @@ from modul.constants import (MENU_BACKGROUND_ALPHA, MENU_TITLE_COLOR,
 try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
-    def gettext(k):
+    def gettext(key):
         """Fallback gettext used in tests when i18n is not available."""
-        return k
+        return key
 
 try:
     from modul import input_utils
@@ -27,7 +27,7 @@ class StatsDashboard:
     """Display detailed session statistics with visual elements."""
 
     def __init__(self, session_stats):
-        """TODO: add docstring."""
+        """Initialize the stats dashboard with session stats."""
         self.session_stats = session_stats
         self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
         self.section_font = pygame.font.Font(None, 40)
@@ -89,7 +89,7 @@ class StatsDashboard:
         ]
 
         for label, value in game_stats:
-            self._draw_stat_line(screen, label, value, left_x, y_pos)
+            self._draw_stat_line(screen, label, value, y_pos)
             y_pos += 35
 
         # Right column - Combat Statistics
@@ -108,7 +108,7 @@ class StatsDashboard:
         ]
 
         for label, value in combat_stats:
-            self._draw_stat_line(screen, label, value, right_x, y_pos)
+            self._draw_stat_line(screen, label, value, y_pos)
             y_pos += 35
 
         # Accuracy and efficiency bars
@@ -135,8 +135,16 @@ class StatsDashboard:
         section_rect = section_surf.get_rect(center=(x, y))
         screen.blit(section_surf, section_rect)
 
-    def _draw_stat_line(self, screen, label, value, x, y):
+    def _draw_stat_line(self, screen, label, value, y):
         """Draw a single stat line."""
+        # Determine which column to use based on y position
+        if y < 400:
+            # Left column
+            x = SCREEN_WIDTH / 4
+        else:
+            # Right column
+            x = SCREEN_WIDTH * 3 / 4
+
         label_surf = self.text_font.render(f"{label}:", True, (200, 200, 200))
         label_rect = label_surf.get_rect(midright=(x - 20, y))
         screen.blit(label_surf, label_rect)
@@ -147,7 +155,7 @@ class StatsDashboard:
 
     def _draw_progress_bars(self, screen, stats, y_pos):
         """Draw visual progress bars for key metrics."""
-        
+
         bar_width = 400
         bar_height = 30
         center_x = SCREEN_WIDTH / 2

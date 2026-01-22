@@ -15,7 +15,7 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - optional runtim
 
 
 def load_locale(lang_code: str):
-    """TODO: add docstring."""
+    """Load and return the locale dictionary for the given language code."""
     if lang_code in _locales_cache:
         return _locales_cache[lang_code]
 
@@ -34,7 +34,7 @@ def load_locale(lang_code: str):
 
 
 def t(key: str, lang_code: str = "en"):
-    """TODO: add docstring."""
+    """Return the localized string for the given key and language code."""
     locale = load_locale(lang_code)
     return locale.get(key, key)
 

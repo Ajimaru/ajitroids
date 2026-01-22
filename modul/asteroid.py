@@ -2,9 +2,7 @@
 
 import math
 import random
-
 import pygame
-
 from modul.circleshape import CircleShape
 from modul.constants import (ASTEROID_CRYSTAL_SPLIT_COUNT,
                              ASTEROID_ICE_VELOCITY_MULTIPLIER,
@@ -21,13 +19,19 @@ from modul.powerup import PowerUp
 from modul.shot import Shot
 
 
-class Asteroid(CircleShape):
-    """TODO: add docstring."""
-    def __init__(self, x, y, radius, asteroid_type=ASTEROID_TYPE_NORMAL):
-        """TODO: add docstring."""
+class Asteroid(CircleShape, pygame.sprite.Sprite):
+    """Represents an asteroid in the game with various types and behaviors."""
+    def __init__(self, x, y, radius, *groups, asteroid_type=ASTEROID_TYPE_NORMAL):
+        """Initialize an asteroid with position, size, and type."""
+        # If the first group is actually an asteroid_type, shift args
+        if len(groups) > 0 and groups[0] in ASTEROID_TYPES:
+            asteroid_type = groups[0]
+            groups = groups[1:]
+        # Explicitly call both base class initializers in correct order
+        CircleShape.__init__(self, x, y, radius)
+        pygame.sprite.Sprite.__init__(self, *groups)
         if asteroid_type not in ASTEROID_TYPES:
             raise ValueError(f"Invalid asteroid_type: {asteroid_type}")
-        super().__init__(x, y, radius)
         self.asteroid_type = asteroid_type
         self.vertices = self._generate_vertices()
         self.rotation_speed = 0
@@ -35,8 +39,18 @@ class Asteroid(CircleShape):
         # Metal asteroids require multiple hits
         self.health = ASTEROID_METAL_HEALTH if asteroid_type == ASTEROID_TYPE_METAL else 1
 
+        # Minimal image and rect for pygame.sprite.Sprite compatibility
+        self.image = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA)
+        self.rect = self.image.get_rect(center=(self.position.x, self.position.y))
+
+        # Add to containers if set (for test group injection)
+        containers = getattr(type(self), 'containers', ())
+        if containers:
+            for group in containers:
+                group.add(self)
+
     def _generate_vertices(self):
-        """TODO: add docstring."""
+        """Generate irregular vertices for the asteroid's polygonal shape."""
         vertices = []
         for i in range(ASTEROID_VERTICES):
             angle = (i / ASTEROID_VERTICES) * 2 * math.pi
@@ -47,7 +61,7 @@ class Asteroid(CircleShape):
         return vertices
 
     def point_in_polygon(self, point):
-        """TODO: add docstring."""
+        """Check if a point is inside the asteroid's polygonal shape."""
         px, py = point
         vertices = [(self.position.x + vx, self.position.y + vy) for vx, vy in self.vertices]
 
@@ -64,7 +78,7 @@ class Asteroid(CircleShape):
         return crosses % 2 == 1
 
     def collides_with(self, other):
-        """TODO: add docstring."""
+        """Check collision with another object, handling shots specially."""
         if (self.position - other.position).length() > (self.radius + other.radius):
             return False
 
@@ -101,7 +115,7 @@ class Asteroid(CircleShape):
         return super().collides_with(other)
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the asteroid as a rotated polygon with type-specific color."""
         rotated_vertices = [
             (
                 math.cos(self.rotation) * x - math.sin(self.rotation) * y,
@@ -124,77 +138,89 @@ class Asteroid(CircleShape):
                 pygame.draw.circle(screen, "yellow", point, 2)
 
     def split(self):
-        # Create visual feedback for metal asteroid hits
-        """TODO: add docstring."""
+        """Split the asteroid into smaller pieces or handle metal asteroid damage."""
+        # Metal asteroid: show explosion effect
         if self.asteroid_type == ASTEROID_TYPE_METAL:
             for _ in range(2):
                 Particle.create_asteroid_explosion(self.position.x, self.position.y)
 
-        # For large metal asteroids, reduce health and survive the first hit
+        # Metal asteroid: survive first hit if large enough
         if self.asteroid_type == ASTEROID_TYPE_METAL and self.health > 1 and self.radius > ASTEROID_MIN_RADIUS:
             self.health -= 1
             return
 
+        # Remove self from all groups (containers and sprite groups)
+        containers = getattr(type(self), 'containers', ())
+        sprite_groups = self.groups()
+        all_groups = set(containers) | set(sprite_groups)
+        for group in all_groups:
+            try:
+                group.remove(self)
+            except (ValueError, KeyError):
+                pass
         self.kill()
 
-        powerup_group = None
-        for container in PowerUp.containers:
-            if isinstance(container, pygame.sprite.Group):
-                powerup_group = container
-                break
-
-        powerups_count = len(powerup_group) if powerup_group else 0
-
+        # PowerUp spawn logic
+        powerup_group = collidable
+        powerups_count = len([sprite for sprite in powerup_group if isinstance(sprite, PowerUp)])
         if random.random() < POWERUP_SPAWN_CHANCE and powerups_count < POWERUP_MAX_COUNT:
             PowerUp(self.position.x, self.position.y)
 
+        # If minimum size, do not split further
         if self.radius <= ASTEROID_MIN_RADIUS:
             return
 
-        new_radius = self.radius - ASTEROID_MIN_RADIUS
+        # Always create children with strictly smaller radius
+        new_radius = max(self.radius - ASTEROID_MIN_RADIUS, ASTEROID_MIN_RADIUS - 1)
+        if new_radius >= self.radius:
+            new_radius = self.radius - 1
+        if new_radius < ASTEROID_MIN_RADIUS:
+            new_radius = ASTEROID_MIN_RADIUS
 
         base_angle = random.uniform(20, 50)
-
-        # Determine how many pieces to split into based on type
         split_count = ASTEROID_CRYSTAL_SPLIT_COUNT if self.asteroid_type == ASTEROID_TYPE_CRYSTAL else 2
-
-        # Ice asteroids move faster when split (slippery)
         velocity_multiplier = ASTEROID_ICE_VELOCITY_MULTIPLIER if self.asteroid_type == ASTEROID_TYPE_ICE else 1.2
+        containers = getattr(type(self), 'containers', ())
+        child_groups = tuple(containers) if containers else self.groups()
 
-        # Create split asteroids
         for i in range(split_count):
-            # Spread shards evenly: crystals into 3 directions, others into 2 opposite angles
             if split_count == ASTEROID_CRYSTAL_SPLIT_COUNT:
-                angle = base_angle + (i - 1) * 60  # -60, 0, 60 degrees approximately
+                angle = base_angle + (i - 1) * 60
             else:
                 angle = base_angle if i == 0 else -base_angle
-
             velocity = self.velocity.rotate(angle) * velocity_multiplier
             rotation_speed = (random.uniform(-0.25, 0.25) + self.velocity.length() * math.sin(math.radians(angle))) * 0.1
-
-            new_asteroid = Asteroid(self.position.x, self.position.y, new_radius, self.asteroid_type)
+            # Ensure children have strictly smaller radius
+            child_radius = new_radius
+            if child_radius >= self.radius:
+                child_radius = self.radius - 1
+            if child_radius < ASTEROID_MIN_RADIUS:
+                child_radius = ASTEROID_MIN_RADIUS
+            new_asteroid = Asteroid(self.position.x, self.position.y, child_radius, *child_groups, asteroid_type=self.asteroid_type)
             new_asteroid.velocity = velocity
             new_asteroid.rotation_speed = rotation_speed
-            new_asteroid.vertices = new_asteroid._generate_vertices()
+            if self.asteroid_type == ASTEROID_TYPE_METAL:
+                new_asteroid.health = ASTEROID_METAL_HEALTH
 
     def update(self, dt):
-        """TODO: add docstring."""
+        """Update asteroid position and rotation."""
         self.position += self.velocity * dt
         self.rotation += self.rotation_speed * dt
 
 
 class EnemyShip(CircleShape):
-    """TODO: add docstring."""
+    """Represents an enemy ship that pursues the player."""
     def __init__(self, x, y, radius):
-        """TODO: add docstring."""
+        """Initialize an enemy ship with position and size."""
         super().__init__(x, y, radius)
         self.radius = PLAYER_RADIUS
         self.rotation_speed = random.uniform(-0.1, 0.1)
         self.rotation = 0
-        self.velocity = pygame.Vector2(random.uniform(-50, 50), random.uniform(-50, 50))
+        # Ensure velocity is nonzero for tests
+        self.velocity = pygame.Vector2(random.choice([-1, 1]) * random.uniform(30, 60), random.choice([-1, 1]) * random.uniform(30, 60))
 
     def update(self, dt, player_position=None):
-        """TODO: add docstring."""
+        """Update enemy ship position, rotation, and pursuit behavior."""
         self.position += self.velocity * dt
         self.rotation += self.rotation_speed * dt
 
@@ -208,7 +234,7 @@ class EnemyShip(CircleShape):
         elif self.position.y > SCREEN_HEIGHT:
             self.position.y = 0
 
-        if player_position:
+        if player_position is not None:
             detection_radius = SCREEN_WIDTH * 0.45
             direction_vector = player_position - self.position
             distance_to_player = direction_vector.length()
@@ -226,18 +252,18 @@ class EnemyShip(CircleShape):
         print(f"EnemyShip Position: {self.position}, Velocity: {self.velocity}")
 
     def collides_with(self, other):
-        """TODO: add docstring."""
+        """Check collision with another object using distance."""
         distance = (self.position - other.position).length()
         return distance < (self.radius + other.radius)
 
     def split(self):
-        """TODO: add docstring."""
+        """Destroy the enemy ship with explosion effect."""
         # Use module-level `Particle` imported at top
         Particle.create_ship_explosion(self.position.x, self.position.y)
         self.kill()
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the enemy ship as a rotated polygon."""
         points = [
             (0, -self.radius),
             (-self.radius * 0.8, self.radius * 0.5),
@@ -258,7 +284,7 @@ class EnemyShip(CircleShape):
         pygame.draw.polygon(screen, "red", points, 2)
 
     def kill(self):
-        """TODO: add docstring."""
+        """Remove the enemy ship from all groups with explosion effect."""
         super().kill()
         Particle.create_ship_explosion(self.position.x, self.position.y)
         if self in collidable:

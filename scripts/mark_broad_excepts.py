@@ -11,6 +11,14 @@ import logging
 
 
 def process(path: Path) -> bool:
+    """Process a Python file, marking lines with 'except Exception:' by appending a pylint disable comment.
+
+    Args:
+        path (Path): The path to the Python file to process.
+
+    Returns:
+        bool: True if the file was changed, False otherwise.
+    """
     src = path.read_text(encoding="utf-8")
     lines = src.splitlines()
     changed = False
@@ -26,12 +34,13 @@ def process(path: Path) -> bool:
 
 
 def main():
+    """Scan Python files in the 'modul' directory and mark broad exception handlers with a pylint disable comment."""
     changed_files = []
     for p in sorted(Path("modul").glob("**/*.py")):
         try:
             if process(p):
                 changed_files.append(str(p))
-        except Exception:
+        except (OSError, IOError):
             logging.exception("Failed processing %s", p)
     if changed_files:
         print("Updated files:")
