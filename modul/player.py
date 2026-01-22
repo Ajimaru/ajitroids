@@ -19,10 +19,12 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - provide minimal
     class _InputUtilsStub:  # pylint: disable=too-few-public-methods
         @staticmethod
         def is_action_pressed(name):
+            """Return False for action state in tests or missing runtime helpers."""
             return False
 
         @staticmethod
         def get_action_keycode(name):
+            """Return None for mapped keycodes when runtime helpers unavailable."""
             return None
 
     input_utils = _InputUtilsStub()
@@ -31,6 +33,7 @@ try:
     from modul.i18n import gettext  # type: ignore
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
     def gettext(k):
+        """Fallback translation function that returns the original key."""
         return k
 
 
@@ -356,7 +359,12 @@ class Player(CircleShape):
         screen.blit(title_text, (weapons_panel_x + 5, weapons_panel_y + 5))
 
         y_offset = 35
-        max_ammo = {C.WEAPON_STANDARD: -1, C.WEAPON_LASER: C.LASER_AMMO, C.WEAPON_MISSILE: C.MISSILE_AMMO, C.WEAPON_SHOTGUN: C.SHOTGUN_AMMO}
+        max_ammo = {
+            C.WEAPON_STANDARD: -1,
+            C.WEAPON_LASER: C.LASER_AMMO,
+            C.WEAPON_MISSILE: C.MISSILE_AMMO,
+            C.WEAPON_SHOTGUN: C.SHOTGUN_AMMO,
+        }
 
         for weapon_type, ammo in self.weapons.items():
             weapon_y = weapons_panel_y + y_offset
