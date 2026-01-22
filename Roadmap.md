@@ -160,7 +160,6 @@ the Ajitroids game experience.
 
 #### 11. Accessibility Features ✅
 
-<<<<<<< HEAD
 - ~~**Colorblind Modes**: Different color palettes~~
 - ~~**Difficulty Assists**: Adjustable game speed, aim assist~~
 - **Remappable Controls**: ✅ Full keyboard and gamepad customization
@@ -170,14 +169,6 @@ the Ajitroids game experience.
   non-blocking TTS manager, voice selection UI, persisted voice choice)
 - ~~**High Contrast Mode**: Better visibility options~~
 - ~~**Subtitle Options**: For all audio cues~~
-=======
-- **Colorblind Modes**: Different color palettes
-- **Difficulty Assists**: Adjustable game speed, aim assist
-- **Remappable Controls**: ✅ Full keyboard and gamepad customization (implemented: remapping UI, readable persisted key names, duplicate-binding checks, joystick capture)
-- **Text-to-Speech**: ✅ Audio feedback for menu navigation (implemented: non-blocking TTS manager, voice selection UI, persisted voice choice)
-- **High Contrast Mode**: Better visibility options
-- **Subtitle Options**: For all audio cues
->>>>>>> origin/main
 
 #### 12. User Experience ✅
 
@@ -263,7 +254,6 @@ the Ajitroids game experience.
 
 ## 🔄 Recent Progress & Next Steps
 
-<<<<<<< HEAD
 - **Completed:** Remappable controls (UI + persistence), German localization
   (modul/locales/de.json), readable persisted key names, duplicate-binding
   rejection, non-blocking TTS manager, TTS voice selection UI, and persisting
@@ -274,11 +264,6 @@ the Ajitroids game experience.
 - **Next Steps:** Run full pre-commit hooks after fixing the environment,
   address remaining flake8/pylint issues incrementally, run the test suite, and
   open a PR summarizing these accessibility/localization/TTS changes.
-=======
-- **Completed:** Remappable controls (UI + persistence), German localization (modul/locales/de.json), readable persisted key names, duplicate-binding rejection, non-blocking TTS manager, TTS voice selection UI, and persisting selected voice to settings.
-- **In Progress:** Repository-wide lint fixes and pre-commit environment resolution (some hooks failed in this workspace; commits were saved with hooks bypassed to preserve work).
-- **Next Steps:** Run full pre-commit hooks after fixing the environment, address remaining flake8/pylint issues incrementally, run the test suite, and open a PR summarizing these accessibility/localization/TTS changes.
->>>>>>> origin/main
 
 ## 🤝 Contributing
 
