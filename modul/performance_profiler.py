@@ -15,7 +15,7 @@ import pygame
 # Optional i18n helper bound at import time to avoid imports inside methods
 try:
     from modul.i18n import gettext  # type: ignore
-except Exception:  # pragma: no cover - fallback for tests
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback for tests
     def gettext(k):
         return k
 

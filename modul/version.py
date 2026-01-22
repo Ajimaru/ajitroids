@@ -15,7 +15,7 @@ from importlib import metadata
 # the top-level (C0415).
 try:
     from modul._version import __version__ as _generated_version  # type: ignore
-except Exception:  # pragma: no cover - best-effort fallback, tested at runtime
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - best-effort fallback
     _generated_version = None
 
 

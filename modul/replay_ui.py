@@ -11,13 +11,13 @@ from modul.constants import (MENU_BACKGROUND_ALPHA, MENU_ITEM_FONT_SIZE,
 from modul.replay_system import ReplayManager, ReplayPlayer
 try:
     from modul.i18n import gettext
-except Exception:  # pragma: no cover - fallback when i18n unavailable
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
     def gettext(k):
         return k
 
 try:
     from modul import input_utils
-except Exception:  # pragma: no cover - minimal stub for tests
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - minimal stub for tests
     class _InputUtilsStub:
         @staticmethod
         def get_action_keycode(name):

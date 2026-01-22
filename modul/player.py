@@ -15,7 +15,7 @@ from modul.sounds import Sounds
 # dynamic imports inside methods and to satisfy linters (C0415).
 try:
     from modul import input_utils  # type: ignore
-except Exception:  # pragma: no cover - provide minimal runtime stub
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - provide minimal runtime stub
     class _InputUtilsStub:  # pylint: disable=too-few-public-methods
         @staticmethod
         def is_action_pressed(name):
@@ -29,7 +29,7 @@ except Exception:  # pragma: no cover - provide minimal runtime stub
 
 try:
     from modul.i18n import gettext  # type: ignore
-except Exception:  # pragma: no cover - fallback when i18n unavailable
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
     def gettext(k):
         return k
 

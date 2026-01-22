@@ -7,7 +7,7 @@ import modul.constants as C
 # Ensure `MenuStarfield` is available at module level so tests can patch it
 try:
     from modul.starfield import MenuStarfield  # type: ignore
-except Exception:  # pylint: disable=broad-exception-caught
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - best-effort
     MenuStarfield = None
 
 
@@ -15,13 +15,13 @@ except Exception:  # pylint: disable=broad-exception-caught
 # linters (C0415).
 try:
     from modul.i18n import gettext  # type: ignore
-except Exception:  # pragma: no cover - fallback for tests
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback for tests
     def gettext(k):
         return k
 
 try:
     from modul import input_utils  # type: ignore
-except Exception:  # pragma: no cover - provide minimal stub for tests
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - provide minimal stub for tests
     class _InputUtilsStub:
         @staticmethod
         def get_action_keycode(name):
@@ -34,6 +34,8 @@ class Tutorial:
     """TODO: add docstring."""
     def __init__(self):
         """TODO: add docstring."""
+        # initialize attributes created later to avoid W0201
+        self.target_page = 0
         # Use module-level `gettext` bound at import time
         self.pages = [
             {

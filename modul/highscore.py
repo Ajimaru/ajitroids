@@ -9,7 +9,7 @@ import pygame
 import modul.constants as C
 try:
     from modul.i18n import gettext
-except Exception:  # pragma: no cover - fallback when i18n unavailable
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
     def gettext(k):
         return k
 
@@ -36,7 +36,7 @@ class HighscoreManager:
                     for i in range(C.HIGHSCORE_MAX_ENTRIES)
                 ]
                 self.save_highscores()
-        except Exception as e:  # pylint: disable=broad-exception-caught
+        except (OSError, json.JSONDecodeError) as e:  # fallback for file/parse errors
             print(f"Error loading highscores: {e}")
             self.highscores = [{"name": "AAA", "score": 1000 - i * 100} for i in range(C.HIGHSCORE_MAX_ENTRIES)]
 
@@ -45,7 +45,7 @@ class HighscoreManager:
         try:
             with open(C.HIGHSCORE_FILE, "w", encoding="utf-8") as f:
                 json.dump(self.highscores, f)
-        except Exception as e:  # pylint: disable=broad-exception-caught
+        except OSError as e:  # fallback for file write errors
             print(f"Error saving highscores: {e}")
 
     def is_highscore(self, score):

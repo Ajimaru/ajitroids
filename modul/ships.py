@@ -7,7 +7,7 @@ import os
 import pygame
 try:
     from modul.i18n import gettext
-except Exception:  # pragma: no cover - fallback when i18n unavailable
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
     def gettext(k):
         return k
 

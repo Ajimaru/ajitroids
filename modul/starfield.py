@@ -16,6 +16,14 @@ class Star:
         self.size = random.choice(C.STAR_SIZES)
         self.color = random.choice(C.STAR_COLORS)
         self.twinkle_timer = random.random() * 2 * math.pi
+        # Initialize current color to a valid RGB tuple so that draw() can
+        # always rely on `current_color` existing (avoid W0201 warnings).
+        try:
+            color_obj = pygame.Color(self.color)
+            self.current_color = [color_obj.r, color_obj.g, color_obj.b]
+        except (ValueError, TypeError):
+            # Fallback to white if color parsing fails
+            self.current_color = [255, 255, 255]
 
     def update(self, dt):
         """TODO: add docstring."""

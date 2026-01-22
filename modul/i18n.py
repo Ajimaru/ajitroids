@@ -10,7 +10,7 @@ _locales_cache = {}
 # to satisfy linters complaining about imports outside top-level (C0415).
 try:
     from modul import settings as settings_mod  # type: ignore
-except Exception:  # pragma: no cover - optional runtime integration
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - optional runtime integration
     settings_mod = None
 
 

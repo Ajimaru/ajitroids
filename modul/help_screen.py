@@ -7,7 +7,7 @@ from modul.constants import SCREEN_HEIGHT, SCREEN_WIDTH
 # Module-level optional runtime helpers to satisfy linters (C0415)
 try:
     from modul import input_utils  # type: ignore
-except Exception:  # pragma: no cover - provide minimal stub for tests
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - provide minimal stub for tests
     class _InputUtilsStub:
         @staticmethod
         def get_action_keycode(name):
@@ -17,7 +17,7 @@ except Exception:  # pragma: no cover - provide minimal stub for tests
 
 try:
     from modul.i18n import gettext  # type: ignore
-except Exception:  # pragma: no cover - fallback for tests
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback for tests
     def gettext(k):
         return k
 
