@@ -15,10 +15,13 @@ class CircleShape(pygame.sprite.Sprite):
         # Add to containers if set (for test group injection)
         containers = getattr(type(self), 'containers', ())
         if containers:
-            for group in containers:
-                group.add(self)
-
-    def draw(self, screen):
+        containers = getattr(type(self), 'containers', ())
+        if containers:
+            if isinstance(containers, pygame.sprite.AbstractGroup):
+                containers.add(self)
+            else:
+                for group in containers:
+                    group.add(self)
         """Draw the circle shape (to be implemented by subclasses)."""
 
     def update(self, dt):
