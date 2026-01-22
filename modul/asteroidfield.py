@@ -1,3 +1,5 @@
+"""AsteroidField generation and management."""
+
 import pygame
 import random
 from modul.asteroid import Asteroid

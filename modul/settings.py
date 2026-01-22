@@ -1,3 +1,5 @@
+"""Manage user settings persistence and defaults."""
+
 import json
 import os
 

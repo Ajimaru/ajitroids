@@ -1,3 +1,5 @@
+"""Player class, input handling and player-related mechanics."""
+
 import pygame
 import modul.constants as C
 from modul.circleshape import CircleShape

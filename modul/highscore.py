@@ -1,3 +1,5 @@
+"""Highscore persistence and UI helpers."""
+
 import json
 import os
 import pygame

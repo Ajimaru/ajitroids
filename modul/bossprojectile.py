@@ -1,3 +1,5 @@
+"""Projectile class used by Boss entities."""
+
 import pygame
 import math
 import modul.constants as C

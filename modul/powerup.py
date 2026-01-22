@@ -1,3 +1,5 @@
+"""Power-up entities and their behaviors."""
+
 import pygame
 import random
 import math

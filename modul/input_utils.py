@@ -1,3 +1,5 @@
+"""Utilities for mapping actions to input bindings and keycodes."""
+
 import pygame
 from typing import Optional
 from modul import settings as settings_mod

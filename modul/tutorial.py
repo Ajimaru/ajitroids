@@ -1,3 +1,5 @@
+"""Tutorial screens and tutorial page management."""
+
 import pygame
 import math
 import modul.constants as C

@@ -1,3 +1,5 @@
+"""Starfield background rendering utilities."""
+
 import random
 import pygame
 import math

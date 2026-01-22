@@ -1,3 +1,5 @@
+"""Core game constants used throughout the project."""
+
 import random
 
 SCREEN_WIDTH = 1280

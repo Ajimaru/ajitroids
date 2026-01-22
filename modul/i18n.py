@@ -1,3 +1,5 @@
+"""Simple i18n helper for loading localized strings from JSON files."""
+
 import json
 import os
 

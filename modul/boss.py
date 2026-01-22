@@ -1,3 +1,5 @@
+"""Boss enemy behavior, spawning and attack logic."""
+
 import pygame
 import math
 import random

@@ -1,3 +1,5 @@
+"""Ship definitions, persistence and rendering helpers."""
+
 import pygame
 import json
 import os

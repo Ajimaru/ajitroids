@@ -1,3 +1,5 @@
+"""Simple circle-shaped sprite helper."""
+
 import pygame
 
 
