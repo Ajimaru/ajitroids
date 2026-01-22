@@ -4,25 +4,8 @@ import time
 
 import pygame
 
-from modul.constants import \
-    ASTEROID_COUNT_PER_LEVEL as ASTEROID_COUNT_PER_LEVEL
-from modul.constants import \
-    DIFFICULTY_EASY_ASTEROIDS as DIFFICULTY_EASY_ASTEROIDS
-from modul.constants import \
-    DIFFICULTY_EASY_INTERVAL as DIFFICULTY_EASY_INTERVAL
-from modul.constants import \
-    DIFFICULTY_HARD_ASTEROIDS as DIFFICULTY_HARD_ASTEROIDS
-from modul.constants import \
-    DIFFICULTY_HARD_INTERVAL as DIFFICULTY_HARD_INTERVAL
-from modul.constants import \
-    DIFFICULTY_NORMAL_ASTEROIDS as DIFFICULTY_NORMAL_ASTEROIDS
-from modul.constants import \
-    DIFFICULTY_NORMAL_INTERVAL as DIFFICULTY_NORMAL_INTERVAL
-from modul.constants import SCREEN_WIDTH as SCREEN_WIDTH
-from modul.constants import \
-    SPAWN_INTERVAL_REDUCTION as SPAWN_INTERVAL_REDUCTION
-from modul.constants import \
-    generate_default_highscores as generate_default_highscores
+# Only `SCREEN_WIDTH` is used in this module; remove other unused imports/aliases.
+from modul.constants import SCREEN_WIDTH
 
 try:
     from modul.i18n import gettext

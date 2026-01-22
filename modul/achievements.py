@@ -48,7 +48,9 @@ class AchievementSystem:
         for name, description in standard_achievements:
             achievement = Achievement(name, description)
             self.achievements.append(achievement)
-        print(f"Standard achievements initialized in memory: {len(self.achievements)} entries")
+        print(
+            f"Standard achievements initialized in memory: {len(self.achievements)} entries"
+        )
 
     def load_unlocked_achievements(self):
         """TODO: add docstring."""
@@ -61,8 +63,10 @@ class AchievementSystem:
                             if achievement.name == item["name"]:
                                 achievement.unlocked = True
                                 break
+                unlocked_count = len([a for a in self.achievements if a.unlocked])
+                total_count = len(self.achievements)
                 print(
-                    f"Unlocked achievements loaded: {len([a for a in self.achievements if a.unlocked])} of {len(self.achievements)}"
+                    f"Unlocked achievements loaded: {unlocked_count} of {total_count}"
                 )
         except FileNotFoundError:
             print("Achievements file not found - all achievements are locked")
