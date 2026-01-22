@@ -1,3 +1,7 @@
+[TYPECHECK]
+# Treat pygame as generated so Pylint doesn't raise spurious no-member errors
+generated-members=pygame.*
+
 [FORMAT]
 max-line-length=127
 
