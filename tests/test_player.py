@@ -1,28 +1,17 @@
 """Tests for Player class behavior and mechanics."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-import pytest
 import pygame
-import math
+import pytest
+
+from modul.constants import (INVINCIBILITY_TIME, LASER_AMMO, MISSILE_AMMO,
+                             PLAYER_RADIUS, RAPID_FIRE_COOLDOWN,
+                             RAPID_FIRE_DURATION, SCREEN_HEIGHT, SCREEN_WIDTH,
+                             SHIELD_DURATION, SHOTGUN_AMMO,
+                             TRIPLE_SHOT_DURATION, WEAPON_LASER,
+                             WEAPON_MISSILE, WEAPON_SHOTGUN, WEAPON_STANDARD)
 from modul.player import Player
-from modul.constants import (
-    INVINCIBILITY_TIME,
-    LASER_AMMO,
-    MISSILE_AMMO,
-    PLAYER_RADIUS,
-    RAPID_FIRE_COOLDOWN,
-    RAPID_FIRE_DURATION,
-    SCREEN_HEIGHT,
-    SCREEN_WIDTH,
-    SHIELD_DURATION,
-    SHOTGUN_AMMO,
-    TRIPLE_SHOT_DURATION,
-    WEAPON_LASER,
-    WEAPON_MISSILE,
-    WEAPON_SHOTGUN,
-    WEAPON_STANDARD,
-)
 
 
 @pytest.fixture

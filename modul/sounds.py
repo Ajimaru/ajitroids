@@ -63,26 +63,26 @@ class Sounds:
         self.current_theme = SoundTheme.DEFAULT
         try:
             self.shoot = pygame.mixer.Sound(asset_path("shoot.wav"))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Shoot sound could not be loaded: {e}")
         try:
             self.explosion = pygame.mixer.Sound(asset_path("explosion.wav"))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Explosion sound could not be loaded: {e}")
         try:
             self.player_death = pygame.mixer.Sound(asset_path("player_hit.wav"))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Player-Death sound could not be loaded: {e}")
         try:
             self.menu_move = pygame.mixer.Sound(asset_path("menu_select.wav"))
             self.menu_select = pygame.mixer.Sound(asset_path("menu_confirm.wav"))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             self.menu_move = None
             self.menu_select = None
             print(f"Menu sounds could not be loaded: {e}")
         try:
             pygame.mixer.music.load(asset_path("background.mp3"))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error loading background music: {e}")
             print(f"Current directory: {os.getcwd()}")
             print(f"File exists: {os.path.exists(asset_path('background.mp3'))}")
@@ -92,47 +92,47 @@ class Sounds:
     def load_new_sounds(self):
         try:
             self.laser_shoot = pygame.mixer.Sound(asset_path("laser_shoot.wav"))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             self.laser_shoot = None
             print(f"Laser shoot sound could not be loaded: {e}")
         try:
             self.rocket_shoot = pygame.mixer.Sound(asset_path("rocket_shoot.wav"))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             self.rocket_shoot = None
             print(f"Rocket shoot sound could not be loaded: {e}")
         try:
             self.boss_spawn = pygame.mixer.Sound(asset_path("boss_spawn.wav"))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             self.boss_spawn = None
             print(f"Boss spawn sound could not be loaded: {e}")
         try:
             self.boss_death = pygame.mixer.Sound(asset_path("boss_death.wav"))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             self.boss_death = None
             print(f"Boss death sound could not be loaded: {e}")
         try:
             self.powerup = pygame.mixer.Sound(asset_path("powerup.wav"))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             self.powerup = None
             print(f"PowerUp sound could not be loaded: {e}")
         try:
             self.shield_activate = pygame.mixer.Sound(asset_path("shield_hit.wav"))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             self.shield_activate = None
             print(f"Shield-Activate sound could not be loaded: {e}")
         try:
             self.level_up = pygame.mixer.Sound(asset_path("level_up.wav"))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             self.level_up = None
             print(f"Level-Up sound could not be loaded: {e}")
         try:
             self.game_over = pygame.mixer.Sound(asset_path("game_over.wav"))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             self.game_over = None
             print(f"Game-Over sound could not be loaded: {e}")
         try:
             self.player_hit = pygame.mixer.Sound(asset_path("player_hit.wav"))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             self.player_hit = None
             print(f"Player-Hit sound could not be loaded: {e}")
 
@@ -220,7 +220,7 @@ class Sounds:
                 pygame.mixer.music.stop()
                 pygame.mixer.music.set_volume(0.0)
                 print("toggle_music: Music stopped and volume set to 0")
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error toggling music: {e}")
 
     def toggle_sound(self, enabled):
@@ -251,7 +251,7 @@ class Sounds:
                 pygame.mixer.music.set_volume(0.6)
                 pygame.mixer.music.play(-1)
                 print("Boss music started")
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Boss music could not be loaded: {e}")
 
     def play_hit(self):
@@ -354,7 +354,7 @@ class Sounds:
                     setattr(self, attr_name, sound)
                     # Apply current volume
                     sound.set_volume(self.master_volume)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 print(f"Could not load {sound_name} for theme: {e}")
                 setattr(self, attr_name, None)
 

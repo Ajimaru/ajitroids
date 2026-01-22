@@ -52,7 +52,7 @@ class StatsDashboard:
         # Title
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 
@@ -138,7 +138,7 @@ class StatsDashboard:
         """Draw visual progress bars for key metrics."""
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
         bar_width = 400

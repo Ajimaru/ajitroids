@@ -115,7 +115,7 @@ class DynamicMusicSystem:
 
             print(f"Music transitioned to {new_intensity.value}")
             return True
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error transitioning music: {e}")
             return False
 
@@ -178,7 +178,7 @@ class VoiceAnnouncement:
                 self.tts_engine.setProperty('rate', 180)  # Speed of speech
                 self.tts_engine.setProperty('volume', 0.9)  # Volume (0.0 to 1.0)
                 self.tts_initialized = True
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 print(f"Failed to initialize TTS engine: {e}")
                 self.tts_initialized = False
 
@@ -215,7 +215,7 @@ class VoiceAnnouncement:
             self.announcement_timer = 2.0  # Display text for 2 seconds
             self.last_announcement_time = time.time()
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error playing announcement: {e}")
 
     def update(self, dt: float):
@@ -261,7 +261,7 @@ class VoiceAnnouncement:
             self.tts_engine.save_to_file(text, output_path)
             self.tts_engine.runAndWait()
             return os.path.exists(output_path)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error generating voice file: {e}")
             return False
 
@@ -303,7 +303,7 @@ class VoiceAnnouncement:
                     self.announcement_sounds[event_type] = pygame.mixer.Sound(sound_path)
                 else:
                     self.announcement_sounds[event_type] = None
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 print(f"Error loading announcement sound {event_type}: {e}")
                 self.announcement_sounds[event_type] = None
 

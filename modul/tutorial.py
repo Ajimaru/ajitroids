@@ -7,7 +7,7 @@ import modul.constants as C
 # Ensure `MenuStarfield` is available at module level so tests can patch it
 try:
     from modul.starfield import MenuStarfield  # type: ignore
-except Exception:
+except Exception:  # pylint: disable=broad-exception-caught
     MenuStarfield = None
 
 
@@ -15,7 +15,7 @@ class Tutorial:
     def __init__(self):
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 
@@ -143,7 +143,7 @@ class Tutorial:
             if MenuStarfield is None:
                 raise ImportError("No MenuStarfield available")
             self.starfield = MenuStarfield(num_stars=80)
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             self.starfield = None
             print("Could not import starfield")
 
@@ -258,7 +258,7 @@ class Tutorial:
         try:
             from modul.i18n import gettext
             nav_text = gettext("tutorial_nav")
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             nav_text = "LEFT / RIGHT to navigate or SPACE to go Back"
         nav_surface = self.font_navigation.render(nav_text, True, (100, 100, 100))
         nav_rect = nav_surface.get_rect(center=(C.SCREEN_WIDTH / 2, nav_y + 30))

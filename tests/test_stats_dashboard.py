@@ -2,8 +2,8 @@
 
 from unittest.mock import MagicMock
 
-import pytest
 import pygame
+import pytest
 
 from modul.session_stats import SessionStats
 from modul.stats_dashboard import StatsDashboard

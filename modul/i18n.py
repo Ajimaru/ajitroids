@@ -40,7 +40,7 @@ def gettext(key: str):
         lang = getattr(settings_mod, "current_settings", None)
         if lang and getattr(lang, "language", None):
             return t(key, lang.language)
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
         # If settings cannot be inspected, fall back to English
         pass
     return t(key, "en")

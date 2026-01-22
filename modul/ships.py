@@ -67,7 +67,7 @@ class ShipManager:
                 with open(self.ships_file, "r") as f:
                     data = json.load(f)
                     return data.get("unlocked_ships", [])
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 print(f"Error loading ships file {self.ships_file}: {e}")
                 return []
         return []
@@ -77,7 +77,7 @@ class ShipManager:
         try:
             with open(self.ships_file, "w") as f:
                 json.dump(data, f, indent=2)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error saving ships: {e}")
 
     def unlock_ship(self, ship_id):
@@ -267,7 +267,7 @@ class ShipRenderer:
     def draw_question_mark(screen, x, y, scale, color):
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 

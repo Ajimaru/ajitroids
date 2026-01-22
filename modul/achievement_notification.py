@@ -92,7 +92,7 @@ class AchievementNotification:
         header_color = (255, 215, 0, alpha)
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 

@@ -28,7 +28,7 @@ class HighscoreManager:
                     for i in range(C.HIGHSCORE_MAX_ENTRIES)
                 ]
                 self.save_highscores()
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error loading highscores: {e}")
             self.highscores = [{"name": "AAA", "score": 1000 - i * 100} for i in range(C.HIGHSCORE_MAX_ENTRIES)]
 
@@ -36,7 +36,7 @@ class HighscoreManager:
         try:
             with open(C.HIGHSCORE_FILE, "w") as f:
                 json.dump(self.highscores, f)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error saving highscores: {e}")
 
     def is_highscore(self, score):
@@ -105,7 +105,7 @@ class HighscoreInput:
 
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 
@@ -206,7 +206,7 @@ class HighscoreDisplay:
 
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 

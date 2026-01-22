@@ -151,7 +151,7 @@ class Menu:
         if "sounds" in globals() or hasattr(self, "sounds"):
             try:
                 sounds.play_menu_move()
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 pass
 
     def _select_previous(self):
@@ -161,7 +161,7 @@ class Menu:
         if "sounds" in globals() or hasattr(self, "sounds"):
             try:
                 sounds.play_menu_move()
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 pass
 
     def draw(self, screen):
@@ -185,7 +185,7 @@ class MainMenu(Menu):
     def __init__(self):
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 
@@ -201,7 +201,7 @@ class MainMenu(Menu):
         try:
             from modul.i18n import t
             options_label = t("options", "de")
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             options_label = gettext("options")
         self.add_item(options_label, "options")
         self.add_item(gettext("credits"), "credits")
@@ -221,12 +221,12 @@ class PauseMenu(Menu):
         try:
             from modul.i18n import gettext
             title = gettext("pause").upper()
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             title = "PAUSE"
         super().__init__(title)
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
         self.add_item(gettext("resume"), "continue")
@@ -240,7 +240,7 @@ class PauseMenu(Menu):
         shortcuts_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE * 0.8))
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 
@@ -296,7 +296,7 @@ class TutorialScreen:
 
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 
@@ -334,7 +334,7 @@ class OptionsMenu(Menu):
         self.sounds = sounds
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 
@@ -353,7 +353,7 @@ class OptionsMenu(Menu):
         if "show_tts_in_options" in getattr(settings, "__dict__", {}):
             try:
                 tts_toggle_state = gettext('on') if getattr(settings, 'show_tts_in_options', False) else gettext('off')
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 tts_toggle_state = "ON" if getattr(settings, 'show_tts_in_options', False) else "OFF"
             self.add_item(f"{gettext('show_tts_in_options')}: {tts_toggle_state}", "toggle_show_tts")
 
@@ -364,7 +364,7 @@ class OptionsMenu(Menu):
     def handle_action(self, action, sounds):
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
         if action == "toggle_music":
@@ -410,7 +410,7 @@ class OptionsMenu(Menu):
                 else:
                     pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
                     print("Windowed mode activated")
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 print(f"Error switching screen mode: {e}")
                 self.settings.fullscreen = not self.settings.fullscreen
                 self.settings.save()
@@ -424,7 +424,7 @@ class OptionsMenu(Menu):
             self.settings.save()
             try:
                 state = gettext('on') if self.settings.show_tts_in_options else gettext('off')
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 state = "ON" if self.settings.show_tts_in_options else "OFF"
             # Update the toggle item's text
             for i, it in enumerate(self.items):
@@ -437,7 +437,7 @@ class OptionsMenu(Menu):
                 from modul.tts import get_tts_manager
                 mgr = get_tts_manager()
                 has_voices = bool(mgr and getattr(mgr, 'engine', None) and (mgr.engine.getProperty('voices') or []))
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 has_voices = False
 
             # Find existing tts item
@@ -489,7 +489,7 @@ class OptionsMenu(Menu):
                             self.sounds.set_music_volume(self.settings.music_volume)
                         try:
                             from modul.i18n import gettext
-                        except Exception:
+                        except Exception:  # pylint: disable=broad-exception-caught
                             def gettext(k):
                                 return k
                         self.items[self.selected_index].text = gettext('music_volume_format').format(percent=int(self.settings.music_volume * 100))
@@ -500,7 +500,7 @@ class OptionsMenu(Menu):
                             self.sounds.set_effects_volume(self.settings.sound_volume)
                         try:
                             from modul.i18n import gettext
-                        except Exception:
+                        except Exception:  # pylint: disable=broad-exception-caught
                             def gettext(k):
                                 return k
                         self.items[self.selected_index].text = gettext('sound_volume_format').format(percent=int(self.settings.sound_volume * 100))
@@ -512,7 +512,7 @@ class OptionsMenu(Menu):
                             self.sounds.set_music_volume(self.settings.music_volume)
                         try:
                             from modul.i18n import gettext
-                        except Exception:
+                        except Exception:  # pylint: disable=broad-exception-caught
                             def gettext(k):
                                 return k
                         self.items[self.selected_index].text = gettext('music_volume_format').format(percent=int(self.settings.music_volume * 100))
@@ -523,7 +523,7 @@ class OptionsMenu(Menu):
                             self.sounds.set_effects_volume(self.settings.sound_volume)
                         try:
                             from modul.i18n import gettext
-                        except Exception:
+                        except Exception:  # pylint: disable=broad-exception-caught
                             def gettext(k):
                                 return k
                         self.items[self.selected_index].text = gettext('sound_volume_format').format(percent=int(self.settings.sound_volume * 100))
@@ -599,7 +599,7 @@ class ControlsMenu(Menu):
     def __init__(self, settings):
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
         super().__init__(gettext("controls").upper())
@@ -607,7 +607,7 @@ class ControlsMenu(Menu):
         # Define action order for display
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 
@@ -626,7 +626,7 @@ class ControlsMenu(Menu):
             self.add_item(display, action_key)
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
         self.add_item(gettext("back"), "back")
@@ -649,7 +649,7 @@ class ControlsMenu(Menu):
                     self.capture_action = None
                     try:
                         from modul.i18n import gettext
-                    except Exception:
+                    except Exception:  # pylint: disable=broad-exception-caught
                         def gettext(k):
                             return k
                     self.message = gettext("binding_cancelled")
@@ -666,7 +666,7 @@ class ControlsMenu(Menu):
                         joy_id = event.joy
                         btn = event.button
                         new_name = f"JOY{joy_id}_BUTTON{btn}"
-                    except Exception:
+                    except Exception:  # pylint: disable=broad-exception-caught
                         new_name = None
 
                 # Joystick axis (capture strong deflections)
@@ -678,7 +678,7 @@ class ControlsMenu(Menu):
                             axis = event.axis
                             dir_s = "POS" if val > 0 else "NEG"
                             new_name = f"JOY{joy_id}_AXIS{axis}_{dir_s}"
-                    except Exception:
+                    except Exception:  # pylint: disable=broad-exception-caught
                         new_name = None
 
                 # Hat (D-pad)
@@ -698,7 +698,7 @@ class ControlsMenu(Menu):
                             elif x == -1:
                                 dirs.append("LEFT")
                             new_name = f"JOY{joy_id}_HAT{hat}_{'_'.join(dirs)}"
-                    except Exception:
+                    except Exception:  # pylint: disable=broad-exception-caught
                         new_name = None
 
                 if not new_name:
@@ -709,7 +709,7 @@ class ControlsMenu(Menu):
                     if self.settings.controls.get(a_key) == new_name:
                         try:
                             from modul.i18n import gettext
-                        except Exception:
+                        except Exception:  # pylint: disable=broad-exception-caught
                             def gettext(k):
                                 return k
                         self.message = gettext("key_already_assigned").format(key=new_name)
@@ -722,7 +722,7 @@ class ControlsMenu(Menu):
                 self.capture_action = None
                 try:
                     from modul.i18n import gettext
-                except Exception:
+                except Exception:  # pylint: disable=broad-exception-caught
                     def gettext(k):
                         return k
                 self.message = gettext("bound_key").format(key=new_name)
@@ -741,7 +741,7 @@ class ControlsMenu(Menu):
                     self.capture_action = action_key
                     try:
                         from modul.i18n import gettext
-                    except Exception:
+                    except Exception:  # pylint: disable=broad-exception-caught
                         def gettext(k):
                             return k
                     # show the user-friendly action label if available
@@ -763,7 +763,7 @@ class LanguageMenu(Menu):
     def __init__(self, settings):
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
         super().__init__(gettext("language").upper())
@@ -840,7 +840,7 @@ class GameOverScreen:
 
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
         title_surf = self.title_font.render(gettext("game_over").upper(), True, pygame.Color("red"))
@@ -867,7 +867,7 @@ class DifficultyMenu(Menu):
     def __init__(self):
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
         super().__init__(gettext("difficulty").upper())
@@ -884,7 +884,7 @@ class VoiceAnnouncementsMenu:
         self.settings = settings
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
         self.title = gettext("voice_announcements")
@@ -914,7 +914,7 @@ class VoiceAnnouncementsMenu:
         announcements = self.settings.announcement_types
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 
@@ -1033,7 +1033,7 @@ class TTSVoiceMenu(Menu):
     def __init__(self, settings):
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 
@@ -1053,7 +1053,7 @@ class TTSVoiceMenu(Menu):
                 name = getattr(v, "name", None) or getattr(v, "id", str(v))
                 vid = getattr(v, "id", name)
                 self.add_item(name, f"tts_voice:{vid}")
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             # If enumeration fails, provide no extra choices
             pass
 
@@ -1094,16 +1094,16 @@ class TTSVoiceMenu(Menu):
                                                 code = l[:2]
                                                 self.settings.tts_voice_language = code
                                                 break
-                                        except Exception:
+                                        except Exception:  # pylint: disable=broad-exception-caught
                                             continue
                                     break
                         # Attempt to apply the voice immediately to the running manager
                         try:
                             if manager:
                                 manager.set_preferred_voice(vid, self.settings.tts_voice_language)
-                        except Exception:
+                        except Exception:  # pylint: disable=broad-exception-caught
                             pass
-                except Exception:
+                except Exception:  # pylint: disable=broad-exception-caught
                     pass
             # Persist selection
             self.settings.save()
@@ -1114,7 +1114,7 @@ class SoundTestMenu:
     def __init__(self):
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
         self.title = gettext("sound_test")
@@ -1250,7 +1250,7 @@ class SoundTestMenu:
             self.sounds.play_shoot()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("standard_shoot"))
@@ -1263,7 +1263,7 @@ class SoundTestMenu:
                 self.sounds.play_shoot()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("laser_shoot"))
@@ -1276,7 +1276,7 @@ class SoundTestMenu:
                 self.sounds.play_shoot()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("rocket_shoot"))
@@ -1289,7 +1289,7 @@ class SoundTestMenu:
                 self.sounds.play_shoot()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("shotgun_shoot"))
@@ -1302,7 +1302,7 @@ class SoundTestMenu:
                 self.sounds.play_shoot()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("triple_shoot"))
@@ -1312,7 +1312,7 @@ class SoundTestMenu:
             self.sounds.play_explosion()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("explosion"))
@@ -1322,7 +1322,7 @@ class SoundTestMenu:
             self.sounds.play_player_hit()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("player_hit"))
@@ -1332,7 +1332,7 @@ class SoundTestMenu:
             self.sounds.play_powerup()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("powerup"))
@@ -1342,7 +1342,7 @@ class SoundTestMenu:
             self.sounds.play_shield_activate()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("shield_activate"))
@@ -1355,7 +1355,7 @@ class SoundTestMenu:
                 self.sounds.play_powerup()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("weapon_pickup"))
@@ -1365,7 +1365,7 @@ class SoundTestMenu:
             self.sounds.play_boss_spawn()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("boss_spawn"))
@@ -1375,7 +1375,7 @@ class SoundTestMenu:
             self.sounds.play_boss_death()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("boss_death"))
@@ -1388,7 +1388,7 @@ class SoundTestMenu:
                 self.sounds.play_explosion()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("boss_attack"))
@@ -1398,7 +1398,7 @@ class SoundTestMenu:
             self.sounds.play_level_up()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("level_up"))
@@ -1408,7 +1408,7 @@ class SoundTestMenu:
             self.sounds.play_game_over()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("game_over"))
@@ -1418,7 +1418,7 @@ class SoundTestMenu:
             self.sounds.play_menu_move()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("menu_select"))
@@ -1428,7 +1428,7 @@ class SoundTestMenu:
             self.sounds.play_menu_select()
             try:
                 from modul.i18n import gettext
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("menu_confirm"))
@@ -1454,7 +1454,7 @@ class SoundTestMenu:
                     try:
                         sound_func()
                         time.sleep(0.8)
-                    except Exception as e:
+                    except Exception as e:  # pylint: disable=broad-exception-caught
                         print(f"Error playing sound '{name}': {e}")
 
                 self.playing_all_sounds = False
@@ -1466,7 +1466,7 @@ class SoundTestMenu:
                 try:
                     from modul.i18n import gettext as _gettext
                     self.last_played = _gettext("playing_all_sounds")
-                except Exception:
+                except Exception:  # pylint: disable=broad-exception-caught
                     self.last_played = "Playing all sounds..."
                 self.last_played_timer = 8.0
 
@@ -1494,7 +1494,7 @@ class SoundTestMenu:
 
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 

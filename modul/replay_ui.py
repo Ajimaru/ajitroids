@@ -88,7 +88,7 @@ class ReplayListMenu:
         # Title
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
 
@@ -207,7 +207,7 @@ class ReplayViewer:
         """Draw replay HUD with controls and info."""
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
         # Draw control bar at bottom

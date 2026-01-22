@@ -103,7 +103,7 @@ def is_action_pressed(action: str) -> bool:
             joy = pygame.joystick.Joystick(joy_id)
             try:
                 joy.init()
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 # Some joysticks may not initialize; treat as not pressed
                 return False
 
@@ -157,6 +157,6 @@ def is_action_pressed(action: str) -> bool:
             return bool(keys[keycode])
         except (IndexError, TypeError):
             return False
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
         # Unexpected errors in input handling should be treated as not-pressed
         return False

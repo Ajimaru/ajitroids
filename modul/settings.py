@@ -97,7 +97,7 @@ class Settings:
                 json.dump(settings_data, f)
                 print("Settings saved")
             return True
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error saving settings: {e}")
             return False
 
@@ -152,6 +152,6 @@ class Settings:
                 self.show_tts_in_options = _show
                 print("Settings loaded")
             return True
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"Error loading settings: {e}")
             return False

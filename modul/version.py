@@ -15,7 +15,7 @@ def _fallback_version() -> str:
             __version__ as generated_version  # type: ignore
 
         return generated_version
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
         return "0.0.0"
 
 

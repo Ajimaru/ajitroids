@@ -305,7 +305,7 @@ class Player(CircleShape):
         font_small = pygame.font.Font(None, 18)
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             gettext = None
 
         weapons_panel_x = C.SCREEN_WIDTH - 120

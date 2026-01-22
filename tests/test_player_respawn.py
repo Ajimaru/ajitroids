@@ -3,7 +3,6 @@
 from unittest.mock import patch
 
 import pygame
-import pytest
 
 from modul.player import Player
 

@@ -223,7 +223,7 @@ class ReplayRecorder:
                 try:
                     if hasattr(obj, "x") and hasattr(obj, "y"):
                         return {"x": float(obj.x), "y": float(obj.y)}
-                except Exception:
+                except Exception:  # pylint: disable=broad-exception-caught
                     pass
                 return str(obj)
 
@@ -241,7 +241,7 @@ class ReplayRecorder:
         except OSError as e:
             logger.error(f"Failed to save replay: {e}")
             raise
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(f"Unexpected error saving replay: {e}")
             raise
 
@@ -292,7 +292,7 @@ class ReplayPlayer:
         except KeyError as e:
             logger.error(f"Missing field in replay '{filepath}': {e}")
             raise
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(f"Failed to load replay '{filepath}': {e}")
             raise
 
@@ -434,7 +434,7 @@ class ReplayManager:
             replays_abs = os.path.realpath(self.replays_dir)
             file_abs = os.path.realpath(filepath)
             return os.path.commonpath([replays_abs, file_abs]) == replays_abs
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(f"Error validating filepath '{filepath}': {e}")
             return False
 
@@ -463,7 +463,7 @@ class ReplayManager:
                     logger.warning(
                         f"Skipping replay '{filename}': Missing field - {e}"
                     )
-                except Exception as e:
+                except Exception as e:  # pylint: disable=broad-exception-caught
                     logger.error(
                         f"Error reading replay '{filename}': {e}"
                     )
@@ -488,7 +488,7 @@ class ReplayManager:
             try:
                 os.remove(filepath)
                 logger.info(f"Deleted replay file: {filepath}")
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 logger.error(f"Failed to delete replay file '{filepath}': {e}")
 
     def get_replay_count(self) -> int:

@@ -2,13 +2,14 @@
 
 from unittest.mock import patch
 
-import pytest
 import pygame
+import pytest
 
 from modul.asteroid import Asteroid, EnemyShip
-from modul.constants import ASTEROID_MIN_RADIUS, ASTEROID_MAX_RADIUS, ASTEROID_VERTICES
-from modul.shot import Shot
+from modul.constants import (ASTEROID_MAX_RADIUS, ASTEROID_MIN_RADIUS,
+                             ASTEROID_VERTICES)
 from modul.powerup import PowerUp
+from modul.shot import Shot
 
 
 @pytest.fixture(autouse=True)

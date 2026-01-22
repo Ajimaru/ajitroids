@@ -1,7 +1,8 @@
-import pytest
 import pygame
-from modul.starfield import Star, Starfield, MenuStarfield
+import pytest
+
 from modul.constants import STAR_COUNT
+from modul.starfield import MenuStarfield, Star, Starfield
 
 
 @pytest.fixture(autouse=True)

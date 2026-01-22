@@ -164,7 +164,7 @@ class PerformanceProfiler:
         # Title
         try:
             from modul.i18n import gettext
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
                 return k
         title = self.font.render(gettext("performance_profiler"), True, self.text_color)

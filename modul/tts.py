@@ -7,7 +7,7 @@ from typing import Optional
 
 try:
     import pyttsx3
-except Exception:
+except Exception:  # pylint: disable=broad-exception-caught
     pyttsx3 = None
 
 from .settings import current_settings
@@ -56,7 +56,7 @@ class TTSManager:
                                 if self.preferred_voice_lang in ls:
                                     selected = v
                                     break
-                            except Exception:
+                            except Exception:  # pylint: disable=broad-exception-caught
                                 continue
                         if selected:
                             break
@@ -64,9 +64,9 @@ class TTSManager:
                     try:
                         self.engine.setProperty("voice", selected.id)
                         self.voice = selected.id
-                    except Exception:
+                    except Exception:  # pylint: disable=broad-exception-caught
                         pass
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 self.engine = None
 
     def _do_speak(self, text: str):
@@ -79,9 +79,9 @@ class TTSManager:
                 try:
                     self.engine.say(text)
                     self.engine.runAndWait()
-                except Exception:
+                except Exception:  # pylint: disable=broad-exception-caught
                     logging.exception("TTS speak failed")
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             # Ensure any unexpected errors in the worker are logged
             logging.exception("TTS worker failed")
 
@@ -92,7 +92,7 @@ class TTSManager:
         try:
             # Submit to single-thread executor; it will serialize calls
             self._executor.submit(self._do_speak, text)
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             # If executor submission fails, attempt fallback logging
             logging.exception("TTS enqueue failed")
             logging.info("TTS fallback: %s", text)
@@ -115,9 +115,9 @@ class TTSManager:
                     langs = getattr(v, "languages", []) or []
                     entry = {"id": vid, "name": name, "languages": langs}
                     voices.append(entry)
-                except Exception:
+                except Exception:  # pylint: disable=broad-exception-caught
                     continue
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             logging.exception("Failed to list TTS voices")
         return voices
 
@@ -156,12 +156,12 @@ class TTSManager:
                     self.engine.setProperty("voice", selected.id)
                     self.voice = selected.id
                     return True
-                except Exception:
+                except Exception:  # pylint: disable=broad-exception-caught
                     logging.exception("Failed to set TTS voice")
                     return False
 
             return False
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             logging.exception("Error setting preferred voice")
             return False
 
