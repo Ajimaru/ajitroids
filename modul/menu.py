@@ -14,9 +14,6 @@ for _const_name in dir(C):
 
 SOUNDS = None
 
-# Menu-related constants (add or adjust as needed)
-CREDITS_SCROLL_SPEED = 40  # pixels per second (adjust to desired scroll speed)
-
 
 def _gettext(key):
     """Return translated string for `key` or the key itself if i18n unavailable.
