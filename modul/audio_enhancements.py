@@ -40,7 +40,17 @@ class DynamicMusicSystem:
     """Manages dynamic music that changes based on game intensity"""
 
     def __init__(self):
-        """Initialize dynamic music system."""
+        """
+        Set up default state and configuration for the dynamic music system.
+        
+        Initializes:
+        - current_intensity: starting intensity level (IntensityLevel.CALM).
+        - music_tracks: mapping of intensity levels to background music filenames (BOSS uses a distinct track).
+        - transition_cooldown: time remaining before another transition is allowed.
+        - min_transition_time: minimum seconds required between transitions.
+        - last_transition: timestamp of the last transition.
+        - enabled: whether the dynamic music system is active.
+        """
         self.current_intensity = IntensityLevel.CALM
         # Music tracks for different intensity levels
         # Note: Currently using the same track for CALM/NORMAL/INTENSE as only one background
@@ -127,7 +137,24 @@ class VoiceAnnouncement:
     """Manages voice announcements for game events"""
 
     def __init__(self):
-        """Initialize voice announcement system."""
+        """
+        Create and configure the voice announcement subsystem and its default state.
+        
+        Initializes announcement queues, defaults for per-event enable flags and announcement texts, TTS engine state, and timing controls used to schedule and play announcements.
+        
+        Attributes:
+            announcement_queue (List[Tuple[str, float]]): Pending announcements as (event_type, priority).
+            current_announcement (Optional[str]): Text of the announcement currently playing, or None.
+            announcement_timer (float): Remaining seconds for the current announcement.
+            min_announcement_gap (float): Minimum seconds required between consecutive announcements.
+            last_announcement_time (float): Timestamp of when the last announcement started.
+            enabled (bool): Master enable flag for voice announcements.
+            tts_engine: Text-to-speech engine instance if initialized, otherwise None.
+            tts_initialized (bool): True if TTS engine was successfully initialized.
+            announcement_enabled (Dict[str, bool]): Per-event-type enable flags.
+            announcements (Dict[str, str]): Mapping from event type to default announcement text.
+            announcement_sounds (Dict[str, Optional[pygame.mixer.Sound]]): Loaded sound objects or None for each event type.
+        """
         self.announcement_queue: List[Tuple[str, float]] = []  # (text, priority)
         self.current_announcement: Optional[str] = None
         self.announcement_timer = 0.0
@@ -312,7 +339,15 @@ class SoundThemeManager:
     """Manages multiple sound themes (retro, sci-fi, orchestral)"""
 
     def __init__(self):
-        """Initialize sound theme manager."""
+        """
+        Create a SoundThemeManager and initialize its current theme and per-theme sound filename mappings.
+        
+        Initializes:
+        - current_theme: the active SoundTheme (defaults to SoundTheme.DEFAULT).
+        - theme_mappings: a dictionary mapping each SoundTheme to a dictionary of sound keys (e.g., "shoot", "explosion", "background_music") to asset filenames.
+        
+        The mappings provide theme-specific filenames and serve as the fallback lookup for requested sound names.
+        """
         self.current_theme = SoundTheme.DEFAULT
 
         # Define sound mappings for each theme
@@ -432,7 +467,15 @@ class AudioEnhancementManager:
     """Main manager for all audio enhancements"""
 
     def __init__(self):
-        """Initialize the audio enhancement manager with subsystems."""
+        """
+        Create an AudioEnhancementManager and initialize its subsystems and state.
+        
+        Initializes the following attributes:
+        - dynamic_music: DynamicMusicSystem instance managing adaptive background music.
+        - voice_announcements: VoiceAnnouncement instance handling spoken/event announcements.
+        - theme_manager: SoundThemeManager instance for selecting sound themes.
+        - low_health_announced: Boolean flag tracking whether a low-health announcement has been issued.
+        """
         self.dynamic_music = DynamicMusicSystem()
         self.voice_announcements = VoiceAnnouncement()
         self.theme_manager = SoundThemeManager()

@@ -116,6 +116,15 @@ class TestShipManager:
         called = []
 
         def callback(title, message):
+            """
+            Test callback that records invocation arguments.
+            
+            Appends a (title, message) tuple to the outer-scope `called` list for later inspection by the test.
+            
+            Parameters:
+                title (str): Title passed to the callback.
+                message (str): Message passed to the callback.
+            """
             called.append((title, message))
 
         result = manager.unlock_ship_with_notification("destroyer", callback)

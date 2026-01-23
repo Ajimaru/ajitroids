@@ -19,12 +19,14 @@ CREDITS_SCROLL_SPEED = 40  # pixels per second (adjust to desired scroll speed)
 
 
 def _gettext(key):
-    """Return translated string for `key` or the key itself if i18n unavailable.
-
-    This helper centralizes the common try/except import pattern used across
-    the module: it attempts to import and call `modul.i18n.gettext` and
-    falls back to returning the key unchanged when the i18n module is not
-    available (for tests or minimal environments).
+    """
+    Translate the given key using modul.i18n.gettext, falling back to the key if translation is unavailable.
+    
+    Parameters:
+        key (str): The lookup key for the translated string.
+    
+    Returns:
+        The translated string for `key`, or `key` itself if no translation provider is available.
     """
     try:
         from modul.i18n import gettext as _g
@@ -39,7 +41,21 @@ gettext = _gettext
 class MenuItem:
     """Represents a selectable item in a menu."""
     def __init__(self, text, action, shortcut=None):
-        """Initialize a MenuItem with text, action, and optional shortcut."""
+        """
+        Create a MenuItem representing a selectable menu entry.
+        
+        Parameters:
+            text (str): Display string shown for the menu item.
+            action (str): Identifier returned when the item is activated.
+            shortcut (str | None): Optional short key label shown/used for quick activation (e.g., "Z", "L"). When None, no shortcut is associated.
+        
+        Notes:
+            Initializes selection state and visual properties:
+            - selected: False
+            - hover_animation: 0
+            - opacity: 255
+            - delay: 0
+        """
         self.text = text
         self.action = action
         self.selected = False
@@ -49,7 +65,12 @@ class MenuItem:
         self.shortcut = shortcut
 
     def update(self, dt):
-        """Update the item's animation and opacity state."""
+        """
+        Update the menu item's hover animation and resolve its opacity delay.
+        
+        Parameters:
+            dt (float): Time elapsed in seconds since the last update.
+        """
         target = 1.0 if self.selected else 0.0
         animation_speed = 12.0
         self.hover_animation = self.hover_animation + (target - self.hover_animation) * dt * animation_speed
@@ -60,7 +81,16 @@ class MenuItem:
                 self.opacity = 255
 
     def draw(self, screen, position, font=None):
-        """Draw the menu item at the given position. Accepts optional font argument."""
+        """
+        Render this menu item's text centered at the given position.
+        
+        Parameters:
+            position (tuple): (x, y) coordinates used as the center point for the rendered text.
+            font (pygame.font.Font | None): Optional font to use; if None a font scaled by the item's hover animation is created.
+        
+        Returns:
+            pygame.Rect: Rectangle of the rendered text (positioned with its center at `position`).
+        """
         color = pygame.Color(C.MENU_UNSELECTED_COLOR)
         selected_color = pygame.Color(C.MENU_SELECTED_COLOR)
         r = max(0, min(255, int(color.r + (selected_color.r - color.r) * self.hover_animation)))
@@ -80,7 +110,13 @@ class MenuItem:
 class Menu:
     """Base class for game menus with selectable items."""
     def __init__(self, title, sounds=None):
-        """Initialize the menu with a title."""
+        """
+        Create a Menu with the given title and optional sounds controller.
+        
+        Parameters:
+            title (str): The menu's displayed title.
+            sounds (optional): An object providing menu sound effects; may be None.
+        """
         self.title = title
         self.items = []
         self.selected_index = 0
@@ -93,14 +129,27 @@ class Menu:
         self.sounds = sounds
 
     def add_item(self, text, action, shortcut=None):
-        """Add a new item to the menu."""
+        """
+        Append a selectable entry to the menu.
+        
+        If this is the first item added, it becomes the selected item.
+        
+        Parameters:
+            text (str): Display label for the menu item.
+            action (str): Action identifier returned when the item is activated.
+            shortcut (str | None): Optional shortcut label shown for the item.
+        """
         item = MenuItem(text, action, shortcut)
         self.items.append(item)
         if len(self.items) == 1:
             self.items[0].selected = True
 
     def activate(self):
-        """Activate the menu and start fade-in animation."""
+        """
+        Enable the menu and begin its fade-in reveal.
+        
+        Sets the menu active, starts the fade-in state, resets the background alpha to 0, and initializes each item's opacity to 0 with a staggered reveal delay.
+        """
         self.active = True
         self.fade_in = True
         self.background_alpha = 0
@@ -109,7 +158,16 @@ class Menu:
             item.delay = i * 0.1
 
     def update(self, dt, events):
-        """Update menu state and handle input events."""
+        """
+        Update menu animation, process input events, and advance selection state.
+        
+        Parameters:
+            dt (float): Time elapsed since the last update, in seconds.
+            events (iterable): Iterable of pygame event objects to consume for navigation and selection.
+        
+        Returns:
+            action (str or dict or None): The selected menu action identifier (or a dict with navigation details) when an item is activated, or `None` if no action was triggered.
+        """
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
             if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
@@ -188,7 +246,11 @@ class Menu:
                 logger.debug("Exception in play_menu_move in _select_next: %s", e, exc_info=True)
 
     def _select_previous(self):
-        """Select the previous menu item."""
+        """
+        Move selection to the previous menu item, wrapping to the end if currently at the first item.
+        
+        Updates the previously selected item's state and the newly selected item's state accordingly. If a `sounds` attribute is present, attempts to play the menu-move sound and logs any exception at debug level.
+        """
         self.items[self.selected_index].selected = False
         self.selected_index = (self.selected_index - 1) % len(self.items)
         self.items[self.selected_index].selected = True
@@ -203,7 +265,12 @@ class Menu:
                 logger.debug("Exception in play_menu_move in _select_previous: %s", e, exc_info=True)
 
     def draw(self, screen):
-        """Draw the menu and its items on the screen."""
+        """
+        Render the menu: a translucent background, a centered title near the top, and all menu items centered horizontally and distributed vertically.
+        
+        Parameters:
+            screen (pygame.Surface): Destination surface to draw the menu onto.
+        """
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -223,7 +290,11 @@ class Menu:
 class MainMenu(Menu):
     """Main menu for the game."""
     def __init__(self):
-        """Initialize the main menu with all items."""
+        """
+        Create the main menu and populate it with primary navigation entries.
+        
+        Sets the menu title to "AJITROIDS" and adds localized items for: start game, tutorial, replays, highscores, statistics, achievements, options, credits, and exit.
+        """
         super().__init__("AJITROIDS")
         self.add_item(gettext("start_game"), "start_game")
         self.add_item(gettext("tutorial"), "tutorial")
@@ -236,7 +307,12 @@ class MainMenu(Menu):
         self.add_item(gettext("exit"), "exit")
 
     def draw(self, screen):
-        """Draw the main menu and version info."""
+        """
+        Render the main menu and the game's version string at the bottom-right of the screen.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the menu and version text onto.
+        """
         super().draw(screen)
 
         version_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE / 1.5))
@@ -248,7 +324,11 @@ class MainMenu(Menu):
 class PauseMenu(Menu):
     """Pause menu shown during gameplay."""
     def __init__(self):
-        """Initialize the pause menu with items."""
+        """
+        Create the pause menu and populate it with localized resume, restart, and main menu entries.
+        
+        Sets the menu title to the translated "pause" (uppercased) and adds items labeled with the localized strings for resume, restart, and main menu that trigger actions "continue", "restart", and "main_menu" respectively.
+        """
         title = _gettext("pause").upper()
         super().__init__(title)
         self.add_item(gettext("resume"), "continue")
@@ -256,7 +336,12 @@ class PauseMenu(Menu):
         self.add_item(gettext("main_menu"), "main_menu")
 
     def draw(self, screen):
-        """Draw the pause menu and shortcuts."""
+        """
+        Render the pause menu and a list of common keyboard shortcuts.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the menu and shortcuts onto.
+        """
         super().draw(screen)
 
         # Show common keyboard shortcuts while paused
@@ -297,7 +382,16 @@ class TutorialScreen:
         self.fade_in = True
 
     def update(self, dt, events):
-        """Update fade-in and handle input for tutorial screen."""
+        """
+        Handle the tutorial screen's fade-in transition and keyboard input.
+        
+        Parameters:
+            dt (float): Time elapsed since the last update, in seconds.
+            events (iterable): Iterable of pygame events to process.
+        
+        Returns:
+            str or None: "main_menu" if the user pressed Escape to return to the main menu, `None` otherwise.
+        """
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
             if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
@@ -311,7 +405,12 @@ class TutorialScreen:
         return None
 
     def draw(self, screen):
-        """Draw the tutorial instructions on the screen."""
+        """
+        Render the tutorial screen: a translucent background, localized title, and centered instruction lines.
+        
+        Parameters:
+            screen (pygame.Surface): Destination surface to draw the tutorial UI onto.
+        """
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -346,7 +445,17 @@ class TutorialScreen:
 class OptionsMenu(Menu):
     """Menu for adjusting game options and settings."""
     def __init__(self, settings, sounds):
-        """Initialize the options menu with settings and sounds."""
+        """
+        Create an Options menu populated from the provided settings and optional sounds.
+        
+        The constructor builds menu items that reflect the current settings (music on/off and volume, sound on/off and volume, fullscreen state, language) and conditionally includes a toggle for showing TTS options if the settings object exposes `show_tts_in_options`.
+        
+        Parameters:
+            settings: An object exposing at least the attributes `music_on` (bool), `sound_on` (bool),
+                `music_volume` (float, 0.0–1.0), `sound_volume` (float, 0.0–1.0), `fullscreen` (bool),
+                and `language` (str). If present, `show_tts_in_options` (bool) is used to add a TTS toggle item.
+            sounds: Optional sounds manager used for UI feedback; may be None.
+        """
         super().__init__("OPTIONS")
         self.settings = settings
         self.sounds = sounds
@@ -373,7 +482,15 @@ class OptionsMenu(Menu):
         self.add_item(gettext('back'), "back")
 
     def handle_action(self, action, sounds):
-        """Handle actions triggered by menu item selection."""
+        """
+        Handle an options-menu action by applying setting changes, updating menu text, and returning navigation targets when appropriate.
+        
+        Parameters:
+            action (str): Action identifier from the selected menu item (e.g. "toggle_music", "adjust_sound_volume", "toggle_fullscreen", "toggle_show_tts", "language", "back", etc.).
+        
+        Returns:
+            str or None: A navigation target string when the action requests a screen change (possible values include "voice_announcements", "tts_voice", "controls", "language", "sound_test", "main_menu"), or `None` when the action only updates settings or UI state.
+        """
         # Use module-level gettext helper
         if action == "toggle_music":
             self.settings.music_on = not self.settings.music_on
@@ -485,7 +602,16 @@ class OptionsMenu(Menu):
         return None
 
     def update(self, dt, events):
-        """Update options menu and handle left/right/escape keys."""
+        """
+        Handle input for the options menu: adjust music/sound volume with left/right keys, save and apply changes, update item labels, and return navigation signals (e.g., escape to main menu).
+        
+        Parameters:
+            dt (float): Time elapsed since last update in seconds.
+            events (iterable): Iterable of pygame events to process.
+        
+        Returns:
+            str or dict or None: A navigation action (for example, `"main_menu"`), a dict returned by delegated handlers, or `None` if no navigation change occurred.
+        """
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -545,7 +671,16 @@ class OptionsMenu(Menu):
 class CreditsScreen:
     """Screen displaying game credits."""
     def __init__(self):
-        """Initialize fonts, state, and scroll position for credits."""
+        """
+        Set up fonts and initial visual state for the credits screen.
+        
+        Initializes the following attributes:
+            title_font: Font used for the credits title.
+            text_font: Font used for credits body text.
+            background_alpha: Current background overlay alpha (starts at 0).
+            fade_in: Whether the screen is currently fading in (starts True).
+            scroll_position: Vertical position used to scroll the credits (start value 250).
+        """
         self.title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
         self.text_font = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE - 8)
         self.background_alpha = 0
@@ -553,7 +688,16 @@ class CreditsScreen:
         self.scroll_position = 250
 
     def update(self, dt, events):
-        """Update fade-in, scroll credits, and handle input."""
+        """
+        Advance the credits scroll, update background fade-in, and handle input to exit to the main menu.
+        
+        Parameters:
+            dt (float): Time elapsed since last update in seconds.
+            events (iterable): Iterable of pygame events to process.
+        
+        Returns:
+            str or None: `"main_menu"` if the user pressed Space or Escape to return to the main menu, `None` otherwise.
+        """
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
             if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
@@ -570,7 +714,14 @@ class CreditsScreen:
         return None
 
     def draw(self, screen):
-        """Draw the credits text on the screen."""
+        """
+        Render a translucent background, the credits title, and centered scrolling credit lines onto the provided screen.
+        
+        The credits block is positioned below the title and offset by self.scroll_position to produce vertical scrolling. The background opacity is taken from self.background_alpha and text uses the instance title and text fonts.
+        
+        Parameters:
+            screen (pygame.Surface): Destination surface to draw the credits on.
+        """
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -624,6 +775,20 @@ class ControlsMenu(Menu):
     """Menu for remapping and displaying controls."""
 
     def _handle_capture_event(self, event):
+        """
+        Translate a pygame input event into a normalized binding name for control remapping.
+        
+        Parameters:
+            event (pygame.Event): The input event to inspect (keyboard, joystick button/axis/hat).
+        
+        Returns:
+            str: A binding name for the captured control, for example:
+                 - keyboard key name (e.g., "space"),
+                 - "JOY{joy}_BUTTON{btn}" (e.g., "JOY0_BUTTON1"),
+                 - "JOY{joy}_AXIS{axis}_POS" or "..._NEG" (e.g., "JOY0_AXIS2_POS"),
+                 - "JOY{joy}_HAT{hat}_{DIRS}" (e.g., "JOY0_HAT0_UP_RIGHT"),
+                 or `None` if the event does not produce a captureable binding.
+        """
         new_name = None
         # Keyboard binding
         if event.type == pygame.KEYDOWN:
@@ -669,12 +834,32 @@ class ControlsMenu(Menu):
         return new_name
 
     def _is_duplicate_binding(self, new_name):
+        """
+        Check whether a proposed control binding is already assigned to any existing action.
+        
+        Parameters:
+            new_name (str): The binding identifier to check (e.g. "K_SPACE", "JOY0_BUTTON1", or "JOY0_AXIS0_POS").
+        
+        Returns:
+            `true` if the binding is already assigned to an action, `false` otherwise.
+        """
         for a_key, _ in self.actions:
             if self.settings.controls.get(a_key) == new_name:
                 return True
         return False
 
     def _apply_binding(self, action, new_name):
+        """
+        Apply a new input binding for an action and persist the change.
+        
+        This updates the stored control mapping for `action` to `new_name`, saves settings,
+        stops key-capture mode, clears the pending capture action, and sets a user-facing
+        message indicating the newly bound key.
+        
+        Parameters:
+            action (str): The action identifier whose binding is being changed (e.g., "shoot").
+            new_name (str): The canonical name of the new binding (e.g., "K_SPACE" or "JOY0_BUTTON1").
+        """
         self.settings.controls[action] = new_name
         self.settings.save()
         self.capturing = False
@@ -682,7 +867,14 @@ class ControlsMenu(Menu):
         self.message = gettext("bound_key").format(key=new_name)
 
     def __init__(self, settings):
-        """Initialize the controls menu with settings."""
+        """
+        Create a controls menu populated with the current key bindings.
+        
+        Initializes the menu title from the localized "controls" label, adds one item per configured action (showing "<label>: <binding>"), appends a "back" item, and sets up capture state used for rebinding controls.
+        
+        Parameters:
+            settings: An object exposing a `controls` mapping (action -> key name) used to read current bindings and persist changes.
+        """
         super().__init__(gettext("controls").upper())
         self.settings = settings
         # Define action order for display
@@ -708,19 +900,20 @@ class ControlsMenu(Menu):
 
     def update(self, dt, events):
         # Refresh labels from settings
-        """Process input and update the controls menu state.
-
-        Args:
-            dt (float): Time delta in seconds since last update.
-            events (list): Iterable of pygame events to process.
-
+        """
+        Handle input and update the controls menu state, including initiating and processing key-capture mode for rebinding controls.
+        
+        During a non-capturing state this processes navigation and selection; when a binding action is selected it enters capture mode and waits for a new control input. While capturing, pressing Escape cancels the capture. Successful captures update stored control bindings and the displayed labels.
+        
+        Parameters:
+            dt (float): Time elapsed since the last update, in seconds.
+            events (iterable): Iterable of pygame events to process.
+        
         Returns:
-            Optional[str]: Navigation/action key (e.g. 'options' or a binding action)
-            or None when no navigation is requested.
-
+            str or None: A navigation/action key (for example "options" to go back) when the menu requests navigation; `None` otherwise.
+        
         Side effects:
-            Updates item labels from `self.settings`, may set `self.capturing`,
-            `self.capture_action` and `self.message` when rebinding keys.
+            Updates menu item labels from self.settings.controls; may set or clear self.capturing, self.capture_action, and self.message; persists new bindings via settings when applied.
         """
         for i, (action_key, label) in enumerate(self.actions):
             key_name = self.settings.controls.get(action_key, "")
@@ -761,14 +954,13 @@ class ControlsMenu(Menu):
         return None
 
     def draw(self, screen):
-        """Render the controls menu to the provided Pygame surface.
-
-        Args:
+        """
+        Render the controls menu and an optional status message.
+        
+        If the menu instance has a non-empty `message`, draw that message centered near the bottom of the provided surface. Delegates the main menu rendering to the superclass.
+         
+        Parameters:
             screen (pygame.Surface): Surface to render the menu onto.
-
-        Side effects:
-            Draws menu items and a small status message (e.g. binding prompts)
-            at the bottom of the screen.
         """
         super().draw(screen)
         if self.message:
@@ -791,20 +983,27 @@ class LanguageMenu(Menu):
     """
     def __init__(self, settings):
         """
-        Initialize the LanguageMenu.
-
-        Args:
-            settings: The settings object containing the current language (settings.language)
-                and a list of available languages. This menu will update settings.language
-                and call settings.save() when a new language is selected.
-
-        Populates menu items for each available language and a back option.
+        Create a LanguageMenu and populate it with language selection items plus a Back option.
+        
+        Parameters:
+            settings: An object exposing a `language` attribute (current language code) and a `save()` method. Selecting a language item will update `settings.language` and is expected to be persisted by callers (the menu itself adds the items and triggers selection handling elsewhere).
+        
+        Notes:
+            The constructor attempts to import `modul.i18n.gettext` for localized labels and falls back to a no-op translator that returns the key unchanged if the import fails. The menu is populated with entries for English ("en") and German ("de"), marking the current language.
         """
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(key):
-                """Fallback gettext when i18n import fails; returns key unchanged."""
+                """
+                Fallback translation function used when internationalization is unavailable.
+                
+                Parameters:
+                    key (str): Translation key or message identifier.
+                
+                Returns:
+                    str: The input `key` unchanged.
+                """
                 return key
         super().__init__(gettext("language").upper())
         self.settings = settings
@@ -816,19 +1015,12 @@ class LanguageMenu(Menu):
 
     def update(self, dt, events):
         """
-        Refresh menu labels to reflect the current language and handle user input.
-
-        Args:
-            dt: Elapsed time since last update (float, seconds).
-            events: List of pygame events to process (typically List[pygame.event.Event]).
-
+        Update language menu labels from settings and handle user navigation.
+        
+        Updates each menu item's text to indicate the currently selected language, processes input events, and handles navigation. If the user selects Back, returns "options". If the user selects a language, updates settings.language, persists settings, and returns a dict signalling the caller to rebuild menus.
+        
         Returns:
-            str: The key of the next screen to display (e.g., "options") if the user selects back,
-            or the language code if a language is selected. Returns None if no navigation occurs.
-
-        Side effects:
-            Updates menu item labels to show the current language.
-            If a language is selected, sets settings.language and calls settings.save().
+            "options" if the Back item was selected; a dict `{"action": "rebuild_menus", "target": "options"}` when a language was selected and saved; `None` if no navigation occurred.
         """
         for i, (code, label) in enumerate(self.languages):
             sel = " (current)" if self.settings.language == code else ""
@@ -853,7 +1045,11 @@ class LanguageMenu(Menu):
 class GameOverScreen:
     """Implementation detail: see method body for behavior."""
     def __init__(self):
-        """Implementation detail: see method body for behavior."""
+        """
+        Initialize the GameOver screen's visual state and default score.
+        
+        Creates title and body fonts using configured menu sizes, sets the background alpha to 0 and enables fade-in, and initializes the final score to 0.
+        """
         self.title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
         self.text_font = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE)
         self.background_alpha = 0
@@ -861,7 +1057,12 @@ class GameOverScreen:
         self.final_score = 0
 
     def set_score(self, score):
-        """Set the final score to display on the Game Over screen."""
+        """
+        Set the final score shown on the Game Over screen.
+        
+        Parameters:
+            score (int): Final score value to display.
+        """
         self.final_score = score
 
     def update(self, dt, events):
@@ -892,10 +1093,11 @@ class GameOverScreen:
         return None
 
     def draw(self, screen):
-        """Render the announcements menu and its toggle items.
-
-        Args:
-            screen (pygame.Surface): Surface to draw on.
+        """
+        Render the game over screen showing a title, the final score, and input instructions.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the screen contents on.
         """
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
@@ -905,7 +1107,15 @@ class GameOverScreen:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(key):
-                """Fallback gettext when i18n is unavailable; returns the key unchanged."""
+                """
+                Return the translation key unchanged when internationalization is unavailable.
+                
+                Parameters:
+                    key (str): The translation key to resolve.
+                
+                Returns:
+                    str: The same `key` passed in.
+                """
                 return key
         title_surf = self.title_font.render(gettext("game_over").upper(), True, pygame.Color("red"))
         title_rect = title_surf.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 3))
@@ -939,7 +1149,15 @@ class DifficultyMenu(Menu):
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(key):
-                """Fallback gettext when i18n import fails; returns key unchanged."""
+                """
+                Fallback translation function used when internationalization is unavailable.
+                
+                Parameters:
+                    key (str): Translation key or message identifier.
+                
+                Returns:
+                    str: The input `key` unchanged.
+                """
                 return key
         super().__init__(gettext("difficulty").upper())
         self.add_item(gettext("difficulty_easy"), "difficulty_easy", "L")
@@ -952,19 +1170,22 @@ class VoiceAnnouncementsMenu:
     """Menu to configure voice announcement toggles"""
 
     def __init__(self, settings):
-        """Initialize the TTS voice menu and enumerate available system voices.
-
-        Args:
-            settings: Settings object used to persist chosen voice.
+        """
+        Create the voice announcements menu and populate its items from the provided settings.
+        
+        Parameters:
+            settings: Settings object used to read and persist announcement toggles and the selected TTS voice. The constructor will read current values to initialize item labels and call update_menu_texts() to synchronize displayed text. If the i18n module cannot be imported, labels fall back to the untranslated keys.
         """
         self.settings = settings
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(key):
-                """Fallback gettext used when i18n cannot be imported.
-
-                Returns the key unchanged so the UI remains functional.
+                """
+                Provide a fallback translation when no i18n backend is available.
+                
+                @param key (str): The translation lookup key.
+                @returns (str): The original `key` unchanged.
                 """
                 return key
         self.title = gettext("voice_announcements")
@@ -991,16 +1212,26 @@ class VoiceAnnouncementsMenu:
         self.update_menu_texts()
 
     def update_menu_texts(self):
-        """Refresh the announcements menu labels to reflect current settings.
-
-        Updates each item to show 'ON' or 'OFF' depending on `settings.announcement_types`.
+        """
+        Update menu item labels to reflect enabled/disabled voice announcement settings.
+        
+        Each menu item's text is set to "<label>: ON" or "<label>: OFF" according to entries in self.settings.announcement_types.
+        This method attempts to use the i18n gettext translation for each label and falls back to the raw key when i18n is unavailable.
         """
         announcements = self.settings.announcement_types
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(key):
-                """Fallback gettext when i18n is unavailable; returns the key unchanged."""
+                """
+                Return the translation key unchanged when internationalization is unavailable.
+                
+                Parameters:
+                    key (str): The translation key to resolve.
+                
+                Returns:
+                    str: The same `key` passed in.
+                """
                 return key
 
         self.items[0].text = f"{gettext('level_up')}: {'ON' if announcements.get('level_up', True) else 'OFF'}"
@@ -1016,14 +1247,17 @@ class VoiceAnnouncementsMenu:
         self.items[10].text = f"{gettext('powerup')}: {'ON' if announcements.get('powerup', False) else 'OFF'}"
 
     def update(self, dt, events):
-        """Handle keyboard navigation and selection for announcements toggles.
-
-        Args:
-            dt (float): Time delta since last frame.
-            events (list): Iterable of pygame events.
-
+        """
+        Handle menu input for voice-announcement toggles and advance fade-in.
+        
+        Processes the fade-in of the background, moves the current selection with Up/Down keys (skipping empty items), activates the selected item with Enter, and closes the menu with Escape.
+        
+        Parameters:
+            dt (float): Time elapsed since the last frame.
+            events (iterable): Iterable of pygame events to process.
+        
         Returns:
-            Optional[str]: Action key selected or 'back'.
+            str | None: The selected item's action key if activated, `"back"` if the user requested to go back, or `None` if no navigation action occurred.
         """
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
@@ -1060,13 +1294,14 @@ class VoiceAnnouncementsMenu:
         return None
 
     def handle_action(self, action):
-        """Toggle announcement settings or navigate to submenus based on action.
-
-        Args:
-            action (str): Action key from the menu.
-
+        """
+        Handle a menu action to toggle specific voice announcement settings or request navigation to a submenu.
+        
+        Parameters:
+            action (str): Menu action key indicating which announcement to toggle or which submenu to open.
+        
         Returns:
-            Optional[str]: Navigation key such as 'tts_voice' or None.
+            str | None: `'tts_voice'` to open the TTS voice selection submenu, `'options'` to return to the options menu, or `None` if no navigation is requested.
         """
         if action == "back":
             return "options"
@@ -1100,7 +1335,14 @@ class VoiceAnnouncementsMenu:
         return None
 
     def draw(self, screen):
-        """Render the voice announcements menu to the provided screen surface."""
+        """
+        Render the voice announcements menu onto the given display surface.
+        
+        Draws a translucent background, the menu title near the top, and the menu items centered vertically with configured spacing. The currently selected item is rendered using the selected color; empty items are skipped visually and contribute half the normal vertical spacing to preserve layout. Uses the menu's background_alpha, title, and item texts for display.
+        
+        Parameters:
+            screen (pygame.Surface): Target surface to draw the menu on.
+        """
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -1134,16 +1376,27 @@ class TTSVoiceMenu(Menu):
     """Menu to select a TTS voice from available system voices."""
 
     def __init__(self, settings):
-        """Initialize the TTS voice selection menu using `settings`.
-
-        Populates available voices (if the TTS manager is present) and a
-        back option. The chosen voice id is stored in `settings.tts_voice`.
+        """
+        Create the TTS voice selection menu and populate it with available voices.
+        
+        Adds a "default" item (action "tts_voice:__default__") and a "back" item (action "back"). If a TTS manager is available, adds one menu item per discovered voice with action "tts_voice:<id>". The chosen voice id is stored in settings.tts_voice (selecting "__default__" clears the explicit choice). Menu labels use the "tts_voice_label" i18n key when a gettext implementation is available; otherwise the raw keys are used.
+        
+        Parameters:
+            settings: An application settings object that exposes and persists a `tts_voice` attribute.
         """
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(key):
-                """Fallback gettext used when i18n import fails; returns key unchanged."""
+                """
+                Return the input key unchanged when a translation lookup is not available.
+                
+                Parameters:
+                    key (str): The message identifier or text to translate.
+                
+                Returns:
+                    str: The same string passed in `key`.
+                """
                 return key
 
         super().__init__(gettext("tts_voice_label").upper())
@@ -1170,14 +1423,15 @@ class TTSVoiceMenu(Menu):
 
     def update(self, dt, events):
         # Use base menu navigation
-        """Delegate event processing to the base Menu and return any action.
-
-        Args:
-            dt (float): Time delta since last update.
-            events (list): Iterable of pygame events.
-
+        """
+        Delegate input events and time progression to the base Menu and return any resulting navigation action.
+        
+        Parameters:
+            dt (float): Time delta since the last update.
+            events (Iterable[pygame.event.Event]): Iterable of pygame events to process.
+        
         Returns:
-            Optional[str]: Action key returned by base update or None.
+            action (str or None): Action key returned by the base Menu if one was triggered, None otherwise.
         """
         result = super().update(dt, events)
         if result:
@@ -1186,13 +1440,22 @@ class TTSVoiceMenu(Menu):
 
     def handle_action(self, action):
         # Expected action formats: 'tts_voice:<id>' or 'tts_voice:__default__'
-        """Apply a TTS voice selection to settings and attempt language detection.
-
-        Args:
-            action (str): Action in form 'tts_voice:<id>' or 'back'.
-
+        """
+        Apply a TTS voice selection to settings and persist the change.
+        
+        Recognizes actions of the form "tts_voice:<id>" to select a specific voice and
+        "tts_voice:__default__" to clear the custom voice. When a specific voice is
+        selected, this method will try to derive a language code from the voice metadata
+        and, if possible, instruct the running TTS manager to use the selected voice.
+        
+        Parameters:
+            action (str): Action string, one of:
+                - "back" — navigate back to the options menu;
+                - "tts_voice:<id>" — select the voice with identifier or name <id>;
+                - "tts_voice:__default__" — clear the custom TTS voice and use the default.
+        
         Returns:
-            Optional[str]: Navigation key such as 'options' or None.
+            Optional[str]: "options" when action is "back", otherwise None.
         """
         if action == "back":
             return "options"
@@ -1243,14 +1506,26 @@ class SoundTestMenu:
     Supports playing individual sounds and a threaded "play all" routine.
     """
     def __init__(self):
-        """Set up sound list, UI state variables and threading lock."""
+        """
+        Initialize the Sound Test screen state and populate the list of testable sounds.
+        
+        Sets up a threading lock used to protect sound state, establishes a gettext fallback for label translation, and initializes UI state (title, sounds placeholder, last-played tracking, scroll offset, visible-item limits, current selection). Initializes playback control flags (playing all, stop-all), constructs the ordered list of sound items as (label, action) pairs, calls update_visible_items() to prepare the visible subset, and initializes background fade state.
+        """
         import threading
         self._sound_state_lock = threading.Lock()
         try:
             from modul.i18n import gettext
         except Exception:
             def gettext(key):
-                """Implementation detail: see method body for behavior."""
+                """
+                Return the translated text for the given message key or the key itself if no translation is available.
+                
+                Parameters:
+                    key (str): Message identifier to translate.
+                
+                Returns:
+                    str: Translated text for `key`, or `key` unchanged when translations are unavailable.
+                """
                 return key
         self.title = gettext("sound_test")
         self.sounds = None
@@ -1297,7 +1572,11 @@ class SoundTestMenu:
         self.fade_in = False
 
     def activate(self):
-        """Reset UI state and flags when the menu is activated."""
+        """
+        Prepare the menu for display by resetting visual state, selection, and sound-test playback flags, then refresh the visible items.
+        
+        This sets fade-in to start, clears background transparency and scroll offset, selects the first item, resets sound playback control flags, and recomputes which items are visible.
+        """
         self.fade_in = True
         self.background_alpha = 0
         self.scroll_offset = 0
@@ -1332,14 +1611,17 @@ class SoundTestMenu:
             self.current_selection = 0
 
     def update(self, dt, events):
-        """Handle keyboard input for scrolling and selecting sound test items.
-
-        Args:
-            dt (float): Time delta in seconds.
-            events (list): Iterable of pygame events to process.
-
+        """
+        Handle input and update scrolling/selection for the sound test menu.
+        
+        Processes keyboard events to move the selection up/down with wrap and scrolling, activate the selected sound item, stop any ongoing "play all" playback, and return navigation actions. Also advances the fade-in of the background and decrements the last-played timer, clearing the last played label when it expires.
+        
+        Parameters:
+            dt (float): Time elapsed since the last update, in seconds.
+            events (Iterable): Iterable of pygame events to process.
+        
         Returns:
-            Optional[str]: Action key (e.g. sound test key or 'back') or None.
+            Optional[str]: The action key for the selected sound item or "back" when navigating out, or `None` if no action was triggered.
         """
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
@@ -1397,10 +1679,16 @@ class SoundTestMenu:
         return None
 
     def handle_action(self, action):
-        """Execute the requested sound playback action and update UI status.
-
-        Args:
-            action (str): Sound action key describing which sound to play.
+        """
+        Handle a sound-related menu action and update the menu's playback state.
+        
+        Performs the requested test playback (multiple "test_*" keys), may start a background thread to play all sounds ("test_all"), updates UI status fields (e.g., `self.last_played`, `self.last_played_timer`), and stops any running "play all" thread when navigating back.
+        
+        Parameters:
+            action (str): Action key indicating which sound or control to perform (examples: "test_shoot", "test_explosion", "test_menu_select", "test_all", "back").
+        
+        Returns:
+            str or None: Returns "options" when the "back" action is processed (and any running all-sounds playback is stopped); otherwise `None`.
         """
         if not self.sounds:
             return None
@@ -1411,7 +1699,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("standard_shoot"))
             self.last_played_timer = 2.0
@@ -1425,7 +1721,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("laser_shoot"))
             self.last_played_timer = 2.0
@@ -1439,7 +1743,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("rocket_shoot"))
             self.last_played_timer = 2.0
@@ -1453,7 +1765,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("shotgun_shoot"))
             self.last_played_timer = 2.0
@@ -1467,7 +1787,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("triple_shoot"))
             self.last_played_timer = 2.0
@@ -1478,7 +1806,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("explosion"))
             self.last_played_timer = 2.0
@@ -1489,7 +1825,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("player_hit"))
             self.last_played_timer = 2.0
@@ -1500,7 +1844,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("powerup"))
             self.last_played_timer = 2.0
@@ -1511,7 +1863,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("shield_activate"))
             self.last_played_timer = 2.0
@@ -1525,7 +1885,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("weapon_pickup"))
             self.last_played_timer = 2.0
@@ -1536,7 +1904,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("boss_spawn"))
             self.last_played_timer = 2.0
@@ -1547,7 +1923,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("boss_death"))
             self.last_played_timer = 2.0
@@ -1561,7 +1945,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("boss_attack"))
             self.last_played_timer = 2.0
@@ -1572,7 +1964,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("level_up"))
             self.last_played_timer = 2.0
@@ -1583,7 +1983,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("game_over"))
             self.last_played_timer = 2.0
@@ -1594,7 +2002,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("menu_select"))
             self.last_played_timer = 2.0
@@ -1605,7 +2021,15 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:
                 def gettext(k):
-                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
+                    """
+                    Return the translation key unchanged when the i18n system is unavailable.
+                    
+                    Parameters:
+                        k (str): The translation key to look up.
+                    
+                    Returns:
+                        str: The original key unchanged.
+                    """
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("menu_confirm"))
             self.last_played_timer = 2.0
@@ -1616,7 +2040,11 @@ class SoundTestMenu:
             import time
 
             def play_all_sounds():
-                """Play all sounds in a separate thread, with thread-safe state updates."""
+                """
+                Play the configured sequence of sound effects and clear the playing flag when finished.
+                
+                If the instance has a sounds object, calls each sound playback method in order with a short pause between them. The loop stops early if the `stop_all_sounds_thread` flag becomes true. Any exceptions raised by individual sound calls are caught and reported to stdout. At exit, sets `playing_all_sounds` to False while holding the instance's `_sound_state_lock`.
+                """
                 sound_list = []
                 if self.sounds is not None:
                     sound_list = [
@@ -1665,7 +2093,14 @@ class SoundTestMenu:
         return None
 
     def draw(self, screen):
-        """Implementation detail: see method body for behavior."""
+        """
+        Draw the menu's translucent background and centered title onto the provided pygame surface.
+        
+        Renders a semi-transparent black background using the menu's current background_alpha, draws the menu title centered near the top using the configured title font and color, and prepares an indicator font for item rendering. The method also attempts to import a localized `gettext`; if that import fails, it installs a fallback that returns keys unchanged.
+        
+        Parameters:
+            screen (pygame.Surface): Destination surface to render the menu onto.
+        """
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -1681,19 +2116,42 @@ class SoundTestMenu:
             from modul.i18n import gettext
         except Exception:
             def gettext(key):
-                """Implementation detail: see method body for behavior."""
+                """
+                Return the translated text for the given message key or the key itself if no translation is available.
+                
+                Parameters:
+                    key (str): Message identifier to translate.
+                
+                Returns:
+                    str: Translated text for `key`, or `key` unchanged when translations are unavailable.
+                """
                 return key
 
 class TTSVoiceMenu(Menu):
     """Menu to select a TTS voice from available system voices."""
 
     def __init__(self, settings):
-        """TODO: add docstring."""
+        """
+        Initialize the TTS voice selection menu and populate it with available system voices.
+        
+        This constructs the menu title from the localized "tts_voice_label", adds a "default" option and a "back" option, and inserts one menu item per discovered TTS voice when a TTS manager is available. If voice enumeration fails or no voices are available, the menu will contain only the default and back entries.
+        
+        Parameters:
+            settings: Application settings object used to read and later persist the selected TTS voice (e.g., `settings.tts_voice`).
+        """
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(k):
-                """TODO: add docstring."""
+                """
+                Look up a translated string for a message key, returning the key unchanged if no translation is available.
+                
+                Parameters:
+                    k (str): Message key to translate.
+                
+                Returns:
+                    translated (str): The translated string for `k`, or `k` unchanged if a translation is not available.
+                """
                 return k
 
         super().__init__(gettext("tts_voice_label").upper())
@@ -1720,7 +2178,16 @@ class TTSVoiceMenu(Menu):
 
     def update(self, dt, events):
         # Use base menu navigation
-        """TODO: add docstring."""
+        """
+        Delegate update handling to the base Menu implementation and propagate any navigation result.
+        
+        Parameters:
+        	dt (float): Time elapsed since last frame in seconds.
+        	events (list): Iterable of input/events to process (e.g., pygame events).
+        
+        Returns:
+        	Navigation action (str or dict) if a menu action was triggered, `None` otherwise.
+        """
         result = super().update(dt, events)
         if result:
             return result
@@ -1728,7 +2195,24 @@ class TTSVoiceMenu(Menu):
 
     def handle_action(self, action):
         # Expected action formats: 'tts_voice:<id>' or 'tts_voice:__default__'
-        """TODO: add docstring."""
+        """
+        Apply a text-to-speech (TTS) voice selection action and persist the updated settings.
+        
+        Parameters:
+            action (str): Action string to handle. Expected values:
+                - "back": navigate back to the options menu.
+                - "tts_voice:<id>": select the voice with identifier or name <id>.
+                - "tts_voice:__default__": clear a specific voice selection and use the current language as the voice language.
+        
+        Behavior:
+            - When a "tts_voice:<id>" action is provided, updates settings.tts_voice to the given id.
+            - If the id is "__default__", clears settings.tts_voice and sets settings.tts_voice_language to the current settings.language.
+            - When selecting a specific voice, attempts to derive and store a language code from available voice metadata and to apply the preferred voice to the running TTS manager if available.
+            - Persists settings by calling settings.save() when a voice selection or clear is made.
+        
+        Returns:
+            str or None: "options" if action is "back", otherwise None.
+        """
         if action == "back":
             return "options"
         if action and action.startswith("tts_voice:"):
@@ -1778,12 +2262,31 @@ class AchievementsMenu(Menu):
     """Menu to display and interact with achievements."""
     def __init__(self, achievement_system):
         # Prepend game name for consistency with other menus
+        """
+        Initialize the achievements menu using the provided achievement system.
+        
+        Sets the menu title to "<game name> - ACHIEVEMENTS", stores the given achievement system, extracts an optional
+        graphics mapping from achievement_system.graphics (defaults to an empty dict), and adds a "back" menu item.
+        
+        Parameters:
+            achievement_system: An object that provides achievement data and may expose a `graphics` attribute
+                (mapping achievement IDs to graphic representations) used by the menu.
+        """
         super().__init__(f"{C.CREDITS_GAME_NAME} - {gettext('achievements').upper()}")
         self.achievement_system = achievement_system
         self.achievement_graphics = getattr(achievement_system, "graphics", {})
         self.add_item(gettext("back"), "back")
 
     def draw(self, screen):
+        """
+        Render the achievements screen onto the given display surface.
+        
+        This draws a translucent background, the centered title, a grid of up to 12 achievements arranged in two columns (each entry shows the achievement name; unlocked achievements are highlighted in green and display associated ASCII/graphic lines when available), the menu items (e.g., Back) near the bottom, and a progress line showing the number of unlocked achievements versus the total.
+        
+        Parameters:
+            screen (pygame.Surface): The target surface to draw the menu onto.
+        
+        """
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -1847,6 +2350,16 @@ class AchievementsMenu(Menu):
         screen.blit(progress_surf, progress_rect)
 
     def update(self, dt, events):
+        """
+        Process per-frame updates and handle immediate "back" navigation.
+        
+        Parameters:
+            dt (float): Time elapsed since the last update in seconds.
+            events (iterable): Sequence of pygame events to process.
+        
+        Returns:
+            navigation (str or None): A navigation target string when a navigation action occurred (for example, `'back'` when Escape or Space is pressed), `None` otherwise.
+        """
         result = super().update(dt, events)
         if result:
             return result
@@ -1899,7 +2412,17 @@ class ShipSelectionMenu(Menu):
         return None
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """
+        Render the ship selection screen including ships, details for the selected ship, and UI instructions.
+        
+        Parameters:
+            screen (pygame.Surface): Target surface to draw the entire ship selection UI onto.
+        
+        Description:
+            Draws a translucent background, the menu title, a horizontal list of available ships (highlighting the selected one),
+            each ship's name (or "LOCKED" if unavailable), and detailed information for the currently selected ship if unlocked.
+            Also renders selection instructions at the bottom of the screen. No value is returned.
+        """
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))

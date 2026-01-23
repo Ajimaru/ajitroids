@@ -115,10 +115,13 @@ class PerformanceProfiler:
             )
 
     def draw(self, screen):
-        """Draw performance metrics overlay.
-
-        Args:
-            screen: pygame Surface to draw on
+        """
+        Render the performance overlay (metrics, graph, and object counts) onto the provided surface.
+        
+        When the profiler is enabled, draws a semi-transparent panel containing title text, current and average FPS, current and average frame time, an FPS graph, per-type object counts and total, and a toggle hint. If the profiler is disabled, this method does nothing.
+        
+        Parameters:
+            screen (pygame.Surface): Target surface to render the overlay on.
         """
         if not self.enabled:
             return

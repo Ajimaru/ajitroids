@@ -9,8 +9,14 @@ logger = logging.getLogger(__name__)
 
 
 def key_name_to_keycode(name: str) -> Optional[int]:
-    """Convert a readable pygame key name (e.g. 'K_SPACE' or 'space')
-    to a pygame key constant.
+    """
+    Map a readable key name to its pygame key constant.
+    
+    Parameters:
+        name (str): Readable key name (for example "K_SPACE" or "space").
+    
+    Returns:
+        Optional[int]: The corresponding pygame key constant, or None if the name cannot be resolved.
     """
     if not name:
         return None
@@ -81,7 +87,17 @@ def get_action_binding(action: str) -> Optional[str]:
 
 
 def is_action_pressed(action: str) -> bool:
-    """Return True if the mapped key for `action` is currently pressed."""
+    """
+    Determine whether the configured input binding for the given action is currently active.
+    
+    Checks the runtime or default binding for the action and evaluates its current state for either keyboard or joystick inputs.
+    
+    Parameters:
+        action (str): The action name whose configured binding should be checked.
+    
+    Returns:
+        `true` if the action's input is currently active/pressed, `false` otherwise.
+    """
     binding = get_action_binding(action)
     if not binding:
         return False

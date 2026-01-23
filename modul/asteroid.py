@@ -30,18 +30,16 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
     """Represents an asteroid in the game with various types and behaviors."""
     def __init__(self, x, y, radius, *args, asteroid_type=None):
         """
-        Initialize an asteroid with position, size, and type.
-
-        Args:
-            x (float): X position.
-            y (float): Y position.
-            radius (float): Asteroid radius.
-            *groups: Sprite groups to add this asteroid to.
-            asteroid_type (str): The asteroid type (must be one of ASTEROID_TYPES). Can be provided
-                positionally or as a keyword argument for compatibility with tests.
-
+        Create an Asteroid at (x, y) with the given radius and type.
+        
+        Supports legacy positional usage where the last element of *args may be an asteroid_type string; any remaining positional args are treated as pygame sprite groups to add this sprite to. If asteroid_type is omitted, defaults to ASTEROID_TYPE_NORMAL. Metal asteroids receive ASTEROID_METAL_HEALTH; other types receive health 1. Also initializes polygon vertices, rotation properties, a minimal pygame image/rect for sprite compatibility, and adds the instance to any class-level containers.
+        
+        Parameters:
+            asteroid_type (str, optional): Name of the asteroid type; must be one of ASTEROID_TYPES.
+            *args: Optional pygame sprite groups and/or a trailing asteroid_type for backwards compatibility.
+        
         Raises:
-            ValueError: If asteroid_type is not a valid type.
+            ValueError: If asteroid_type is not a valid member of ASTEROID_TYPES.
         """
         # Args parsing: support older callers that passed asteroid_type
         # positionally as 4th argument, or callers that pass groups first
@@ -80,7 +78,15 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
                 group.add(self)
 
     def _generate_vertices(self):
-        """Generate irregular vertices for the asteroid's polygonal shape."""
+        """
+        Create an irregular polygonal vertex list representing this asteroid's shape.
+        
+        Each returned item is an (x, y) tuple of floats giving a vertex offset in local coordinates.
+        The list contains ASTEROID_VERTICES entries and describes a roughly circular polygon whose vertex distances from the center vary to produce irregularity.
+        
+        Returns:
+            list[tuple[float, float]]: Vertex offsets for the asteroid polygon in local coordinates.
+        """
         vertices = []
         for i in range(ASTEROID_VERTICES):
             angle = (i / ASTEROID_VERTICES) * 2 * math.pi
@@ -91,7 +97,15 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
         return vertices
 
     def point_in_polygon(self, point):
-        """Check if a point is inside the asteroid's polygonal shape."""
+        """
+        Determine whether a world-space point lies inside the asteroid's polygon.
+        
+        Parameters:
+            point (tuple[float, float]): (x, y) coordinates in world space.
+        
+        Returns:
+            true if the point is inside the polygon, false otherwise.
+        """
         px, py = point
         vertices = [(self.position.x + vx, self.position.y + vy) for vx, vy in self.vertices]
 
@@ -108,7 +122,15 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
         return crosses % 2 == 1
 
     def collides_with(self, other):
-        """Check collision with another object, handling shots specially."""
+        """
+        Determine whether this asteroid intersects another object, using polygon-edge checks for shots.
+        
+        Parameters:
+            other: The other object to test for collision. If `other` is a `Shot`, collision is computed against the asteroid's polygon edges using the shot's radius; for other types the method delegates to the superclass collision logic.
+        
+        Returns:
+            bool: `True` if the asteroid intersects `other`, `False` otherwise.
+        """
         if (self.position - other.position).length() > (self.radius + other.radius):
             return False
 
@@ -145,7 +167,14 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
         return super().collides_with(other)
 
     def draw(self, screen):
-        """Draw the asteroid as a rotated polygon with type-specific color."""
+        """
+        Render the asteroid as a rotated, type-colored polygon onto the provided surface.
+        
+        The polygon is drawn using the asteroid's vertices transformed by its current rotation and position. The outline color is selected from ASTEROID_TYPE_COLORS based on the asteroid's type. When COLLISION_DEBUG is enabled, also draw the collision circle and small markers at each vertex for debugging.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the asteroid on.
+        """
         rotated_vertices = [
             (
                 math.cos(self.rotation) * x - math.sin(self.rotation) * y,
@@ -168,7 +197,11 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
                 pygame.draw.circle(screen, "yellow", point, 2)
 
     def split(self):
-        """Split the asteroid into smaller pieces or handle metal asteroid damage."""
+        """
+        Handle destruction of this asteroid: either absorb damage (metal), produce effects, remove itself, and optionally create smaller child asteroids and a power-up.
+        
+        If the asteroid is metal and still has extra health and sufficiently large radius, decrement health and do not split. Otherwise, emit explosion particles for metal asteroids, remove this asteroid from all groups (kill), and possibly spawn a PowerUp with probability POWERUP_SPAWN_CHANCE subject to POWERUP_MAX_COUNT. If the asteroid's radius is greater than ASTEROID_MIN_RADIUS, create a set of child Asteroid instances with strictly smaller radii; the number of children, their velocities, and rotation speeds depend on the asteroid type (crystal produces more fragments, ice uses a different velocity multiplier). Child asteroids inherit this asteroid's type and are placed into the same containers/groups as the parent.
+        """
         # Metal asteroid: show explosion effect
         if self.asteroid_type == ASTEROID_TYPE_METAL:
             for _ in range(2):
@@ -211,7 +244,7 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
         split_count = ASTEROID_CRYSTAL_SPLIT_COUNT if self.asteroid_type == ASTEROID_TYPE_CRYSTAL else 2
         velocity_multiplier = ASTEROID_ICE_VELOCITY_MULTIPLIER if self.asteroid_type == ASTEROID_TYPE_ICE else 1.2
         containers = getattr(type(self), 'containers', ())
-        child_groups = tuple(containers) if containers else tuple(sprite_groups)
+        child_groups = tuple(containers) if containers else self.groups()
 
         for i in range(split_count):
             if split_count == ASTEROID_CRYSTAL_SPLIT_COUNT:
@@ -233,7 +266,12 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
                 new_asteroid.health = ASTEROID_METAL_HEALTH
 
     def update(self, dt):
-        """Update asteroid position and rotation."""
+        """
+        Advance the asteroid's position and rotation by the given time step.
+        
+        Parameters:
+            dt (float): Time step in seconds used to scale linear movement and angular rotation.
+        """
         self.position += self.velocity * dt
         self.rotation += self.rotation_speed * dt
 
@@ -241,7 +279,16 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
 class EnemyShip(CircleShape):
     """Represents an enemy ship that pursues the player."""
     def __init__(self, x, y, radius):
-        """Initialize an enemy ship with position and size."""
+        """
+        Create an EnemyShip positioned at (x, y) with a given size hint.
+        
+        Initializes the ship's base CircleShape state, forces the logical radius to PLAYER_RADIUS (ignoring the provided `radius`), sets a small random rotation speed, a zero initial rotation, and assigns a non-zero random velocity vector to ensure movement (useful for tests).
+        
+        Parameters:
+            x (float): Initial x-coordinate of the ship.
+            y (float): Initial y-coordinate of the ship.
+            radius (float): Size hint (ignored; the ship's radius is set to PLAYER_RADIUS).
+        """
         super().__init__(x, y, radius)
         self.radius = PLAYER_RADIUS
         self.rotation_speed = random.uniform(-0.1, 0.1)
@@ -250,7 +297,13 @@ class EnemyShip(CircleShape):
         self.velocity = pygame.Vector2(random.choice([-1, 1]) * random.uniform(30, 60), random.choice([-1, 1]) * random.uniform(30, 60))
 
     def update(self, dt, player_position=None):
-        """Update enemy ship position, rotation, and pursuit behavior."""
+        """
+        Update the ship's position, rotation, screen-wrapping, and simple pursuit behavior.
+        
+        Parameters:
+            dt (float): Time step used to scale position and rotation updates (seconds).
+            player_position (pygame.Vector2 | None): If provided, the world position of the player; when the player is within 45% of the screen width the ship sets its velocity toward the player, otherwise the velocity is dampened.
+        """
         self.position += self.velocity * dt
         self.rotation += self.rotation_speed * dt
 
@@ -284,7 +337,12 @@ class EnemyShip(CircleShape):
             logger.debug("EnemyShip Position: %s, Velocity: %s", self.position, self.velocity)
 
     def collides_with(self, other):
-        """Check collision with another object using distance."""
+        """
+        Determine whether this object intersects another by comparing center-to-center distance with the sum of their radii.
+        
+        Returns:
+            `true` if the distance between centers is less than the sum of the two radii, `false` otherwise.
+        """
         distance = (self.position - other.position).length()
         return distance < (self.radius + other.radius)
 
@@ -295,7 +353,12 @@ class EnemyShip(CircleShape):
         self.kill()
 
     def draw(self, screen):
-        """Draw the enemy ship as a rotated polygon."""
+        """
+        Draw the enemy ship polygon rotated to the ship's current rotation and translated to its position.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the ship on.
+        """
         points = [
             (0, -self.radius),
             (-self.radius * 0.8, self.radius * 0.5),

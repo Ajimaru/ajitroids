@@ -20,7 +20,16 @@ class TTSManager:
 
 
     def __init__(self):
-        """Initialize the TTS manager with settings and engine setup."""
+        """
+        Create and configure a Text-to-Speech manager based on current settings.
+        
+        Initializes logger, internal state (language, enabled flag, preferred voice and language),
+        a single-worker ThreadPoolExecutor for serialized TTS operations, and an internal lock.
+        If a TTS backend is available and enabled, attempts to initialize the engine and
+        apply a preferred voice (by id/name or by language). On failure to initialize or
+        apply a voice, the manager falls back to a disabled engine state while preserving
+        configured preferences.
+        """
         self.logger = logging.getLogger(__name__)
         self.engine = None
         self.voice = ""
@@ -70,7 +79,18 @@ class TTSManager:
                 self.engine = None
 
     def _find_voice_by_language(self, voices, lang_code):
-        """Return the first voice whose languages include lang_code."""
+        """
+        Find the first voice whose declared languages contain the given language code.
+        
+        Iterates the provided voice objects and checks each voice's `languages` entries for a match containing `lang_code`. Byte or bytearray language entries are decoded to strings; entries that fail to decode are skipped.
+        
+        Parameters:
+            voices (iterable): Iterable of voice-like objects (expected to have a `languages` attribute).
+            lang_code (str): Language code substring to match (for example, "en" or "en_US").
+        
+        Returns:
+            voice or None: The first matching voice object, or `None` if no match is found.
+        """
         for voice in voices:
             langs = getattr(voice, "languages", []) or []
             for lang in langs:
@@ -90,7 +110,14 @@ class TTSManager:
         return None
 
     def _do_speak(self, text: str):
-        """Execute text-to-speech in a background thread."""
+        """
+        Perform speech synthesis for the provided text in the TTS worker.
+        
+        If no TTS engine is available, logs a fallback message and returns. Any exceptions raised while issuing speech commands or from the worker are caught and logged; exceptions are not propagated.
+        
+        Parameters:
+            text (str): The text to synthesize and speak.
+        """
         try:
             with self._lock:
                 if not self.engine:
@@ -106,7 +133,14 @@ class TTSManager:
             logging.exception("TTS worker failed")
 
     def speak(self, text: str):
-        """Enqueue text for speech synthesis in background."""
+        """
+        Enqueue the provided text to be spoken asynchronously by the manager.
+        
+        If TTS is disabled, this is a no-op. If enqueuing fails, the failure is logged and the text is written to the log as a fallback.
+        
+        Parameters:
+            text (str): The text to speak.
+        """
         if not self.enabled:
             return
         try:
@@ -118,10 +152,16 @@ class TTSManager:
             logging.info("TTS fallback: %s", text)
 
     def list_voices(self):
-        """Return a list of available voices from the underlying engine.
-
-        Each entry is a dict with at least `id` and `name`, and an optional
-        `languages` entry.
+        """
+        Retrieve available TTS voices from the underlying engine.
+        
+        Each voice is represented as a dict with keys:
+        - `id` (str): voice identifier (falls back to `name` or str(voice) if missing)
+        - `name` (str): human-readable voice name
+        - `languages` (list): list of language tags (may be empty)
+        
+        Returns:
+            list: A list of voice dictionaries as described above. Returns an empty list if no engine is available or on error.
         """
         voices = []
         try:
@@ -145,9 +185,15 @@ class TTSManager:
         return voices
 
     def set_preferred_voice(self, voice_id: str, voice_language: Optional[str] = None):
-        """Set the preferred voice on the engine and update the manager state.
-
-        Pass an empty string to revert to the engine default.
+        """
+        Update the manager's preferred TTS voice and apply it to the underlying engine if available.
+        
+        Parameters:
+            voice_id (str): Voice identifier or display name to select. Pass an empty string to clear the preference and revert to the engine default.
+            voice_language (Optional[str]): Optional language code to store as the preferred voice language for future selection.
+        
+        Returns:
+            bool: `True` if the preferred voice was applied to the engine or the preference was cleared successfully, `False` otherwise (including when no engine is available or the specified voice could not be found/applied).
         """
         try:
             # Update internal preferred values
@@ -202,7 +248,12 @@ _TTS_MANAGER_INSTANCE = None
 
 
 def get_tts_manager():
-    """Get the singleton TTS manager instance."""
+    """
+    Get the singleton TTSManager, creating it lazily with thread-safe initialization.
+    
+    Returns:
+        TTSManager: The singleton TTSManager instance.
+    """
     global _TTS_MANAGER_INSTANCE
     if _TTS_MANAGER_INSTANCE is None:
         with _tts_manager_lock:

@@ -13,7 +13,15 @@ try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
     def gettext(key):
-        """Fallback translation: return the given key unchanged."""
+        """
+        Return the translation for the given key using a no-op fallback.
+        
+        Parameters:
+            key (str): Translation key or message identifier.
+        
+        Returns:
+            str: The input key unchanged.
+        """
         return key
 
 try:
@@ -32,7 +40,12 @@ class ReplayListMenu:
     """Menu for listing and selecting replays."""
 
     def __init__(self, replay_manager: ReplayManager):
-        """Initialize replay list menu."""
+        """
+        Create a ReplayListMenu bound to the provided ReplayManager.
+        
+        Parameters:
+        	replay_manager (ReplayManager): Manager used to list, delete, and access replay files and metadata.
+        """
         self.replay_manager = replay_manager
         self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
         self.text_font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
@@ -183,7 +196,12 @@ class ReplayViewer:
     """Viewer for playing back replays."""
 
     def __init__(self, replay_player: ReplayPlayer):
-        """Initialize replay viewer."""
+        """
+        Initialize the ReplayViewer with a ReplayPlayer and prepare fonts used by the HUD and on-screen text.
+        
+        Parameters:
+            replay_player (ReplayPlayer): Player instance used to control playback and provide playback state (progress, time, pause/play, speed).
+        """
         self.replay_player = replay_player
         self.title_font = pygame.font.Font(None, 48)
         self.text_font = pygame.font.Font(None, 32)
@@ -215,7 +233,14 @@ class ReplayViewer:
         return None
 
     def draw_hud(self, screen):
-        """Draw replay HUD with controls and info."""
+        """
+        Render the replay HUD overlay onto the given screen.
+        
+        Displays playback status (playing/paused), a progress bar, current and total time, playback speed, control hints, and a replay label in the top-right corner by drawing directly onto the provided pygame surface.
+        
+        Parameters:
+            screen (pygame.Surface): Target surface to render the HUD onto.
+        """
         # use module-level gettext
         # Draw control bar at bottom
         bar_height = 80

@@ -6,7 +6,13 @@ import json
 class Achievement:
     """Represents a single achievement with name, description, and unlock status."""
     def __init__(self, name, description):
-        """Initialize an achievement with name and description."""
+        """
+        Create an Achievement with a name, description, and default locked state.
+        
+        Parameters:
+            name (str): Display name of the achievement.
+            description (str): Short description shown when the achievement is unlocked.
+        """
         self.name = name
         self.description = description
         self.unlocked = False
@@ -19,7 +25,15 @@ class Achievement:
 class AchievementSystem:
     """Manages achievements, loading, saving, and unlocking."""
     def __init__(self, achievements_file="achievements.json"):
-        """Initialize the achievement system with file path."""
+        """
+        Initialize the achievement system and load persisted unlocked achievements.
+        
+        Parameters:
+            achievements_file (str): Path to the JSON file used to persist unlocked achievements. Defaults to "achievements.json".
+        
+        Description:
+            Sets up internal state (file path, achievement list, notification callback), populates the standard achievements, and loads any previously unlocked achievements from the specified file.
+        """
         self.achievements_file = achievements_file
         self.achievements = []
         self.notification_callback = None
@@ -27,11 +41,22 @@ class AchievementSystem:
         self.load_unlocked_achievements()
 
     def set_notification_callback(self, callback):
-        """Set the callback function for achievement notifications."""
+        """
+        Register a callback to be invoked when an achievement is unlocked.
+        
+        Parameters:
+            callback (callable): A function accepting two positional arguments: (name: str, payload: str).
+                - `name` is the achievement name.
+                - `payload` is either ASCII art for the achievement (when enabled and available) or the achievement description.
+        """
         self.notification_callback = callback
 
     def initialize_standard_achievements(self):
-        """Initialize the list of standard achievements."""
+        """
+        Populate self.achievements with the application's predefined standard Achievement instances.
+        
+        Creates Achievement objects for the canonical set of in-game achievements (name and description) and appends them to the system's in-memory achievements list; logs the total count added.
+        """
         standard_achievements = [
             ("First Blood", "Destroy your first asteroid."),
             ("Survivor", "Survive for 10 minutes."),
@@ -53,7 +78,11 @@ class AchievementSystem:
         )
 
     def load_unlocked_achievements(self):
-        """Load unlocked achievements from the JSON file."""
+        """
+        Load unlocked achievements from the achievements JSON file.
+        
+        Marks in-memory Achievement instances as unlocked when the file contains entries with "unlocked": true, prints a summary of loaded vs total achievements, and leaves achievements locked while printing an explanatory message if the file is missing or contains invalid JSON.
+        """
         try:
             with open(self.achievements_file, "r", encoding="utf-8") as file:
                 data = json.load(file)
@@ -74,7 +103,11 @@ class AchievementSystem:
             print(f"Error loading achievements file: {e}")
 
     def save_unlocked_achievements(self):
-        """Save unlocked achievements to the JSON file."""
+        """
+        Persist currently unlocked achievements to the configured JSON file.
+        
+        Writes a JSON array of unlocked achievements (each with name, description, and unlocked=true) to the achievements file. If no achievements are unlocked, writes an empty list to avoid leaving stale data. File I/O errors are caught and reported via printed messages; the method does not raise on OSError.
+        """
         unlocked_achievements = [
             {"name": achievement.name, "description": achievement.description, "unlocked": True}
             for achievement in self.achievements
@@ -98,17 +131,39 @@ class AchievementSystem:
                 print(f"Failed to write empty achievements file {self.achievements_file}: {e}")
 
     def load_achievements(self):
-        """Load achievements (delegates to load_unlocked_achievements)."""
+        """
+        Load previously unlocked achievements from persistent storage into the in-memory list.
+        
+        This method preserves the public API for callers that expect a `load_achievements` entrypoint and may be extended in the future.
+        """
         # Delegate to existing loader that reads unlocked achievements from file.
         # Keep this method for compatibility and potential future expansion.
         return self.load_unlocked_achievements()
 
     def save_achievements(self):
-        """Save achievements (delegates to save_unlocked_achievements)."""
+        """
+        Persist the currently unlocked achievements to the configured achievements file.
+        
+        This writes the set of unlocked achievements so future runs can restore their state.
+        """
         self.save_unlocked_achievements()
 
     def unlock(self, name, use_ascii=False):
-        """Unlock an achievement by name. If use_ascii is True, show ASCII art in notification."""
+        """
+        Unlock the achievement matching `name` and persist the unlocked state.
+        
+        If the achievement is unlocked and a notification callback is registered, the callback
+        is invoked with the achievement name and either ASCII art (when `use_ascii` is True
+        and art is available) or the achievement description.
+        
+        Parameters:
+            name (str): The name of the achievement to unlock.
+            use_ascii (bool): When True, prefer sending ASCII art to the notification callback
+                if an ASCII representation exists for the achievement.
+        
+        Returns:
+            `True` if an achievement was unlocked by this call, `False` otherwise.
+        """
         for achievement in self.achievements:
             if achievement.name == name and not achievement.unlocked:
                 achievement.unlock()
@@ -141,14 +196,32 @@ class AchievementSystem:
         return False
 
     def is_unlocked(self, name):
-        """Check if an achievement is unlocked."""
+        """
+        Determine whether the achievement with the given name is unlocked.
+        
+        Parameters:
+            name (str): The achievement name to check.
+        
+        Returns:
+            bool: `True` if the achievement exists and is unlocked, `False` otherwise.
+        """
         for achievement in self.achievements:
             if achievement.name == name:
                 return achievement.unlocked
         return False
 
     def check_fleet_commander(self, ships):
-        """Check and unlock Fleet Commander achievement if all ships are unlocked."""
+        """
+        Check whether all ships are unlocked and unlock the "Fleet Commander" achievement.
+        
+        Performs validation on the provided ships object (it must have `unlocked_ships` and `ships` attributes). If the counts of unlocked ships and total ships are equal, unlocks the "Fleet Commander" achievement and requests an ASCII notification.
+        
+        Parameters:
+            ships: An object with `unlocked_ships` and `ships` attributes (both iterable/collection-like).
+        
+        Returns:
+            True if the achievement was unlocked, False otherwise (including when `ships` is invalid or an error occurs).
+        """
         # Defensive checks: ensure ships object exists and has expected attributes
         if not ships:
             return False
@@ -165,10 +238,17 @@ class AchievementSystem:
             return False
         return False
 
-    def unlock_achievement(self, name, use_ascii=True):
-        """Deprecated compatibility wrapper for older API tests.
-
-        Historically tests and older code called `unlock_achievement(name)`.
-        Keep a small wrapper that forwards to the newer `unlock` method.
+    def unlock_achievement(self, name, use_ascii=False):
+        """
+        Provide a backward-compatible API to unlock an achievement by name.
+        
+        Deprecated: kept for backward compatibility with older tests and code.
+        
+        Parameters:
+            name (str): The name of the achievement to unlock.
+            use_ascii (bool): If True, request an ASCII-art notification when unlocking.
+        
+        Returns:
+            bool: `True` if the achievement was unlocked, `False` otherwise.
         """
         return self.unlock(name, use_ascii=use_ascii)

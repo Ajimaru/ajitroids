@@ -17,11 +17,33 @@ class Shot(CircleShape):
 
     @classmethod
     def set_enemy_ships(cls, enemy_ships):
-        """Set enemy ships group for collision."""
+        """
+        Configure the class-level group of enemy ships used for collision and homing.
+        
+        Parameters:
+            enemy_ships: A collection or group object containing enemy ship instances to be used for collision checks and target acquisition by Shot instances.
+        """
         cls.enemy_ships_group = enemy_ships
 
     def __init__(self, x, y, shot_type=C.WEAPON_STANDARD):
-        """Initialize shot with position and type."""
+        """
+        Create a Shot at the given position configured for the specified weapon type.
+        
+        Initializes public instance attributes used by the shot's lifecycle and behavior including:
+        - velocity: 2D velocity vector (pygame.Vector2).
+        - shot_type: weapon type constant.
+        - lifetime: seconds before the shot expires.
+        - damage: damage dealt on impact.
+        - target: current homing target (or None).
+        - homing_power: homing strength (nonzero for missiles).
+        - radius, penetrating, and max_turn_rate as applicable per weapon type.
+        - color: rendering color selected from weapon palette.
+        
+        Parameters:
+            x (float): Initial x-coordinate of the shot.
+            y (float): Initial y-coordinate of the shot.
+            shot_type (int): Weapon type constant that selects per-type properties (e.g., laser, missile, shotgun).
+        """
         super().__init__(x, y, 3)
         self.velocity = pygame.Vector2(0, 0)
         self.shot_type = shot_type
@@ -52,7 +74,14 @@ class Shot(CircleShape):
         self.color = C.WEAPON_COLORS[shot_type]
 
     def update(self, dt):
-        """Update shot position and lifetime."""
+        """
+        Advance the shot's state: optionally seek a target, move by velocity, and decrease lifetime.
+        
+        If the shot is a missile with homing enabled and collision groups are available, this will attempt to acquire/adjust toward a target before moving. Then the shot's position is advanced by velocity * dt. The shot's lifetime is reduced by dt and the shot is removed when lifetime is less than or equal to zero.
+        
+        Parameters:
+            dt (float): Time step in seconds to advance the shot.
+        """
         if self.shot_type == C.WEAPON_MISSILE and self.homing_power > 0 and (Shot.asteroids_group or Shot.enemy_ships_group):
             self.seek_target(dt)
 
@@ -63,7 +92,14 @@ class Shot(CircleShape):
             self.kill()
 
     def draw(self, screen):
-        """Draw shot on screen."""
+        """
+        Render the shot to the given Pygame surface according to its weapon type.
+        
+        For lasers this draws a short line in the shot's direction (falls back to right when velocity is zero). For missiles this draws a circle and an orange tail behind the missile (falls back to downward tail when velocity is zero). For other shot types this draws a filled circle at the shot position.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the shot onto.
+        """
         if self.shot_type == C.WEAPON_LASER:
             # Guard against zero-length velocity before normalizing
             if self.velocity.length() > 0:
@@ -92,7 +128,14 @@ class Shot(CircleShape):
             pygame.draw.circle(screen, self.color, pos_tuple, self.radius)
 
     def seek_target(self, dt):
-        """Seek nearest target for homing."""
+        """
+        Acquire the nearest alive target from asteroid and enemy ship groups and steer the shot toward it.
+        
+        If neither collision group exists the method does nothing. If there is no current valid target, it selects the closest alive object from Shot.asteroids_group and Shot.enemy_ships_group and assigns it to `self.target`. If `self.target` is alive, adjusts `self.velocity` by rotating its direction toward the target by at most `self.max_turn_rate * dt`, preserving the current speed.
+        
+        Parameters:
+            dt (float): Time step in seconds used to scale the maximum turn applied this update.
+        """
         if not Shot.asteroids_group and not Shot.enemy_ships_group:
             return
 

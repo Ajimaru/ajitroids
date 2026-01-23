@@ -10,7 +10,17 @@ from modul.circleshape import CircleShape
 class PowerUp(CircleShape):
     """Represents a power-up item that can be collected by the player."""
     def __init__(self, x, y, powerup_type=None):
-        """Initialize a power-up with position and type."""
+        """
+        Create a PowerUp at the given position and initialize its visual and runtime properties.
+        
+        Parameters:
+            x (float): X coordinate of the power-up's center.
+            y (float): Y coordinate of the power-up's center.
+            powerup_type (str, optional): Specific power-up type (one of C.POWERUP_TYPES). If omitted, a type is chosen at random.
+        
+        Description:
+            Sets the power-up's type and color, initializes rotation to 0, assigns a random velocity with each component in the range [-30, 30], and sets the lifetime to C.POWERUP_LIFETIME.
+        """
         super().__init__(x, y, C.POWERUP_RADIUS)
         self.type = powerup_type if powerup_type else random.choice(C.POWERUP_TYPES)
         self.color = C.POWERUP_COLORS[self.type]
@@ -19,7 +29,14 @@ class PowerUp(CircleShape):
         self.lifetime = C.POWERUP_LIFETIME
 
     def update(self, dt):
-        """Update power-up position, rotation, and lifetime."""
+        """
+        Advance the power-up's state over a time step.
+        
+        Updates position by moving along the current velocity, increments rotation at 90 degrees per second, decreases remaining lifetime by the elapsed time, and removes the power-up if its lifetime is less than or equal to zero.
+        
+        Parameters:
+            dt (float): Time step in seconds.
+        """
         self.position += self.velocity * dt
         self.rotation += 90 * dt
 
@@ -28,7 +45,14 @@ class PowerUp(CircleShape):
             self.kill()
 
     def draw(self, screen):
-        """Draw the power-up with pulsing effect based on lifetime."""
+        """
+        Render the power-up at its position with a pulsing scale that accelerates as lifetime nears zero and draw type-specific decorative graphics.
+        
+        The visual pulse increases in frequency when lifetime is less than or equal to 3 seconds. The method draws a base outlined circle scaled by the pulse and additional decorative shapes depending on the power-up type (recognized types: "shield", "triple_shot", "rapid_fire", "laser_weapon", "missile_weapon", "shotgun_weapon").
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the power-up onto.
+        """
         pulse_scale = 1.0
         if self.lifetime <= 3.0:
             pulse_frequency = 2.0 + (3.0 - self.lifetime) * 2

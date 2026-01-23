@@ -38,7 +38,16 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i
 class Player(CircleShape):
     """Player character with movement, shooting, and powerups."""
     def __init__(self, x, y, ship_type="standard"):
-        """Initialize player with position, ship type, and state."""
+        """
+        Create a Player positioned at (x, y) with the given ship configuration and initialize gameplay state.
+        
+        Initializes movement, timers, weapon state, powerup flags, audio, and loads ship-specific data before applying ship modifiers.
+        
+        Parameters:
+            x (float): Initial x-coordinate of the player.
+            y (float): Initial y-coordinate of the player.
+            ship_type (str): Identifier for the ship configuration to load (e.g., "standard").
+        """
         super().__init__(x, y, C.PLAYER_RADIUS)
         self.rotation = 0
         self.velocity = pygame.Vector2(0, 0)
@@ -63,7 +72,18 @@ class Player(CircleShape):
         self.apply_ship_modifiers()
 
     def apply_ship_modifiers(self):
-        """Apply ship-specific modifiers to player attributes."""
+        """
+        Configure the player's movement and combat modifiers based on loaded ship data.
+        
+        Reads `self.ship_data` to set `self.base_speed` and `self.base_turn_speed` from global constants scaled by the ship's
+        `speed_multiplier` and `turn_speed_multiplier`. Also sets `self.shield_duration_multiplier`, `self.damage_multiplier`,
+        and `self.has_rear_shot` according to the ship's `special_ability` value:
+        
+        - "rear_shot": enables rear shots; default multipliers (1.0).
+        - "speed_boost": increases base speed by an additional 20%; rear shots disabled; default multipliers (1.0).
+        - "double_damage": doubles damage; rear shots disabled.
+        - any other value: applies default multipliers (1.0) and disables rear shots.
+        """
         self.base_speed = C.PLAYER_SPEED * self.ship_data["speed_multiplier"]
         self.base_turn_speed = C.PLAYER_TURN_SPEED * self.ship_data["turn_speed_multiplier"]
 
@@ -87,7 +107,14 @@ class Player(CircleShape):
             self.has_rear_shot = False
 
     def draw(self, screen):
-        """Draw the player ship and shield on the screen."""
+        """
+        Render the player's ship and active shield onto the given screen surface.
+        
+        The ship blinks while invincible (visible during the blink-on interval). If a shield is active the ship uses the shield color and an animated, pulsing translucent circular shield is drawn around the player.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to render the ship and shield onto.
+        """
         if (not self.invincible or pygame.time.get_ticks() % 200 < 100) or self.shield_active:
             if self.shield_active:
                 ship_color = C.POWERUP_COLORS.get("shield", "cyan")
@@ -109,7 +136,13 @@ class Player(CircleShape):
             screen.blit(shield_surf, (self.position.x - self.radius * 1.5, self.position.y - self.radius * 1.5))
 
     def triangle(self):
-        """Return the coordinates of the player's ship triangle."""
+        """
+        Compute the triangle vertices representing the player's ship shape.
+        
+        Returns:
+            list[pygame.Vector2]: Three vertex positions [front, rear-left, rear-right] for the ship's triangle,
+            computed from the player's current position, rotation, and radius.
+        """
         forward = pygame.Vector2(0, -1).rotate(self.rotation)
         right = pygame.Vector2(1, 0).rotate(self.rotation) * self.radius / 1.5
         a = self.position + forward * self.radius
@@ -118,7 +151,14 @@ class Player(CircleShape):
         return [a, b, c]
 
     def update(self, dt):
-        """Update player state, handle input, and powerup timers."""
+        """
+        Update the player's position, input-driven actions, and time-limited status effects.
+        
+        Processes player input (rotation, thrust/reverse, shooting, weapon switching), clamps and applies velocity with friction, advances position by dt, and decrements timers that control shooting cooldown, invincibility, shield, triple-shot, rapid-fire, and weapon-switch cooldowns; toggles corresponding flags when timers expire.
+        
+        Parameters:
+            dt (float): Time step in seconds since the last update.
+        """
 
         if input_utils.is_action_pressed("rotate_left"):
             self.rotate(-self.base_turn_speed * dt)
@@ -172,7 +212,11 @@ class Player(CircleShape):
             self.weapon_switch_timer -= dt
 
     def shoot(self):
-        """Handle shooting logic for the current weapon."""
+        """
+        Execute the player's firing action for the currently selected weapon.
+        
+        If the weapon cooldown has expired, this method will fire shots according to the active weapon and power-ups, perform automatic weapon switching when the selected special weapon has no ammo, consume ammo for weapons that require it, optionally spawn rear shots if the ship supports them, play the shooting sound if available, and reset the shooting cooldown to the rapid-fire or standard interval.
+        """
         if self.shoot_timer <= 0:
 
             if self.current_weapon != C.WEAPON_STANDARD and self.weapons[self.current_weapon] <= 0:
@@ -239,7 +283,11 @@ class Player(CircleShape):
                 self.shoot_timer = C.PLAYER_SHOOT_COOLDOWN
 
     def fire_triple_shot(self):
-        """Fire three shots in a spread pattern."""
+        """
+        Spawn three forward shots in a three-way spread centered on the player's facing direction.
+        
+        Creates a center shot plus two additional shots offset by ±15 degrees from the player's rotation, each using the player shoot speed. If the player has a rear shot ability (`has_rear_shot` is true), also spawns a rear-facing shot at 80% of the forward shot speed.
+        """
         shot1 = Shot(self.position.x, self.position.y)
         shot1.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * C.PLAYER_SHOOT_SPEED
 
@@ -259,7 +307,11 @@ class Player(CircleShape):
         self.invincible_timer = C.INVINCIBILITY_TIME
 
     def respawn(self):
-        """Reset player state and position after death."""
+        """
+        Reset the player to the spawn position and clear transient combat state.
+        
+        Sets the player's position to the screen center, zeroes velocity and rotation, enables temporary invincibility for 3.0 seconds, and clears active powerups and their timers (shield, triple shot, rapid fire) as well as the shooting cooldown.
+        """
         self.position.x = C.SCREEN_WIDTH / 2
         self.position.y = C.SCREEN_HEIGHT / 2
         self.velocity = pygame.Vector2(0, 0)
@@ -279,7 +331,23 @@ class Player(CircleShape):
         print("Player respawned with 3 seconds of invincibility")
 
     def activate_powerup(self, powerup_type):
-        """Activate the specified powerup effect."""
+        """
+        Apply a powerup effect to the player.
+        
+        Parameters:
+            powerup_type (str): Type of powerup to activate. Supported values:
+                - "shield": activates a shield, sets the shield timer to C.SHIELD_DURATION, and grants temporary invincibility.
+                - "triple_shot": enables triple-shot mode and sets the triple-shot timer to C.TRIPLE_SHOT_DURATION.
+                - "rapid_fire": enables rapid-fire mode and sets the rapid-fire timer to C.RAPID_FIRE_DURATION.
+                - "laser_weapon": adds laser ammo (capped at C.LASER_AMMO) and switches the current weapon to laser.
+                - "missile_weapon": adds missile ammo (capped at C.MISSILE_AMMO) and switches the current weapon to missile.
+                - "shotgun_weapon": adds shotgun ammo (capped at C.SHOTGUN_AMMO) and switches the current weapon to shotgun.
+        
+        Effects:
+            - Updates internal state flags and timers for temporary powerups.
+            - Increments weapon ammo for weapon powerups (bounded by each weapon's max) and switches the active weapon.
+            - Emits a console message when a weapon powerup is activated.
+        """
         if powerup_type == "shield":
             self.shield_active = True
             self.shield_timer = C.SHIELD_DURATION
@@ -309,7 +377,19 @@ class Player(CircleShape):
             print(f"Shotgun activated! Ammo: {self.weapons[C.WEAPON_SHOTGUN]}")
 
     def cycle_weapon(self):
-        """Switch to the next available weapon."""
+        """
+        Advance the player's active weapon to the next available option.
+        
+        If called while the weapon switch debounce timer is active, no change occurs. Otherwise this method:
+        - Sets the weapon switch debounce timer to 0.2 seconds.
+        - Iterates the available weapons in order, starting after the current weapon, and selects the first weapon that is either the standard weapon or has remaining ammo.
+        - Updates `self.current_weapon` to the chosen weapon; falls back to the standard weapon if none other are suitable.
+        - Emits a console message indicating the new weapon and its ammo when applicable.
+        
+        Side effects:
+        - Modifies `self.weapon_switch_timer` and `self.current_weapon`.
+        - Prints status messages to stdout.
+        """
         if self.weapon_switch_timer > 0:
             return
 
@@ -334,7 +414,14 @@ class Player(CircleShape):
         print(f"Fallback to standard weapon: {self.current_weapon}")
 
     def draw_weapon_hud(self, screen):
-        """Draw the player's weapon HUD on the screen."""
+        """
+        Render the player's weapon HUD in the top-right corner of the screen.
+        
+        Displays a panel listing each weapon with a colored icon, short name (STD/LSR/MSL/SHG), and current ammo or "∞" for unlimited. Highlights the currently selected weapon and dims entries with no ammo. Also shows a small hint label for switching weapons.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the HUD onto.
+        """
         font_small = pygame.font.Font(None, 18)
 
         weapons_panel_x = C.SCREEN_WIDTH - 120

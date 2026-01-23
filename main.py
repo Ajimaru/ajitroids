@@ -109,6 +109,14 @@ def setup_logging(args):
 
 def main(args=None):
 
+    """
+    Start and run the Ajitroids game application main loop.
+    
+    Initializes logging, audio, settings, global game state, game objects, UI screens, and subsystems, applies command-line overrides, then enters the main event/update/render loop until the game exits. The function may return to the caller when the player quits or when the application flow requests termination.
+    
+    Parameters:
+        args (argparse.Namespace | None): Optional pre-parsed command-line arguments. If None, arguments are parsed from sys.argv.
+    """
     if args is None:
         args = parse_arguments()
 
@@ -1512,7 +1520,14 @@ def toggle_fullscreen():
 
 
 def quick_restart_game():
-    """Quickly restart the game without going through menus."""
+    """
+    Restart the current play session in-place by resetting game state, clearing active objects, and beginning a new recording.
+    
+    Performs these observable actions: stops and attempts to save any active replay recording, resets score/lives/level and tracking statistics, clears non-player game objects, respawns the player at the default position, starts a new session and replay recording with the currently selected ship and difficulty, and spawns the initial asteroids for the new game.
+    
+    Returns:
+        state (str): The next game state, `"playing"`.
+    """
     global score, lives, level, last_spawn_time, spawn_interval, current_enemy_ships
     global level_up_timer, level_up_text, boss_active, boss_defeated_timer, boss_defeated_message
     global powerups_collected, asteroids_destroyed, shields_used, triple_shots_used, speed_boosts_used

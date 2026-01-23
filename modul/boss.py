@@ -11,7 +11,16 @@ from modul.particle import Particle
 class Boss(CircleShape):
     """Boss enemy with health, movement, and attack patterns."""
     def __init__(self, level):
-        """Initialize boss with level-based stats."""
+        """
+        Create a Boss positioned at screen center and initialize its level-dependent stats and runtime state.
+        
+        Parameters:
+            level (int): Global game level used to derive boss difficulty; boss_level is computed as level // 10.
+        
+        Notes:
+            - max_health is computed as C.BOSS_BASE_HEALTH + (boss_level - 1) * C.BOSS_HEALTH_PER_LEVEL and health is set to max_health.
+            - Visual and runtime state initialized: color, pulse and rotation timers, velocity, target_position, movement and attack timers/phases, hit flash, and death sequence flags.
+        """
         super().__init__(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2, C.BOSS_RADIUS)
         self.boss_level = level // 10
         self.max_health = C.BOSS_BASE_HEALTH + (self.boss_level - 1) * C.BOSS_HEALTH_PER_LEVEL
@@ -31,7 +40,13 @@ class Boss(CircleShape):
         self.death_particles_emitted = False
 
     def update(self, dt, player_position=None):
-        """Update boss state, movement, and attacks."""
+        """
+        Advance the boss's timers, handle death sequence, update movement and attack state, and apply velocity for this frame.
+        
+        Parameters:
+        	dt (float): Time elapsed since the last update, in seconds.
+        	player_position (pygame.Vector2 or None): Current player position used for chase behavior; pass None if unavailable.
+        """
         if self.death_timer >= 0:
             self.death_timer += dt
             if self.death_timer >= C.BOSS_DEATH_DURATION:
@@ -52,7 +67,20 @@ class Boss(CircleShape):
         self._constrain_to_screen()
 
     def _update_movement(self, dt, player_position):
-        """Update boss movement based on current phase."""
+        """
+        Advance the boss's movement state and update its target velocity according to the current movement phase.
+        
+        Parameters:
+            dt (float): Time elapsed since the last update in seconds; used to advance the movement timer and to time random target selection.
+            player_position (pygame.Vector2 | None): Player world position used when in the "chase" phase; if None, the boss will not chase the player.
+        
+        Detailed behavior:
+            - Phases: "center", "random", "chase". Each phase runs for a fixed duration before transitioning:
+                - "center": move toward the screen center at normal speed.
+                - "random": periodically pick a new random target within screen margins and move toward it at reduced speed.
+                - "chase": move toward the provided player_position at increased speed.
+            - Transitions cycle between phases based on the movement timer; if no player_position is available when a transition would select "chase", the boss returns to "center".
+        """
         self.movement_timer += dt
         if self.movement_phase == "center" and self.movement_timer >= 3.0:
             self.movement_phase = "random"
@@ -77,11 +105,15 @@ class Boss(CircleShape):
             self._move_towards(player_position, C.BOSS_MOVE_SPEED * 1.2)
 
     def _move_towards(self, target, speed, dt=0):
-        """Move the boss toward `target` at given `speed`.
-
-        Accepts an optional `dt` parameter used to decay velocity when already
-        at the target. Tests call this method with a `dt` argument, so keep
-        backward-compatible behavior while making velocity decay time-aware.
+        """
+        Move the boss toward a target point.
+        
+        Sets the boss's velocity to a vector pointing at `target` with magnitude `speed`. If the boss is already at `target`, reduces the current velocity by a decay factor; when `dt` is provided the decay is scaled by time, otherwise a fixed decay factor is used.
+        
+        Parameters:
+            target (Vector2): Destination position to move toward.
+            speed (float): Desired speed when moving toward the target.
+            dt (float, optional): Elapsed time used to scale the velocity decay when at the target. If zero or omitted, a fixed decay factor is applied.
         """
         direction = target - self.position
         if direction.length() > 0:
@@ -93,7 +125,11 @@ class Boss(CircleShape):
             self.velocity *= factor
 
     def _constrain_to_screen(self):
-        """Keep boss within screen boundaries."""
+        """
+        Keep the boss inside the screen bounds and reflect velocity when it crosses an edge.
+        
+        If the boss position moves beyond the screen margin equal to its radius, clamp the position to that margin and invert the corresponding velocity component while halving its magnitude.
+        """
         margin = self.radius
         if self.position.x < margin:
             self.position.x = margin
@@ -109,7 +145,17 @@ class Boss(CircleShape):
             self.velocity.y = -abs(self.velocity.y) * 0.5
 
     def _update_attack(self, dt):
-        """Update attack timer and trigger attacks."""
+        """
+        Advance the boss's attack timing and trigger the next attack pattern when the interval elapses.
+        
+        Parameters:
+        	dt (float): Elapsed time in seconds since the last update; added to the internal attack timer.
+        
+        Description:
+        	If the internal attack timer meets or exceeds the configured attack interval, this increments
+        	the attack pattern (cycling through available patterns), resets the attack timer to zero,
+        	and invokes the boss's attack behavior.
+        """
         self.attack_timer += dt
         if self.attack_timer >= self.attack_interval:
             self.attack()
@@ -117,7 +163,17 @@ class Boss(CircleShape):
             self.attack_pattern = (self.attack_pattern + 1) % 3
 
     def attack(self):
-        """Generate attack pattern data."""
+        """
+        Selects the next attack pattern and returns a configuration describing that attack.
+        
+        The returned configuration describes the attack kind and how many projectiles it will produce; the projectile count scales with the boss's level.
+        
+        Returns:
+            dict: {
+                'type': one of 'circle', 'spiral', 'targeted',
+                'count': int — number of projectiles for this attack (scaled by boss level)
+            }
+        """
         if self.attack_pattern == 0:
             return {"type": "circle", "count": 8 + self.boss_level * 2}
         elif self.attack_pattern == 1:
@@ -126,7 +182,15 @@ class Boss(CircleShape):
             return {"type": "targeted", "count": 3 + self.boss_level}
 
     def take_damage(self, damage):
-        """Apply damage and handle death."""
+        """
+        Reduce the boss's health by a given amount, emit hit effects, and initiate the death sequence if health is depleted.
+        
+        Parameters:
+            damage (float): Amount of health to subtract from the boss.
+        
+        Returns:
+            bool: `True` if this call started the death sequence (health <= 0 and death was not already triggered), `False` otherwise.
+        """
         self.health -= damage
         self.hit_flash = 0.1
         for _ in range(3):
@@ -137,7 +201,14 @@ class Boss(CircleShape):
         return False
 
     def draw(self, screen):
-        """Draw the boss with health bar."""
+        """
+        Render the boss and its health bar onto the given surface.
+        
+        Renders the boss's visual representation (including a brief white flash when recently hit) and the health bar positioned above the boss.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the boss and its health bar on.
+        """
         color = self.color
         if self.hit_flash > 0:
             color = (255, 255, 255)
@@ -145,7 +216,13 @@ class Boss(CircleShape):
         self._draw_health_bar(screen)
 
     def _draw_boss_shape(self, screen, color):
-        """Draw the boss's visual shape."""
+        """
+        Render the boss's circular body, inner core, orbiting satellites, or its death animation.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the boss on.
+            color (tuple[int, int, int]): RGB color used for the boss visuals.
+        """
         if self.death_timer >= 0:
             alpha = int(255 * (1 - self.death_timer / C.BOSS_DEATH_DURATION))
             pulsating_radius = self.radius * (1 + 0.5 * math.sin(self.death_timer * 10))
@@ -172,7 +249,14 @@ class Boss(CircleShape):
             pygame.draw.circle(screen, color, satellite_pos, satellite_radius)
 
     def _draw_health_bar(self, screen):
-        """Draw the boss's health bar."""
+        """
+        Draws the boss's health bar above its position and skips rendering during the death sequence.
+        
+        The bar's width scales with the boss radius and shows a dark background with a foreground whose width is proportional to current health. Foreground color is green when health > 0.6, yellow when health > 0.3, and red otherwise. The bar is positioned above the boss and is not drawn if the death sequence is active.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the health bar on.
+        """
         if self.death_timer >= 0:
             return
         bar_width = self.radius * 2.5

@@ -15,7 +15,11 @@ current_settings = None
 class Settings:
     """Manages user settings with persistence to JSON file."""
     def __init__(self):
-        """Initialize settings with default values."""
+        """
+        Initialize a Settings instance with application default values.
+        
+        Sets default preferences for audio (music_on, sound_on, music_volume, sound_volume, sound_theme, dynamic_music_enabled, voice_announcements_enabled), display and gameplay (fullscreen, difficulty), per-announcement enable flags (`announcement_types`), control key mappings (`controls`), and language/tts preferences (`language`, `tts_voice`, `tts_voice_language`, `show_tts_in_options`). After initializing these defaults the method attempts to load persisted values from disk, registers this instance as the module runtime singleton (`current_settings`), and prints a brief diagnostic summary of the active settings.
+        """
         self.music_on = True
         self.sound_on = True
         self.fullscreen = False
@@ -77,7 +81,14 @@ class Settings:
         print(f"  Theme={self.sound_theme}")
 
     def save(self):
-        """Save settings to file."""
+        """
+        Persist current settings to the "settings.json" file.
+        
+        Writes the instance's serializable settings fields as UTF-8 JSON to a file named "settings.json". Existing file will be overwritten.
+        
+        Returns:
+            bool: True if the settings were saved successfully, False if an error occurred while saving.
+        """
         settings_data = {
             "music_on": self.music_on,
             "sound_on": self.sound_on,
@@ -105,7 +116,14 @@ class Settings:
             return False
 
     def load(self):
-        """Load settings from file."""
+        """
+        Load settings from the "settings.json" file into this Settings instance.
+        
+        If the file is missing or cannot be parsed/applied, the method leaves the current in-memory defaults unchanged and returns False.
+        
+        Returns:
+            True if settings were successfully read from the file and applied, False otherwise.
+        """
         if not os.path.exists("settings.json"):
             print("No settings file found, using default values")
             return False

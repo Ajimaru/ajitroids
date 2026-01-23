@@ -17,7 +17,15 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - optional runtim
 
 
 def load_locale(lang_code: str):
-    """Load and return the locale dictionary for the given language code."""
+    """
+    Load and return the locale mapping for the specified language, caching the result and falling back to English on error.
+    
+    Parameters:
+        lang_code (str): BCP 47-like language code used to locate the corresponding JSON file (e.g., "en", "fr").
+    
+    Returns:
+        dict: Mapping of translation keys to localized strings for the requested language; returns an empty dict if the locale cannot be loaded and no English fallback is available.
+    """
     if lang_code in _locales_cache:
         return _locales_cache[lang_code]
 
@@ -36,15 +44,31 @@ def load_locale(lang_code: str):
 
 
 def t(key: str, lang_code: str = "en"):
-    """Return the localized string for the given key and language code."""
+    """
+    Retrieve the localized string for a given key in the specified language.
+    
+    Parameters:
+        key (str): The lookup key for the localized text.
+        lang_code (str): Language code to use (e.g., "en"); defaults to "en".
+    
+    Returns:
+        str: The localized string if present in the locale for `lang_code`, otherwise returns `key`.
+    """
     locale = load_locale(lang_code)
     return locale.get(key, key)
 
 
 def gettext(key: str):
-    """Get localized string for current settings language, fallback to English.
-
-    This consults the runtime `current_settings.language` when available.
+    """
+    Retrieve the localized text for a key using the runtime's configured language, falling back to English.
+    
+    Attempts to read the runtime language from settings_mod.current_settings.language; if a language is found, returns the localized text for that language. If the language is not set or an exception occurs while reading settings, a debug message is logged and the English localization is used.
+    
+    Parameters:
+        key (str): The localization key to look up.
+    
+    Returns:
+        str: The localized text for the resolved language. If no translation exists for the key, returns the key itself.
     """
     try:
         lang = getattr(settings_mod, "current_settings", None) if settings_mod else None
@@ -59,9 +83,9 @@ def gettext(key: str):
 
 
 def reload_locales():
-    """Clear the locale cache so subsequent gettext calls reload JSON files.
-
-    Call this after changing the active language to force fresh loading of
-    locale files. This is safe to call repeatedly.
+    """
+    Clear the internal locales cache so subsequent locale lookups reload JSON files.
+    
+    This forces the module to re-read locale JSON files on the next request; safe to call repeatedly.
     """
     _locales_cache.clear()

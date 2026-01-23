@@ -9,7 +9,21 @@ from modul.circleshape import CircleShape
 class BossProjectile(CircleShape):
     """Projectile fired by boss enemies."""
     def __init__(self, x, y, velocity, projectile_type="normal"):
-        """Initialize boss projectile with position, velocity, and type."""
+        """
+        Create a boss-fired projectile at (x, y) with a given velocity and visual/behavior type.
+        
+        Parameters:
+            x (float): Initial horizontal position of the projectile.
+            y (float): Initial vertical position of the projectile.
+            velocity (pygame.math.Vector2 | tuple): Initial velocity vector in pixels per second.
+            projectile_type (str): Visual/behavior type; commonly "normal", "homing", or "explosive". Defaults to "normal".
+        
+        Initial state:
+            - lifetime is set to 5.0 seconds.
+            - damage is set to 1.
+            - color is selected from C.BOSS_PROJECTILE_COLORS by type, falling back to C.BOSS_COLOR.
+            - rotation is set to 0 degrees and rotation_speed to 180 degrees/second.
+        """
         super().__init__(x, y, C.BOSS_PROJECTILE_RADIUS)
         self.velocity = velocity
         self.type = projectile_type
@@ -20,7 +34,14 @@ class BossProjectile(CircleShape):
         self.rotation_speed = 180
 
     def update(self, dt):
-        """Update projectile position, rotation, and lifetime."""
+        """
+        Advance the projectile's state for the given time step.
+        
+        Updates position and rotation, decrements remaining lifetime, and terminates the projectile when its lifetime reaches zero or when it moves outside the screen bounds (20 px margin).
+        
+        Parameters:
+            dt (float): Time step in seconds.
+        """
         self.position += self.velocity * dt
         self.rotation += self.rotation_speed * dt
         self.lifetime -= dt
@@ -35,7 +56,17 @@ class BossProjectile(CircleShape):
             self.kill()
 
     def draw(self, screen):
-        """Draw the projectile based on its type."""
+        """
+        Render the projectile onto the provided pygame surface.
+        
+        Renders visual representation according to the projectile's `type`:
+        - "normal": filled circle in `self.color` with an inner stroked white ring.
+        - "homing": rotated four-point polygon (diamond-like) using `self.rotation` and `self.radius`.
+        - "explosive": filled circle in `self.color` with two concentric stroked white rings.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the projectile on.
+        """
         if self.type == "normal":
             pygame.draw.circle(screen, self.color, self.position, self.radius)
             pygame.draw.circle(screen, (255, 255, 255), self.position, self.radius * 0.7, 1)

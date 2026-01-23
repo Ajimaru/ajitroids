@@ -915,7 +915,11 @@ class TestSoundTestMenu:
         assert result == "back"
 
     def test_soundtestmenu_handle_test_shoot(self, mock_sounds):
-        """Test playing shoot sound"""
+        """
+        Verify that selecting the "test_shoot" action plays the shoot sound and records the last played label.
+        
+        Asserts that SoundTestMenu.play action triggers mock_sounds.play_shoot exactly once and that menu.last_played is set to "Standard Shoot played".
+        """
 
         class DummySettings:
             """

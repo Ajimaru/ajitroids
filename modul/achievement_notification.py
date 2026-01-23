@@ -7,7 +7,15 @@ try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
     def gettext(key):
-        """Fallback translation returning the passed key when i18n is missing."""
+        """
+        Provide a fallback translation that returns the input key when internationalization is unavailable.
+        
+        Parameters:
+            key (str): The translation key or message identifier.
+        
+        Returns:
+            str: The original `key` unchanged.
+        """
         return key
 
 
@@ -15,11 +23,17 @@ class AchievementNotification:
     """Visual notification for unlocked achievements, including animation and display logic."""
 
     def __init__(self, achievement_name, achievement_description):
-        """Initialize an AchievementNotification.
-
+        """
+        Create an AchievementNotification and initialize its display state, timing, target position, and fonts.
+        
         Args:
-            achievement_name (str): Achievement name.
-            achievement_description (str): Achievement description.
+            achievement_name (str): The achievement title to show.
+            achievement_description (str): Short description of the achievement.
+        
+        Notes:
+            - display_time is set to 4.0 seconds and fade_time to 1.0 second.
+            - The notification is positioned near the top-right of the screen; target_x is derived from C.SCREEN_WIDTH.
+            - Fonts for title and description are created with sizes 32 and 20 respectively.
         """
         self.name = achievement_name
         self.description = achievement_description
@@ -37,7 +51,17 @@ class AchievementNotification:
         self.sound_played = False
 
     def update(self, _dt):
-        """Update animation progress; `_dt` accepted for API compatibility."""
+        """
+        Advance the notification's animation and screen position based on the real clock.
+        
+        Updates internal animation_progress and current_x for fade-in, steady display, and fade-out phases using the notification's start time, fade_time, and display_time.
+        
+        Parameters:
+            _dt (float): Ignored; present for API compatibility. Real elapsed time is measured via the system clock.
+        
+        Returns:
+            bool: `True` while the notification is still active, `False` after its display time has completed.
+        """
         current_time = time.time()
         elapsed = current_time - self.start_time
 
@@ -63,11 +87,24 @@ class AchievementNotification:
         return True
 
     def _ease_out(self, t):
-        """Ease out cubic animation function."""
+        """
+        Compute a cubic ease-out interpolation for a progress value.
+        
+        Parameters:
+            t (float): Progress in the range [0, 1].
+        
+        Returns:
+            float: Interpolated progress in the range [0, 1], using a cubic ease-out curve.
+        """
         return 1 - (1 - t) ** 3
 
     def draw(self, screen):
-        """Draw the achievement notification on the screen with fade effects."""
+        """
+        Render the notification at its current animated position using a vertical gradient background, gold border, and text with alpha-based fade.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the notification onto.
+        """
         if self.animation_progress <= 0:
             return
 
@@ -121,17 +158,38 @@ class AchievementNotification:
 class AchievementNotificationManager:
     """Manages achievement notifications display and animation."""
     def __init__(self, sounds=None):
-        """Initialize the achievement notification manager."""
+        """
+        Manage active achievement notifications and optional sound playback.
+        
+        Parameters:
+            sounds (optional): An object providing a `play_achievement(name: str)` method; if supplied, the manager calls this when a new achievement notification is added.
+        
+        Notes:
+            - Initializes an empty notification list and sets the maximum concurrent notifications to 3.
+        """
         self.notifications = []
         self.max_notifications = 3
         self.sounds = sounds
 
     def set_sounds(self, sounds):
-        """Set the sounds object for playing achievement sounds."""
+        """
+        Set the sounds provider used to play achievement audio.
+        
+        Parameters:
+            sounds: An object that provides achievement sound playback (expected to expose a `play_achievement` method).
+        """
         self.sounds = sounds
 
     def add_notification(self, achievement_name, achievement_description):
-        """Add a new achievement notification if not already present."""
+        """
+        Create and enqueue an achievement notification unless a notification with the same name already exists.
+        
+        Creates an AchievementNotification with the given name and description, sets its vertical target position based on current notifications, appends it to the manager, plays the configured achievement sound if available, and removes the oldest notification when the maximum count is exceeded. Prints a debug message when added.
+        
+        Parameters:
+            achievement_name (str): Display name of the achievement.
+            achievement_description (str): Short description of the achievement.
+        """
         for notification in self.notifications:
             if notification.name == achievement_name:
                 return
@@ -146,7 +204,14 @@ class AchievementNotificationManager:
         print(f"Achievement notification added: {achievement_name}")
 
     def update(self, dt):
-        """Update all notifications and remove expired ones."""
+        """
+        Advance and manage active notifications: update each, drop finished ones, and adjust vertical targets with eased positioning.
+        
+        For each remaining notification this sets its target y position based on its index and moves current_y toward that target using a simple easing factor.
+        
+        Parameters:
+            dt (float): Elapsed time in seconds since the last update; used to scale the easing interpolation.
+        """
         self.notifications = [notification for notification in self.notifications if notification.update(dt)]
 
         for i, notification in enumerate(self.notifications):
@@ -155,7 +220,12 @@ class AchievementNotificationManager:
             notification.current_y += (target_y - notification.current_y) * dt * 5
 
     def draw(self, screen):
-        """Draw all active notifications on the screen."""
+        """
+        Draw all managed achievement notifications onto the given screen surface.
+        
+        Parameters:
+            screen (pygame.Surface): Destination surface to render notifications onto.
+        """
         for notification in self.notifications:
             notification.draw(screen)
 

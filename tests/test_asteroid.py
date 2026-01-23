@@ -123,7 +123,11 @@ class TestAsteroid:
         assert not asteroid.collides_with(shot2)
 
     def test_asteroid_split_min_size(self, sprite_groups):
-        """Test splitting minimum size asteroid"""
+        """
+        Verify that splitting an asteroid at the minimum radius destroys the asteroid and does not produce child asteroids.
+        
+        When an asteroid with radius equal to ASTEROID_MIN_RADIUS is split, the original asteroid is removed from the asteroid group and no new asteroids are added.
+        """
         asteroid_group, _, powerup_group = sprite_groups
 
         asteroid = Asteroid(100, 100, ASTEROID_MIN_RADIUS)

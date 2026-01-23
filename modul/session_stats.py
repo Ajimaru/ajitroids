@@ -6,7 +6,11 @@ class SessionStats:
     """Track statistics for the current game session."""
 
     def __init__(self):
-        """Initialize session statistics with default values."""
+        """
+        Initialize session statistics and record the session start time.
+        
+        Creates public attributes used to track per-session and per-game statistics (scores, counts of destroyed entities, shots fired, playtime, highest level, games played, and session timings) and prepares them with default values.
+        """
         # Define all attributes here to satisfy pylint (W0201)
         self.game_start_time = 0
         self.total_score = 0
@@ -24,7 +28,11 @@ class SessionStats:
         self.reset()
 
     def reset(self):
-        """Reset statistics for a new game."""
+        """
+        Reset session and per-game statistics and record a new game start time.
+        
+        Resets scores, counters (games_played, asteroids/enemies/bosses destroyed, power-ups collected, shots fired, lives lost), highest level, and accumulated playtime to zero, and sets `game_start_time` to the current time.
+        """
         self.game_start_time = time.time()
         self.total_score = 0
         self.highest_score = 0

@@ -8,7 +8,15 @@ try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
     def gettext(key):
-        """Fallback translation function returning the key when unavailable."""
+        """
+        Provide a fallback translation for a message key when no translation system is available.
+        
+        Parameters:
+            key (str): The message key to translate.
+        
+        Returns:
+            str: The translated string for `key` if available, otherwise the original `key`.
+        """
         return key
 
 
@@ -102,7 +110,20 @@ class ShipManager:
         return False
 
     def unlock_ship_with_notification(self, ship_id, notification_callback=None):
-        """Unlock a ship and call the optional notification callback."""
+        """
+        Unlocks the specified ship and issues notifications for the unlock.
+        
+        If the ship is successfully unlocked, prints a console message and, if provided,
+        invokes `notification_callback` with two arguments: a short message and a title.
+        
+        Parameters:
+            ship_id (str): Identifier of the ship to unlock.
+            notification_callback (callable, optional): Function called when unlock occurs.
+                It will be invoked as notification_callback(message, title).
+        
+        Returns:
+            `true` if the ship was unlocked by this call, `false` otherwise.
+        """
         if self.unlock_ship(ship_id):
             ship_name = self.ships[ship_id]["name"]
             print(f"🚀 {ship_name} unlocked!")
@@ -112,9 +133,16 @@ class ShipManager:
         return False
 
     def check_unlock_conditions(self, level, difficulty, notification_callback=None):
-        """Check level/difficulty unlock conditions and notify if unlocked.
-
-        Uses unlock_ship_with_notification to avoid code duplication.
+        """
+        Evaluate unlock criteria based on level and difficulty and notify when a ship becomes unlocked.
+        
+        Parameters:
+            level (int): Player's current level used to determine eligibility.
+            difficulty (str): Current difficulty setting; expected values include "easy", "normal", and "hard".
+            notification_callback (callable, optional): Function called with a single string message when a ship is unlocked.
+        
+        Returns:
+            bool: `True` if a ship was unlocked, `False` otherwise.
         """
         unlocked_any = False
         if level >= 50:
@@ -131,7 +159,15 @@ class ShipManager:
         return unlocked_any
 
     def get_ship_data(self, ship_id):
-        """Return the ship data dictionary for `ship_id` or the standard ship."""
+        """
+        Get the ship definition for the given ship_id, falling back to the "standard" ship if not found.
+        
+        Parameters:
+            ship_id (str): Identifier of the ship to retrieve.
+        
+        Returns:
+            dict: The ship's data dictionary; the "standard" ship data is returned when ship_id is not present.
+        """
         return self.ships.get(ship_id, self.ships["standard"])
 
     def get_available_ships(self):
@@ -158,7 +194,14 @@ class ShipManager:
         return ship_id in self.ships and self.ships[ship_id]["unlocked"]
 
     def check_all_ships_unlocked(self, achievement_system):
-        """Trigger achievement when all ships are unlocked."""
+        """
+        Unlocks the "Fleet Commander" achievement when every non-default ship is unlocked.
+        
+        Treats the "standard" ship as always available; if all other ships defined in self.ships are present in self.unlocked_ships, calls achievement_system.unlock("Fleet Commander").
+        
+        Parameters:
+            achievement_system: An object providing an unlock(achievement_name: str) method used to report the achievement.
+        """
         # Consider the default 'standard' ship which is always available.
         # Trigger the achievement when every non-default ship is present in
         # the unlocked_ships list.
@@ -286,7 +329,16 @@ class ShipRenderer:
 
     @staticmethod
     def draw_question_mark(screen, x, y, scale, color):
-        """Draw a question mark symbol for unknown ship types."""
+        """
+        Render a question-mark placeholder centered at (x, y) for unknown ship types.
+        
+        Parameters:
+            screen: Pygame Surface to draw onto.
+            x (int|float): X coordinate of the symbol center.
+            y (int|float): Y coordinate of the symbol center.
+            scale (float): Size multiplier for the symbol.
+            color (tuple): RGB color tuple for the symbol.
+        """
         font = pygame.font.Font(None, int(36 * scale))
         symbol = gettext("question_mark")
         # Treat the untranslated key as missing (gettext often returns the key)

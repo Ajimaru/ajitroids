@@ -35,7 +35,15 @@ class Tutorial:
     """Manages tutorial pages and navigation."""
 
     def should_go_back(self, event):
-        """Return True if the given event should trigger going back from the tutorial."""
+        """
+        Determine whether an input event should trigger exiting the tutorial.
+        
+        Parameters:
+            event (pygame.Event): The key event to evaluate (expected to be a KEYDOWN event).
+        
+        Returns:
+            `true` if the event's key matches the configured "pause" key, the configured "shoot" key, Escape, or Space; `false` otherwise.
+        """
         pause_key = input_utils.get_action_keycode("pause")
         shoot_key = input_utils.get_action_keycode("shoot")
         return (
@@ -46,7 +54,15 @@ class Tutorial:
         )
 
     def __init__(self):
-        """Initialize tutorial with pages."""
+        """
+        Set up tutorial pages, navigation state, rendering fonts, and an optional starfield background.
+        
+        Initializes:
+        - pages: localized list of tutorial pages (each has "title" and "content").
+        - current_page, target_page, transitioning, transition_timer, transition_duration: navigation and transition state.
+        - font_title, font_content, font_navigation: Pygame fonts used for rendering.
+        - starfield: a MenuStarfield instance when available; otherwise None.
+        """
         # initialize attributes created later to avoid W0201
         self.target_page = 0
         # Use module-level `gettext` bound at import time
@@ -191,7 +207,18 @@ class Tutorial:
         self.transition_timer = 0
 
     def update(self, dt, events):
-        """Process input events and update transition state for the tutorial."""
+        """
+        Advance animation state and handle input events to navigate the tutorial.
+        
+        Updates the optional starfield, advances any active page transition (finalizing it when complete), and processes key events to navigate pages or request exit.
+        
+        Parameters:
+            dt (float): Time delta in seconds since the last update.
+            events (iterable): Iterable of Pygame event objects to process.
+        
+        Returns:
+            str: `'back'` if a back-navigation event was detected, `None` otherwise.
+        """
         if hasattr(self, "starfield") and self.starfield:
             self.starfield.update(dt)
 
@@ -218,7 +245,14 @@ class Tutorial:
         return None
 
     def draw(self, screen):
-        """Render the current tutorial page and navigation UI to `screen`."""
+        """
+        Render the active tutorial page and its navigation UI onto the given screen.
+        
+        Renders an optional starfield background, the page title, each content line, a localized navigation hint, a page indicator, and a progress bar. During page transitions a computed alpha is applied to title and content for fade/slide visuals. Content rendering recognizes:
+        - bracketed or weapon-style lines (e.g., "[LASER] ..." or "LASER: ...") which are delegated to draw_colored_line for colored name/description rendering;
+        - headings wrapped in triple asterisks ("*** heading ***") which are color-coded by keywords (e.g., boss → purple, tip/tipp → gold, control/steuer/strateg → blue);
+        - bullet lines starting with "•" which are drawn in gray.
+        """
         screen.fill((0, 0, 0))
 
         if hasattr(self, "starfield") and self.starfield:
@@ -307,7 +341,17 @@ class Tutorial:
         pygame.draw.rect(screen, (100, 200, 255), (progress_x, progress_y, progress_fill_width, progress_height))
 
     def draw_colored_line(self, screen, line, x, y):
-        """Render a colored title/content line used in tutorial pages."""
+        """
+        Render a single tutorial line at the given center position, applying color-coding for tagged or weapon-style entries.
+        
+        This draws lines centered at (x, y). If the line starts with a bracketed tag (e.g., "[LASER] Name..."), the tag is colored according to a known palette and the remainder rendered in white, aligned so the tag and description are centered together. If the line contains a colon (e.g., "Laser: Fires a beam"), the portion up to and including the colon is treated as the name and colorized based on weapon keywords (language-agnostic matching includes English and German variants); the description after the colon is rendered in white and both parts are centered together. Otherwise the whole line is rendered in white and centered.
+        
+        Parameters:
+            screen: Pygame Surface to render onto.
+            line (str): The text line to render; may include bracketed tags or a colon-separated name/description.
+            x (int): Horizontal center coordinate for the rendered text.
+            y (int): Vertical coordinate for the rendered text (center for plain lines, top-aligned for split name/description).
+        """
         if line.startswith("[") and "]" in line:
             bracket_end = line.find("]") + 1
             name_part = line[:bracket_end]
