@@ -121,5 +121,7 @@
   "new_highscore": "New Highscore!",
   "score_format": "Score: {score}",
   "highscore_hint_updown": "Use UP/DOWN to change letter",
-  "highscore_hint_enter": "Press ENTER to confirm"
+  "highscore_hint_enter": "Press ENTER to confirm",
+  "replay_browser": "Replay Browser",
+  "session_statistics": "Session Statistics"
 }

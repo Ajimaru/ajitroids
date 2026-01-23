@@ -231,15 +231,7 @@ class MainMenu(Menu):
         self.add_item(gettext("highscores"), "highscores")
         self.add_item(gettext("statistics"), "statistics")
         self.add_item(gettext("achievements"), "achievements")
-        # Use the user's current locale for the Options label; fall back to
-        # gettext("options") if unavailable. Tests that depended on a German
-        # label should be adapted to the active locale.
-        try:
-            from modul.i18n import t
-            options_label = t("options")
-        except Exception:  # pylint: disable=broad-exception-caught
-            options_label = gettext("options")
-        self.add_item(options_label, "options")
+        self.add_item(gettext("options"), "options")
         self.add_item(gettext("credits"), "credits")
         self.add_item(gettext("exit"), "exit")
 
@@ -566,6 +558,10 @@ class CreditsScreen:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
             if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
                 self.background_alpha = C.MENU_BACKGROUND_ALPHA
+
+        # Automatisches Scrollen der Credits
+        self.scroll_position -= C.CREDITS_SCROLL_SPEED * dt
+
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE:
@@ -1576,8 +1572,7 @@ class SoundTestMenu:
             def gettext(key):
                 """TODO: add docstring."""
                 return key
-        try:
-            from modul.i18n import gettext
+
 class TTSVoiceMenu(Menu):
     """Menu to select a TTS voice from available system voices."""
 
@@ -1665,13 +1660,24 @@ class TTSVoiceMenu(Menu):
             self.settings.save()
         return None
 
+
+
+# --- AchievementsMenu class ---
+class AchievementsMenu(Menu):
+    """Menu to display and interact with achievements."""
+    def __init__(self, achievement_system):
+        super().__init__(gettext("achievements").upper())
+        self.achievement_system = achievement_system
+        self.achievement_graphics = getattr(achievement_system, "graphics", {})
+        self.add_item(gettext("back"), "back")
+
     def draw(self, screen):
-        """TODO: add docstring."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_surf = self.title_font.render(self.title, True, pygame.Color(C.MENU_TITLE_COLOR))
+        title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
+        title_surf = title_font.render(self.title, True, pygame.Color(C.MENU_TITLE_COLOR))
         title_rect = title_surf.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 12))
         screen.blit(title_surf, title_rect)
 
@@ -1688,40 +1694,28 @@ class TTSVoiceMenu(Menu):
         for i, achievement in enumerate(self.achievement_system.achievements):
             if i >= 12:
                 break
-
             column = i // achievements_per_column
             row = i % achievements_per_column
-
-            if column == 0:
-                center_x = left_column_x
-            else:
-                center_x = right_column_x
-
+            center_x = left_column_x if column == 0 else right_column_x
             current_y = start_y + row * achievement_spacing
             is_unlocked = achievement.unlocked
-
             if is_unlocked:
                 name_color = pygame.Color("green")
                 graphic_color = pygame.Color("lightgreen")
             else:
                 name_color = pygame.Color("gray")
                 graphic_color = pygame.Color("gray")
-
             if is_unlocked and achievement.name in self.achievement_graphics:
                 graphics = self.achievement_graphics[achievement.name]
-
                 ascii_start_x = center_x - 120
-
                 for line_idx, line in enumerate(graphics):
                     graphic_surf = graphics_font.render(line, True, graphic_color)
                     graphic_rect = graphic_surf.get_rect(topleft=(ascii_start_x, current_y - 8 + line_idx * 10))
                     screen.blit(graphic_surf, graphic_rect)
-
                 name_x = center_x - 20
             else:
                 name_surf_temp = name_font.render(achievement.name, True, name_color)
                 name_x = center_x - name_surf_temp.get_width() / 2
-
             name_surf = name_font.render(achievement.name, True, name_color)
             name_rect = name_surf.get_rect(topleft=(name_x, current_y))
             screen.blit(name_surf, name_rect)
@@ -1739,16 +1733,13 @@ class TTSVoiceMenu(Menu):
         screen.blit(progress_surf, progress_rect)
 
     def update(self, dt, events):
-        """TODO: add docstring."""
         result = super().update(dt, events)
         if result:
             return result
-
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE or event.key == pygame.K_SPACE:
                     return "back"
-
         return None
 
 

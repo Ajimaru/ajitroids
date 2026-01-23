@@ -113,5 +113,7 @@
   "new_highscore": "Neuer Highscore!",
   "score_format": "Punktestand: {score}",
   "highscore_hint_updown": "Benutze OBEN/UNTEN um Buchstabe zu ändern",
-  "highscore_hint_enter": "Drücke ENTER zum Bestätigen"
+  "highscore_hint_enter": "Drücke ENTER zum Bestätigen",
+  "replay_browser": "Wiederholungs-Browser",
+  "session_statistics": "Sitzungsstatistiken"
 }
