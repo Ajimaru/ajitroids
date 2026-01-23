@@ -1,10 +1,6 @@
 """Tutorial screens and tutorial page management."""
 
 import pygame
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main
 import modul.constants as C
 
 # Ensure `MenuStarfield` is available at module level so tests can patch it
@@ -36,15 +32,21 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - provide minimal
 
 
 class Tutorial:
-<<<<<<< HEAD
     """Manages tutorial pages and navigation."""
+
+    def should_go_back(self, event):
+        """Return True if the given event should trigger going back from the tutorial."""
+        pause_key = input_utils.get_action_keycode("pause")
+        shoot_key = input_utils.get_action_keycode("shoot")
+        return (
+            (pause_key is not None and event.key == pause_key)
+            or event.key == pygame.K_ESCAPE
+            or (shoot_key is not None and event.key == shoot_key)
+            or event.key == pygame.K_SPACE
+        )
+
     def __init__(self):
         """Initialize tutorial with pages."""
-=======
-    """TODO: add docstring."""
-    def __init__(self):
-        """TODO: add docstring."""
->>>>>>> origin/main
         # initialize attributes created later to avoid W0201
         self.target_page = 0
         # Use module-level `gettext` bound at import time
@@ -56,11 +58,11 @@ class Tutorial:
                     gettext("tutorial_shoot"),
                     gettext("tutorial_rotate"),
                     gettext("tutorial_thrust"),
-                    "• Destroy asteroids for points!",
+                    gettext("tutorial_destroy_asteroids"),
                     gettext("tutorial_switch_b"),
                     "",
-                    "• Large asteroids break into smaller pieces",
-                    "• Collect power-ups for special abilities",
+                    gettext("tutorial_large_asteroids"),
+                    gettext("tutorial_collect_powerups"),
                 ],
             },
             {
@@ -168,13 +170,15 @@ class Tutorial:
         self.font_navigation = pygame.font.Font(None, 24)
 
         # Use the module-level `MenuStarfield` symbol so tests can patch it.
-        try:
-            if MenuStarfield is None:
-                raise ImportError("No MenuStarfield available")
-            self.starfield = MenuStarfield(num_stars=80)
-        except Exception:  # pylint: disable=broad-exception-caught
+        if MenuStarfield is None:
             self.starfield = None
             print("Could not import starfield")
+        else:
+            try:
+                self.starfield = MenuStarfield(num_stars=80)
+            except (ImportError, TypeError):
+                self.starfield = None
+                print("Could not import starfield")
 
     def next_page(self):
         """Advance to the next tutorial page, starting transition animation."""
@@ -207,14 +211,8 @@ class Tutorial:
 
         for event in events:
             if event.type == pygame.KEYDOWN:
-                pause_key = input_utils.get_action_keycode("pause")
-                shoot_key = input_utils.get_action_keycode("shoot")
-                if ((pause_key is not None and event.key == pause_key)
-                        or event.key == pygame.K_ESCAPE
-                        or (shoot_key is not None and event.key == shoot_key)
-                        or event.key == pygame.K_SPACE):
+                if self.should_go_back(event):
                     return "back"
-
                 elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
                     if not self.transitioning:
                         self.previous_page()

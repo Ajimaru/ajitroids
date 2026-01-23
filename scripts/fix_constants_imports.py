@@ -10,6 +10,7 @@ import re
 from pathlib import Path
 import ast
 
+
 ROOT = Path(__file__).resolve().parents[1]
 PAT_NAME = re.compile(r"\b([A-Z][A-Z0-9_]*)\b")
 
