@@ -321,9 +321,9 @@ echo "Saved data backed up to $BACKUP_DIR"
 
 ### Render Menu Screenshots (Development)
 
-The repository includes a small development helper that renders all menu
-classes found in `modul.menu` to PNG files. This is useful for visually
-verifying UI changes without running the full game.
+The repository includes a small development helper that renders all menu classes
+found in `modul.menu` to PNG files. This is useful for visually verifying UI
+changes without running the full game.
 
 Script location: **`.development/generate_menu_screenshots.py`**
 
@@ -335,7 +335,6 @@ python .development/generate_menu_screenshots.py
 
 Screenshots are written to the repository `.logs/` directory as
 `.logs/<MenuClassName>.png`. The `.logs/` directory is ignored by Git.
-
 
 ### Run Full CI Checks
 

@@ -1198,7 +1198,7 @@ def main(args=None):
                             # Play boss death sound effect (ensure asset present)
                             try:
                                 sounds.play_boss_death()
-                            except Exception:
+                            except pygame.error:
                                 pass
 
                             score += BOSS_SCORE
@@ -1322,8 +1322,8 @@ def main(args=None):
                         replay_player.load_replay(result["filepath"])
                         replay_player.start_playback()
                         game_state = "replay_viewer"
-                    except Exception as e:
-                        logger.error(f"Failed to load replay: {e}")
+                    except Exception as e:  # pylint: disable=broad-except
+                        logger.error("Failed to load replay: %s", e)
 
         elif game_state == "replay_viewer":
             # Draw game objects based on replay data
@@ -1523,7 +1523,7 @@ def quick_restart_game():
         try:
             saved_path = replay_recorder.save_replay()
             logger.info(f"Replay saved before restart: {saved_path}")
-        except Exception as e:
+        except OSError as e:
             logger.error(f"Failed to save replay: {e}")
 
     # Reset game state
@@ -1586,7 +1586,10 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n\nGame interrupted by user.")
     except Exception as e:
-        # Ensure we can always emit a crash log even if main() failed early
+        # Catching broad Exception to ensure all errors are logged before exit.
+        # Re-raise critical exceptions.
+        if isinstance(e, (KeyboardInterrupt, SystemExit)):
+            raise
         root = logging.getLogger()
         if not root.handlers:
             logging.basicConfig(
