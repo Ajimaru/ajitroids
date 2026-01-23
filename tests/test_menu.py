@@ -27,8 +27,12 @@ def test_menu_initial_state():
 def test_menu_select_index():
     """Test setting the selected index of the menu."""
     menu = Menu(title="Test")
+    menu.add_item("A", "a")
+    menu.add_item("B", "b")
+    menu.add_item("C", "c")
     menu.selected_index = 2
     assert menu.selected_index == 2
+    assert menu.items[menu.selected_index].text == "C"
 
 
 def test_menu_add_and_select_item():
