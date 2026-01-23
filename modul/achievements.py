@@ -165,7 +165,7 @@ class AchievementSystem:
             return False
         return False
 
-    def unlock_achievement(self, name, use_ascii=False):
+    def unlock_achievement(self, name, use_ascii=True):
         """Deprecated compatibility wrapper for older API tests.
 
         Historically tests and older code called `unlock_achievement(name)`.
