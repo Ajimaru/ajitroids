@@ -17,7 +17,7 @@ from .settings import current_settings
 
 
 class TTSManager:
-    """Manages text-to-speech functionality using pyttsx3."""
+
 
     def __init__(self):
         """Initialize the TTS manager with settings and engine setup."""

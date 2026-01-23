@@ -7,7 +7,6 @@ This is a conservative automated helper: it finds lines containing
 Run this only when you accept suppressing those specific warnings.
 """
 from pathlib import Path
-<<<<<<< HEAD
 import logging
 
 
@@ -20,13 +19,13 @@ def process(path: Path) -> bool:
     Returns:
         bool: True if the file was changed, False otherwise.
     """
-=======
-
-
-def process(path: Path) -> bool:
->>>>>>> origin/main
-    src = path.read_text(encoding="utf-8")
-    lines = src.splitlines()
+    try:
+        original_text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        logging.warning("Skipping unreadable file due to UnicodeDecodeError: %s", path)
+        return False
+    sep = '\r\n' if '\r\n' in original_text else '\n'
+    lines = original_text.splitlines()
     changed = False
     for i, line in enumerate(lines):
         stripped = line.strip()
@@ -35,27 +34,19 @@ def process(path: Path) -> bool:
                 lines[i] = line + "  # pylint: disable=broad-exception-caught"
                 changed = True
     if changed:
-        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        path.write_text(sep.join(lines) + sep, encoding="utf-8")
     return changed
 
 
 def main():
-<<<<<<< HEAD
     """Scan Python files in the 'modul' directory and mark broad exception handlers with a pylint disable comment."""
-=======
->>>>>>> origin/main
     changed_files = []
     for p in sorted(Path("modul").glob("**/*.py")):
         try:
             if process(p):
                 changed_files.append(str(p))
-<<<<<<< HEAD
         except OSError:
             logging.exception("Failed processing %s", p)
-=======
-        except Exception:
-            continue
->>>>>>> origin/main
     if changed_files:
         print("Updated files:")
         for f in changed_files:

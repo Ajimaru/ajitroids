@@ -259,12 +259,6 @@ class PerformanceProfiler:
         if not data or len(data) < 2:
             return
 
-        # Ensure fonts are initialized
-        if self.font_small is None:
-            if not pygame.font.get_init():
-                pygame.font.init()
-            self.font_small = pygame.font.Font(None, 18)
-
         # Draw graph background
         graph_rect = pygame.Rect(x, y, self.graph_width, self.graph_height)
         pygame.draw.rect(screen, (20, 20, 20), graph_rect)

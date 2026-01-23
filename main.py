@@ -695,6 +695,8 @@ def main(args=None):
             menu_starfield.draw(screen)
 
             action = voice_announcements_menu.update(dt, events)
+            voice_announcements_menu.draw(screen)
+
             if action:
                 result = voice_announcements_menu.handle_action(action)
                 if result == "options":
@@ -705,6 +707,19 @@ def main(args=None):
                 elif result == "tts_voice":
                     game_state = "tts_voice"
                     tts_voice_menu.activate()
+
+        elif game_state == "tts_voice":
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+
+            action = tts_voice_menu.update(dt, events)
+            tts_voice_menu.draw(screen)
+
+            if action:
+                result = tts_voice_menu.handle_action(action)
+                if result == "options":
+                    game_state = "options"
+                    options_menu.activate()
 
         elif game_state == "controls":
             menu_starfield.update(dt)
