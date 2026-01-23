@@ -114,6 +114,7 @@ class TestShipManager:
         manager.unlock_ship("destroyer")
 
         called = []
+
         def callback(title, message):
             called.append((title, message))
 

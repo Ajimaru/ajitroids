@@ -12,22 +12,23 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i
         """Fallback translation function returning key when i18n is unavailable."""
         return key
 
-    class HighscoreManager:
-        """Manage loading, saving and querying highscores."""
 
-        def _generate_default_highscores(self):
-            return [
-                {
-                    "name": "".join(random.choice(C.HIGHSCORE_ALLOWED_CHARS) for _ in range(C.HIGHSCORE_NAME_LENGTH)),
-                    "score": (C.HIGHSCORE_MAX_ENTRIES - i) * 1000,
-                }
-                for i in range(C.HIGHSCORE_MAX_ENTRIES)
-            ]
+class HighscoreManager:
+    """Manage loading, saving and querying highscores."""
 
-        def __init__(self):
-            """Initialize highscore manager and load persisted highscores."""
-            self.highscores = []
-            self.load_highscores()
+    def _generate_default_highscores(self):
+        return [
+            {
+                "name": "".join(random.choice(C.HIGHSCORE_ALLOWED_CHARS) for _ in range(C.HIGHSCORE_NAME_LENGTH)),
+                "score": (C.HIGHSCORE_MAX_ENTRIES - i) * 1000,
+            }
+            for i in range(C.HIGHSCORE_MAX_ENTRIES)
+        ]
+
+    def __init__(self):
+        """Initialize highscore manager and load persisted highscores."""
+        self.highscores = []
+        self.load_highscores()
 
     def load_highscores(self):
         """Load highscores from disk or initialize defaults."""
@@ -80,7 +81,9 @@ class HighscoreInput:
     def __init__(self, score):
         """Initialize highscore input with score."""
         self.score = score
-        self.name = ["A", "A", "A"]
+        # Initialize name with configured length so tests and runtime honour
+        # the `HIGHSCORE_NAME_LENGTH` constant.
+        self.name = ["A"] * C.HIGHSCORE_NAME_LENGTH
         self.current_pos = 0
         self.done = False
         self.font = pygame.font.Font(None, 64)

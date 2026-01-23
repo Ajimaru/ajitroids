@@ -121,13 +121,13 @@ class Player(CircleShape):
         """Update player state, handle input, and powerup timers."""
 
         if input_utils.is_action_pressed("rotate_left"):
-            self.rotate(-current_turn_speed * dt)
+            self.rotate(-self.base_turn_speed * dt)
         if input_utils.is_action_pressed("rotate_right"):
-            self.rotate(current_turn_speed * dt)
+            self.rotate(self.base_turn_speed * dt)
         if input_utils.is_action_pressed("thrust"):
-            self.velocity += self.forward() * current_speed * dt
+            self.velocity += self.forward() * self.base_speed * dt
         if input_utils.is_action_pressed("reverse"):
-            self.velocity -= self.forward() * current_speed * dt
+            self.velocity -= self.forward() * self.base_speed * dt
 
         if input_utils.is_action_pressed("shoot"):
             self.shoot()

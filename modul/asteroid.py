@@ -3,6 +3,7 @@
 import math
 import random
 import pygame
+import logging
 
 from modul.circleshape import CircleShape
 from modul.constants import (ASTEROID_CRYSTAL_SPLIT_COUNT,
@@ -19,10 +20,15 @@ from modul.particle import Particle
 from modul.powerup import PowerUp
 from modul.shot import Shot
 
+# Toggle to enable verbose enemy-ship debug output during development.
+# Set to True locally when you need per-frame tracing; keep False in production.
+DEBUG = False
+logger = logging.getLogger(__name__)
+
 
 class Asteroid(CircleShape, pygame.sprite.Sprite):
     """Represents an asteroid in the game with various types and behaviors."""
-    def __init__(self, x, y, radius, *groups, asteroid_type=ASTEROID_TYPE_NORMAL):
+    def __init__(self, x, y, radius, *args, asteroid_type=None):
         """
         Initialize an asteroid with position, size, and type.
 
@@ -31,16 +37,31 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
             y (float): Y position.
             radius (float): Asteroid radius.
             *groups: Sprite groups to add this asteroid to.
-            asteroid_type (str): The asteroid type (must be one of ASTEROID_TYPES). This must be passed as a keyword-only argument.
+            asteroid_type (str): The asteroid type (must be one of ASTEROID_TYPES). Can be provided
+                positionally or as a keyword argument for compatibility with tests.
 
         Raises:
             ValueError: If asteroid_type is not a valid type.
         """
+        # Args parsing: support older callers that passed asteroid_type
+        # positionally as 4th argument, or callers that pass groups first
+        groups = ()
+        if args:
+            # If last positional arg is a valid asteroid type string and no
+            # explicit keyword was provided, treat it as the asteroid_type.
+            if asteroid_type is None and isinstance(args[-1], str) and args[-1] in ASTEROID_TYPES:
+                asteroid_type = args[-1]
+                groups = args[:-1]
+            else:
+                groups = args
+        if asteroid_type is None:
+            asteroid_type = ASTEROID_TYPE_NORMAL
+        if asteroid_type not in ASTEROID_TYPES:
+            raise ValueError(f"Invalid asteroid_type: {asteroid_type}")
+
         # Explicitly call both base class initializers in correct order
         CircleShape.__init__(self, x, y, radius)
         pygame.sprite.Sprite.__init__(self, *groups)
-        if asteroid_type not in ASTEROID_TYPES:
-            raise ValueError(f"Invalid asteroid_type: {asteroid_type}")
         self.asteroid_type = asteroid_type
         self.vertices = self._generate_vertices()
         self.rotation_speed = 0
@@ -190,7 +211,7 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
         split_count = ASTEROID_CRYSTAL_SPLIT_COUNT if self.asteroid_type == ASTEROID_TYPE_CRYSTAL else 2
         velocity_multiplier = ASTEROID_ICE_VELOCITY_MULTIPLIER if self.asteroid_type == ASTEROID_TYPE_ICE else 1.2
         containers = getattr(type(self), 'containers', ())
-        child_groups = tuple(containers) if containers else self.groups()
+        child_groups = tuple(containers) if containers else tuple(sprite_groups)
 
         for i in range(split_count):
             if split_count == ASTEROID_CRYSTAL_SPLIT_COUNT:
@@ -253,12 +274,14 @@ class EnemyShip(CircleShape):
                 else:
                     direction_to_player = pygame.Vector2(0, 0)
                 self.velocity = direction_to_player * 100
-                print(f"EnemyShip moving towards player! Distance: {distance_to_player}")
+                if DEBUG:
+                    logger.debug("EnemyShip moving towards player! Distance: %s", distance_to_player)
 
             else:
                 self.velocity *= 0.8
 
-        print(f"EnemyShip Position: {self.position}, Velocity: {self.velocity}")
+        if DEBUG:
+            logger.debug("EnemyShip Position: %s, Velocity: %s", self.position, self.velocity)
 
     def collides_with(self, other):
         """Check collision with another object using distance."""

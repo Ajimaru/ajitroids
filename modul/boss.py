@@ -47,9 +47,12 @@ class Boss(CircleShape):
         if self.hit_flash > 0:
             self.hit_flash -= dt
         self._update_movement(dt, player_position)
-        self._update_attack(dt)
+        # Capture attack payload when an attack is triggered so callers can
+        # spawn projectiles or otherwise react to the attack data.
+        attack_data = self._update_attack(dt)
         self.position += self.velocity * dt
         self._constrain_to_screen()
+        return attack_data
 
     def _update_movement(self, dt, player_position):
         """Update boss movement based on current phase."""
@@ -76,14 +79,21 @@ class Boss(CircleShape):
         elif self.movement_phase == "chase" and player_position:
             self._move_towards(player_position, C.BOSS_MOVE_SPEED * 1.2)
 
-    def _move_towards(self, target, speed):
-        """Move the boss toward `target` at given `speed`."""
+    def _move_towards(self, target, speed, dt=0):
+        """Move the boss toward `target` at given `speed`.
+
+        Accepts an optional `dt` parameter used to decay velocity when already
+        at the target. Tests call this method with a `dt` argument, so keep
+        backward-compatible behavior while making velocity decay time-aware.
+        """
         direction = target - self.position
         if direction.length() > 0:
             direction = direction.normalize()
             self.velocity = direction * speed
         else:
-            self.velocity *= 0.9
+            # Decay velocity when at target; ensure dt reduces speed deterministically.
+            factor = max(0.0, 1.0 - (dt * 0.5)) if dt else 0.9
+            self.velocity *= factor
 
     def _constrain_to_screen(self):
         """Keep boss within screen boundaries."""
@@ -105,9 +115,14 @@ class Boss(CircleShape):
         """Update attack timer and trigger attacks."""
         self.attack_timer += dt
         if self.attack_timer >= self.attack_interval:
-            self.attack()
+            # Capture data produced by the attack() call and return it so
+            # external code can act on the attack payload (e.g., spawn
+            # projectiles). Advance the attack pattern and reset timer.
+            attack_data = self.attack()
             self.attack_timer = 0
             self.attack_pattern = (self.attack_pattern + 1) % 3
+            return attack_data
+        return None
 
     def attack(self):
         """Generate attack pattern data."""

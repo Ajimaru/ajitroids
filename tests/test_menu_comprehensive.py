@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 
 import pygame
 import pytest
+import modul.i18n as i18n
 
 from modul.constants import CREDITS_LINE_SPACING, SCREEN_HEIGHT, SCREEN_WIDTH
 from modul.menu import (AchievementsMenu, CreditsScreen, DifficultyMenu,
@@ -78,6 +79,10 @@ def mock_achievement_system():
 
 
 class TestMenuItem:
+    """
+    Unit tests for the MenuItem class, verifying initialization, selection animation,
+    delay handling, and drawing functionality.
+    """
     def test_menuitem_initialization(self):
         """Test MenuItem initializes with correct values"""
         item = MenuItem("Start", "start_game")
@@ -134,6 +139,11 @@ class TestMenuItem:
 
 
 class TestMenu:
+    """
+    Comprehensive test suite for the Menu class, covering initialization, item management, input handling
+    (keyboard, shortcut keys, joystick), selection logic, cooldowns, and rendering.
+    Each test verifies a specific aspect of menu behavior to ensure correct functionality and robust user interaction.
+    """
     def test_menu_initialization(self):
         """Test Menu initializes correctly"""
         menu = Menu("Test Menu")
@@ -437,12 +447,17 @@ class TestMenu:
 
 
 class TestMainMenu:
+    """
+    Unit tests for the MainMenu class, verifying initialization and drawing functionality.
+    """
+
     def test_mainmenu_initialization(self):
         """Test MainMenu initializes with correct items"""
         # Force language to English for localization test
-        import modul.i18n as i18n
         class DummySettings:
+            """A dummy settings class used for testing purposes."""
             language = "en"
+
         i18n.settings_mod = Mock()
         i18n.settings_mod.current_settings = DummySettings()
         menu = MainMenu()
@@ -465,10 +480,19 @@ class TestMainMenu:
 
 
 class TestPauseMenu:
+    """
+    Test suite for the PauseMenu class, verifying correct initialization and menu item setup.
+    """
     def test_pausemenu_initialization(self):
         """Test PauseMenu initializes correctly"""
-        import modul.i18n as i18n
+
         class DummySettings:
+            """
+            A dummy settings class used for testing purposes.
+
+            Attributes:
+                language (str): The language setting, default is "en".
+            """
             language = "en"
         i18n.settings_mod = Mock()
         i18n.settings_mod.current_settings = DummySettings()
@@ -481,6 +505,10 @@ class TestPauseMenu:
 
 
 class TestTutorialScreen:
+    """
+    Unit tests for the TutorialScreen class, verifying its initialization, fade-in behavior,
+    handling of the ESC key to return to the main menu, and drawing functionality.
+    """
     def test_tutorialscreen_initialization(self):
         """Test TutorialScreen initializes"""
         screen = TutorialScreen()
@@ -507,10 +535,27 @@ class TestTutorialScreen:
 
 
 class TestOptionsMenu:
+    """
+    Test suite for the OptionsMenu class, verifying initialization, user interactions, and settings adjustments.
+
+    This class contains comprehensive tests for the OptionsMenu, including:
+    - Initialization and menu item setup
+    - Toggling music and sound settings
+    - Adjusting music and sound volume, including boundary conditions
+    - Toggling fullscreen mode and error handling
+    - Sound test and navigation actions
+    - Handling keyboard events for menu navigation and volume control
+
+    Each test ensures that the OptionsMenu behaves as expected under various scenarios,
+    maintaining correct state and invoking appropriate methods.
+    """
     def test_optionsmenu_initialization(self, mock_settings, mock_sounds):
         """Test OptionsMenu initializes correctly"""
-        import modul.i18n as i18n
+
         class DummySettings:
+            """
+            A dummy settings class used for testing purposes, simulating application settings such as language.
+            """
             language = "en"
         i18n.settings_mod = Mock()
         i18n.settings_mod.current_settings = DummySettings()
@@ -626,6 +671,14 @@ class TestOptionsMenu:
 
 
 class TestCreditsScreen:
+    """
+    Unit tests for the CreditsScreen class,
+    verifying initialization,
+    scrolling behavior,
+    key event handling,
+    drawing,
+    and scroll wrapping functionality.
+    """
     def test_creditsscreen_initialization(self):
         """Test CreditsScreen initializes"""
         screen = CreditsScreen()
@@ -680,6 +733,10 @@ class TestCreditsScreen:
 
 
 class TestGameOverScreen:
+    """
+    Unit tests for the GameOverScreen class, verifying its initialization, score setting,
+    keyboard event handling (space, return, escape keys), and drawing functionality.
+    """
     def test_gameoverscreen_initialization(self):
         """Test GameOverScreen initializes"""
         screen = GameOverScreen()
@@ -722,10 +779,18 @@ class TestGameOverScreen:
 
 
 class TestDifficultyMenu:
+    """
+    Unit tests for the DifficultyMenu class, verifying initialization and shortcut assignments.
+    """
     def test_difficultymenu_initialization(self):
         """Test DifficultyMenu initializes"""
-        import modul.i18n as i18n
         class DummySettings:
+            """
+            A dummy settings class used for testing purposes.
+
+            Attributes:
+                language (str): The language setting, default is "en".
+            """
             language = "en"
         i18n.settings_mod = Mock()
         i18n.settings_mod.current_settings = DummySettings()
@@ -747,10 +812,30 @@ class TestDifficultyMenu:
 
 
 class TestSoundTestMenu:
+    """
+    Test suite for the SoundTestMenu class,
+    verifying initialization,
+    activation,
+    navigation,
+    sound playback,
+    action handling,
+    drawing,
+    and timer functionality.
+    Each test covers a specific aspect
+    of the menu's behavior,
+    including user input handling,
+    sound interactions,
+    and UI updates.
+    """
     def test_soundtestmenu_initialization(self):
         """Test SoundTestMenu initializes"""
-        import modul.i18n as i18n
         class DummySettings:
+            """
+            A dummy settings class used for testing purposes.
+
+            Attributes:
+                language (str): The language setting, default is "en".
+            """
             language = "en"
         i18n.settings_mod = Mock()
         i18n.settings_mod.current_settings = DummySettings()
@@ -831,8 +916,14 @@ class TestSoundTestMenu:
 
     def test_soundtestmenu_handle_test_shoot(self, mock_sounds):
         """Test playing shoot sound"""
-        import modul.i18n as i18n
+
         class DummySettings:
+            """
+            A dummy settings class used for testing purposes.
+
+            Attributes:
+                language (str): The language setting, default is "en".
+            """
             language = "en"
         i18n.settings_mod = Mock()
         i18n.settings_mod.current_settings = DummySettings()
@@ -893,6 +984,10 @@ class TestSoundTestMenu:
 
 
 class TestAchievementsMenu:
+    """
+    Test suite for the AchievementsMenu class, verifying its initialization, input handling, and drawing functionality.
+    Includes tests for menu creation, handling of escape and space key events, and rendering with and without achievement graphics.
+    """
     def test_achievementsmenu_initialization(self, mock_achievement_system):
         """Test AchievementsMenu initializes"""
         menu = AchievementsMenu(mock_achievement_system)
@@ -928,6 +1023,12 @@ class TestAchievementsMenu:
 
 
 class TestShipSelectionMenu:
+    """
+    Unit tests for the ShipSelectionMenu class, covering initialization, activation, navigation,
+    ship selection (locked and unlocked), escape key handling, drawing, and animation updates.
+    Each test verifies the expected behavior of ShipSelectionMenu in response to user input
+    and interactions with the ship_manager dependency.
+    """
     @patch('modul.menu.ship_manager')
     def test_shipselectionmenu_initialization(self, mock_ship_manager):
         """Test ShipSelectionMenu initializes"""

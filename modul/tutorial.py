@@ -52,7 +52,7 @@ class Tutorial:
         # Use module-level `gettext` bound at import time
         self.pages = [
             {
-                "title": "Basics",
+                "title": gettext("tutorial_title_basics"),
                 "content": [
                     gettext("tutorial_move"),
                     gettext("tutorial_shoot"),
@@ -66,96 +66,90 @@ class Tutorial:
                 ],
             },
             {
-                "title": "Power-Ups",
+                "title": gettext("tutorial_title_powerups"),
                 "content": [
-                    "[SHIELD] - Immune for 3 sec.",
-                    "[3-SHOT] - Three shots simultaneously",
-                    "[SPEED] - Increased fire rate",
-                    "[LASER] - Increased damage",
-                    "[ROCKET] - Tracks nearby asteroids",
-                    "[SHOTGUN] - Multiple shots in a spread",
+                    gettext("tutorial_powerup_shield"),
+                    gettext("tutorial_powerup_tripleshot"),
+                    gettext("tutorial_powerup_speed"),
+                    gettext("tutorial_powerup_laser"),
+                    gettext("tutorial_powerup_rocket"),
+                    gettext("tutorial_powerup_shotgun"),
                     "",
-                    "• Power-ups only appear from large asteroids!",
-                    "• They disappear after 10 seconds",
+                    gettext("tutorial_powerups_note1"),
+                    gettext("tutorial_powerups_note2"),
                 ],
             },
             {
-                "title": "Level System",
+                "title": gettext("tutorial_title_level_system"),
                 "content": [
-                    "• Collect 2500 points for a level-up",
-                    "• Higher levels = more and faster asteroids",
-                    "• Maximum level: 666",
+                    gettext("tutorial_level_collect_points"),
+                    gettext("tutorial_level_higher_levels"),
+                    gettext("tutorial_level_max"),
                     "",
-                    "*** Boss Fights ***",
-                    "• A boss appears every 10 levels!",
-                    "• Bosses have high health and attack patterns",
-                    "• Reward: +1 life and 500 points",
+                    gettext("tutorial_boss_heading"),
+                    gettext("tutorial_boss_every"),
+                    gettext("tutorial_boss_health"),
+                    gettext("tutorial_boss_reward"),
                     "",
-                    "• Bosses get stronger with each level!",
+                    gettext("tutorial_boss_strengthen"),
                 ],
             },
             {
-                "title": "Weapon System",
+                "title": gettext("tutorial_title_weapon_system"),
                 "content": [
-                    "STANDARD: Unlimited ammo",
-                    "LASER: 15 shots, makes more damage",
-                    "ROCKETS: 8 shots, automatically track targets",
-                    "SHOTGUN: 12 shots, spread fire",
+                    gettext("tutorial_weapon_standard"),
+                    gettext("tutorial_weapon_laser"),
+                    gettext("tutorial_weapon_rockets"),
+                    gettext("tutorial_weapon_shotgun"),
                     "",
-                    "• Collect the same weapon to refill ammo",
-                    "• Weapons automatically switch back to the standard weapon",
+                    gettext("tutorial_weapon_refill"),
+                    gettext("tutorial_weapon_auto_switch"),
                 ],
             },
             {
-                "title": "Boss Fight Strategies",
+                "title": gettext("tutorial_title_boss_strategies"),
                 "content": [
-                    "*** Boss Behavior ***",
-                    "• Moves in different phases",
-                    "• Switches between attack patterns",
-                    "• Becomes more dangerous at higher levels",
+                    gettext("tutorial_boss_behavior"),
+                    gettext("tutorial_boss_phases"),
+                    gettext("tutorial_boss_patterns"),
+                    gettext("tutorial_boss_more_dangerous"),
                     "",
-                    "*** Tips ***",
-                    "• Use movement to dodge projectiles",
-                    "• Collect power-ups before the boss fight",
-                    "• Focus on the boss core",
-                    "• The health bar shows progress",
+                    gettext("tutorial_boss_tips_heading"),
+                    gettext("tutorial_boss_tip_dodge"),
+                    gettext("tutorial_boss_tip_collect"),
+                    gettext("tutorial_boss_tip_focus"),
+                    gettext("tutorial_boss_tip_healthbar"),
                 ],
             },
             {
-                "title": "Advanced Tips",
+                "title": gettext("tutorial_title_advanced_tips"),
                 "content": [
-                    "*** Controls ***",
-                    "• ESC for pause",
-                    "• F11 for fullscreen",
-                    "• F10 to toggle music",
-                    "• F9 to toggle sound",
-                    "• Arrow keys for movement",
-                    "• Spacebar to shoot",
+                    gettext("tutorial_controls_heading"),
+                    gettext("tutorial_control_pause"),
+                    gettext("tutorial_control_fullscreen"),
+                    gettext("tutorial_control_music"),
+                    gettext("tutorial_control_sound"),
+                    gettext("tutorial_control_movement"),
+                    gettext("tutorial_control_shoot"),
                     "",
-                    "*** Strategy ***",
-                    "• Large asteroids give more points",
-                    "• Power-ups pulse in the last 3 seconds",
-                    "• Use invulnerability after respawn",
-                    "• Boss fights are optional - but rewarding!",
+                    gettext("tutorial_strategy_heading"),
+                    gettext("tutorial_strategy_large_asteroids"),
+                    gettext("tutorial_strategy_powerup_pulse"),
+                    gettext("tutorial_strategy_invuln_after_respawn"),
+                    gettext("tutorial_strategy_boss_optional"),
                 ],
             },
             {
-                "title": "Difficulty Levels",
+                "title": gettext("tutorial_title_difficulty_levels"),
                 "content": [
-                    "[EASY]:",
-                    "• Slower asteroids",
-                    "• Fewer asteroids per level",
-                    "• More power-up chances",
+                    gettext("tutorial_diff_easy_title"),
+                    gettext("tutorial_diff_easy_lines"),
                     "",
-                    "[NORMAL]:",
-                    "• Balanced gameplay",
-                    "• Standard settings",
+                    gettext("tutorial_diff_normal_title"),
+                    gettext("tutorial_diff_normal_lines"),
                     "",
-                    "[HARD]:",
-                    "• Faster asteroids",
-                    "• More asteroids per level",
-                    "• Fewer power-up chances",
-                    "• Tougher boss fights",
+                    gettext("tutorial_diff_hard_title"),
+                    gettext("tutorial_diff_hard_lines"),
                 ],
             },
         ]
@@ -260,12 +254,22 @@ class Tutorial:
             else:
                 color = (255, 255, 255)
 
-                if line.startswith("*** Boss Fights ***") or line.startswith("*** Boss Behavior ***"):
-                    color = (128, 0, 128)
-                elif line.startswith("*** Tips ***"):
-                    color = (255, 215, 0)
-                elif line.startswith("*** Controls ***") or line.startswith("*** Strategy ***"):
-                    color = (100, 200, 255)
+                # Headings are wrapped in triple-stars ("*** heading ***").
+                # Detect the pattern language-agnostically and then match
+                # keywords that may appear in English or German.
+                if line.startswith("***") and line.endswith("***"):
+                    inner = line.strip("* ").lower()
+                    # Boss-related headings (English "Boss", German "Boss")
+                    if "boss" in inner:
+                        color = (128, 0, 128)
+                    # Tips / Tipps
+                    elif "tip" in inner or "tipp" in inner:
+                        color = (255, 215, 0)
+                    # Controls / Steuerung, Strategy / Strategie
+                    elif "control" in inner or "steuer" in inner or "strateg" in inner:
+                        color = (100, 200, 255)
+                    else:
+                        color = (255, 255, 255)
 
                 elif line.startswith("•"):
                     color = (200, 200, 200)
@@ -322,7 +326,7 @@ class Tutorial:
                 name_color = (255, 0, 255)
             elif "[SPEED]" in name_part:
                 name_color = (255, 255, 0)
-            elif "[LEASY]" in name_part:
+            elif "[EASY]" in name_part:
                 name_color = (0, 255, 0)
             elif "[NORMAL]" in name_part:
                 name_color = (255, 255, 0)
@@ -345,14 +349,18 @@ class Tutorial:
             name_part = line[:colon_pos]
             desc_part = line[colon_pos:]
 
+            # Normalize and match weapon keywords in a language-agnostic way
             name_color = (255, 255, 255)
-            if "STANDARD:" in name_part:
+            name_upper = name_part.upper()
+            if "STANDARD" in name_upper:
                 name_color = (255, 255, 255)
-            elif "LASER:" in name_part:
+            elif "LASER" in name_upper:
                 name_color = (0, 255, 0)
-            elif "ROCKETS:" in name_part:
+            # English: ROCKET/ROCKETS, German: RAKETE/RAKETEN
+            elif "ROCKET" in name_upper or "RAKET" in name_upper:
                 name_color = (255, 0, 0)
-            elif "SHOTGUN:" in name_part:
+            # English: SHOTGUN, German: SCHROTFLINTE / SCHROT
+            elif "SHOTGUN" in name_upper or "SCHROT" in name_upper:
                 name_color = (255, 165, 0)
 
             name_surface = self.font_content.render(name_part, True, name_color)

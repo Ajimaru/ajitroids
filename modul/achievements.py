@@ -115,16 +115,26 @@ class AchievementSystem:
                 self.save_unlocked_achievements()
                 print(f"Achievement unlocked: {achievement.name} - {achievement.description}")
                 if self.notification_callback:
+                    # If ASCII notifications were requested, try to use a per-achievement
+                    # ASCII art mapping. Fall back to the description when no art exists.
                     if use_ascii:
-                        ascii_art = """
-                        ███████╗██╗     ███████╗████████╗
-                        ██╔════╝██║     ██╔════╝╚══██╔══╝
-                        █████╗  ██║     █████╗     ██║
-                        ██╔══╝  ██║     ██╔══╝     ██║
-                        ███████╗███████╗███████╗   ██║
-                        ╚══════╝╚══════╝╚══════╝   ╚═╝
-                        """
-                        self.notification_callback(achievement.name, ascii_art)
+                        ascii_map = {
+                            "Fleet Commander": """
+███████╗██╗     ███████╗████████╗
+██╔════╝██║     ██╔════╝╚══██╔══╝
+█████╗  ██║     █████╗     ██║
+██╔══╝  ██║     ██╔══╝     ██║
+███████╗███████╗███████╗   ██║
+╚══════╝╚══════╝╚══════╝   ╚═╝
+""",
+                        }
+                        # Other achievements may be added here in the future
+                        ascii_art = ascii_map.get(achievement.name)
+                        if ascii_art:
+                            self.notification_callback(achievement.name, ascii_art)
+                        else:
+                            # No ascii art available for this achievement; send description
+                            self.notification_callback(achievement.name, achievement.description)
                     else:
                         self.notification_callback(achievement.name, achievement.description)
                 return True
@@ -139,5 +149,26 @@ class AchievementSystem:
 
     def check_fleet_commander(self, ships):
         """Check and unlock Fleet Commander achievement if all ships are unlocked."""
-        if len(ships.unlocked_ships) == len(ships.ships):
-            self.unlock("Fleet Commander")
+        # Defensive checks: ensure ships object exists and has expected attributes
+        if not ships:
+            return False
+        if not (hasattr(ships, "unlocked_ships") and hasattr(ships, "ships")):
+            return False
+
+        try:
+            if len(ships.unlocked_ships) == len(ships.ships):
+                # Prefer an ASCII notification for Fleet Commander unlocks
+                self.unlock("Fleet Commander", use_ascii=True)
+                return True
+        except Exception:
+            # Defensive: do not raise from stats/achievement checks
+            return False
+        return False
+
+    def unlock_achievement(self, name, use_ascii=True):
+        """Deprecated compatibility wrapper for older API tests.
+
+        Historically tests and older code called `unlock_achievement(name)`.
+        Keep a small wrapper that forwards to the newer `unlock` method.
+        """
+        return self.unlock(name, use_ascii=use_ascii)

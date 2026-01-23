@@ -155,7 +155,7 @@ class StatsDashboard:
 
     def _draw_progress_bars(self, screen, stats, y_pos):
         """Draw visual progress bars for key metrics."""
-        
+
         bar_width = 400
         bar_height = 30
         center_x = SCREEN_WIDTH / 2

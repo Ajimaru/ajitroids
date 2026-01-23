@@ -298,6 +298,8 @@ def main(args=None):
         logger.info("Skipping intro, going directly to difficulty select")
     else:
         main_menu.activate()
+    # Track last applied language so we can refresh UI when it changes
+    last_language = game_settings.language
 
     boss_active = False
     boss_defeated_timer = 0
@@ -695,6 +697,8 @@ def main(args=None):
             menu_starfield.draw(screen)
 
             action = voice_announcements_menu.update(dt, events)
+            voice_announcements_menu.draw(screen)
+
             if action:
                 result = voice_announcements_menu.handle_action(action)
                 if result == "options":
@@ -705,6 +709,19 @@ def main(args=None):
                 elif result == "tts_voice":
                     game_state = "tts_voice"
                     tts_voice_menu.activate()
+
+        elif game_state == "tts_voice":
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+
+            action = tts_voice_menu.update(dt, events)
+            tts_voice_menu.draw(screen)
+
+            if action:
+                result = tts_voice_menu.handle_action(action)
+                if result == "options":
+                    game_state = "options"
+                    options_menu.activate()
 
         elif game_state == "controls":
             menu_starfield.update(dt)
@@ -724,7 +741,20 @@ def main(args=None):
             action = language_menu.update(dt, events)
             language_menu.draw(screen)
 
-            if action == "options":
+            # LanguageMenu may return a rebuild signal when the language
+            # selection changes. Handle structured rebuild requests here so
+            # menu reconstruction is centralized.
+            if isinstance(action, dict) and action.get("action") == "rebuild_menus":
+                # Recreate menus with updated settings
+                main_menu = MainMenu()
+                options_menu = OptionsMenu(game_settings, sounds)
+                controls_menu = ControlsMenu(game_settings)
+                # Activate the requested target
+                target = action.get("target", "options")
+                if target == "options":
+                    game_state = "options"
+                    options_menu.activate()
+            elif action == "options":
                 game_state = "options"
                 options_menu.activate()
 
@@ -1165,6 +1195,12 @@ def main(args=None):
                         sounds.play_hit()
 
                         if boss_defeated:
+                            # Play boss death sound effect (ensure asset present)
+                            try:
+                                sounds.play_boss_death()
+                            except pygame.error:
+                                pass
+
                             score += BOSS_SCORE
                             boss_active = False
                             session_stats.record_boss_defeated()
@@ -1286,8 +1322,8 @@ def main(args=None):
                         replay_player.load_replay(result["filepath"])
                         replay_player.start_playback()
                         game_state = "replay_viewer"
-                    except Exception as e:
-                        logger.error(f"Failed to load replay: {e}")
+                    except Exception as e:  # pylint: disable=broad-except
+                        logger.error("Failed to load replay: %s", e)
 
         elif game_state == "replay_viewer":
             # Draw game objects based on replay data
@@ -1364,6 +1400,72 @@ def main(args=None):
             fps_rect = fps_text.get_rect(topright=(SCREEN_WIDTH - 10, 10))
             screen.blit(fps_text, fps_rect)
 
+        # If language changed, rebuild menus/screens so new gettext values apply
+        if game_settings.language != last_language:
+            last_language = game_settings.language
+            # Reload locale files first so new UI components pick up translations
+            try:
+                from modul import i18n as _i18n
+
+                _i18n.reload_locales()
+            except Exception as e:
+                logger.exception("Failed to reload locales: %s", e)
+
+            # Recreate menus/screens that hold translated strings
+            try:
+                main_menu = MainMenu()
+                pause_menu = PauseMenu()
+                options_menu = OptionsMenu(game_settings, sounds)
+                sound_test_menu = SoundTestMenu()
+                sound_test_menu.set_sounds(sounds)
+                voice_announcements_menu = VoiceAnnouncementsMenu(game_settings)
+                tts_voice_menu = TTSVoiceMenu(game_settings)
+                controls_menu = ControlsMenu(game_settings)
+                language_menu = LanguageMenu(game_settings)
+                credits_screen = CreditsScreen()
+                game_over_screen = GameOverScreen()
+                difficulty_menu = DifficultyMenu()
+                ship_selection_menu = ShipSelectionMenu()
+                tutorial = Tutorial()
+                help_screen = HelpScreen()
+            except Exception as e:
+                logger.exception("Error recreating main UI components: %s", e)
+
+            # Recreate displays and viewers that cache translated strings
+            try:
+                highscore_display = HighscoreDisplay(highscore_manager)
+            except Exception as e:
+                logger.exception("Failed to recreate HighscoreDisplay: %s", e)
+
+            try:
+                replay_recorder = ReplayRecorder()
+                replay_manager = ReplayManager()
+                replay_list_menu = ReplayListMenu(replay_manager)
+                replay_player = ReplayPlayer()
+                replay_viewer = ReplayViewer(replay_player)
+            except Exception as e:
+                logger.exception("Failed to recreate replay components: %s", e)
+
+            try:
+                stats_dashboard = StatsDashboard(session_stats)
+            except Exception as e:
+                logger.exception("Failed to recreate StatsDashboard: %s", e)
+
+            # Activate the currently visible menu so transitions remain smooth
+            try:
+                if game_state == 'main_menu':
+                    main_menu.activate()
+                elif game_state == 'options':
+                    options_menu.activate()
+                elif game_state == 'controls':
+                    controls_menu.activate()
+                elif game_state == 'language':
+                    language_menu.activate()
+                elif game_state == 'credits':
+                    credits_screen.fade_in = True
+            except Exception as e:
+                logger.exception("Failed to activate restored menu state: %s", e)
+
         pygame.display.flip()
 
         dt = clock.tick(60) / 1000.0
@@ -1421,7 +1523,7 @@ def quick_restart_game():
         try:
             saved_path = replay_recorder.save_replay()
             logger.info(f"Replay saved before restart: {saved_path}")
-        except Exception as e:
+        except OSError as e:
             logger.error(f"Failed to save replay: {e}")
 
     # Reset game state
@@ -1484,7 +1586,10 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n\nGame interrupted by user.")
     except Exception as e:
-        # Ensure we can always emit a crash log even if main() failed early
+        # Catching broad Exception to ensure all errors are logged before exit.
+        # Re-raise critical exceptions.
+        if isinstance(e, (KeyboardInterrupt, SystemExit)):
+            raise
         root = logging.getLogger()
         if not root.handlers:
             logging.basicConfig(
