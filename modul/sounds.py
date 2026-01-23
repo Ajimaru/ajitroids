@@ -2,10 +2,12 @@
 
 import os
 from pathlib import Path
-
 import pygame
-
+import logging
 from modul.audio_enhancements import SoundTheme, SoundThemeManager
+
+# Module-level logger
+logger = logging.getLogger(__name__)
 
 
 def asset_path(name: str) -> str:
@@ -312,9 +314,9 @@ class Sounds:
         """Play player hit sound effect."""
         if self.sound_on and hasattr(self, "player_hit") and self.player_hit:
             self.player_hit.play()
-            print("Player Hit Sound played")
+            logger.debug("Player Hit Sound played")
         else:
-            print("Player Hit Sound not available - using fallback")
+            logger.debug("Player Hit Sound not available - using fallback")
             if self.sound_on and hasattr(self, "explosion") and self.explosion:
                 self.explosion.play()
 

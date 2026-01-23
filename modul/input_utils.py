@@ -1,13 +1,7 @@
 """Utilities for mapping actions to input bindings and keycodes."""
 
 from typing import Optional
-<<<<<<< HEAD
 import pygame
-=======
-
-import pygame
-
->>>>>>> origin/main
 from modul import settings as settings_mod
 
 
@@ -134,7 +128,7 @@ def is_action_pressed(action: str) -> bool:
                     hat = int(parts[1][3:])
                     hat_val = joy.get_hat(hat)
                     if len(parts) > 2:
-                        dirs = parts[2].split("_")
+                        dirs = parts[2].split("/")
                         x, y = hat_val
                         for d in dirs:
                             if d == "UP" and y != 1:

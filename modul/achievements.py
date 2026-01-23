@@ -4,38 +4,22 @@ import json
 
 
 class Achievement:
-<<<<<<< HEAD
     """Represents a single achievement with name, description, and unlock status."""
     def __init__(self, name, description):
         """Initialize an achievement with name and description."""
-=======
-    """TODO: add docstring."""
-    def __init__(self, name, description):
-        """TODO: add docstring."""
->>>>>>> origin/main
         self.name = name
         self.description = description
         self.unlocked = False
 
     def unlock(self):
-<<<<<<< HEAD
         """Mark the achievement as unlocked."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         self.unlocked = True
 
 
 class AchievementSystem:
-<<<<<<< HEAD
     """Manages achievements, loading, saving, and unlocking."""
     def __init__(self, achievements_file="achievements.json"):
         """Initialize the achievement system with file path."""
-=======
-    """TODO: add docstring."""
-    def __init__(self, achievements_file="achievements.json"):
-        """TODO: add docstring."""
->>>>>>> origin/main
         self.achievements_file = achievements_file
         self.achievements = []
         self.notification_callback = None
@@ -43,19 +27,11 @@ class AchievementSystem:
         self.load_unlocked_achievements()
 
     def set_notification_callback(self, callback):
-<<<<<<< HEAD
         """Set the callback function for achievement notifications."""
         self.notification_callback = callback
 
     def initialize_standard_achievements(self):
         """Initialize the list of standard achievements."""
-=======
-        """TODO: add docstring."""
-        self.notification_callback = callback
-
-    def initialize_standard_achievements(self):
-        """TODO: add docstring."""
->>>>>>> origin/main
         standard_achievements = [
             ("First Blood", "Destroy your first asteroid."),
             ("Survivor", "Survive for 10 minutes."),
@@ -77,11 +53,7 @@ class AchievementSystem:
         )
 
     def load_unlocked_achievements(self):
-<<<<<<< HEAD
         """Load unlocked achievements from the JSON file."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         try:
             with open(self.achievements_file, "r", encoding="utf-8") as file:
                 data = json.load(file)
@@ -102,29 +74,19 @@ class AchievementSystem:
             print(f"Error loading achievements file: {e}")
 
     def save_unlocked_achievements(self):
-<<<<<<< HEAD
         """Save unlocked achievements to the JSON file."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         unlocked_achievements = [
             {"name": achievement.name, "description": achievement.description, "unlocked": True}
             for achievement in self.achievements
             if achievement.unlocked
         ]
         if unlocked_achievements:
-<<<<<<< HEAD
             try:
                 with open(self.achievements_file, "w", encoding="utf-8") as file:
                     json.dump(unlocked_achievements, file, indent=4)
                 print(f"Unlocked achievements saved: {len(unlocked_achievements)} entries")
             except OSError as e:
                 print(f"Failed to save achievements to {self.achievements_file}: {e}")
-=======
-            with open(self.achievements_file, "w", encoding="utf-8") as file:
-                json.dump(unlocked_achievements, file, indent=4)
-            print(f"Unlocked achievements saved: {len(unlocked_achievements)} entries")
->>>>>>> origin/main
         else:
             # When there are no unlocked achievements, write an empty list
             # to avoid leaving a stale file with previous data.
@@ -136,7 +98,6 @@ class AchievementSystem:
                 print(f"Failed to write empty achievements file {self.achievements_file}: {e}")
 
     def load_achievements(self):
-<<<<<<< HEAD
         """Load achievements (delegates to load_unlocked_achievements)."""
         # Delegate to existing loader that reads unlocked achievements from file.
         # Keep this method for compatibility and potential future expansion.
@@ -146,67 +107,37 @@ class AchievementSystem:
         """Save achievements (delegates to save_unlocked_achievements)."""
         self.save_unlocked_achievements()
 
-    def unlock_achievement(self, name):
-        """Unlock an achievement by name and trigger notification."""
-=======
-        """TODO: add docstring."""
-
-    def save_achievements(self):
-        """TODO: add docstring."""
-        self.save_unlocked_achievements()
-
-    def unlock_achievement(self, name):
-        """TODO: add docstring."""
->>>>>>> origin/main
+    def unlock(self, name, use_ascii=False):
+        """Unlock an achievement by name. If use_ascii is True, show ASCII art in notification."""
         for achievement in self.achievements:
             if achievement.name == name and not achievement.unlocked:
                 achievement.unlock()
                 self.save_unlocked_achievements()
                 print(f"Achievement unlocked: {achievement.name} - {achievement.description}")
                 if self.notification_callback:
-                    ascii_art = """
-                    ███████╗██╗     ███████╗████████╗
-                    ██╔════╝██║     ██╔════╝╚══██╔══╝
-                    █████╗  ██║     █████╗     ██║
-                    ██╔══╝  ██║     ██╔══╝     ██║
-                    ███████╗███████╗███████╗   ██║
-                    ╚══════╝╚══════╝╚══════╝   ╚═╝
-                    """
-                    self.notification_callback(achievement.name, ascii_art)
-                break
-
-    def unlock(self, name):
-<<<<<<< HEAD
-        """Unlock an achievement by name."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
-        for achievement in self.achievements:
-            if achievement.name == name and not achievement.unlocked:
-                achievement.unlock()
-                self.save_unlocked_achievements()
-                print(f"Achievement unlocked: {achievement.name} - {achievement.description}")
-                if self.notification_callback:
-                    self.notification_callback(achievement.name, achievement.description)
+                    if use_ascii:
+                        ascii_art = """
+                        ███████╗██╗     ███████╗████████╗
+                        ██╔════╝██║     ██╔════╝╚══██╔══╝
+                        █████╗  ██║     █████╗     ██║
+                        ██╔══╝  ██║     ██╔══╝     ██║
+                        ███████╗███████╗███████╗   ██║
+                        ╚══════╝╚══════╝╚══════╝   ╚═╝
+                        """
+                        self.notification_callback(achievement.name, ascii_art)
+                    else:
+                        self.notification_callback(achievement.name, achievement.description)
                 return True
         return False
 
     def is_unlocked(self, name):
-<<<<<<< HEAD
         """Check if an achievement is unlocked."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         for achievement in self.achievements:
             if achievement.name == name:
                 return achievement.unlocked
         return False
 
     def check_fleet_commander(self, ships):
-<<<<<<< HEAD
         """Check and unlock Fleet Commander achievement if all ships are unlocked."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         if len(ships.unlocked_ships) == len(ships.ships):
             self.unlock("Fleet Commander")
