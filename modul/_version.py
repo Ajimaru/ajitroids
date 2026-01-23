@@ -32,7 +32,7 @@ __commit_id__: CommitId
 # Public names are the uppercase constants (`VERSION`, `COMMIT_ID`).
 # The dunder names (`__version__`, `__commit_id__`) are kept as
 # legacy aliases for backwards compatibility.
-__version__ = VERSION = '0.24.1.dev49'
+__version__ = VERSION = version = '0.24.1.dev49'
 __version_tuple__ = version_tuple = (0, 24, 1, 'dev49')
 
 __commit_id__ = COMMIT_ID = 'gb2e481b8f'
