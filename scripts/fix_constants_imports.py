@@ -19,7 +19,7 @@ def main():
     files = list((ROOT / 'tests').rglob('*.py'))
     changed = []
     for p in files:
-        s = p.read_text()
+        s = p.read_text(encoding='utf-8')
         # Parse the file AST and find ImportFrom nodes importing from modul.constants
         try:
             tree = ast.parse(s)
@@ -78,7 +78,7 @@ def main():
 
         new_s = ''.join(lines)
         if new_s != s:
-            p.write_text(new_s)
+            p.write_text(new_s, encoding='utf-8')
             changed.append(str(p.relative_to(ROOT)))
 
     return changed
