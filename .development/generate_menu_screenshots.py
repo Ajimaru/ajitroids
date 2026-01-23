@@ -200,8 +200,9 @@ def _parse_main_instantiations():
         with open(main_py, "r", encoding="utf-8") as fh:
             for line in fh:
                 line = line.strip()
-                # simple heuristic: look for `name = ClassName(`
-                if "=" in line and "(" in line and line.endswith(")") or "(" in line:
+                # simple heuristic: look for `name = ClassName(...)` — require
+                # the full conjunction so a stray '(' doesn't match everything.
+                if ("=" in line and "(" in line and line.endswith(")")):
                     parts = line.split("=")
                     if len(parts) >= 2:
                         rhs = parts[1].strip()
