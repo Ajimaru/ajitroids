@@ -306,4 +306,4 @@ LICENSE.md file for details.
 - Developed with ❤️ and Pygame
 
 _Note: This project is in active development. New features and improvements are
-regularly being added.
+regularly being added._
