@@ -63,7 +63,7 @@
   "tutorial_collect_powerups": "• Sammle Power-ups, um Vorteile zu erhalten",
 
   "tutorial_title_powerups": "Power-Ups",
-  "tutorial_powerup_shield": "[SCHILD] - 3 Sek. Unverwundbarkeit",
+  "tutorial_powerup_shield": "[SHIELD] - 3 Sek. Unverwundbarkeit",
   "tutorial_powerup_tripleshot": "[3-SHOT] - Drei Schüsse gleichzeitig",
   "tutorial_powerup_speed": "[SPEED] - Erhöhte Schussrate",
   "tutorial_powerup_laser": "[LASER] - Erhöhter Schaden",
@@ -116,11 +116,11 @@
   "tutorial_strategy_boss_optional": "• Boss-Kämpfe sind optional — aber lohnend!",
 
   "tutorial_title_difficulty_levels": "Schwierigkeitsgrade",
-  "tutorial_diff_easy_title": "[EINFACH]:",
+  "tutorial_diff_easy_title": "[EASY]:",
   "tutorial_diff_easy_lines": "• Langsamere Asteroiden\n• Weniger Asteroiden pro Level\n• Höhere Chance auf Power-ups",
   "tutorial_diff_normal_title": "[NORMAL]:",
   "tutorial_diff_normal_lines": "• Ausgewogenes Gameplay\n• Standardeinstellungen",
-  "tutorial_diff_hard_title": "[SCHWER]:",
+  "tutorial_diff_hard_title": "[HARD]:",
   "tutorial_diff_hard_lines": "• Schnellere Asteroiden\n• Mehr Asteroiden pro Level\n• Geringere Chance auf Power-ups\n• Härtere Bosskämpfe",
 
   "binding_cancelled": "Bindung abgebrochen",

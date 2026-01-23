@@ -316,7 +316,7 @@ class Tutorial:
                 name_color = (255, 0, 255)
             elif "[SPEED]" in name_part:
                 name_color = (255, 255, 0)
-            elif "[LEASY]" in name_part:
+            elif "[EASY]" in name_part:
                 name_color = (0, 255, 0)
             elif "[NORMAL]" in name_part:
                 name_color = (255, 255, 0)
