@@ -192,7 +192,7 @@ def _parse_main_instantiations():
 
     Returns a set of class names referenced in assignments.
     """
-    main_py = os.path.join(os.path.dirname(ROOT), "main.py")
+    main_py = os.path.join(ROOT, "main.py")
     if not os.path.exists(main_py):
         return set()
     names = set()
