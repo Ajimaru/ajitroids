@@ -11,11 +11,9 @@ import time
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-
 import pygame
-
 try:
-    import pyttsx3
+    import pyttsx3 as ttsdriver
     TTS_AVAILABLE = True
 except ImportError:
     TTS_AVAILABLE = False
@@ -42,7 +40,7 @@ class DynamicMusicSystem:
     """Manages dynamic music that changes based on game intensity"""
 
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize dynamic music system."""
         self.current_intensity = IntensityLevel.CALM
         # Music tracks for different intensity levels
         # Note: Currently using the same track for CALM/NORMAL/INTENSE as only one background
@@ -129,7 +127,7 @@ class VoiceAnnouncement:
     """Manages voice announcements for game events"""
 
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize voice announcement system."""
         self.announcement_queue: List[Tuple[str, float]] = []  # (text, priority)
         self.current_announcement: Optional[str] = None
         self.announcement_timer = 0.0
@@ -175,7 +173,7 @@ class VoiceAnnouncement:
         # Initialize TTS engine if available
         if TTS_AVAILABLE:
             try:
-                self.tts_engine = pyttsx3.init()
+                self.tts_engine = ttsdriver.init()
                 # Configure TTS settings
                 self.tts_engine.setProperty('rate', 180)  # Speed of speech
                 self.tts_engine.setProperty('volume', 0.9)  # Volume (0.0 to 1.0)
@@ -314,7 +312,7 @@ class SoundThemeManager:
     """Manages multiple sound themes (retro, sci-fi, orchestral)"""
 
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize sound theme manager."""
         self.current_theme = SoundTheme.DEFAULT
 
         # Define sound mappings for each theme
@@ -434,7 +432,7 @@ class AudioEnhancementManager:
     """Main manager for all audio enhancements"""
 
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize the audio enhancement manager with subsystems."""
         self.dynamic_music = DynamicMusicSystem()
         self.voice_announcements = VoiceAnnouncement()
         self.theme_manager = SoundThemeManager()

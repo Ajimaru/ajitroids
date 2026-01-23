@@ -2,6 +2,11 @@
 
 import json
 import os
+import logging
+# Try to import the runtime settings module once at import time. Keep the
+# reference optional to avoid repeated dynamic imports inside `gettext()` and
+# to satisfy linters complaining about imports outside top-level (C0415).
+logger = logging.getLogger(__name__)
 
 _locales_cache = {}
 
@@ -15,7 +20,7 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - optional runtim
 
 
 def load_locale(lang_code: str):
-    """TODO: add docstring."""
+    """Load and return the locale dictionary for the given language code."""
     if lang_code in _locales_cache:
         return _locales_cache[lang_code]
 
@@ -34,7 +39,7 @@ def load_locale(lang_code: str):
 
 
 def t(key: str, lang_code: str = "en"):
-    """TODO: add docstring."""
+    """Return the localized string for the given key and language code."""
     locale = load_locale(lang_code)
     return locale.get(key, key)
 
@@ -48,7 +53,9 @@ def gettext(key: str):
         lang = getattr(settings_mod, "current_settings", None) if settings_mod else None
         if lang and getattr(lang, "language", None):
             return t(key, lang.language)
-    except Exception:  # pylint: disable=broad-exception-caught
-        # If settings cannot be inspected, fall back to English
-        pass
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.debug(
+            "i18n.gettext: Exception reading settings_mod.current_settings.language for key '%s': %r",
+            key, e, exc_info=True
+        )
     return t(key, "en")

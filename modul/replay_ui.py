@@ -12,9 +12,9 @@ from modul.replay_system import ReplayManager, ReplayPlayer
 try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
-    def gettext(k):
+    def gettext(key):
         """Fallback translation: return the given key unchanged."""
-        return k
+        return key
 
 try:
     from modul import input_utils
@@ -32,7 +32,7 @@ class ReplayListMenu:
     """Menu for listing and selecting replays."""
 
     def __init__(self, replay_manager: ReplayManager):
-        """TODO: add docstring."""
+        """Initialize replay list menu."""
         self.replay_manager = replay_manager
         self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
         self.text_font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
@@ -183,7 +183,7 @@ class ReplayViewer:
     """Viewer for playing back replays."""
 
     def __init__(self, replay_player: ReplayPlayer):
-        """TODO: add docstring."""
+        """Initialize replay viewer."""
         self.replay_player = replay_player
         self.title_font = pygame.font.Font(None, 48)
         self.text_font = pygame.font.Font(None, 32)
@@ -268,7 +268,13 @@ class ReplayViewer:
         screen.blit(time_surf, time_rect)
 
         # Speed indicator
-        speed_text = gettext("replay_speed_format").format(speed=self.replay_player.playback_speed)
+        template = gettext("replay_speed_format")
+        try:
+            # Defensive formatting: if the template doesn't accept 'speed', fall back
+            speed_text = template.format(speed=self.replay_player.playback_speed)
+        except Exception:
+            # Fallback to a safe default that includes the numeric speed
+            speed_text = f"{self.replay_player.playback_speed}x"
         speed_surf = self.small_font.render(speed_text, True, (200, 200, 200))
         screen.blit(speed_surf, (SCREEN_WIDTH - 150, bar_y + 10))
 

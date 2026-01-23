@@ -728,7 +728,6 @@ def main(args=None):
                 game_state = "options"
                 options_menu.activate()
 
-            voice_announcements_menu.draw(screen)
 
         elif game_state == "sound_test":
             menu_starfield.update(dt)

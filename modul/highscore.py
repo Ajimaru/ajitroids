@@ -3,24 +3,31 @@
 import json
 import os
 import random
-
 import pygame
-
 import modul.constants as C
 try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
-    def gettext(k):
+    def gettext(key):
         """Fallback translation function returning key when i18n is unavailable."""
-        return k
+        return key
 
+    class HighscoreManager:
+        """Manage loading, saving and querying highscores."""
 
-class HighscoreManager:
-    """Manage loading, saving and querying highscores."""
-    def __init__(self):
-        """Initialize highscore manager and load persisted highscores."""
-        self.highscores = []
-        self.load_highscores()
+        def _generate_default_highscores(self):
+            return [
+                {
+                    "name": "".join(random.choice(C.HIGHSCORE_ALLOWED_CHARS) for _ in range(C.HIGHSCORE_NAME_LENGTH)),
+                    "score": (C.HIGHSCORE_MAX_ENTRIES - i) * 1000,
+                }
+                for i in range(C.HIGHSCORE_MAX_ENTRIES)
+            ]
+
+        def __init__(self):
+            """Initialize highscore manager and load persisted highscores."""
+            self.highscores = []
+            self.load_highscores()
 
     def load_highscores(self):
         """Load highscores from disk or initialize defaults."""
@@ -29,17 +36,13 @@ class HighscoreManager:
                 with open(C.HIGHSCORE_FILE, "r", encoding="utf-8") as f:
                     self.highscores = json.load(f)
             else:
-                self.highscores = [
-                    {
-                        "name": "".join(random.choice(C.HIGHSCORE_ALLOWED_CHARS) for _ in range(C.HIGHSCORE_NAME_LENGTH)),
-                        "score": (C.HIGHSCORE_MAX_ENTRIES - i) * 1000,
-                    }
-                    for i in range(C.HIGHSCORE_MAX_ENTRIES)
-                ]
+                self.highscores = self._generate_default_highscores()
                 self.save_highscores()
         except (OSError, json.JSONDecodeError) as e:  # fallback for file/parse errors
             print(f"Error loading highscores: {e}")
-            self.highscores = [{"name": "AAA", "score": 1000 - i * 100} for i in range(C.HIGHSCORE_MAX_ENTRIES)]
+            # Fallback: generate entries using the same logic as the default
+            # initialization so names and scores are consistent.
+            self.highscores = self._generate_default_highscores()
 
     def save_highscores(self):
         """Persist highscores to disk, handling IO errors."""
@@ -50,13 +53,13 @@ class HighscoreManager:
             print(f"Error saving highscores: {e}")
 
     def is_highscore(self, score):
-        """TODO: add docstring."""
+        """Check if the score qualifies as a highscore."""
         if len(self.highscores) < C.HIGHSCORE_MAX_ENTRIES:
             return True
         return score > self.highscores[-1]["score"]
 
     def add_highscore(self, name, score):
-        """TODO: add docstring."""
+        """Add a new highscore entry."""
         name = name.upper()[:C.HIGHSCORE_NAME_LENGTH]
         name = "".join(c for c in name if c in C.HIGHSCORE_ALLOWED_CHARS)
         name = name.ljust(C.HIGHSCORE_NAME_LENGTH, "A")
@@ -73,9 +76,9 @@ class HighscoreManager:
 
 
 class HighscoreInput:
-    """TODO: add docstring."""
+    """Handles input for entering highscore name."""
     def __init__(self, score):
-        """TODO: add docstring."""
+        """Initialize highscore input with score."""
         self.score = score
         self.name = ["A", "A", "A"]
         self.current_pos = 0
@@ -83,29 +86,29 @@ class HighscoreInput:
         self.font = pygame.font.Font(None, 64)
 
     def update(self, events):
-        """TODO: add docstring."""
+        """Update input based on events."""
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     self.done = True
                     return "".join(self.name)
 
-                elif event.key == pygame.K_BACKSPACE:
+                if event.key == pygame.K_BACKSPACE:
                     self.current_pos = max(0, self.current_pos - 1)
 
-                elif event.key == pygame.K_RIGHT:
+                if event.key == pygame.K_RIGHT:
                     self.current_pos = min(C.HIGHSCORE_NAME_LENGTH - 1, self.current_pos + 1)
 
-                elif event.key == pygame.K_LEFT:
+                if event.key == pygame.K_LEFT:
                     self.current_pos = max(0, self.current_pos - 1)
 
-                elif event.key == pygame.K_UP:
+                if event.key == pygame.K_UP:
                     current_char = self.name[self.current_pos]
                     idx = C.HIGHSCORE_ALLOWED_CHARS.find(current_char)
                     idx = (idx + 1) % len(C.HIGHSCORE_ALLOWED_CHARS)
                     self.name[self.current_pos] = C.HIGHSCORE_ALLOWED_CHARS[idx]
 
-                elif event.key == pygame.K_DOWN:
+                if event.key == pygame.K_DOWN:
                     current_char = self.name[self.current_pos]
                     idx = C.HIGHSCORE_ALLOWED_CHARS.find(current_char)
                     idx = (idx - 1) % len(C.HIGHSCORE_ALLOWED_CHARS)
@@ -114,7 +117,7 @@ class HighscoreInput:
         return None
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the highscore input screen."""
         overlay = pygame.Surface((C.SCREEN_WIDTH, C.SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 200))
         screen.blit(overlay, (0, 0))
@@ -168,9 +171,9 @@ class HighscoreInput:
 
 
 class HighscoreDisplay:
-    """TODO: add docstring."""
+    """Displays the highscore list."""
     def __init__(self, highscore_manager):
-        """TODO: add docstring."""
+        """Initialize highscore display."""
         self.highscore_manager = highscore_manager
         self.font_title = pygame.font.Font(None, 64)
         self.font_entry = pygame.font.Font(None, 36)
@@ -187,7 +190,7 @@ class HighscoreDisplay:
         self.input_cooldown = 0
 
     def update(self, dt, events):
-        """TODO: add docstring."""
+        """Update fade-in animation and button hover effects."""
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / 0.5)
             if self.background_alpha >= 200:
@@ -206,14 +209,14 @@ class HighscoreDisplay:
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if self.input_cooldown <= 0:
-                    if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN or event.key == pygame.K_ESCAPE:
+                    if event.key in (pygame.K_SPACE, pygame.K_RETURN, pygame.K_ESCAPE):
                         self.input_cooldown = 0.15
                         return "main_menu"
 
         return None
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the highscore display screen."""
         overlay = pygame.Surface((C.SCREEN_WIDTH, C.SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, self.background_alpha))
         screen.blit(overlay, (0, 0))

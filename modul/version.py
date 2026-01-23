@@ -20,7 +20,7 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - best-effort fal
 
 
 def _fallback_version() -> str:
-    """TODO: add docstring."""
+    """Return the fallback version string."""
     # Use the module-level cached generated version when present.
     if _generated_version:
         return _generated_version

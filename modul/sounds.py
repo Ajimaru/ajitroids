@@ -1,11 +1,14 @@
 """Module modul.sounds — minimal module docstring."""
 
+
 import os
 from pathlib import Path
-
 import pygame
-
+import logging
 from modul.audio_enhancements import SoundTheme, SoundThemeManager
+
+# Module-level logger
+logger = logging.getLogger(__name__)
 
 
 def asset_path(name: str) -> str:
@@ -33,7 +36,7 @@ class Sounds:
     # Base volume levels for individual sound effects (relative to master volume)
     # Heavily reduced to account for WAV files being typically very loud
     # and to make volume slider changes actually perceptible
-    """TODO: add docstring."""
+    """Manages game sounds and music playback."""
     BASE_VOLUMES = {
         "shoot": 0.1,
         "explosion": 0.12,
@@ -52,7 +55,7 @@ class Sounds:
     }
 
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize sound system and load sounds."""
         pygame.mixer.init(44100, -16, 2, 2048)
         self.shoot = None
         self.explosion = None
@@ -92,7 +95,7 @@ class Sounds:
         self.load_new_sounds()
 
     def load_new_sounds(self):
-        """TODO: add docstring."""
+        """Load additional sound effects."""
         try:
             self.laser_shoot = pygame.mixer.Sound(asset_path("laser_shoot.wav"))
         except Exception as e:  # pylint: disable=broad-exception-caught
@@ -138,76 +141,81 @@ class Sounds:
         except Exception as e:  # pylint: disable=broad-exception-caught
             self.player_hit = None
             print(f"Player-Hit sound could not be loaded: {e}")
+        try:
+            self.boss_attack = pygame.mixer.Sound(asset_path("boss_attack.wav"))
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self.boss_attack = None
+            print(f"Boss-Attack sound could not be loaded: {e}")
 
     def play_shoot(self):
-        """TODO: add docstring."""
+        """Play shoot sound effect."""
         if self.sound_on and self.shoot:
             self.shoot.play()
 
     def play_explosion(self):
-        """TODO: add docstring."""
+        """Play explosion sound effect."""
         if self.sound_on and self.explosion:
             self.explosion.play()
 
     def play_player_death(self):
-        """TODO: add docstring."""
+        """Play player death sound effect."""
         if self.sound_on and self.player_death:
             self.player_death.play()
 
     def play_menu_move(self):
-        """TODO: add docstring."""
+        """Play menu move sound effect."""
         if self.sound_on and self.menu_move:
             self.menu_move.play()
 
     def play_menu_select(self):
-        """TODO: add docstring."""
+        """Play menu select sound effect."""
         if self.sound_on and self.menu_select:
             self.menu_select.play()
 
     def play_level_up(self):
-        """TODO: add docstring."""
+        """Play level up sound effect."""
         if self.sound_on and self.level_up:
             self.level_up.play()
 
     def play_powerup(self):
-        """TODO: add docstring."""
+        """Play powerup sound effect."""
         if self.sound_on and self.powerup:
             self.powerup.play()
 
     def play_laser_shoot(self):
-        """TODO: add docstring."""
+        """Play laser shoot sound effect."""
         if self.sound_on and self.laser_shoot:
             self.laser_shoot.play()
 
     def play_rocket_shoot(self):
-        """TODO: add docstring."""
+        """Play rocket shoot sound effect."""
         if self.sound_on and self.rocket_shoot:
             self.rocket_shoot.play()
 
     def play_boss_spawn(self):
-        """TODO: add docstring."""
+        """Play boss spawn sound effect."""
         if self.sound_on and self.boss_spawn:
             self.boss_spawn.play()
 
     def play_boss_death(self):
-        """TODO: add docstring."""
+        """Play boss death sound effect."""
         if self.sound_on and self.boss_death:
             self.boss_death.play()
 
     def play_shield_activate(self):
-        """TODO: add docstring."""
+        """Play shield activate sound effect."""
         if self.sound_on and self.shield_activate:
             self.shield_activate.play()
 
     def play_achievement(self):
-        """TODO: add docstring."""
+        """Play achievement sound effect."""
         if self.sound_on and self.level_up:
             self.level_up.play()
         else:
             print("Achievement sound not available (Level-Up sound missing)")
 
     def play_game_over(self):
-        """TODO: add docstring."""
+        """Play game over sound effect."""
         if self.sound_on and hasattr(self, "game_over") and self.game_over:
             self.game_over.play()
         else:
@@ -224,7 +232,7 @@ class Sounds:
         pygame.mixer.music.set_volume(curve_volume)
 
     def toggle_music(self, enabled):
-        """TODO: add docstring."""
+        """Toggle background music on/off."""
         try:
             if enabled:
                 pygame.mixer.music.set_volume(0.6)
@@ -263,7 +271,7 @@ class Sounds:
                         sound.set_volume(0.0)
 
     def play_boss_music(self):
-        """TODO: add docstring."""
+        """Play boss music."""
         try:
             if pygame.mixer.get_init() is not None:
                 pygame.mixer.music.load(asset_path("boss_music.mp3"))
@@ -274,32 +282,41 @@ class Sounds:
             print(f"Boss music could not be loaded: {e}")
 
     def play_hit(self):
-        """TODO: add docstring."""
+        """Play hit sound effect."""
         if self.sound_on and hasattr(self, "explosion") and self.explosion:
             self.explosion.play()
 
     def play_extra_life(self):
-        """TODO: add docstring."""
+        """Play extra life sound effect."""
         if self.sound_on and hasattr(self, "level_up") and self.level_up:
             self.level_up.play()
         else:
             print("Extra Life sound not available or disabled")
 
     def play_enemy_shoot(self):
-        """TODO: add docstring."""
-        if self.sound_on and hasattr(self, "boss_attack") and self.boss_attack:
-            self.boss_attack.play()
-        else:
-            if self.sound_on and self.shoot:
-                self.shoot.play()
+        """Play enemy shoot sound effect."""
+        if self.sound_on:
+            # Prefer boss_attack when available; fall back to shoot only if boss_attack is missing or fails
+            played = False
+            if hasattr(self, "boss_attack") and self.boss_attack:
+                try:
+                    self.boss_attack.play()
+                    played = True
+                except pygame.error:
+                    played = False
+            if not played and hasattr(self, "shoot") and self.shoot:
+                try:
+                    self.shoot.play()
+                except pygame.error:
+                    pass
 
     def play_player_hit(self):
-        """TODO: add docstring."""
+        """Play player hit sound effect."""
         if self.sound_on and hasattr(self, "player_hit") and self.player_hit:
             self.player_hit.play()
-            print("Player Hit Sound played")
+            logger.debug("Player Hit Sound played")
         else:
-            print("Player Hit Sound not available - using fallback")
+            logger.debug("Player Hit Sound not available - using fallback")
             if self.sound_on and hasattr(self, "explosion") and self.explosion:
                 self.explosion.play()
 
@@ -367,6 +384,7 @@ class Sounds:
             'level_up': 'level_up',
             'game_over': 'game_over',
             'player_hit': 'player_hit',
+            'boss_attack': 'boss_attack',
         }
 
         for attr_name, sound_name in sound_mappings.items():

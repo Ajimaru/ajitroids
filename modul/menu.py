@@ -1,38 +1,55 @@
 """Module modul.menu — minimal module docstring."""
 
-# flake8: noqa
-# pylint: disable=all
-# pyright: reportUndefinedVariable=false
-# pyright: reportWildcardImportFromLibrary=false
 import math
-
 import pygame
-
 import modul.constants as C
 from modul.version import __version__
+from modul.ships import ShipRenderer, ship_manager
+from modul import input_utils
 
 # Backwards-compatibility: expose uppercase constants into module globals
 for _const_name in dir(C):
     if _const_name.isupper():
         globals()[_const_name] = getattr(C, _const_name)
-from modul.ships import ShipRenderer, ship_manager
 
-sounds = None
+SOUNDS = None
+
+# Menu-related constants (add or adjust as needed)
+CREDITS_SCROLL_SPEED = 40  # pixels per second (adjust to desired scroll speed)
+
+
+def _gettext(key):
+    """Return translated string for `key` or the key itself if i18n unavailable.
+
+    This helper centralizes the common try/except import pattern used across
+    the module: it attempts to import and call `modul.i18n.gettext` and
+    falls back to returning the key unchanged when the i18n module is not
+    available (for tests or minimal environments).
+    """
+    try:
+        from modul.i18n import gettext as _g
+        return _g(key)
+    except Exception:
+        return key
+
+# Backwards-compatibility: expose a `gettext` name to call the helper
+gettext = _gettext
 
 
 class MenuItem:
-    """TODO: add docstring."""
-    def __init__(self, text, action):
-        """TODO: add docstring."""
+    """Represents a selectable item in a menu."""
+    def __init__(self, text, action, shortcut=None):
+        """Initialize a MenuItem with text, action, and optional shortcut."""
         self.text = text
         self.action = action
         self.selected = False
         self.hover_animation = 0
         self.opacity = 255
         self.delay = 0
+        self.shortcut = shortcut
 
     def update(self, dt):
-        """TODO: add docstring."""
+        """Update the item's animation and opacity state."""
         target = 1.0 if self.selected else 0.0
         animation_speed = 12.0
         self.hover_animation = self.hover_animation + (target - self.hover_animation) * dt * animation_speed
@@ -42,15 +59,18 @@ class MenuItem:
                 self.delay = 0
                 self.opacity = 255
 
-    def draw(self, screen, position, font):
-        """TODO: add docstring."""
+    def draw(self, screen, position, font=None):
+        """Draw the menu item at the given position. Accepts optional font argument."""
         color = pygame.Color(C.MENU_UNSELECTED_COLOR)
         selected_color = pygame.Color(C.MENU_SELECTED_COLOR)
         r = max(0, min(255, int(color.r + (selected_color.r - color.r) * self.hover_animation)))
         g = max(0, min(255, int(color.g + (selected_color.g - color.g) * self.hover_animation)))
         b = max(0, min(255, int(color.b + (selected_color.b - color.b) * self.hover_animation)))
         size_multiplier = 1.0 + 0.2 * self.hover_animation
-        scaled_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE * size_multiplier))
+        if font is None:
+            scaled_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE * size_multiplier))
+        else:
+            scaled_font = font
         text_surface = scaled_font.render(self.text, True, (r, g, b))
         text_rect = text_surface.get_rect(center=(position[0], position[1]))
         screen.blit(text_surface, text_rect)
@@ -58,9 +78,9 @@ class MenuItem:
 
 
 class Menu:
-    """TODO: add docstring."""
-    def __init__(self, title):
-        """TODO: add docstring."""
+    """Base class for game menus with selectable items."""
+    def __init__(self, title, sounds=None):
+        """Initialize the menu with a title."""
         self.title = title
         self.items = []
         self.selected_index = 0
@@ -70,17 +90,17 @@ class Menu:
         self.active = False
         self.fade_in = False
         self.input_cooldown = 0
+        self.sounds = sounds
 
     def add_item(self, text, action, shortcut=None):
-        """TODO: add docstring."""
-        item = MenuItem(text, action)
-        item.shortcut = shortcut
+        """Add a new item to the menu."""
+        item = MenuItem(text, action, shortcut)
         self.items.append(item)
         if len(self.items) == 1:
             self.items[0].selected = True
 
     def activate(self):
-        """TODO: add docstring."""
+        """Activate the menu and start fade-in animation."""
         self.active = True
         self.fade_in = True
         self.background_alpha = 0
@@ -89,7 +109,7 @@ class Menu:
             item.delay = i * 0.1
 
     def update(self, dt, events):
-        """TODO: add docstring."""
+        """Update menu state and handle input events."""
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
             if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
@@ -102,7 +122,6 @@ class Menu:
         if self.input_cooldown > 0:
             self.input_cooldown -= dt
 
-        from modul import input_utils
         shoot_key = input_utils.get_action_keycode("shoot")
 
         for event in events:
@@ -154,29 +173,37 @@ class Menu:
         return None
 
     def _select_next(self):
-        """TODO: add docstring."""
+        """Select the next menu item."""
         self.items[self.selected_index].selected = False
         self.selected_index = (self.selected_index + 1) % len(self.items)
         self.items[self.selected_index].selected = True
-        if "sounds" in globals() or hasattr(self, "sounds"):
+        if hasattr(self, "sounds") and self.sounds:
             try:
-                sounds.play_menu_move()
-            except Exception:  # pylint: disable=broad-exception-caught
-                pass
+                self.sounds.play_menu_move()
+            except Exception as e:
+                logger = getattr(self, 'logger', None)
+                if logger is None:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                logger.debug("Exception in play_menu_move in _select_next: %s", e, exc_info=True)
 
     def _select_previous(self):
-        """TODO: add docstring."""
+        """Select the previous menu item."""
         self.items[self.selected_index].selected = False
         self.selected_index = (self.selected_index - 1) % len(self.items)
         self.items[self.selected_index].selected = True
-        if "sounds" in globals() or hasattr(self, "sounds"):
+        if hasattr(self, "sounds") and self.sounds:
             try:
-                sounds.play_menu_move()
-            except Exception:  # pylint: disable=broad-exception-caught
-                pass
+                self.sounds.play_menu_move()
+            except Exception as e:
+                logger = getattr(self, 'logger', None)
+                if logger is None:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                logger.debug("Exception in play_menu_move in _select_previous: %s", e, exc_info=True)
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the menu and its items on the screen."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -190,20 +217,13 @@ class Menu:
         start_y = C.SCREEN_HEIGHT / 2 - total_height / 2
         for i, item in enumerate(self.items):
             position = (C.SCREEN_WIDTH / 2, start_y + i * C.MENU_ITEM_SPACING)
-            item.draw(screen, position, self.item_font)
+            item.draw(screen, position)
 
 
 class MainMenu(Menu):
-    """TODO: add docstring."""
+    """Main menu for the game."""
     def __init__(self):
-        """TODO: add docstring."""
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
-
+        """Initialize the main menu with all items."""
         super().__init__("AJITROIDS")
         self.add_item(gettext("start_game"), "start_game")
         self.add_item(gettext("tutorial"), "tutorial")
@@ -211,11 +231,12 @@ class MainMenu(Menu):
         self.add_item(gettext("highscores"), "highscores")
         self.add_item(gettext("statistics"), "statistics")
         self.add_item(gettext("achievements"), "achievements")
-        # Tests expect the Options item to appear as German "Optionen".
-        # Use the German locale for this single label to match existing test expectations.
+        # Use the user's current locale for the Options label; fall back to
+        # gettext("options") if unavailable. Tests that depended on a German
+        # label should be adapted to the active locale.
         try:
             from modul.i18n import t
-            options_label = t("options", "de")
+            options_label = t("options")
         except Exception:  # pylint: disable=broad-exception-caught
             options_label = gettext("options")
         self.add_item(options_label, "options")
@@ -223,7 +244,7 @@ class MainMenu(Menu):
         self.add_item(gettext("exit"), "exit")
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the main menu and version info."""
         super().draw(screen)
 
         version_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE / 1.5))
@@ -233,37 +254,22 @@ class MainMenu(Menu):
 
 
 class PauseMenu(Menu):
-    """TODO: add docstring."""
+    """Pause menu shown during gameplay."""
     def __init__(self):
-        """TODO: add docstring."""
-        try:
-            from modul.i18n import gettext
-            title = gettext("pause").upper()
-        except Exception:  # pylint: disable=broad-exception-caught
-            title = "PAUSE"
+        """Initialize the pause menu with items."""
+        title = _gettext("pause").upper()
         super().__init__(title)
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
         self.add_item(gettext("resume"), "continue")
         self.add_item(gettext("restart"), "restart")
         self.add_item(gettext("main_menu"), "main_menu")
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the pause menu and shortcuts."""
         super().draw(screen)
 
         # Show common keyboard shortcuts while paused
         shortcuts_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE * 0.8))
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
+        # Use module-level gettext helper
 
         shortcuts = [
             gettext("shortcut_arrow_up_accelerate"),
@@ -290,22 +296,21 @@ class PauseMenu(Menu):
 
 
 class TutorialScreen:
-    """TODO: add docstring."""
+    """Screen displaying tutorial instructions."""
     def __init__(self):
-        """TODO: add docstring."""
+        """Initialize fonts and state for the tutorial screen."""
         self.title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
         self.text_font = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE)
         self.background_alpha = 0
         self.fade_in = True
 
     def update(self, dt, events):
-        """TODO: add docstring."""
+        """Update fade-in and handle input for tutorial screen."""
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
             if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
-                self.fade_in = False
                 self.background_alpha = C.MENU_BACKGROUND_ALPHA
-
+                self.fade_in = False
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -314,17 +319,10 @@ class TutorialScreen:
         return None
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the tutorial instructions on the screen."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
-
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
 
         title_surf = self.title_font.render(gettext("tutorial_title"), True, pygame.Color(C.MENU_TITLE_COLOR))
         title_rect = title_surf.get_rect(center=(C.SCREEN_WIDTH / 2, 100))
@@ -354,18 +352,13 @@ class TutorialScreen:
 
 
 class OptionsMenu(Menu):
-    """TODO: add docstring."""
+    """Menu for adjusting game options and settings."""
     def __init__(self, settings, sounds):
-        """TODO: add docstring."""
+        """Initialize the options menu with settings and sounds."""
         super().__init__("OPTIONS")
         self.settings = settings
         self.sounds = sounds
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
+        # Use module-level gettext helper
 
         music_state = gettext("on") if settings.music_on else gettext("off")
         sound_state = gettext("on") if settings.sound_on else gettext("off")
@@ -380,10 +373,7 @@ class OptionsMenu(Menu):
         # `show_tts_in_options` attribute so tests that don't include the
         # feature flag keep the original menu length.
         if "show_tts_in_options" in getattr(settings, "__dict__", {}):
-            try:
-                tts_toggle_state = gettext('on') if getattr(settings, 'show_tts_in_options', False) else gettext('off')
-            except Exception:  # pylint: disable=broad-exception-caught
-                tts_toggle_state = "ON" if getattr(settings, 'show_tts_in_options', False) else "OFF"
+            tts_toggle_state = gettext('on') if getattr(settings, 'show_tts_in_options', False) else gettext('off')
             self.add_item(f"{gettext('show_tts_in_options')}: {tts_toggle_state}", "toggle_show_tts")
 
         lang_label = gettext('language_label').format(lang=("Deutsch" if settings.language == "de" else "English"))
@@ -391,13 +381,8 @@ class OptionsMenu(Menu):
         self.add_item(gettext('back'), "back")
 
     def handle_action(self, action, sounds):
-        """TODO: add docstring."""
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
+        """Handle actions triggered by menu item selection."""
+        # Use module-level gettext helper
         if action == "toggle_music":
             self.settings.music_on = not self.settings.music_on
             self.settings.save()
@@ -436,10 +421,10 @@ class OptionsMenu(Menu):
 
             try:
                 if self.settings.fullscreen:
-                    pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+                    pygame.display.set_mode((C.SCREEN_WIDTH, C.SCREEN_HEIGHT), pygame.FULLSCREEN)
                     print("Fullscreen aktiviert")
                 else:
-                    pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+                    pygame.display.set_mode((C.SCREEN_WIDTH, C.SCREEN_HEIGHT))
                     print("Windowed mode activated")
             except Exception as e:  # pylint: disable=broad-exception-caught
                 print(f"Error switching screen mode: {e}")
@@ -508,7 +493,7 @@ class OptionsMenu(Menu):
         return None
 
     def update(self, dt, events):
-        """TODO: add docstring."""
+        """Update options menu and handle left/right/escape keys."""
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -519,50 +504,46 @@ class OptionsMenu(Menu):
                         self.settings.save()
                         if self.sounds:
                             self.sounds.set_music_volume(self.settings.music_volume)
-                        try:
-                            from modul.i18n import gettext
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            def gettext(k):
-                                """TODO: add docstring."""
-                                return k
-                        self.items[self.selected_index].text = gettext('music_volume_format').format(percent=int(self.settings.music_volume * 100))
+                        # use module-level gettext
+                        self.items[self.selected_index].text = (
+                            gettext('music_volume_format').format(
+                                percent=int(self.settings.music_volume * 100)
+                            )
+                        )
                     elif self.items[self.selected_index].action == "adjust_sound_volume":
                         self.settings.sound_volume = max(0.0, self.settings.sound_volume - 0.1)
                         self.settings.save()
                         if self.sounds:
                             self.sounds.set_effects_volume(self.settings.sound_volume)
-                        try:
-                            from modul.i18n import gettext
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            def gettext(k):
-                                """TODO: add docstring."""
-                                return k
-                        self.items[self.selected_index].text = gettext('sound_volume_format').format(percent=int(self.settings.sound_volume * 100))
+                        # use module-level gettext
+                        self.items[self.selected_index].text = (
+                            gettext('sound_volume_format').format(
+                                percent=int(self.settings.sound_volume * 100)
+                            )
+                        )
                 elif event.key == pygame.K_RIGHT:
                     if self.items[self.selected_index].action == "adjust_music_volume":
                         self.settings.music_volume = min(1.0, self.settings.music_volume + 0.1)
                         self.settings.save()
                         if self.sounds:
                             self.sounds.set_music_volume(self.settings.music_volume)
-                        try:
-                            from modul.i18n import gettext
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            def gettext(k):
-                                """TODO: add docstring."""
-                                return k
-                        self.items[self.selected_index].text = gettext('music_volume_format').format(percent=int(self.settings.music_volume * 100))
+                        # use module-level gettext
+                        self.items[self.selected_index].text = (
+                            gettext('music_volume_format').format(
+                                percent=int(self.settings.music_volume * 100)
+                            )
+                        )
                     elif self.items[self.selected_index].action == "adjust_sound_volume":
                         self.settings.sound_volume = min(1.0, self.settings.sound_volume + 0.1)
                         self.settings.save()
                         if self.sounds:
                             self.sounds.set_effects_volume(self.settings.sound_volume)
-                        try:
-                            from modul.i18n import gettext
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            def gettext(k):
-                                """TODO: add docstring."""
-                                return k
-                        self.items[self.selected_index].text = gettext('sound_volume_format').format(percent=int(self.settings.sound_volume * 100))
+                        # use module-level gettext
+                        self.items[self.selected_index].text = (
+                            gettext('sound_volume_format').format(
+                                percent=int(self.settings.sound_volume * 100)
+                            )
+                        )
         result = super().update(dt, events)
         if result:
             return result
@@ -570,25 +551,21 @@ class OptionsMenu(Menu):
 
 
 class CreditsScreen:
-    """TODO: add docstring."""
+    """Screen displaying game credits."""
     def __init__(self):
-        """TODO: add docstring."""
-        self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
-        self.text_font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE - 8)
+        """Initialize fonts, state, and scroll position for credits."""
+        self.title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
+        self.text_font = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE - 8)
         self.background_alpha = 0
         self.fade_in = True
         self.scroll_position = 250
 
     def update(self, dt, events):
-        """TODO: add docstring."""
+        """Update fade-in, scroll credits, and handle input."""
         if self.fade_in:
-            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
-            if self.background_alpha >= MENU_BACKGROUND_ALPHA:
-                self.fade_in = False
-                self.background_alpha = MENU_BACKGROUND_ALPHA
-
-        self.scroll_position -= CREDITS_SCROLL_SPEED * dt
-
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
+            if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
+                self.background_alpha = C.MENU_BACKGROUND_ALPHA
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE:
@@ -597,63 +574,123 @@ class CreditsScreen:
         return None
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Draw the credits text on the screen."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_surf = self.title_font.render(CREDITS_TITLE, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, 100))
+        title_surf = self.title_font.render(C.CREDITS_TITLE, True, pygame.Color(C.MENU_TITLE_COLOR))
+        title_rect = title_surf.get_rect(center=(C.SCREEN_WIDTH / 2, 100))
         screen.blit(title_surf, title_rect)
 
-        credits = [
-            CREDITS_GAME_NAME,
+        credits_lines = [
+            C.CREDITS_GAME_NAME,
             "",
-            f"A game by {CREDITS_MASTERMIND}",
+            f"A game by {C.CREDITS_MASTERMIND}",
             "",
             "Programming",
-            CREDITS_DEVELOPER,
+            C.CREDITS_DEVELOPER,
             "",
             "Graphics & Design",
-            CREDITS_GRAPHICS,
+            C.CREDITS_GRAPHICS,
             "",
             "Sound & Music",
-            CREDITS_SOUND,
+            C.CREDITS_SOUND,
             "",
             "Special thanks to",
         ]
 
-        credits.extend(CREDITS_SPECIAL_THANKS)
+        credits_lines.extend(C.CREDITS_SPECIAL_THANKS)
 
-        credits.extend(
+        credits_lines.extend(
             [
                 "",
-                f"Download & Updates: {CREDITS_WEBSITE}",
+                f"Download & Updates: {C.CREDITS_WEBSITE}",
                 "",
                 "Thank you for playing!",
             ]
         )
 
+        # Render each credits line centered below the title, with scrolling
+        margin = 20
+        line_spacing = self.text_font.get_linesize() + 4
+        # start below the title and apply scroll position
+        current_y = title_rect.bottom + margin + self.scroll_position
+        for line in credits_lines:
+            surf = self.text_font.render(line, True, pygame.Color("white"))
+            rect = surf.get_rect(centerx=C.SCREEN_WIDTH / 2, y=current_y)
+            screen.blit(surf, rect)
+            current_y += line_spacing
+
 
 class ControlsMenu(Menu):
-    """TODO: add docstring."""
+
+    """Menu for remapping and displaying controls."""
+
+    def _handle_capture_event(self, event):
+        new_name = None
+        # Keyboard binding
+        if event.type == pygame.KEYDOWN:
+            new_name = pygame.key.name(event.key)
+        # Joystick button
+        elif event.type == pygame.JOYBUTTONDOWN:
+            try:
+                joy_id = event.joy
+                btn = event.button
+                new_name = f"JOY{joy_id}_BUTTON{btn}"
+            except Exception:
+                new_name = None
+        # Joystick axis (capture strong deflections)
+        elif event.type == pygame.JOYAXISMOTION:
+            try:
+                val = event.value
+                if abs(val) >= 0.6:
+                    joy_id = event.joy
+                    axis = event.axis
+                    dir_s = "POS" if val > 0 else "NEG"
+                    new_name = f"JOY{joy_id}_AXIS{axis}_{dir_s}"
+            except Exception:
+                new_name = None
+        # Hat (D-pad)
+        elif event.type == pygame.JOYHATMOTION:
+            try:
+                joy_id = event.joy
+                hat = event.hat
+                x, y = event.value
+                if (x, y) != (0, 0):
+                    dirs = []
+                    if y == 1:
+                        dirs.append("UP")
+                    elif y == -1:
+                        dirs.append("DOWN")
+                    if x == 1:
+                        dirs.append("RIGHT")
+                    elif x == -1:
+                        dirs.append("LEFT")
+                    new_name = f"JOY{joy_id}_HAT{hat}_{'_'.join(dirs)}"
+            except Exception:
+                new_name = None
+        return new_name
+
+    def _is_duplicate_binding(self, new_name):
+        for a_key, _ in self.actions:
+            if self.settings.controls.get(a_key) == new_name:
+                return True
+        return False
+
+    def _apply_binding(self, action, new_name):
+        self.settings.controls[action] = new_name
+        self.settings.save()
+        self.capturing = False
+        self.capture_action = None
+        self.message = gettext("bound_key").format(key=new_name)
+
     def __init__(self, settings):
-        """TODO: add docstring."""
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
+        """Initialize the controls menu with settings."""
         super().__init__(gettext("controls").upper())
         self.settings = settings
         # Define action order for display
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
+        # use module-level gettext helper
 
         self.actions = [
             ("rotate_left", gettext("rotate_left")),
@@ -668,12 +705,6 @@ class ControlsMenu(Menu):
             key_name = self.settings.controls.get(action_key, "")
             display = f"{label}: {key_name}"
             self.add_item(display, action_key)
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
         self.add_item(gettext("back"), "back")
         self.capturing = False
         self.capture_action = None
@@ -687,94 +718,20 @@ class ControlsMenu(Menu):
             self.items[i].text = f"{label}: {key_name}"
 
         if self.capturing:
-            # Waiting for a key press to rebind
             for event in events:
-                # Cancel capture with ESC (keyboard) or special button
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.capturing = False
                     self.capture_action = None
-                    try:
-                        from modul.i18n import gettext
-                    except Exception:  # pylint: disable=broad-exception-caught
-                        def gettext(k):
-                            """TODO: add docstring."""
-                            return k
                     self.message = gettext("binding_cancelled")
                     return None
 
-                new_name = None
-                # Keyboard binding
-                if event.type == pygame.KEYDOWN:
-                    new_name = pygame.key.name(event.key)
-
-                # Joystick button
-                elif event.type == pygame.JOYBUTTONDOWN:
-                    try:
-                        joy_id = event.joy
-                        btn = event.button
-                        new_name = f"JOY{joy_id}_BUTTON{btn}"
-                    except Exception:  # pylint: disable=broad-exception-caught
-                        new_name = None
-
-                # Joystick axis (capture strong deflections)
-                elif event.type == pygame.JOYAXISMOTION:
-                    try:
-                        val = event.value
-                        if abs(val) >= 0.6:
-                            joy_id = event.joy
-                            axis = event.axis
-                            dir_s = "POS" if val > 0 else "NEG"
-                            new_name = f"JOY{joy_id}_AXIS{axis}_{dir_s}"
-                    except Exception:  # pylint: disable=broad-exception-caught
-                        new_name = None
-
-                # Hat (D-pad)
-                elif event.type == pygame.JOYHATMOTION:
-                    try:
-                        joy_id = event.joy
-                        hat = event.hat
-                        x, y = event.value
-                        if (x, y) != (0, 0):
-                            dirs = []
-                            if y == 1:
-                                dirs.append("UP")
-                            elif y == -1:
-                                dirs.append("DOWN")
-                            if x == 1:
-                                dirs.append("RIGHT")
-                            elif x == -1:
-                                dirs.append("LEFT")
-                            new_name = f"JOY{joy_id}_HAT{hat}_{'_'.join(dirs)}"
-                    except Exception:  # pylint: disable=broad-exception-caught
-                        new_name = None
-
+                new_name = self._handle_capture_event(event)
                 if not new_name:
                     continue
-
-                # Check for duplicates
-                for a_key, _ in self.actions:
-                    if self.settings.controls.get(a_key) == new_name:
-                        try:
-                            from modul.i18n import gettext
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            def gettext(k):
-                                """TODO: add docstring."""
-                                return k
-                        self.message = gettext("key_already_assigned").format(key=new_name)
-                        return None
-
-                # Apply binding
-                self.settings.controls[self.capture_action] = new_name
-                self.settings.save()
-                self.capturing = False
-                self.capture_action = None
-                try:
-                    from modul.i18n import gettext
-                except Exception:  # pylint: disable=broad-exception-caught
-                    def gettext(k):
-                        """TODO: add docstring."""
-                        return k
-                self.message = gettext("bound_key").format(key=new_name)
+                if self._is_duplicate_binding(new_name):
+                    self.message = gettext("key_already_assigned").format(key=new_name)
+                    return None
+                self._apply_binding(self.capture_action, new_name)
                 return None
             return None
 
@@ -788,12 +745,6 @@ class ControlsMenu(Menu):
                 if result == action_key:
                     self.capturing = True
                     self.capture_action = action_key
-                    try:
-                        from modul.i18n import gettext
-                    except Exception:  # pylint: disable=broad-exception-caught
-                        def gettext(k):
-                            """TODO: add docstring."""
-                            return k
                     # show the user-friendly action label if available
                     action_label = dict(self.actions).get(action_key, action_key)
                     self.message = gettext("press_new_key_for").format(action=action_label)
@@ -806,20 +757,33 @@ class ControlsMenu(Menu):
         if self.message:
             font = pygame.font.Font(None, 22)
             msg = font.render(self.message, True, (200, 200, 200))
-            rect = msg.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 40))
+            rect = msg.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT - 40))
             screen.blit(msg, rect)
 
 
 class LanguageMenu(Menu):
-    """TODO: add docstring."""
+    """
+    Menu for selecting the application's language.
+    Allows the user to choose between available languages, updates the settings,
+    and persists the selection. Menu items are dynamically labeled to reflect the current language.
+    """
     def __init__(self, settings):
-        """TODO: add docstring."""
+        """
+        Initialize the LanguageMenu.
+
+        Args:
+            settings: The settings object containing the current language (settings.language)
+                and a list of available languages. This menu will update settings.language
+                and call settings.save() when a new language is selected.
+
+        Populates menu items for each available language and a back option.
+        """
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
+            def gettext(key):
                 """TODO: add docstring."""
-                return k
+                return key
         super().__init__(gettext("language").upper())
         self.settings = settings
         self.languages = [("en", "English"), ("de", "Deutsch")]
@@ -829,8 +793,21 @@ class LanguageMenu(Menu):
         self.add_item(gettext("back"), "back")
 
     def update(self, dt, events):
-        # Refresh labels
-        """TODO: add docstring."""
+        """
+        Refresh menu labels to reflect the current language and handle user input.
+
+        Args:
+            dt: Elapsed time since last update (float, seconds).
+            events: List of pygame events to process (typically List[pygame.event.Event]).
+
+        Returns:
+            str: The key of the next screen to display (e.g., "options") if the user selects back,
+            or the language code if a language is selected. Returns None if no navigation occurs.
+
+        Side effects:
+            Updates menu item labels to show the current language.
+            If a language is selected, sets settings.language and calls settings.save().
+        """
         for i, (code, label) in enumerate(self.languages):
             sel = " (current)" if self.settings.language == code else ""
             self.items[i].text = f"{label}{sel}"
@@ -847,24 +824,13 @@ class LanguageMenu(Menu):
                     return "options"
         return None
 
-        y = self.scroll_position
-        for line in credits:
-            text_surf = self.text_font.render(line, True, (255, 255, 255))
-            text_rect = text_surf.get_rect(center=(SCREEN_WIDTH / 2, y))
-            if y >= SCREEN_HEIGHT / 4:
-                screen.blit(text_surf, text_rect)
-            y += CREDITS_LINE_SPACING
-
-        if y < 0:
-            self.scroll_position = SCREEN_HEIGHT
-
 
 class GameOverScreen:
     """TODO: add docstring."""
     def __init__(self):
         """TODO: add docstring."""
-        self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
-        self.text_font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
+        self.title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
+        self.text_font = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE)
         self.background_alpha = 0
         self.fade_in = True
         self.final_score = 0
@@ -876,10 +842,10 @@ class GameOverScreen:
     def update(self, dt, events):
         """TODO: add docstring."""
         if self.fade_in:
-            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
-            if self.background_alpha >= MENU_BACKGROUND_ALPHA:
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
+            if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
                 self.fade_in = False
-                self.background_alpha = MENU_BACKGROUND_ALPHA
+                self.background_alpha = C.MENU_BACKGROUND_ALPHA
 
         for event in events:
             if event.type == pygame.KEYDOWN:
@@ -901,26 +867,26 @@ class GameOverScreen:
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
+            def gettext(key):
                 """TODO: add docstring."""
-                return k
+                return key
         title_surf = self.title_font.render(gettext("game_over").upper(), True, pygame.Color("red"))
-        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3))
+        title_rect = title_surf.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 3))
         screen.blit(title_surf, title_rect)
 
         score_surf = self.text_font.render(gettext("your_score_format").format(score=self.final_score), True, (255, 255, 255))
-        score_rect = score_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
+        score_rect = score_surf.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2))
         screen.blit(score_surf, score_rect)
         instruction1 = self.text_font.render(gettext("press_space_highscores"), True, (200, 200, 200))
-        instruction1_rect = instruction1.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 60))
+        instruction1_rect = instruction1.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2 + 60))
         screen.blit(instruction1, instruction1_rect)
 
         instruction2 = self.text_font.render(gettext("press_r_restart"), True, (200, 200, 200))
-        instruction2_rect = instruction2.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 100))
+        instruction2_rect = instruction2.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2 + 100))
         screen.blit(instruction2, instruction2_rect)
 
         instruction3 = self.text_font.render(gettext("press_esc_main_menu"), True, (200, 200, 200))
-        instruction3_rect = instruction3.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 140))
+        instruction3_rect = instruction3.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2 + 140))
         screen.blit(instruction3, instruction3_rect)
 
 
@@ -931,9 +897,9 @@ class DifficultyMenu(Menu):
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
+            def gettext(key):
                 """TODO: add docstring."""
-                return k
+                return key
         super().__init__(gettext("difficulty").upper())
         self.add_item(gettext("difficulty_easy"), "difficulty_easy", "L")
         self.add_item(gettext("difficulty_normal"), "difficulty_normal", "N")
@@ -950,9 +916,9 @@ class VoiceAnnouncementsMenu:
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
+            def gettext(key):
                 """TODO: add docstring."""
-                return k
+                return key
         self.title = gettext("voice_announcements")
         self.items = [
             MenuItem(gettext("level_up") + ": ON", "toggle_level_up"),
@@ -982,9 +948,9 @@ class VoiceAnnouncementsMenu:
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
+            def gettext(key):
                 """TODO: add docstring."""
-                return k
+                return key
 
         self.items[0].text = f"{gettext('level_up')}: {'ON' if announcements.get('level_up', True) else 'OFF'}"
         self.items[1].text = f"{gettext('boss_incoming')}: {'ON' if announcements.get('boss_incoming', True) else 'OFF'}"
@@ -1001,10 +967,10 @@ class VoiceAnnouncementsMenu:
     def update(self, dt, events):
         """TODO: add docstring."""
         if self.fade_in:
-            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
-            if self.background_alpha >= MENU_BACKGROUND_ALPHA:
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
+            if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
                 self.fade_in = False
-                self.background_alpha = MENU_BACKGROUND_ALPHA
+                self.background_alpha = C.MENU_BACKGROUND_ALPHA
 
         for event in events:
             if event.type == pygame.KEYDOWN:
@@ -1073,12 +1039,12 @@ class VoiceAnnouncementsMenu:
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
-        title_surface = title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH / 2, 60))
+        title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
+        title_surface = title_font.render(self.title, True, pygame.Color(C.MENU_TITLE_COLOR))
+        title_rect = title_surface.get_rect(center=(C.SCREEN_WIDTH / 2, 60))
         screen.blit(title_surface, title_rect)
 
-        font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
+        font = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE)
         start_y = 130
 
         visible_count = 0
@@ -1087,12 +1053,12 @@ class VoiceAnnouncementsMenu:
                 visible_count += 0.5
                 continue
 
-            y = start_y + visible_count * MENU_ITEM_SPACING
+            y = start_y + visible_count * C.MENU_ITEM_SPACING
             is_selected = i == self.current_selection
-            color = MENU_SELECTED_COLOR if is_selected else MENU_UNSELECTED_COLOR
+            color = C.MENU_SELECTED_COLOR if is_selected else C.MENU_UNSELECTED_COLOR
 
             text_surface = font.render(item.text, True, pygame.Color(color))
-            text_rect = text_surface.get_rect(center=(SCREEN_WIDTH / 2, y))
+            text_rect = text_surface.get_rect(center=(C.SCREEN_WIDTH / 2, y))
             screen.blit(text_surface, text_rect)
 
             visible_count += 1
@@ -1106,9 +1072,9 @@ class TTSVoiceMenu(Menu):
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
+            def gettext(key):
                 """TODO: add docstring."""
-                return k
+                return key
 
         super().__init__(gettext("tts_voice_label").upper())
         self.settings = settings
@@ -1154,31 +1120,32 @@ class TTSVoiceMenu(Menu):
                 self.settings.tts_voice = vid
                 # Try to derive language from available voices
                 try:
-                        from modul.tts import get_tts_manager
-                        manager = get_tts_manager()
-                        if manager and getattr(manager, "engine", None):
-                            voices = manager.engine.getProperty("voices") or []
-                            for v in voices:
-                                if getattr(v, "id", None) == vid or getattr(v, "name", None) == vid:
-                                    langs = getattr(v, "languages", []) or []
-                                    for lang in langs:
-                                        try:
-                                            l = lang.decode() if isinstance(lang, (bytes, bytearray)) else str(lang)
-                                            # pick primary subtag like 'en' from en_US
-                                            if len(l) >= 2:
-                                                code = l[:2]
-                                                self.settings.tts_voice_language = code
-                                                break
-                                        except Exception:  # pylint: disable=broad-exception-caught
-                                            continue
-                                    break
-                        # Attempt to apply the voice immediately to the running manager
-                        try:
-                            if manager:
-                                manager.set_preferred_voice(vid, self.settings.tts_voice_language)
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            pass
-                except Exception:  # pylint: disable=broad-exception-caught
+                    from modul.tts import get_tts_manager
+
+                    manager = get_tts_manager()
+                    if manager and getattr(manager, "engine", None):
+                        voices = manager.engine.getProperty("voices") or []
+                        for v in voices:
+                            if getattr(v, "id", None) == vid or getattr(v, "name", None) == vid:
+                                langs = getattr(v, "languages", []) or []
+                                for lang in langs:
+                                    try:
+                                        l = lang.decode() if isinstance(lang, (bytes, bytearray)) else str(lang)
+                                        # pick primary subtag like 'en' from en_US
+                                        if len(l) >= 2:
+                                            code = l[:2]
+                                            self.settings.tts_voice_language = code
+                                            break
+                                    except Exception:
+                                        continue
+                                break
+                    # Attempt to apply the voice immediately to the running manager
+                    try:
+                        if manager:
+                            manager.set_preferred_voice(vid, self.settings.tts_voice_language)
+                    except Exception:
+                        pass
+                except Exception:
                     pass
             # Persist selection
             self.settings.save()
@@ -1189,12 +1156,14 @@ class SoundTestMenu:
     """TODO: add docstring."""
     def __init__(self):
         """TODO: add docstring."""
+        import threading
+        self._sound_state_lock = threading.Lock()
         try:
             from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
+        except Exception:
+            def gettext(key):
                 """TODO: add docstring."""
-                return k
+                return key
         self.title = gettext("sound_test")
         self.sounds = None
         self.last_played = ""
@@ -1270,10 +1239,10 @@ class SoundTestMenu:
     def update(self, dt, events):
         """TODO: add docstring."""
         if self.fade_in:
-            self.background_alpha = min(255, self.background_alpha + 255 * dt / MENU_TRANSITION_SPEED)
-            if self.background_alpha >= MENU_BACKGROUND_ALPHA:
+            self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
+            if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
                 self.fade_in = False
-                self.background_alpha = MENU_BACKGROUND_ALPHA
+                self.background_alpha = C.MENU_BACKGROUND_ALPHA
 
         if self.last_played_timer > 0:
             self.last_played_timer -= dt
@@ -1516,7 +1485,7 @@ class SoundTestMenu:
             self.sounds.play_menu_move()
             try:
                 from modul.i18n import gettext
-            except Exception:  # pylint: disable=broad-exception-caught
+            except Exception:
                 def gettext(k):
                     """TODO: add docstring."""
                     return k
@@ -1527,56 +1496,63 @@ class SoundTestMenu:
             self.sounds.play_menu_select()
             try:
                 from modul.i18n import gettext
-            except Exception:  # pylint: disable=broad-exception-caught
+            except Exception:
                 def gettext(k):
                     """TODO: add docstring."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("menu_confirm"))
             self.last_played_timer = 2.0
 
+
         elif action == "test_all":
             import threading
             import time
 
             def play_all_sounds():
-                """TODO: add docstring."""
-                sound_list = [
-                    ("Standard Shoot", self.sounds.play_shoot),
-                    ("Explosion", self.sounds.play_explosion),
-                    ("Player Hit", self.sounds.play_player_hit),
-                    ("PowerUp", self.sounds.play_powerup),
-                    ("Level Up", self.sounds.play_level_up),
-                    ("Game Over", self.sounds.play_game_over),
-                ]
+                """Play all sounds in a separate thread, with thread-safe state updates."""
+                sound_list = []
+                if self.sounds is not None:
+                    sound_list = [
+                        ("Standard Shoot", self.sounds.play_shoot),
+                        ("Explosion", self.sounds.play_explosion),
+                        ("Player Hit", self.sounds.play_player_hit),
+                        ("PowerUp", self.sounds.play_powerup),
+                        ("Level Up", self.sounds.play_level_up),
+                        ("Game Over", self.sounds.play_game_over),
+                    ]
 
                 for name, sound_func in sound_list:
-                    if self.stop_all_sounds_thread:
-                        break
+                    with self._sound_state_lock:
+                        if self.stop_all_sounds_thread:
+                            break
                     try:
                         sound_func()
                         time.sleep(0.8)
                     except Exception as e:  # pylint: disable=broad-exception-caught
                         print(f"Error playing sound '{name}': {e}")
 
-                self.playing_all_sounds = False
+                with self._sound_state_lock:
+                    self.playing_all_sounds = False
 
-            if not self.playing_all_sounds:
-                self.playing_all_sounds = True
-                self.stop_all_sounds_thread = False
-                threading.Thread(target=play_all_sounds, daemon=True).start()
-                try:
-                    from modul.i18n import gettext as _gettext
-                    self.last_played = _gettext("playing_all_sounds")
-                except Exception:  # pylint: disable=broad-exception-caught
-                    self.last_played = "Playing all sounds..."
-                self.last_played_timer = 8.0
+            with self._sound_state_lock:
+                if not self.playing_all_sounds:
+                    self.playing_all_sounds = True
+                    self.stop_all_sounds_thread = False
+                    threading.Thread(target=play_all_sounds, daemon=True).start()
+                    try:
+                        from modul.i18n import gettext as _gettext
+                        self.last_played = _gettext("playing_all_sounds")
+                    except Exception:  # pylint: disable=broad-exception-caught
+                        self.last_played = "Playing all sounds..."
+                    self.last_played_timer = 8.0
+
 
         elif action == "back":
-
-            if self.playing_all_sounds:
-                self.stop_all_sounds_thread = True
-                self.playing_all_sounds = False
-                self.last_played = ""
+            with self._sound_state_lock:
+                if self.playing_all_sounds:
+                    self.stop_all_sounds_thread = True
+                    self.playing_all_sounds = False
+                    self.last_played = ""
             return "options"
 
         return None
@@ -1587,13 +1563,26 @@ class SoundTestMenu:
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
-        title_surface = title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surface.get_rect(center=(SCREEN_WIDTH / 2, 60))
+        title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
+        title_surface = title_font.render(self.title, True, pygame.Color(C.MENU_TITLE_COLOR))
+        title_rect = title_surface.get_rect(center=(C.SCREEN_WIDTH / 2, 60))
         screen.blit(title_surface, title_rect)
 
-        indicator_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.7))
+        indicator_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE * 0.7))
 
+        try:
+            from modul.i18n import gettext
+        except Exception:
+            def gettext(key):
+                """TODO: add docstring."""
+                return key
+        try:
+            from modul.i18n import gettext
+class TTSVoiceMenu(Menu):
+    """Menu to select a TTS voice from available system voices."""
+
+    def __init__(self, settings):
+        """TODO: add docstring."""
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
@@ -1601,95 +1590,80 @@ class SoundTestMenu:
                 """TODO: add docstring."""
                 return k
 
-        if self.scroll_offset > 0:
-            up_text = indicator_font.render(gettext("scroll_up"), True, pygame.Color("yellow"))
-            up_rect = up_text.get_rect(center=(SCREEN_WIDTH / 2, 100))
-            screen.blit(up_text, up_rect)
+        super().__init__(gettext("tts_voice_label").upper())
+        self.settings = settings
+        self.add_item(gettext("default"), "tts_voice:__default__")
 
-        if self.scroll_offset + self.max_visible_items < len(self.sound_items):
-            down_text = indicator_font.render(gettext("scroll_down"), True, pygame.Color("yellow"))
-            down_rect = down_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100))
-            screen.blit(down_text, down_rect)
+        # Try to enumerate voices via TTS manager
+        try:
+            from modul.tts import get_tts_manager
+            manager = get_tts_manager()
+            voices = []
+            if manager and getattr(manager, "engine", None):
+                voices = manager.engine.getProperty("voices") or []
+            for v in voices:
+                # Some voice objects expose name and id
+                name = getattr(v, "name", None) or getattr(v, "id", str(v))
+                vid = getattr(v, "id", name)
+                self.add_item(name, f"tts_voice:{vid}")
+        except Exception:  # pylint: disable=broad-exception-caught
+            # If enumeration fails, provide no extra choices
+            pass
 
-        font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
-        small_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.9))
-        start_y = 130
+        self.add_item(gettext("back"), "back")
 
-        visible_item_count = 0
-
-        for i, (text, action) in enumerate(self.visible_items):
-            current_y = start_y + visible_item_count * 35
-
-            if text == "":
-                visible_item_count += 0.3
-                continue
-
-            is_selected = i == self.current_selection
-
-            base_color = MENU_UNSELECTED_COLOR
-            if "Shoot" in text:
-                base_color = "lightblue"
-            elif text in ["Explosion", "Player Hit", "PowerUp", "Shield Activate", "Weapon Pickup"]:
-                base_color = "lightgreen"
-            elif "Boss" in text:
-                base_color = "orange"
-            elif text in ["Level Up", "Game Over", "Menu Select", "Menu Confirm"]:
-                base_color = "yellow"
-            elif text == "Test All Sounds":
-                base_color = "magenta"
-            elif text == "Back":
-                base_color = "white"
-
-            if is_selected:
-                color = MENU_SELECTED_COLOR
-                scaled_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 1.1))
-                surface = scaled_font.render(f"► {text}", True, pygame.Color(color))
-            else:
-                color = base_color
-                surface = small_font.render(f"  {text}", True, pygame.Color(color))
-
-            text_rect = surface.get_rect(center=(SCREEN_WIDTH / 2, current_y))
-            screen.blit(surface, text_rect)
-
-            visible_item_count += 1
-
-        if self.last_played:
-            played_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.8))
-
-            played_text = played_font.render(self.last_played, True, pygame.Color("lightgreen"))
-            played_rect = played_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 128))
-            screen.blit(played_text, played_rect)
-
-        instructions = ["UP / DOWN to Navigate - ENTER to play sound - SPACE to go back"]
-
-        instruction_font = pygame.font.Font(None, int(MENU_ITEM_FONT_SIZE * 0.65))
-        for i, instruction in enumerate(instructions):
-            text = instruction_font.render(instruction, True, pygame.Color("lightgray"))
-            text_rect = text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 70 + i * 25))
-            screen.blit(text, text_rect)
-
-
-class AchievementsMenu(Menu):
-    """TODO: add docstring."""
-    def __init__(self, achievement_system):
+    def update(self, dt, events):
+        # Use base menu navigation
         """TODO: add docstring."""
-        super().__init__("AJITROIDS - ACHIEVEMENTS")
-        self.achievement_system = achievement_system
-        self.add_item("Back", "back")
+        result = super().update(dt, events)
+        if result:
+            return result
+        return None
 
-        self.achievement_graphics = {
-            "First Blood": [" *** ", "*.*.*", ".***.", "*.*.*", " *** "],
-            "Survivor": [" *** ", "*...*", "*.*.*", "*...*", " *** "],
-            "Asteroid Hunter": [" *** ", "*...*", "*.*.*", "*...*", " *** "],
-            "Power User": [" *** ", "*.*.*", "*...*", "*.*.*", " *** "],
-            "Boss Slayer": [" **** ", "*....*", "*.--.*", "*.**.*", " *** "],
-            "Level Master": [" *** ", "*---*", "*.*.*", "*---*", " *** "],
-            "High Scorer": [" *** ", "*.*.*", "*...*", "*.*.*", " *** "],
-            "Shield Expert": [" *** ", "*...*", "*.*.*", "*.^.*", " *** "],
-            "Speed Demon": [" *** ", "*---*", "*===*", "*---*", " *** "],
-            "Triple Threat": [" * * ", "* * *", "* * *", "* * *", " * * "],
-            "Fleet Commander": ["  *  ", " *** ", "*****", " *** ", "  *  "],
-        }
+    def handle_action(self, action):
+        # Expected action formats: 'tts_voice:<id>' or 'tts_voice:__default__'
+        """TODO: add docstring."""
+        if action == "back":
+            return "options"
+        if action and action.startswith("tts_voice:"):
+            vid = action.split(":", 1)[1]
+            if vid == "__default__":
+                self.settings.tts_voice = ""
+                self.settings.tts_voice_language = self.settings.language
+            else:
+                self.settings.tts_voice = vid
+                # Try to derive language from available voices
+                try:
+                    from modul.tts import get_tts_manager
+
+                    manager = get_tts_manager()
+                    if manager and getattr(manager, "engine", None):
+                        voices = manager.engine.getProperty("voices") or []
+                        for v in voices:
+                            if getattr(v, "id", None) == vid or getattr(v, "name", None) == vid:
+                                langs = getattr(v, "languages", []) or []
+                                for lang in langs:
+                                    try:
+                                        lang_str = lang.decode() if isinstance(lang, (bytes, bytearray)) else str(lang)
+                                        # pick primary subtag like 'en' from en_US
+                                        if len(lang_str) >= 2:
+                                            code = lang_str[:2]
+                                            self.settings.tts_voice_language = code
+                                            break
+                                    except Exception:  # pylint: disable=broad-exception-caught
+                                        continue
+                                break
+                    # Attempt to apply the voice immediately to the running manager
+                    try:
+                        if manager:
+                            manager.set_preferred_voice(vid, self.settings.tts_voice_language)
+                    except Exception:  # pylint: disable=broad-exception-caught
+                        pass
+                except Exception:  # pylint: disable=broad-exception-caught
+                    pass
+            # Persist selection
+            self.settings.save()
+        return None
 
     def draw(self, screen):
         """TODO: add docstring."""
@@ -1697,17 +1671,17 @@ class AchievementsMenu(Menu):
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_surf = self.title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 12))
+        title_surf = self.title_font.render(self.title, True, pygame.Color(C.MENU_TITLE_COLOR))
+        title_rect = title_surf.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 12))
         screen.blit(title_surf, title_rect)
 
-        start_y = SCREEN_HEIGHT / 5
+        start_y = C.SCREEN_HEIGHT / 5
         achievement_spacing = 80
         graphics_font = pygame.font.Font(None, 18)
         name_font = pygame.font.Font(None, 28)
 
         achievements_per_column = 6
-        column_width = SCREEN_WIDTH / 2
+        column_width = C.SCREEN_WIDTH / 2
         left_column_x = column_width / 2
         right_column_x = column_width + column_width / 2
 
@@ -1731,6 +1705,7 @@ class AchievementsMenu(Menu):
                 graphic_color = pygame.Color("lightgreen")
             else:
                 name_color = pygame.Color("gray")
+                graphic_color = pygame.Color("gray")
 
             if is_unlocked and achievement.name in self.achievement_graphics:
                 graphics = self.achievement_graphics[achievement.name]
@@ -1751,16 +1726,16 @@ class AchievementsMenu(Menu):
             name_rect = name_surf.get_rect(topleft=(name_x, current_y))
             screen.blit(name_surf, name_rect)
 
-        back_button_y = SCREEN_HEIGHT - 80
+        back_button_y = C.SCREEN_HEIGHT - 80
         for i, item in enumerate(self.items):
-            item_rect = item.draw(screen, (SCREEN_WIDTH / 2, back_button_y + i * MENU_ITEM_SPACING), self.item_font)
+            item.draw(screen, (C.SCREEN_WIDTH / 2, back_button_y + i * C.MENU_ITEM_SPACING))
 
         unlocked_count = sum(1 for achievement in self.achievement_system.achievements if achievement.unlocked)
         total_count = len(self.achievement_system.achievements)
         progress_text = f"Progress: {unlocked_count}/{total_count} Achievements unlocked"
         progress_font = pygame.font.Font(None, 20)
         progress_surf = progress_font.render(progress_text, True, pygame.Color("lightblue"))
-        progress_rect = progress_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 12 + 35))
+        progress_rect = progress_surf.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 12 + 35))
         screen.blit(progress_surf, progress_rect)
 
     def update(self, dt, events):
@@ -1824,13 +1799,13 @@ class ShipSelectionMenu(Menu):
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
 
-        title_surf = self.title_font.render(self.title, True, pygame.Color(MENU_TITLE_COLOR))
-        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH / 2, 80))
+        title_surf = self.title_font.render(self.title, True, pygame.Color(C.MENU_TITLE_COLOR))
+        title_rect = title_surf.get_rect(center=(C.SCREEN_WIDTH / 2, 80))
         screen.blit(title_surf, title_rect)
 
-        ship_y = SCREEN_HEIGHT / 2 - 50
+        ship_y = C.SCREEN_HEIGHT / 2 - 50
         ship_spacing = 200
-        start_x = SCREEN_WIDTH / 2 - (len(self.ships) - 1) * ship_spacing / 2
+        start_x = C.SCREEN_WIDTH / 2 - (len(self.ships) - 1) * ship_spacing / 2
 
         for i, ship_id in enumerate(self.ships):
             ship_data = ship_manager.get_ship_data(ship_id)
@@ -1874,14 +1849,14 @@ class ShipSelectionMenu(Menu):
         selected_ship = self.ships[self.selected_ship_index]
         ship_data = ship_manager.get_ship_data(selected_ship)
 
-        detail_y = SCREEN_HEIGHT - 200
+        detail_y = C.SCREEN_HEIGHT - 200
         detail_font = pygame.font.Font(None, 28)
         small_font = pygame.font.Font(None, 24)
 
         if ship_data["unlocked"]:
 
             desc_surf = detail_font.render(ship_data["description"], True, (255, 255, 255))
-            desc_rect = desc_surf.get_rect(center=(SCREEN_WIDTH / 2, detail_y))
+            desc_rect = desc_surf.get_rect(center=(C.SCREEN_WIDTH / 2, detail_y))
             screen.blit(desc_surf, desc_rect)
 
             props = [
@@ -1892,7 +1867,7 @@ class ShipSelectionMenu(Menu):
 
             for i, prop in enumerate(props):
                 prop_surf = small_font.render(prop, True, (200, 200, 200))
-                prop_rect = prop_surf.get_rect(center=(SCREEN_WIDTH / 2, detail_y + 40 + i * 25))
+                prop_rect = prop_surf.get_rect(center=(C.SCREEN_WIDTH / 2, detail_y + 40 + i * 25))
                 screen.blit(prop_surf, prop_rect)
 
         instruction_font = pygame.font.Font(None, 20)
@@ -1900,5 +1875,5 @@ class ShipSelectionMenu(Menu):
 
         for i, instruction in enumerate(instructions):
             instr_surf = instruction_font.render(instruction, True, (150, 150, 150))
-            instr_rect = instr_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 60 + i * 20))
+            instr_rect = instr_surf.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT - 60 + i * 20))
             screen.blit(instr_surf, instr_rect)

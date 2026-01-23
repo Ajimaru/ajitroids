@@ -14,19 +14,27 @@ PLACEHOLDER = 'TODO: add docstring.'
 
 
 def add_module_docstring(lines, module_node):
+    """Insert a placeholder docstring at the top of the module if missing."""
     if ast.get_docstring(module_node) is not None:
         return lines
-    # Find insertion index after any shebang/encoding comments and module-level
-    # comments/imports. We'll insert at top (line 0) unless a shebang present.
+    # Find insertion index after any shebang and encoding comments.
+    # We'll insert at top (line 0) unless a shebang or encoding declaration is present.
     insert_idx = 0
-    if lines and lines[0].startswith('#!'):
+    max_check = min(2, len(lines))
+    # Check for shebang in first line
+    if max_check > 0 and lines[0].startswith('#!'):
         insert_idx = 1
+    # Check for encoding declaration in first or second line
+    for i in range(insert_idx, max_check):
+        if 'coding:' in lines[i] or 'coding=' in lines[i]:
+            insert_idx = i + 1
     doc = f'"""{PLACEHOLDER}"""\n\n'
     lines.insert(insert_idx, doc)
     return lines
 
 
 def collect_inserts(tree):
+    """Collects nodes (classes and functions) missing docstrings for insertion."""
     inserts = []  # list of (lineno0, indent, docstring)
     for node in ast.walk(tree):
         if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -40,6 +48,7 @@ def collect_inserts(tree):
 
 
 def process_file(path: Path):
+    """Process a Python file to add placeholder docstrings where missing."""
     src = path.read_text(encoding='utf-8')
     try:
         tree = ast.parse(src)
@@ -53,8 +62,12 @@ def process_file(path: Path):
 
     # module docstring
     if ast.get_docstring(tree) is None:
-        lines = add_module_docstring(lines, tree)
         changed = True
+        # Actually insert the module docstring
+        lines = add_module_docstring(lines, tree)
+        # Rebuild src and re-parse tree to keep AST line numbers in sync
+        src = ''.join(lines)
+        tree = ast.parse(src)
 
     inserts = collect_inserts(tree)
     if not inserts:
@@ -64,8 +77,7 @@ def process_file(path: Path):
 
     # prepare to insert in reverse order
     inserts_sorted = sorted(inserts, key=lambda x: x[0], reverse=True)
-    for lineno0, node in inserts_sorted:
-        # compute indentation based on current content at lineno0
+    for lineno0, _ in inserts_sorted:
         if lineno0 < 0 or lineno0 >= len(lines):
             indent = '    '
         else:
@@ -83,12 +95,12 @@ def process_file(path: Path):
 
 
 def backup_and_write(path: Path, lines):
+    """Create a backup of the file and write the updated lines to it."""
     bak = path.with_suffix(path.suffix + '.bak')
     if not bak.exists():
+        # Preserve original by renaming it to .bak, then write new content
         path.rename(bak)
-        bak.write_text(''.join(lines), encoding='utf-8')
-        # restore to original filename
-        bak.rename(path)
+        path.write_text(''.join(lines), encoding='utf-8')
     else:
         # fallback: write directly but keep original as .orig
         orig = path.with_suffix(path.suffix + '.orig')
@@ -98,6 +110,7 @@ def backup_and_write(path: Path, lines):
 
 
 def main():
+    """Main entry point for adding missing docstrings to Python files in the modul directory."""
     root = Path('modul')
     if not root.exists():
         print('Directory modul/ not found; aborting.')
@@ -105,7 +118,7 @@ def main():
     changed_files = []
     for p in sorted(root.rglob('*.py')):
         # skip __pycache__ or hidden
-        if any(part.startswith('.') for part in p.parts):
+        if any(part.startswith('.') or part == '__pycache__' for part in p.parts):
             continue
         if process_file(p):
             changed_files.append(str(p))

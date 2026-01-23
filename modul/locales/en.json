@@ -107,11 +107,17 @@
   "level_up": "Level Up",
   "menu_select": "Menu Select",
   "menu_confirm": "Menu Confirm",
+<<<<<<< HEAD
+  "playing_all_sounds": "Playing all sounds...",
+  "restart": "Restart",
+  "performance_ratio_format": "{performance:.0f}% (Avg/Best)",
+=======
   "playing_all_sounds": "Playing all sounds..."
   ,
   "restart": "Restart",
   "performance_ratio_format": "{performance:.0f}% (Avg/Best)"
   ,
+>>>>>>> origin/main
   "new_highscore": "New Highscore!",
   "score_format": "Score: {score}",
   "highscore_hint_updown": "Use UP/DOWN to change letter",

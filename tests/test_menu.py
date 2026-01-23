@@ -1,3 +1,5 @@
+"""Tests for the Menu class in the modul.menu module."""
+
 import pytest
 
 

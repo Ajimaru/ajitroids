@@ -4,32 +4,35 @@ import pygame
 
 
 class CircleShape(pygame.sprite.Sprite):
-    """TODO: add docstring."""
+    """Base class for circular game objects."""
     def __init__(self, x, y, radius):
-        """TODO: add docstring."""
-        if hasattr(self, "containers"):
-            super().__init__(self.containers)
-        else:
-            super().__init__()
+        """Initialize a circular sprite with position and radius."""
+        super().__init__()
         self.position = pygame.Vector2(x, y)
         self.velocity = pygame.Vector2(0, 0)
         self.radius = radius
         self.rotation = 0
-
-    def draw(self, screen):
-        """TODO: add docstring."""
+        # Add to containers if set (for test group injection)
+        containers = getattr(type(self), 'containers', ())
+        if containers:
+            if isinstance(containers, pygame.sprite.AbstractGroup):
+                containers.add(self)
+            else:
+                for group in containers:
+                    group.add(self)
+        """Draw the circle shape (to be implemented by subclasses)."""
 
     def update(self, dt):
-        """TODO: add docstring."""
+        """Update the circle shape (to be implemented by subclasses)."""
 
     def collides_with(self, other):
-        """TODO: add docstring."""
+        """Check collision with another circle shape."""
         return self.position.distance_to(other.position) <= self.radius + other.radius
 
     def rotate(self, angle):
-        """TODO: add docstring."""
+        """Rotate the shape by the given angle."""
         self.rotation += angle
 
     def forward(self):
-        """TODO: add docstring."""
+        """Return the forward direction vector."""
         return pygame.Vector2(0, -1).rotate(self.rotation)

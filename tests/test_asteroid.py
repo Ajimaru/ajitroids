@@ -127,7 +127,7 @@ class TestAsteroid:
         asteroid_group, _, powerup_group = sprite_groups
 
         asteroid = Asteroid(100, 100, ASTEROID_MIN_RADIUS)
-        asteroid_group.add(asteroid)
+        # Do not add asteroid to group again if Asteroid.containers is set
         initial_count = len(asteroid_group)
 
         asteroid.split()

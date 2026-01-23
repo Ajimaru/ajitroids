@@ -172,7 +172,11 @@ BOSS_PROJECTILE_COLORS = {"normal": (200, 0, 200), "homing": (255, 0, 0), "explo
 
 
 def generate_default_highscores():
-    """TODO: add docstring."""
+    """Generate default highscores for initial game state / fallback data.
+
+    Returns a list of placeholder highscore entries used when no highscores
+    file exists or as an initial set of entries. Not limited to tests.
+    """
     allowed_chars = HIGHSCORE_ALLOWED_CHARS
     max_entries = HIGHSCORE_MAX_ENTRIES
     name_length = HIGHSCORE_NAME_LENGTH
