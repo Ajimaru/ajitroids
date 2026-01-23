@@ -20,6 +20,7 @@ def clean_settings_file():
 
 
 class TestSettings:
+    """Test suite for the Settings class, covering persistence and default values."""
     def test_settings_initialization_defaults(self, clean_settings_file):
         """Test default settings initialization"""
         settings = Settings()

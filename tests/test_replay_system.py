@@ -536,5 +536,5 @@ def test_replay_recorder_save_with_error_handling(tmp_path):
         # Restore permissions for cleanup
         try:
             os.chmod(invalid_dir, 0o755)
-        except:
+        except PermissionError:
             pass

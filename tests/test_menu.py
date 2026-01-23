@@ -18,12 +18,14 @@ def init_pygame(monkeypatch):
 
 
 def test_menu_initial_state():
+    """Test that the menu initializes with the correct default state."""
     menu = Menu(title="Test")
     assert menu.selected_index == 0
     assert isinstance(menu.items, list)
 
 
 def test_menu_select_index():
+    """Test setting the selected index of the menu."""
     menu = Menu(title="Test")
     menu.selected_index = 2
     assert menu.selected_index == 2
@@ -31,8 +33,9 @@ def test_menu_select_index():
 
 def test_menu_add_and_select_item():
     menu = Menu(title="Test")
-    menu.items.append("Start")
-    menu.items.append("Optionen")
-    menu.items.append("Beenden")
+    menu.add_item("Start", "start")
+    menu.add_item("Optionen", "options")
+    menu.add_item("Beenden", "quit")
     menu.selected_index = 1
-    assert menu.items[menu.selected_index] == "Optionen"
+    # Menu stores MenuItem objects; check the displayed text property.
+    assert menu.items[menu.selected_index].text == "Optionen"

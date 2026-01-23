@@ -81,7 +81,9 @@ class HighscoreInput:
     def __init__(self, score):
         """Initialize highscore input with score."""
         self.score = score
-        self.name = ["A", "A", "A"]
+        # Initialize name with configured length so tests and runtime honour
+        # the `HIGHSCORE_NAME_LENGTH` constant.
+        self.name = ["A"] * C.HIGHSCORE_NAME_LENGTH
         self.current_pos = 0
         self.done = False
         self.font = pygame.font.Font(None, 64)

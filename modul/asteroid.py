@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 class Asteroid(CircleShape, pygame.sprite.Sprite):
     """Represents an asteroid in the game with various types and behaviors."""
-    def __init__(self, x, y, radius, *groups, asteroid_type=ASTEROID_TYPE_NORMAL):
+    def __init__(self, x, y, radius, *args, asteroid_type=None):
         """
         Initialize an asteroid with position, size, and type.
 
@@ -37,16 +37,31 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
             y (float): Y position.
             radius (float): Asteroid radius.
             *groups: Sprite groups to add this asteroid to.
-            asteroid_type (str): The asteroid type (must be one of ASTEROID_TYPES). This must be passed as a keyword-only argument.
+            asteroid_type (str): The asteroid type (must be one of ASTEROID_TYPES). Can be provided
+                positionally or as a keyword argument for compatibility with tests.
 
         Raises:
             ValueError: If asteroid_type is not a valid type.
         """
+        # Args parsing: support older callers that passed asteroid_type
+        # positionally as 4th argument, or callers that pass groups first
+        groups = ()
+        if args:
+            # If last positional arg is a valid asteroid type string and no
+            # explicit keyword was provided, treat it as the asteroid_type.
+            if asteroid_type is None and isinstance(args[-1], str) and args[-1] in ASTEROID_TYPES:
+                asteroid_type = args[-1]
+                groups = args[:-1]
+            else:
+                groups = args
+        if asteroid_type is None:
+            asteroid_type = ASTEROID_TYPE_NORMAL
+        if asteroid_type not in ASTEROID_TYPES:
+            raise ValueError(f"Invalid asteroid_type: {asteroid_type}")
+
         # Explicitly call both base class initializers in correct order
         CircleShape.__init__(self, x, y, radius)
         pygame.sprite.Sprite.__init__(self, *groups)
-        if asteroid_type not in ASTEROID_TYPES:
-            raise ValueError(f"Invalid asteroid_type: {asteroid_type}")
         self.asteroid_type = asteroid_type
         self.vertices = self._generate_vertices()
         self.rotation_speed = 0

@@ -1777,7 +1777,8 @@ class TTSVoiceMenu(Menu):
 class AchievementsMenu(Menu):
     """Menu to display and interact with achievements."""
     def __init__(self, achievement_system):
-        super().__init__(gettext("achievements").upper())
+        # Prepend game name for consistency with other menus
+        super().__init__(f"{C.CREDITS_GAME_NAME} - {gettext('achievements').upper()}")
         self.achievement_system = achievement_system
         self.achievement_graphics = getattr(achievement_system, "graphics", {})
         self.add_item(gettext("back"), "back")
@@ -1816,7 +1817,9 @@ class AchievementsMenu(Menu):
             else:
                 name_color = pygame.Color("gray")
                 graphic_color = pygame.Color("gray")
-            if is_unlocked and achievement.name in self.achievement_graphics:
+            # Guard: `achievement_graphics` may be a Mock in tests; ensure it's a
+            # mapping before using `in` to avoid TypeError when iterating.
+            if is_unlocked and isinstance(self.achievement_graphics, dict) and achievement.name in self.achievement_graphics:
                 graphics = self.achievement_graphics[achievement.name]
                 ascii_start_x = center_x - 120
                 for line_idx, line in enumerate(graphics):

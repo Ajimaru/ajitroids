@@ -164,3 +164,11 @@ class AchievementSystem:
             # Defensive: do not raise from stats/achievement checks
             return False
         return False
+
+    def unlock_achievement(self, name, use_ascii=False):
+        """Deprecated compatibility wrapper for older API tests.
+
+        Historically tests and older code called `unlock_achievement(name)`.
+        Keep a small wrapper that forwards to the newer `unlock` method.
+        """
+        return self.unlock(name, use_ascii=use_ascii)
