@@ -1182,6 +1182,12 @@ def main(args=None):
                         sounds.play_hit()
 
                         if boss_defeated:
+                            # Play boss death sound effect (ensure asset present)
+                            try:
+                                sounds.play_boss_death()
+                            except Exception:
+                                pass
+
                             score += BOSS_SCORE
                             boss_active = False
                             session_stats.record_boss_defeated()
