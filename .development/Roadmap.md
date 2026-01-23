@@ -269,7 +269,7 @@ the Ajitroids game experience.
 
 If you'd like to implement any of these features:
 
-1. Check the [Contributing Guide](CONTRIBUTING.md)
+1. Check the [Contributing Guide](../CONTRIBUTING.md)
 2. Open an issue to discuss the feature
 3. Submit a pull request with your implementation
 4. Update this document when features are completed
