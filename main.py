@@ -1382,10 +1382,18 @@ def main(args=None):
             screen.blit(fps_text, fps_rect)
 
         # If language changed, rebuild menus/screens so new gettext values apply
-        try:
-            if game_settings.language != last_language:
-                last_language = game_settings.language
-                # Recreate menus/screens that hold translated strings
+        if game_settings.language != last_language:
+            last_language = game_settings.language
+            # Reload locale files first so new UI components pick up translations
+            try:
+                from modul import i18n as _i18n
+
+                _i18n.reload_locales()
+            except Exception as e:
+                logger.exception("Failed to reload locales: %s", e)
+
+            # Recreate menus/screens that hold translated strings
+            try:
                 main_menu = MainMenu()
                 pause_menu = PauseMenu()
                 options_menu = OptionsMenu(game_settings, sounds)
@@ -1401,46 +1409,43 @@ def main(args=None):
                 ship_selection_menu = ShipSelectionMenu()
                 tutorial = Tutorial()
                 help_screen = HelpScreen()
-                # Recreate displays and viewers that cache translated strings
-                try:
-                    highscore_display = HighscoreDisplay(highscore_manager)
-                except Exception:
-                    pass
-                try:
-                    replay_recorder = ReplayRecorder()
-                    replay_manager = ReplayManager()
-                    replay_list_menu = ReplayListMenu(replay_manager)
-                    replay_player = ReplayPlayer()
-                    replay_viewer = ReplayViewer(replay_player)
-                except Exception:
-                    pass
-                # Clear i18n cache so subsequent gettext() loads new locale files
-                try:
-                    from modul import i18n as _i18n
-                    _i18n.reload_locales()
-                except Exception:
-                    pass
-                try:
-                    stats_dashboard = StatsDashboard(session_stats)
-                except Exception:
-                    pass
-                # Activate the currently visible menu so transitions remain smooth
-                try:
-                    if game_state == 'main_menu':
-                        main_menu.activate()
-                    elif game_state == 'options':
-                        options_menu.activate()
-                    elif game_state == 'controls':
-                        controls_menu.activate()
-                    elif game_state == 'language':
-                        language_menu.activate()
-                    elif game_state == 'credits':
-                        credits_screen.fade_in = True
-                except Exception:
-                    pass
-        except Exception:
-            # Defensive: ignore any issue rebuilding UI and continue
-            pass
+            except Exception as e:
+                logger.exception("Error recreating main UI components: %s", e)
+
+            # Recreate displays and viewers that cache translated strings
+            try:
+                highscore_display = HighscoreDisplay(highscore_manager)
+            except Exception as e:
+                logger.exception("Failed to recreate HighscoreDisplay: %s", e)
+
+            try:
+                replay_recorder = ReplayRecorder()
+                replay_manager = ReplayManager()
+                replay_list_menu = ReplayListMenu(replay_manager)
+                replay_player = ReplayPlayer()
+                replay_viewer = ReplayViewer(replay_player)
+            except Exception as e:
+                logger.exception("Failed to recreate replay components: %s", e)
+
+            try:
+                stats_dashboard = StatsDashboard(session_stats)
+            except Exception as e:
+                logger.exception("Failed to recreate StatsDashboard: %s", e)
+
+            # Activate the currently visible menu so transitions remain smooth
+            try:
+                if game_state == 'main_menu':
+                    main_menu.activate()
+                elif game_state == 'options':
+                    options_menu.activate()
+                elif game_state == 'controls':
+                    controls_menu.activate()
+                elif game_state == 'language':
+                    language_menu.activate()
+                elif game_state == 'credits':
+                    credits_screen.fade_in = True
+            except Exception as e:
+                logger.exception("Failed to activate restored menu state: %s", e)
 
         pygame.display.flip()
 

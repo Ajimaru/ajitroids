@@ -3,9 +3,6 @@
 import json
 import os
 import logging
-# Try to import the runtime settings module once at import time. Keep the
-# reference optional to avoid repeated dynamic imports inside `gettext()` and
-# to satisfy linters complaining about imports outside top-level (C0415).
 logger = logging.getLogger(__name__)
 
 _locales_cache = {}

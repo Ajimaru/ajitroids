@@ -6,9 +6,18 @@ set -e
 
 echo "🚀 Setting up ajitroids development environment..."
 
-# Check if Python is available
+# Check if Python is available and meets the minimum version requirement
 if ! command -v python3 &> /dev/null; then
     echo "❌ Python 3 not found. Please install Python 3.10+."
+    exit 1
+fi
+
+# Verify Python version is >= 3.10
+PY_VER=$(python3 -c 'import sys; print("{}.{}".format(*sys.version_info[:2]))')
+PY_MAJOR=$(python3 -c 'import sys; print(sys.version_info[0])')
+PY_MINOR=$(python3 -c 'import sys; print(sys.version_info[1])')
+if [ "$PY_MAJOR" -lt 3 ] || { [ "$PY_MAJOR" -eq 3 ] && [ "$PY_MINOR" -lt 10 ]; }; then
+    echo "❌ Detected Python $PY_VER. ajitroids requires Python 3.10+."
     exit 1
 fi
 
@@ -19,7 +28,25 @@ if [ ! -d "venv" ]; then
 fi
 
 echo "📦 Activating virtual environment..."
-source venv/bin/activate 2>/dev/null || source venv/Scripts/activate 2>/dev/null || true
+# Try unix-style activate first, then windows-style. Do not swallow errors.
+if [ -f "venv/bin/activate" ]; then
+    # shellcheck disable=SC1091
+    source venv/bin/activate
+elif [ -f "venv/Scripts/activate" ]; then
+    # shellcheck disable=SC1091
+    source venv/Scripts/activate
+fi
+
+# Verify virtualenv activation to avoid accidental global installs
+if [ -z "$VIRTUAL_ENV" ]; then
+    # Fallback check: compare python's sys.prefix basename to 'venv'
+    PREFIX=$(python3 -c 'import sys,os; print(os.path.basename(sys.prefix))' 2>/dev/null || echo unknown)
+    if [ "$PREFIX" != "venv" ]; then
+        echo "❌ Failed to activate virtualenv (VIRTUAL_ENV unset, python prefix: $PREFIX)."
+        echo "Please run: source venv/bin/activate (or venv/Scripts/activate) and re-run this script."
+        exit 1
+    fi
+fi
 
 echo "📦 Installing dependencies..."
 pip install --upgrade pip setuptools wheel

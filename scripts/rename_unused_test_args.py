@@ -73,7 +73,8 @@ def process_file(path: Path) -> bool:
     if not edits:
         return False
 
-    for item in sorted(edits, key=lambda x: x[0]):
+    # Apply edits from bottom-to-top so earlier edits don't shift later indices
+    for item in sorted(edits, key=lambda x: x[0], reverse=True):
         start, end, old_lines, new_lines = item
         if lines[start:end + 1] == old_lines:
             lines[start:end + 1] = new_lines

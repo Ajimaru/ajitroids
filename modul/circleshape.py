@@ -20,7 +20,6 @@ class CircleShape(pygame.sprite.Sprite):
             else:
                 for group in containers:
                     group.add(self)
-        """Draw the circle shape (to be implemented by subclasses)."""
 
     def update(self, dt):
         """Update the circle shape (to be implemented by subclasses)."""

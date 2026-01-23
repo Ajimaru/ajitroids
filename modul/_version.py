@@ -29,7 +29,9 @@ version_tuple: VersionTuple
 COMMIT_ID: CommitId
 __commit_id__: CommitId
 
-# keep uppercase aliases for backwards compatibility
+# Public names are the uppercase constants (`VERSION`, `COMMIT_ID`).
+# The dunder names (`__version__`, `__commit_id__`) are kept as
+# legacy aliases for backwards compatibility.
 __version__ = VERSION = '0.24.1.dev49'
 __version_tuple__ = version_tuple = (0, 24, 1, 'dev49')
 

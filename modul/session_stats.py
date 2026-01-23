@@ -37,8 +37,7 @@ class SessionStats:
         self.highest_level = 0
         self.total_lives_lost = 0
         self.total_playtime = 0.0
-        self.total_playtime = 0.0
-
+    
     def start_game(self):
         """Mark the start of a new game."""
         self.game_start_time = time.time()
