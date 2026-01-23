@@ -1,6 +1,5 @@
-"""Module modul.update_version — minimal module docstring."""
-
 #!/usr/bin/env python3
+
 """Update _version.py and pyproject.toml from VERSION file
 
 This script ensures the version is only maintained in one place (VERSION file)

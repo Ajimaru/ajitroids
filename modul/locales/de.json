@@ -107,11 +107,9 @@
   "level_up": "Levelaufstieg",
   "menu_select": "Menü ausgewählt",
   "menu_confirm": "Menü bestätigt",
-  "playing_all_sounds": "Spiele alle Sounds ab..."
-  ,
+  "playing_all_sounds": "Spiele alle Sounds ab...",
   "restart": "Neustart",
-  "performance_ratio_format": "{performance:.0f}% (Ø/Best)"
-  ,
+  "performance_ratio_format": "{performance:.0f}% (Ø/Best)",
   "new_highscore": "Neuer Highscore!",
   "score_format": "Punktestand: {score}",
   "highscore_hint_updown": "Benutze OBEN/UNTEN um Buchstabe zu ändern",
