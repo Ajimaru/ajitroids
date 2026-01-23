@@ -3,6 +3,7 @@
 import math
 import random
 import pygame
+import logging
 
 from modul.circleshape import CircleShape
 from modul.constants import (ASTEROID_CRYSTAL_SPLIT_COUNT,
@@ -18,6 +19,11 @@ from modul.groups import collidable, drawable, updatable
 from modul.particle import Particle
 from modul.powerup import PowerUp
 from modul.shot import Shot
+
+# Toggle to enable verbose enemy-ship debug output during development.
+# Set to True locally when you need per-frame tracing; keep False in production.
+DEBUG = False
+logger = logging.getLogger(__name__)
 
 
 class Asteroid(CircleShape, pygame.sprite.Sprite):
@@ -253,12 +259,14 @@ class EnemyShip(CircleShape):
                 else:
                     direction_to_player = pygame.Vector2(0, 0)
                 self.velocity = direction_to_player * 100
-                print(f"EnemyShip moving towards player! Distance: {distance_to_player}")
+                if DEBUG:
+                    logger.debug("EnemyShip moving towards player! Distance: %s", distance_to_player)
 
             else:
                 self.velocity *= 0.8
 
-        print(f"EnemyShip Position: {self.position}, Velocity: {self.velocity}")
+        if DEBUG:
+            logger.debug("EnemyShip Position: %s, Velocity: %s", self.position, self.velocity)
 
     def collides_with(self, other):
         """Check collision with another object using distance."""

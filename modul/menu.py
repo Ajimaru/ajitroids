@@ -708,7 +708,20 @@ class ControlsMenu(Menu):
 
     def update(self, dt, events):
         # Refresh labels from settings
-        """TODO: add docstring."""
+        """Process input and update the controls menu state.
+
+        Args:
+            dt (float): Time delta in seconds since last update.
+            events (list): Iterable of pygame events to process.
+
+        Returns:
+            Optional[str]: Navigation/action key (e.g. 'options' or a binding action)
+            or None when no navigation is requested.
+
+        Side effects:
+            Updates item labels from `self.settings`, may set `self.capturing`,
+            `self.capture_action` and `self.message` when rebinding keys.
+        """
         for i, (action_key, label) in enumerate(self.actions):
             key_name = self.settings.controls.get(action_key, "")
             self.items[i].text = f"{label}: {key_name}"
@@ -748,7 +761,15 @@ class ControlsMenu(Menu):
         return None
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Render the controls menu to the provided Pygame surface.
+
+        Args:
+            screen (pygame.Surface): Surface to render the menu onto.
+
+        Side effects:
+            Draws menu items and a small status message (e.g. binding prompts)
+            at the bottom of the screen.
+        """
         super().draw(screen)
         if self.message:
             font = pygame.font.Font(None, 22)
@@ -783,7 +804,7 @@ class LanguageMenu(Menu):
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(key):
-                """TODO: add docstring."""
+                """Fallback gettext when i18n import fails; returns key unchanged."""
                 return key
         super().__init__(gettext("language").upper())
         self.settings = settings
@@ -832,9 +853,9 @@ class LanguageMenu(Menu):
 
 
 class GameOverScreen:
-    """TODO: add docstring."""
+    """Implementation detail: see method body for behavior."""
     def __init__(self):
-        """TODO: add docstring."""
+        """Implementation detail: see method body for behavior."""
         self.title_font = pygame.font.Font(None, C.MENU_TITLE_FONT_SIZE)
         self.text_font = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE)
         self.background_alpha = 0
@@ -842,11 +863,19 @@ class GameOverScreen:
         self.final_score = 0
 
     def set_score(self, score):
-        """TODO: add docstring."""
+        """Set the final score to display on the Game Over screen."""
         self.final_score = score
 
     def update(self, dt, events):
-        """TODO: add docstring."""
+        """Update fade-in animation and handle input; return next screen or None.
+
+        Args:
+            dt (float): Delta time since last frame in seconds.
+            events (list): Pygame events to process.
+
+        Returns:
+            Optional[str]: Navigation target (e.g. 'highscore_display') or None.
+        """
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
             if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
@@ -865,7 +894,11 @@ class GameOverScreen:
         return None
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Render the announcements menu and its toggle items.
+
+        Args:
+            screen (pygame.Surface): Surface to draw on.
+        """
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -874,7 +907,7 @@ class GameOverScreen:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(key):
-                """TODO: add docstring."""
+                """Fallback gettext when i18n is unavailable; returns the key unchanged."""
                 return key
         title_surf = self.title_font.render(gettext("game_over").upper(), True, pygame.Color("red"))
         title_rect = title_surf.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 3))
@@ -897,14 +930,18 @@ class GameOverScreen:
 
 
 class DifficultyMenu(Menu):
-    """TODO: add docstring."""
+    """Simple menu for selecting the game difficulty.
+
+    Options are 'Easy', 'Normal' and 'Hard' and a back option to return to the
+    main menu.
+    """
     def __init__(self):
-        """TODO: add docstring."""
+        """Create menu items for each difficulty level and a back option."""
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(key):
-                """TODO: add docstring."""
+                """Fallback gettext when i18n import fails; returns key unchanged."""
                 return key
         super().__init__(gettext("difficulty").upper())
         self.add_item(gettext("difficulty_easy"), "difficulty_easy", "L")
@@ -917,13 +954,20 @@ class VoiceAnnouncementsMenu:
     """Menu to configure voice announcement toggles"""
 
     def __init__(self, settings):
-        """TODO: add docstring."""
+        """Initialize the TTS voice menu and enumerate available system voices.
+
+        Args:
+            settings: Settings object used to persist chosen voice.
+        """
         self.settings = settings
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(key):
-                """TODO: add docstring."""
+                """Fallback gettext used when i18n cannot be imported.
+
+                Returns the key unchanged so the UI remains functional.
+                """
                 return key
         self.title = gettext("voice_announcements")
         self.items = [
@@ -949,13 +993,16 @@ class VoiceAnnouncementsMenu:
         self.update_menu_texts()
 
     def update_menu_texts(self):
-        """TODO: add docstring."""
+        """Refresh the announcements menu labels to reflect current settings.
+
+        Updates each item to show 'ON' or 'OFF' depending on `settings.announcement_types`.
+        """
         announcements = self.settings.announcement_types
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(key):
-                """TODO: add docstring."""
+                """Fallback gettext when i18n is unavailable; returns the key unchanged."""
                 return key
 
         self.items[0].text = f"{gettext('level_up')}: {'ON' if announcements.get('level_up', True) else 'OFF'}"
@@ -971,7 +1018,15 @@ class VoiceAnnouncementsMenu:
         self.items[10].text = f"{gettext('powerup')}: {'ON' if announcements.get('powerup', False) else 'OFF'}"
 
     def update(self, dt, events):
-        """TODO: add docstring."""
+        """Handle keyboard navigation and selection for announcements toggles.
+
+        Args:
+            dt (float): Time delta since last frame.
+            events (list): Iterable of pygame events.
+
+        Returns:
+            Optional[str]: Action key selected or 'back'.
+        """
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
             if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
@@ -1007,7 +1062,14 @@ class VoiceAnnouncementsMenu:
         return None
 
     def handle_action(self, action):
-        """TODO: add docstring."""
+        """Toggle announcement settings or navigate to submenus based on action.
+
+        Args:
+            action (str): Action key from the menu.
+
+        Returns:
+            Optional[str]: Navigation key such as 'tts_voice' or None.
+        """
         if action == "back":
             return "options"
 
@@ -1040,7 +1102,7 @@ class VoiceAnnouncementsMenu:
         return None
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Render the voice announcements menu to the provided screen surface."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -1074,12 +1136,16 @@ class TTSVoiceMenu(Menu):
     """Menu to select a TTS voice from available system voices."""
 
     def __init__(self, settings):
-        """TODO: add docstring."""
+        """Initialize the TTS voice selection menu using `settings`.
+
+        Populates available voices (if the TTS manager is present) and a
+        back option. The chosen voice id is stored in `settings.tts_voice`.
+        """
         try:
             from modul.i18n import gettext
         except Exception:  # pylint: disable=broad-exception-caught
             def gettext(key):
-                """TODO: add docstring."""
+                """Fallback gettext used when i18n import fails; returns key unchanged."""
                 return key
 
         super().__init__(gettext("tts_voice_label").upper())
@@ -1106,7 +1172,15 @@ class TTSVoiceMenu(Menu):
 
     def update(self, dt, events):
         # Use base menu navigation
-        """TODO: add docstring."""
+        """Delegate event processing to the base Menu and return any action.
+
+        Args:
+            dt (float): Time delta since last update.
+            events (list): Iterable of pygame events.
+
+        Returns:
+            Optional[str]: Action key returned by base update or None.
+        """
         result = super().update(dt, events)
         if result:
             return result
@@ -1114,7 +1188,14 @@ class TTSVoiceMenu(Menu):
 
     def handle_action(self, action):
         # Expected action formats: 'tts_voice:<id>' or 'tts_voice:__default__'
-        """TODO: add docstring."""
+        """Apply a TTS voice selection to settings and attempt language detection.
+
+        Args:
+            action (str): Action in form 'tts_voice:<id>' or 'back'.
+
+        Returns:
+            Optional[str]: Navigation key such as 'options' or None.
+        """
         if action == "back":
             return "options"
         if action and action.startswith("tts_voice:"):
@@ -1159,16 +1240,19 @@ class TTSVoiceMenu(Menu):
 
 
 class SoundTestMenu:
-    """TODO: add docstring."""
+    """Menu that allows the developer to play and test in-game sounds.
+
+    Supports playing individual sounds and a threaded "play all" routine.
+    """
     def __init__(self):
-        """TODO: add docstring."""
+        """Set up sound list, UI state variables and threading lock."""
         import threading
         self._sound_state_lock = threading.Lock()
         try:
             from modul.i18n import gettext
         except Exception:
             def gettext(key):
-                """TODO: add docstring."""
+                """Implementation detail: see method body for behavior."""
                 return key
         self.title = gettext("sound_test")
         self.sounds = None
@@ -1215,7 +1299,7 @@ class SoundTestMenu:
         self.fade_in = False
 
     def activate(self):
-        """TODO: add docstring."""
+        """Reset UI state and flags when the menu is activated."""
         self.fade_in = True
         self.background_alpha = 0
         self.scroll_offset = 0
@@ -1225,11 +1309,18 @@ class SoundTestMenu:
         self.update_visible_items()
 
     def set_sounds(self, sounds):
-        """TODO: add docstring."""
+        """Attach a `Sounds` instance used to play effects from this menu.
+
+        Args:
+            sounds: Object exposing methods like `play_shoot`, `play_explosion`, etc.
+        """
         self.sounds = sounds
 
     def update_visible_items(self):
-        """TODO: add docstring."""
+        """Recompute which subset of `sound_items` is currently visible.
+
+        Ensures `self.current_selection` remains within visible bounds.
+        """
         self.visible_items = []
         start_index = self.scroll_offset
         end_index = min(start_index + self.max_visible_items, len(self.sound_items))
@@ -1243,7 +1334,15 @@ class SoundTestMenu:
             self.current_selection = 0
 
     def update(self, dt, events):
-        """TODO: add docstring."""
+        """Handle keyboard input for scrolling and selecting sound test items.
+
+        Args:
+            dt (float): Time delta in seconds.
+            events (list): Iterable of pygame events to process.
+
+        Returns:
+            Optional[str]: Action key (e.g. sound test key or 'back') or None.
+        """
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / C.MENU_TRANSITION_SPEED)
             if self.background_alpha >= C.MENU_BACKGROUND_ALPHA:
@@ -1300,7 +1399,11 @@ class SoundTestMenu:
         return None
 
     def handle_action(self, action):
-        """TODO: add docstring."""
+        """Execute the requested sound playback action and update UI status.
+
+        Args:
+            action (str): Sound action key describing which sound to play.
+        """
         if not self.sounds:
             return None
 
@@ -1310,7 +1413,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("standard_shoot"))
             self.last_played_timer = 2.0
@@ -1324,7 +1427,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("laser_shoot"))
             self.last_played_timer = 2.0
@@ -1338,7 +1441,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("rocket_shoot"))
             self.last_played_timer = 2.0
@@ -1352,7 +1455,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("shotgun_shoot"))
             self.last_played_timer = 2.0
@@ -1366,7 +1469,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("triple_shoot"))
             self.last_played_timer = 2.0
@@ -1377,7 +1480,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("explosion"))
             self.last_played_timer = 2.0
@@ -1388,7 +1491,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("player_hit"))
             self.last_played_timer = 2.0
@@ -1399,7 +1502,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("powerup"))
             self.last_played_timer = 2.0
@@ -1410,7 +1513,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("shield_activate"))
             self.last_played_timer = 2.0
@@ -1424,7 +1527,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("weapon_pickup"))
             self.last_played_timer = 2.0
@@ -1435,7 +1538,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("boss_spawn"))
             self.last_played_timer = 2.0
@@ -1446,7 +1549,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("boss_death"))
             self.last_played_timer = 2.0
@@ -1460,7 +1563,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("boss_attack"))
             self.last_played_timer = 2.0
@@ -1471,7 +1574,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("level_up"))
             self.last_played_timer = 2.0
@@ -1482,7 +1585,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:  # pylint: disable=broad-exception-caught
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("game_over"))
             self.last_played_timer = 2.0
@@ -1493,7 +1596,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("menu_select"))
             self.last_played_timer = 2.0
@@ -1504,7 +1607,7 @@ class SoundTestMenu:
                 from modul.i18n import gettext
             except Exception:
                 def gettext(k):
-                    """TODO: add docstring."""
+                    """Fallback gettext when i18n cannot be imported; returns the key unchanged."""
                     return k
             self.last_played = gettext("sound_played").format(name=gettext("menu_confirm"))
             self.last_played_timer = 2.0
@@ -1564,7 +1667,7 @@ class SoundTestMenu:
         return None
 
     def draw(self, screen):
-        """TODO: add docstring."""
+        """Implementation detail: see method body for behavior."""
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -1580,7 +1683,7 @@ class SoundTestMenu:
             from modul.i18n import gettext
         except Exception:
             def gettext(key):
-                """TODO: add docstring."""
+                """Implementation detail: see method body for behavior."""
                 return key
 
 class TTSVoiceMenu(Menu):

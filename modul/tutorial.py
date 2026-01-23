@@ -254,12 +254,22 @@ class Tutorial:
             else:
                 color = (255, 255, 255)
 
-                if line.startswith("*** Boss Fights ***") or line.startswith("*** Boss Behavior ***"):
-                    color = (128, 0, 128)
-                elif line.startswith("*** Tips ***"):
-                    color = (255, 215, 0)
-                elif line.startswith("*** Controls ***") or line.startswith("*** Strategy ***"):
-                    color = (100, 200, 255)
+                # Headings are wrapped in triple-stars ("*** heading ***").
+                # Detect the pattern language-agnostically and then match
+                # keywords that may appear in English or German.
+                if line.startswith("***") and line.endswith("***"):
+                    inner = line.strip("* ").lower()
+                    # Boss-related headings (English "Boss", German "Boss")
+                    if "boss" in inner:
+                        color = (128, 0, 128)
+                    # Tips / Tipps
+                    elif "tip" in inner or "tipp" in inner:
+                        color = (255, 215, 0)
+                    # Controls / Steuerung, Strategy / Strategie
+                    elif "control" in inner or "steuer" in inner or "strateg" in inner:
+                        color = (100, 200, 255)
+                    else:
+                        color = (255, 255, 255)
 
                 elif line.startswith("•"):
                     color = (200, 200, 200)
@@ -339,14 +349,18 @@ class Tutorial:
             name_part = line[:colon_pos]
             desc_part = line[colon_pos:]
 
+            # Normalize and match weapon keywords in a language-agnostic way
             name_color = (255, 255, 255)
-            if "STANDARD:" in name_part:
+            name_upper = name_part.upper()
+            if "STANDARD" in name_upper:
                 name_color = (255, 255, 255)
-            elif "LASER:" in name_part:
+            elif "LASER" in name_upper:
                 name_color = (0, 255, 0)
-            elif "ROCKETS:" in name_part:
+            # English: ROCKET/ROCKETS, German: RAKETE/RAKETEN
+            elif "ROCKET" in name_upper or "RAKET" in name_upper:
                 name_color = (255, 0, 0)
-            elif "SHOTGUN:" in name_part:
+            # English: SHOTGUN, German: SCHROTFLINTE / SCHROT
+            elif "SHOTGUN" in name_upper or "SCHROT" in name_upper:
                 name_color = (255, 165, 0)
 
             name_surface = self.font_content.render(name_part, True, name_color)
