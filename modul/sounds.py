@@ -1,6 +1,5 @@
 """Module modul.sounds — minimal module docstring."""
 
-
 import os
 from pathlib import Path
 import pygame
@@ -52,6 +51,7 @@ class Sounds:
         "level_up": 0.08,
         "game_over": 0.12,
         "player_hit": 0.14,
+        "boss_attack": 0.08,
     }
 
     def __init__(self):
@@ -262,7 +262,7 @@ class Sounds:
                 "shoot", "explosion", "player_death", "powerup",
                 "laser_shoot", "rocket_shoot", "boss_spawn", "boss_death",
                 "shield_activate", "level_up", "game_over", "player_hit",
-                "menu_move", "menu_select",
+                "menu_move", "menu_select", "boss_attack",
             ]
             for attr_name in sound_attributes:
                 if hasattr(self, attr_name):
@@ -340,6 +340,7 @@ class Sounds:
             "level_up",
             "game_over",
             "player_hit",
+            "boss_attack",
         ]:
             if hasattr(self, attr_name):
                 sound = getattr(self, attr_name)
