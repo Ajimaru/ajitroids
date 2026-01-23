@@ -59,3 +59,12 @@ def gettext(key: str):
             key, e, exc_info=True
         )
     return t(key, "en")
+
+
+def reload_locales():
+    """Clear the locale cache so subsequent gettext calls reload JSON files.
+
+    Call this after changing the active language to force fresh loading of
+    locale files. This is safe to call repeatedly.
+    """
+    _locales_cache.clear()

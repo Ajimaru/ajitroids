@@ -76,6 +76,7 @@ docs-old/
 achievements.json
 settings.json
 highscores.json
+ships.json
 pyvenv.cfg
 .envrc
 Makefile

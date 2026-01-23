@@ -13,7 +13,7 @@ Run the provided setup script to install all dependencies and activate
 pre-commit hooks:
 
 ```bash
-bash setup-dev.sh
+bash .development/setup-dev.sh
 ```
 
 This script will:

@@ -757,6 +757,11 @@ class ControlsMenu(Menu):
             screen.blit(msg, rect)
 
 
+# Define global menu objects at the module level for language switching
+main_menu = None
+options_menu = None
+controls_menu = None
+
 class LanguageMenu(Menu):
     """
     Menu for selecting the application's language.
@@ -817,6 +822,11 @@ class LanguageMenu(Menu):
                 if result == code:
                     self.settings.language = result
                     self.settings.save()
+                    # Rebuild all menus to update labels immediately
+                    globals()["main_menu"] = MainMenu()
+                    globals()["options_menu"] = OptionsMenu(self.settings, getattr(self, 'sounds', None))
+                    globals()["controls_menu"] = ControlsMenu(self.settings)
+                    # Rebuild this menu to update its labels
                     return "options"
         return None
 

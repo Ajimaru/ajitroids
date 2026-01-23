@@ -121,7 +121,7 @@ environment with pre-commit hooks:
 
 ```bash
 # Run the setup script (Linux/macOS)
-bash setup-dev.sh
+bash .development/setup-dev.sh
 
 # Or manual setup (all platforms)
 pip install pre-commit
