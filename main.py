@@ -695,6 +695,8 @@ def main(args=None):
             menu_starfield.draw(screen)
 
             action = voice_announcements_menu.update(dt, events)
+            voice_announcements_menu.draw(screen)
+
             if action:
                 result = voice_announcements_menu.handle_action(action)
                 if result == "options":
