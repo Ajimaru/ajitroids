@@ -211,7 +211,7 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
         split_count = ASTEROID_CRYSTAL_SPLIT_COUNT if self.asteroid_type == ASTEROID_TYPE_CRYSTAL else 2
         velocity_multiplier = ASTEROID_ICE_VELOCITY_MULTIPLIER if self.asteroid_type == ASTEROID_TYPE_ICE else 1.2
         containers = getattr(type(self), 'containers', ())
-        child_groups = tuple(containers) if containers else self.groups()
+        child_groups = tuple(containers) if containers else tuple(sprite_groups)
 
         for i in range(split_count):
             if split_count == ASTEROID_CRYSTAL_SPLIT_COUNT:
