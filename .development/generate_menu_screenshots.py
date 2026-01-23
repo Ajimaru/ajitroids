@@ -39,12 +39,30 @@ logger = logging.getLogger("generate_menu_screenshots")
 class _Dummy:
     """Lightweight dummy object used to satisfy constructor parameters."""
     def __init__(self, *a, **k):
+        """
+        Create a placeholder object that ignores any constructor arguments.
+        
+        Accepts arbitrary positional and keyword arguments and performs no initialization.
+        """
         pass
 
 
 class _DummySettings:
     """Provide minimal settings attributes used by OptionsMenu."""
     def __init__(self):
+        """
+        Initialize default dummy settings used to emulate an application's audio/visual and accessibility options.
+        
+        Attributes:
+            music_on: `True` if background music is enabled by default.
+            sound_on: `True` if sound effects are enabled by default.
+            music_volume: Default music volume (0.0 to 1.0), set to 0.5.
+            sound_volume: Default effects volume (0.0 to 1.0), set to 0.5.
+            fullscreen: `False` by default (windowed mode).
+            language: Default language code, set to "en".
+            show_tts_in_options: `False` by default; whether text-to-speech options are shown.
+            tts_voice: Default TTS voice identifier, empty string by default.
+        """
         self.music_on = True
         self.sound_on = True
         self.music_volume = 0.5
@@ -55,35 +73,77 @@ class _DummySettings:
         self.tts_voice = ""
 
     def save(self):
-        """Dummy save method."""
+        """
+        No-op save method for dummy settings used to satisfy callers; performs no action.
+        """
 
 
 class _DummySounds:
     """Minimal sounds object used by OptionsMenu methods."""
     def toggle_music(self, on):
-        """Dummy toggle_music method."""
+        """
+        No-op placeholder that accepts a music-enabled flag.
+        
+        Parameters:
+            on (bool): Indicates whether music should be enabled; the value is ignored.
+        """
         _ = on  # Mark parameter as used
 
     def toggle_sound(self, on):
-        """Dummy toggle_sound method."""
+        """
+        No-op handler for enabling or disabling sound effects.
+        
+        Parameters:
+            on (bool): True to enable sound effects, False to disable them. This implementation intentionally performs no action.
+        """
         _ = on  # Mark parameter as used
 
     def set_music_volume(self, vol):
-        """Dummy set_music_volume method."""
+        """
+        No-op placeholder that accepts a music volume value and performs no action.
+        
+        Parameters:
+            vol (float|int): Intended music volume value; this implementation ignores the value.
+        """
         _ = vol  # Mark parameter as used
 
     def set_effects_volume(self, vol):
-        """Dummy set_effects_volume method."""
+        """
+        No-op placeholder that accepts an effects volume value and ignores it.
+        
+        Parameters:
+            vol (float | int): Desired effects volume; the value is accepted but not used.
+        """
         _ = vol  # Mark parameter as used
 
 
 class _DummyAchievementSystem:
     def __init__(self):
+        """
+        Initialize the dummy achievement system.
+        
+        Creates an `achievements` attribute as an empty list for storing achievement identifiers or objects used by dummy consumers.
+        """
         self.achievements = []
 
 
 def _build_dummy_for_parameter(name):
-    """Return a heuristic dummy value for a constructor parameter name."""
+    """
+    Provide a heuristic dummy value appropriate for a constructor parameter name.
+    
+    Parameters:
+        name (str): The parameter name to analyze.
+    
+    Returns:
+        A dummy value chosen based on the parameter name:
+          - 0 for count/number/size-like names
+          - "" for name/title/path-like names
+          - False for flag/enable/is_-style names
+          - _DummySettings() for settings/config-like names
+          - _DummySounds() for sound/sounds-like names
+          - _DummyAchievementSystem() for achievement-like names
+          - _Dummy() otherwise
+    """
     lname = name.lower()
     if "count" in lname or "num" in lname or "size" in lname:
         return 0
@@ -101,10 +161,14 @@ def _build_dummy_for_parameter(name):
 
 
 def instantiate_with_dummies(cls):
-    """Try to instantiate `cls` by providing simple dummy args when required.
-
-    Returns the instance or raises the original exception if instantiation
-    fails irrecoverably.
+    """
+    Create an instance of `cls`, supplying heuristic dummy values for required constructor parameters.
+    
+    Returns:
+        instance: An instantiated object of type `cls`.
+    
+    Raises:
+        Exception: Propagates any exception raised while calling `cls(...)` if instantiation fails.
     """
     sig = None
     try:
@@ -144,7 +208,18 @@ def find_modul_modules():
 
 
 def collect_menu_classes():
-    """Return dict mapping class name -> class object for all Menu subclasses found."""
+    """
+    Discover Menu and UI-like classes defined under the modul package.
+    
+    Searches importable modules under modul, imports modul.menu to locate the base Menu class, and returns a mapping of discovered class names to their class objects. The result includes:
+    - direct subclasses of Menu (excluding the Menu base itself), and
+    - classes that expose a callable `draw` method together with either `update` or `activate`, or whose class name ends with "Menu", "Screen", "Dashboard", "Viewer", or "Display".
+    
+    If modul.menu cannot be imported or does not define a Menu base class, an empty dict is returned.
+    
+    Returns:
+        dict: Mapping from class name (str) to the class object for each discovered menu/UI-like class.
+    """
     classes = {}
     # first import modul.menu to get base Menu class
     try:
@@ -188,9 +263,15 @@ def collect_menu_classes():
 
 
 def _parse_main_instantiations():
-    """Parse `main.py` for top-level instantiations like `x = ClassName(...)`.
-
-    Returns a set of class names referenced in assignments.
+    """
+    Extract class names used in top-level assignment instantiations in main.py.
+    
+    Scans the main.py file located next to ROOT for lines that resemble top-level assignments of the form
+    `name = ClassName(...)` and collects the `ClassName` tokens that start with an uppercase letter.
+    Uses a simple heuristic and ignores read errors.
+    
+    Returns:
+        set: A set of class name strings found in such assignments; empty if none or if main.py is missing/unreadable.
     """
     main_py = os.path.join(os.path.dirname(ROOT), "main.py")
     if not os.path.exists(main_py):
@@ -216,9 +297,17 @@ def _parse_main_instantiations():
 
 
 def build_hierarchy_and_render(classes):
-    """Instantiate menu classes, detect child relations and render screenshots.
-
-    Creates a directory structure in `.logs/` following parent/child relationships.
+    """
+    Instantiate provided menu-like classes, detect parent/child relationships among them, render each instance to a PNG, and write a manifest describing the hierarchy.
+    
+    For each class in `classes`, attempts to construct an instance using heuristics, inspects public attributes and menu item actions to discover child relations, renders the menu to a surface (invoking `activate()` and `draw(surface)` when available), and saves "<ClassName>.png" plus a "menus_manifest.md" file in OUT_DIR.
+    
+    Parameters:
+        classes (dict): Mapping of class name (str) to class object for menu-like classes to process.
+    
+    Side effects:
+        - Writes PNG files named "<ClassName>.png" and a "menus_manifest.md" file into OUT_DIR.
+        - Logs instantiation, rendering, and I/O errors and warnings.
     """
     instances = {}
     children = {name: set() for name in classes}
@@ -306,7 +395,11 @@ def build_hierarchy_and_render(classes):
 
 
 def main():
-    """Initialize pygame and generate menu screenshots."""
+    """
+    Initialize the SDL environment, discover menu classes in the modul package, and produce screenshots and a manifest for each discovered menu.
+    
+    This function initializes pygame, collects menu-like classes, logs and exits if none are found, and invokes the rendering and manifest generation process for the discovered classes.
+    """
     try:
         pygame.init()
     except pygame.error as e:

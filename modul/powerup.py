@@ -10,7 +10,18 @@ from modul.circleshape import CircleShape
 class PowerUp(CircleShape):
     """Represents a power-up item that can be collected by the player."""
     def __init__(self, x, y, powerup_type=None):
-        """Initialize a power-up with position and type."""
+        """
+        Create a power-up entity at the given position and configure its visual and physical properties.
+        
+        Parameters:
+            x (float): Horizontal position of the power-up.
+            y (float): Vertical position of the power-up.
+            powerup_type (str, optional): Specific power-up type (one of C.POWERUP_TYPES). If omitted, a type is selected at random.
+        
+        Description:
+            Sets the entity's radius from C.POWERUP_RADIUS via the base class, assigns a type and corresponding color,
+            initializes rotation to 0, gives the power-up a small random 2D velocity, and sets its lifetime to C.POWERUP_LIFETIME.
+        """
         super().__init__(x, y, C.POWERUP_RADIUS)
         self.type = powerup_type if powerup_type else random.choice(C.POWERUP_TYPES)
         self.color = C.POWERUP_COLORS[self.type]
@@ -19,7 +30,15 @@ class PowerUp(CircleShape):
         self.lifetime = C.POWERUP_LIFETIME
 
     def update(self, dt):
-        """Update power-up position, rotation, and lifetime."""
+        """
+        Advance the power-up's state by a time step.
+        
+        Parameters:
+            dt (float): Time step in seconds used to update movement, rotation, and lifetime.
+        
+        Description:
+            Moves the power-up by velocity * dt, increases rotation by 90 * dt (degrees), and decreases lifetime by dt. If lifetime is less than or equal to zero, the power-up is removed.
+        """
         self.position += self.velocity * dt
         self.rotation += 90 * dt
 
@@ -28,7 +47,12 @@ class PowerUp(CircleShape):
             self.kill()
 
     def draw(self, screen):
-        """Draw the power-up with pulsing effect based on lifetime."""
+        """
+        Render the power-up at its current position with a lifetime-driven pulsing effect and type-specific decorations.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the power-up on.
+        """
         pulse_scale = 1.0
         if self.lifetime <= 3.0:
             pulse_frequency = 2.0 + (3.0 - self.lifetime) * 2

@@ -11,7 +11,15 @@ logger = logging.getLogger(__name__)
 
 
 def asset_path(name: str) -> str:
-    """Resolve asset path from CWD or packaged assets directory."""
+    """
+    Resolve the filesystem path for an asset, preferring an assets directory in the current working directory.
+    
+    Parameters:
+        name (str): Asset filename or relative asset path (e.g., 'sound.wav' or 'images/icon.png').
+    
+    Returns:
+        str: Filesystem path to the asset. If ./assets/<name> exists it is returned; otherwise the path to assets/<name> relative to this module is returned.
+    """
     cwd_candidate = Path.cwd() / "assets" / name
     if cwd_candidate.exists():
         return str(cwd_candidate)
@@ -55,7 +63,18 @@ class Sounds:
     }
 
     def __init__(self):
-        """Initialize sound system and load sounds."""
+        """
+        Initialize the sound subsystem, load default and themed sound assets, and record initial sound objects for override detection.
+        
+        This sets up the audio mixer, attempts to load core sound effects and background music from the assets directory, creates a SoundThemeManager and applies the default theme, calls load_new_sounds() to load additional effects, and stores a snapshot of initial sound objects in self._initial_sounds for later override detection in tests or runtime.
+        
+        Attributes initialized (not exhaustive):
+            master_volume (float): Master effects volume used when re-enabling sounds.
+            sound_on (bool): Whether sound effects are enabled.
+            theme_manager (SoundThemeManager): Manager used to resolve themed sound files.
+            current_theme (SoundTheme): Currently selected theme (defaults to SoundTheme.DEFAULT).
+            _initial_sounds (dict): Mapping of sound attribute names to their original objects after initialization.
+        """
         pygame.mixer.init(44100, -16, 2, 2048)
         self.shoot = None
         self.explosion = None
@@ -102,7 +121,16 @@ class Sounds:
         )}
 
     def load_new_sounds(self):
-        """Load additional sound effects."""
+        """
+        Load additional sound effect assets and assign them to instance attributes.
+        
+        Attempts to load sound files for laser_shoot, rocket_shoot, boss_spawn, boss_death,
+        powerup, shield_activate, level_up, game_over, player_hit, and boss_attack.
+        Each corresponding attribute is set to a pygame.mixer.Sound instance when the
+        asset is available or to None when loading fails. For the boss_death asset,
+        sensible fallback filenames are tried and a warning is logged if a fallback is
+        used or if no suitable file is found.
+        """
         try:
             self.laser_shoot = pygame.mixer.Sound(asset_path("laser_shoot.wav"))
         except Exception as e:  # pylint: disable=broad-exception-caught
@@ -177,12 +205,18 @@ class Sounds:
             self.explosion.play()
 
     def play_player_death(self):
-        """Play player death sound effect."""
+        """
+        Play the player death sound effect.
+        
+        Plays the configured player death sound if sound playback is enabled and a sound is loaded.
+        """
         if self.sound_on and self.player_death:
             self.player_death.play()
 
     def play_menu_move(self):
-        """Play menu move sound effect."""
+        """
+        Play the menu-move sound effect if sounds are enabled and the sound is available.
+        """
         if self.sound_on and self.menu_move:
             self.menu_move.play()
 
@@ -192,22 +226,36 @@ class Sounds:
             self.menu_select.play()
 
     def play_level_up(self):
-        """Play level up sound effect."""
+        """
+        Play the level-up sound effect when sound is enabled and a level-up sound is loaded.
+        
+        Does nothing if sound playback is disabled or the level-up sound is not available.
+        """
         if self.sound_on and self.level_up:
             self.level_up.play()
 
     def play_powerup(self):
-        """Play powerup sound effect."""
+        """
+        Play the powerup sound effect if sound playback is enabled and the powerup sound is available.
+        """
         if self.sound_on and self.powerup:
             self.powerup.play()
 
     def play_laser_shoot(self):
-        """Play laser shoot sound effect."""
+        """
+        Play the laser shooting sound effect.
+        
+        Plays the `laser_shoot` sound if sounds are enabled and the sound asset is loaded; otherwise does nothing.
+        """
         if self.sound_on and self.laser_shoot:
             self.laser_shoot.play()
 
     def play_rocket_shoot(self):
-        """Play rocket shoot sound effect."""
+        """
+        Play the rocket shoot sound effect if sounds are enabled and the sound is loaded.
+        
+        If sound playback is disabled or the rocket shoot sound is not available, this does nothing.
+        """
         if self.sound_on and self.rocket_shoot:
             self.rocket_shoot.play()
 
@@ -217,41 +265,63 @@ class Sounds:
             self.boss_spawn.play()
 
     def play_boss_death(self):
-        """Play boss death sound effect."""
+        """
+        Play the boss death sound effect.
+        
+        Plays the configured boss death sound if sound playback is enabled and the sound has been loaded; otherwise does nothing.
+        """
         if self.sound_on and self.boss_death:
             self.boss_death.play()
 
     def play_shield_activate(self):
-        """Play shield activate sound effect."""
+        """
+        Play the shield activation sound when sound is enabled and the shield activation sound is loaded.
+        
+        Does nothing if sounds are disabled or the shield activation sound is unavailable.
+        """
         if self.sound_on and self.shield_activate:
             self.shield_activate.play()
 
     def play_achievement(self):
-        """Play achievement sound effect."""
+        """
+        Play the achievement (level-up) sound if available.
+        
+        If sound playback is enabled and a level-up sound is loaded, plays that sound. Otherwise prints a diagnostic message indicating the Level-Up sound is missing.
+        """
         if self.sound_on and self.level_up:
             self.level_up.play()
         else:
             print("Achievement sound not available (Level-Up sound missing)")
 
     def play_game_over(self):
-        """Play game over sound effect."""
+        """
+        Play the "game over" sound effect if sounds are enabled and the sound is loaded.
+        
+        If the sound is unavailable or sound playback is disabled, a diagnostic message is printed.
+        """
         if self.sound_on and hasattr(self, "game_over") and self.game_over:
             self.game_over.play()
         else:
             print("Game Over sound not available or disabled")
 
     def set_music_volume(self, slider_value):
-        """Set music volume using the exponential curve.
-
-        0.5 (50%) = normal volume (1.0x).
-        Below 0.5 = quieter, above 0.5 = louder.
+        """
+        Adjust background music volume according to a perceptual exponential curve.
+        
+        Parameters:
+            slider_value (float): Desired volume in the range 0.0–1.0; values outside this range are clamped.
         """
         slider_value = max(0.0, min(1.0, slider_value))
         curve_volume = apply_volume_curve(slider_value)
         pygame.mixer.music.set_volume(curve_volume)
 
     def toggle_music(self, enabled):
-        """Toggle background music on/off."""
+        """
+        Enable or disable background music playback.
+        
+        Parameters:
+            enabled (bool): True to start or resume background music; False to stop playback and mute music.
+        """
         try:
             if enabled:
                 pygame.mixer.music.set_volume(0.6)
@@ -269,7 +339,12 @@ class Sounds:
             print(f"Error toggling music: {e}")
 
     def toggle_sound(self, enabled):
-        """Toggle sound on/off. Keep master volume unchanged."""
+        """
+        Enable or disable all sound effects while preserving the configured master volume.
+        
+        Parameters:
+            enabled (bool): If True, reapply the current master volume to all sound effects; if False, mute known sound effect objects.
+        """
         self.sound_on = enabled
         # Re-apply current master_volume to all sounds
         if enabled:
@@ -290,7 +365,11 @@ class Sounds:
                         sound.set_volume(0.0)
 
     def play_boss_music(self):
-        """Play boss music."""
+        """
+        Start looping the boss background music if the audio mixer is initialized.
+        
+        If the mixer is initialized, loads the "boss_music.mp3" asset, sets its volume to 0.6, and begins playback in a repeating loop. Any errors during loading or playback are caught and result in an error message being printed.
+        """
         try:
             if pygame.mixer.get_init() is not None:
                 pygame.mixer.music.load(asset_path("boss_music.mp3"))
@@ -313,7 +392,11 @@ class Sounds:
             print("Extra Life sound not available or disabled")
 
     def play_enemy_shoot(self):
-        """Play enemy shoot sound effect."""
+        """
+        Play the enemy's shooting sound using the most appropriate available sound.
+        
+        If sounds are enabled, prefer an explicitly replaced (post-initialization) `boss_attack` sound, then an explicitly replaced `shoot` sound. If no explicit overrides are present, attempt to play `shoot`, falling back to `boss_attack`. Failures to play a sound (e.g., audio errors) are ignored; nothing happens if sounds are disabled or no suitable sound is available.
+        """
         if self.sound_on:
             # If the test or caller explicitly replaced `boss_attack` or
             # `shoot` after initialization, prefer the explicitly-set
@@ -350,7 +433,11 @@ class Sounds:
                     pass
 
     def play_player_hit(self):
-        """Play player hit sound effect."""
+        """
+        Play the player's hit sound effect.
+        
+        If sounds are enabled and `player_hit` is loaded, play it. If `player_hit` is not available but `explosion` is loaded, play `explosion` as a fallback. No effect when sounds are disabled.
+        """
         if self.sound_on and hasattr(self, "player_hit") and self.player_hit:
             self.player_hit.play()
             logger.debug("Player Hit Sound played")
@@ -360,7 +447,14 @@ class Sounds:
                 self.explosion.play()
 
     def set_effects_volume(self, volume):
-        """Set master volume for all sound effects (linear 0.0-1.0)."""
+        """
+        Set the master volume for all sound effects.
+        
+        The provided volume is clamped to the range 0.0–1.0, stored on self.master_volume, and applied to any sound attributes currently present on the instance (only attributes that exist and are not None will have their volume updated).
+        
+        Parameters:
+            volume (float): Desired master volume; values below 0.0 are treated as 0.0 and values above 1.0 as 1.0.
+        """
         slider_value = max(0.0, min(1.0, volume))
         self.master_volume = slider_value
 
@@ -407,7 +501,11 @@ class Sounds:
             return False
 
     def _reload_all_sounds(self):
-        """Reload all sound effects with current theme"""
+        """
+        Reload all sound effects according to the current sound theme.
+        
+        For each known sound identifier, attempts to obtain the themed file from the theme manager and replace the corresponding instance attribute with a loaded Sound object. Applies the current master_volume to any successfully loaded sounds. If a themed file cannot be loaded, the corresponding attribute is set to None and an error message is printed.
+        """
         # Get themed sound files
         sound_mappings = {
             'shoot': 'shoot',

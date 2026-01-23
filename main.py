@@ -109,6 +109,15 @@ def setup_logging(args):
 
 def main(args=None):
 
+    """
+    Run the Ajitroids game: initialize subsystems, enter the main event/update/render loop, and manage game state.
+    
+    Parameters:
+        args (argparse.Namespace | None): Optional pre-parsed command-line arguments returned by parse_arguments(). If None, arguments are parsed inside the function.
+    
+    Returns:
+        None: Returns to the caller when the game loop ends (for example, on quit).
+    """
     if args is None:
         args = parse_arguments()
 
@@ -1512,7 +1521,14 @@ def toggle_fullscreen():
 
 
 def quick_restart_game():
-    """Quickly restart the game without going through menus."""
+    """
+    Reset the running game to its initial playing state and begin a new session immediately.
+    
+    This clears active game objects (except the player), resets score, lives, level, timers, boss and statistic trackers, restarts session tracking, stops and attempts to save any ongoing replay recording, begins a new replay recording for the selected ship and difficulty, respawns the player, and spawns the initial set of asteroids.
+    
+    Returns:
+        str: The new high-level game state, `"playing"`.
+    """
     global score, lives, level, last_spawn_time, spawn_interval, current_enemy_ships
     global level_up_timer, level_up_text, boss_active, boss_defeated_timer, boss_defeated_message
     global powerups_collected, asteroids_destroyed, shields_used, triple_shots_used, speed_boosts_used

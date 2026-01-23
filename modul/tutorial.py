@@ -35,7 +35,15 @@ class Tutorial:
     """Manages tutorial pages and navigation."""
 
     def should_go_back(self, event):
-        """Return True if the given event should trigger going back from the tutorial."""
+        """
+        Determine whether a key event should navigate back from the tutorial.
+        
+        Parameters:
+            event: A pygame key event object whose `key` attribute will be compared.
+        
+        Returns:
+            `True` if the event's key matches the configured pause or shoot action keycodes, the Escape key, or the Space key; `False` otherwise.
+        """
         pause_key = input_utils.get_action_keycode("pause")
         shoot_key = input_utils.get_action_keycode("shoot")
         return (
@@ -46,7 +54,16 @@ class Tutorial:
         )
 
     def __init__(self):
-        """Initialize tutorial with pages."""
+        """
+        Initialize Tutorial state, localized pages, rendering fonts, and an optional starfield.
+        
+        Sets up:
+        - `pages`: list of tutorial pages with localized `title` and `content` entries (uses the module-level `gettext`).
+        - `current_page`: index of the currently visible page (starts at 0).
+        - `target_page`, `transitioning`, `transition_timer`, `transition_duration`: values controlling page transition animations.
+        - `font_title`, `font_content`, `font_navigation`: pygame Font objects used for rendering.
+        - `starfield`: instance of `MenuStarfield(num_stars=80)` when available; otherwise `None` (unavailable or failing instantiation is handled by setting `starfield` to `None`).
+        """
         # initialize attributes created later to avoid W0201
         self.target_page = 0
         # Use module-level `gettext` bound at import time
@@ -175,7 +192,11 @@ class Tutorial:
                 print("Could not import starfield")
 
     def next_page(self):
-        """Advance to the next tutorial page, starting transition animation."""
+        """
+        Start a transition to the next tutorial page.
+        
+        If already on the last page, do nothing.
+        """
         if self.current_page < len(self.pages) - 1:
             self.start_transition(self.current_page + 1)
 
@@ -191,7 +212,16 @@ class Tutorial:
         self.transition_timer = 0
 
     def update(self, dt, events):
-        """Process input events and update transition state for the tutorial."""
+        """
+        Advance the tutorial state, update animations, and handle navigation input events.
+        
+        Parameters:
+            dt (float): Time elapsed since the last update, in seconds.
+            events (iterable): An iterable of pygame events to process.
+        
+        Returns:
+            str or None: `"back"` if a back-navigation event was detected, `None` otherwise.
+        """
         if hasattr(self, "starfield") and self.starfield:
             self.starfield.update(dt)
 
@@ -307,7 +337,18 @@ class Tutorial:
         pygame.draw.rect(screen, (100, 200, 255), (progress_x, progress_y, progress_fill_width, progress_height))
 
     def draw_colored_line(self, screen, line, x, y):
-        """Render a colored title/content line used in tutorial pages."""
+        """
+        Render a single tutorial line with colorized name/label and centered layout.
+        
+        Parameters:
+        	screen: Pygame surface to draw onto.
+        	line (str): Text to render. Supports three formats:
+        		- "[TAG]Description" — renders the bracketed TAG in a color mapped to weapon/difficulty tags (e.g. [SHIELD], [LASER], [ROCKET], [SHOTGUN], [3-SHOT], [SPEED], [EASY], [NORMAL], [HARD]) and the remaining description in white.
+        		- "Name: Description" — renders the "Name:" portion colored based on normalized weapon keywords (e.g. STANDARD, LASER, ROCKET/RAKET, SHOTGUN/SCHROT) and the description in white.
+        		- Any other string — renders the full line in white centered at the given coordinates.
+        	x (int): Horizontal center position for the rendered line.
+        	y (int): Vertical position for the rendered line.
+        """
         if line.startswith("[") and "]" in line:
             bracket_end = line.find("]") + 1
             name_part = line[:bracket_end]

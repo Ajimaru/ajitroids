@@ -8,7 +8,15 @@ try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
     def gettext(key):
-        """Fallback gettext used in tests when i18n is not available."""
+        """
+        Return the translation key unchanged when internationalization is unavailable.
+        
+        Parameters:
+            key (str): The translation key to use in place of a localized string.
+        
+        Returns:
+            str: The same `key` value, unmodified.
+        """
         return key
 
 try:
@@ -27,7 +35,13 @@ class StatsDashboard:
     """Display detailed session statistics with visual elements."""
 
     def __init__(self, session_stats):
-        """Initialize the stats dashboard with session stats."""
+        """
+        Create a StatsDashboard bound to the provided session statistics.
+        
+        Parameters:
+            session_stats: An object providing session statistics used for rendering. Expected to implement
+                get_summary() -> dict and format_time(seconds: int) -> str.
+        """
         self.session_stats = session_stats
         self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
         self.section_font = pygame.font.Font(None, 40)
@@ -60,7 +74,14 @@ class StatsDashboard:
         return None
 
     def draw(self, screen):
-        """Draw the stats dashboard."""
+        """
+        Render the full stats dashboard onto the provided screen surface.
+        
+        Renders a semi-transparent background, centered title, left column of game statistics, right column of combat statistics, accuracy and performance progress bars, formatted session duration, and footer instructions.
+        
+        Parameters:
+            screen (pygame.Surface): The target surface to draw the dashboard on.
+        """
         # Semi-transparent background
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
@@ -130,13 +151,31 @@ class StatsDashboard:
         screen.blit(footer_surf, footer_rect)
 
     def _draw_section(self, screen, title, x, y):
-        """Draw a section header."""
+        """
+        Render a section header centered at the given coordinates.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the header onto.
+            title (str): Text to display as the section header.
+            x (int | float): X-coordinate of the header's center.
+            y (int | float): Y-coordinate of the header's center.
+        """
         section_surf = self.section_font.render(title, True, (100, 200, 255))
         section_rect = section_surf.get_rect(center=(x, y))
         screen.blit(section_surf, section_rect)
 
     def _draw_stat_line(self, screen, label, value, x, y):
-        """Draw a single stat line at the specified column position."""
+        """
+        Render a labeled statistic line with the label right-aligned and the value left-aligned around a vertical column.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw on.
+            label (str): Text label for the statistic (colon is added automatically).
+            value (Any): Value to display; converted to string for rendering.
+            x (int): X coordinate of the central column used for aligning label and value.
+            y (int): Y coordinate of the line's vertical center.
+        
+        """
         label_surf = self.text_font.render(f"{label}:", True, (200, 200, 200))
         label_rect = label_surf.get_rect(midright=(x - 20, y))
         screen.blit(label_surf, label_rect)

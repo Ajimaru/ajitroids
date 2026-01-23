@@ -40,7 +40,17 @@ class DynamicMusicSystem:
     """Manages dynamic music that changes based on game intensity"""
 
     def __init__(self):
-        """Initialize dynamic music system."""
+        """
+        Set up the dynamic music system and initialize its default state.
+        
+        Initializes:
+        - current_intensity: starts at CALM.
+        - music_tracks: mapping of IntensityLevel to filenames (CALM/NORMAL/INTENSE use the same background file; BOSS uses a distinct boss track).
+        - transition_cooldown: remaining cooldown before another transition is allowed (seconds).
+        - min_transition_time: minimum seconds required between transitions.
+        - last_transition: timestamp of the last transition (seconds).
+        - enabled: whether dynamic music is active.
+        """
         self.current_intensity = IntensityLevel.CALM
         # Music tracks for different intensity levels
         # Note: Currently using the same track for CALM/NORMAL/INTENSE as only one background
@@ -127,7 +137,11 @@ class VoiceAnnouncement:
     """Manages voice announcements for game events"""
 
     def __init__(self):
-        """Initialize voice announcement system."""
+        """
+        Set up the voice announcement subsystem and its default configuration.
+        
+        Initializes announcement queues, timers, per-event enable flags, announcement texts, and the announcement_sounds mapping. If a TTS driver is available, attempts to initialize it and sets `tts_initialized` to `True` on success (otherwise `False`).
+        """
         self.announcement_queue: List[Tuple[str, float]] = []  # (text, priority)
         self.current_announcement: Optional[str] = None
         self.announcement_timer = 0.0
@@ -312,7 +326,11 @@ class SoundThemeManager:
     """Manages multiple sound themes (retro, sci-fi, orchestral)"""
 
     def __init__(self):
-        """Initialize sound theme manager."""
+        """
+        Initialize the SoundThemeManager.
+        
+        Sets the current theme to SoundTheme.DEFAULT and populates `theme_mappings` with per-theme dictionaries that map semantic sound identifiers (e.g., "shoot", "explosion", "background_music", "boss_music") to their corresponding filenames for each supported SoundTheme.
+        """
         self.current_theme = SoundTheme.DEFAULT
 
         # Define sound mappings for each theme
@@ -432,7 +450,15 @@ class AudioEnhancementManager:
     """Main manager for all audio enhancements"""
 
     def __init__(self):
-        """Initialize the audio enhancement manager with subsystems."""
+        """
+        Create an AudioEnhancementManager and initialize its subsystems.
+        
+        Attributes:
+            dynamic_music (DynamicMusicSystem): Manages background music transitions based on game intensity.
+            voice_announcements (VoiceAnnouncement): Manages queued and immediate voice/sound announcements.
+            theme_manager (SoundThemeManager): Provides theme-based sound mappings and theme selection.
+            low_health_announced (bool): Tracks whether a low-health announcement has been issued.
+        """
         self.dynamic_music = DynamicMusicSystem()
         self.voice_announcements = VoiceAnnouncement()
         self.theme_manager = SoundThemeManager()

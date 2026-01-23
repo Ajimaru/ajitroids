@@ -6,7 +6,26 @@ class SessionStats:
     """Track statistics for the current game session."""
 
     def __init__(self):
-        """Initialize session statistics with default values."""
+        """
+        Initialize SessionStats and set all session and per-game statistic attributes to default values.
+        
+        Sets timestamp for session start and initializes numeric counters used to track scores, counts of destroyed objects, collected powerups, shots, levels, lives, and playtime. Calls reset() to initialize per-game counters and increments ready state for a new game.
+        
+        Attributes initialized:
+            game_start_time: Start time of the current game (0 until a game is started).
+            session_start_time: Time when the session object was created (seconds since epoch).
+            games_played: Number of games played in this session.
+            total_score: Cumulative score across all games in the session.
+            highest_score: Highest single-game score recorded.
+            highest_level: Highest level reached in any game.
+            total_playtime: Cumulative playtime across all games (seconds).
+            total_asteroids_destroyed: Total asteroids destroyed.
+            total_enemies_destroyed: Total enemies destroyed.
+            total_bosses_defeated: Total bosses defeated.
+            total_powerups_collected: Total powerups collected.
+            total_shots_fired: Total shots fired.
+            total_lives_lost: Total lives lost.
+        """
         # Define all attributes here to satisfy pylint (W0201)
         self.game_start_time = 0
         self.total_score = 0
@@ -24,7 +43,11 @@ class SessionStats:
         self.reset()
 
     def reset(self):
-        """Reset statistics for a new game."""
+        """
+        Initialize per-game statistics for a new game and record the game start time.
+        
+        Resets per-game counters to their initial values and sets `game_start_time` to the current time. The following attributes are reset: `total_score`, `highest_score`, `games_played`, `total_asteroids_destroyed`, `total_enemies_destroyed`, `total_bosses_defeated`, `total_powerups_collected`, `total_shots_fired`, `highest_level`, `total_lives_lost`, and `total_playtime`.
+        """
         self.game_start_time = time.time()
         self.total_score = 0
         self.highest_score = 0
@@ -39,7 +62,11 @@ class SessionStats:
         self.total_playtime = 0.0
     
     def start_game(self):
-        """Mark the start of a new game."""
+        """
+        Begin tracking a new game session.
+        
+        Record the current time as the game's start time and increment the counter of games played.
+        """
         self.game_start_time = time.time()
         self.games_played += 1
 

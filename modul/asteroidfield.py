@@ -34,7 +34,16 @@ class AsteroidField:
         self.spawn_interval = 5.0
 
     def spawn(self, radius, position, velocity):
-        """Spawn an asteroid at the given position with velocity."""
+        """
+        Create and add a new asteroid at the given position and set its initial velocity.
+        
+        Chooses an asteroid type according to C.ASTEROID_TYPE_WEIGHTS and constructs an Asteroid. If the class attribute `Asteroid.containers` exists, its contents are passed to the Asteroid constructor before the asteroid_type keyword.
+        
+        Parameters:
+            radius (float): Radius of the spawned asteroid.
+            position (pygame.Vector2): Spawn coordinates; x and y are used as the asteroid's position.
+            velocity (pygame.Vector2): Initial velocity vector assigned to the asteroid.
+        """
         asteroid_type = random.choices(
             list(C.ASTEROID_TYPE_WEIGHTS.keys()),
             weights=list(C.ASTEROID_TYPE_WEIGHTS.values())
@@ -63,7 +72,11 @@ class AsteroidField:
             self.spawn_timer = 0
 
     def spawn_random(self):
-        """Spawn a random asteroid from screen edges."""
+        """
+        Spawn a single asteroid at a random screen edge with randomized position and velocity.
+        
+        Selects one of the four screen edges, picks a position along that edge, computes a velocity by rotating the edge's direction by a random angle between -45 and 45 degrees and scaling it to a random speed between 30 and 70, then spawns an asteroid with C.ASTEROID_MAX_RADIUS at the computed position.
+        """
         edge_index = random.randint(0, 3)
 
         rand_pos = random.random()

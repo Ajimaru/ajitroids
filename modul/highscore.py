@@ -17,6 +17,14 @@ class HighscoreManager:
     """Manage loading, saving and querying highscores."""
 
     def _generate_default_highscores(self):
+        """
+        Generate the default highscore list used when no saved highscores are available.
+        
+        Each entry is a dict with keys "name" (a randomly generated string of length C.HIGHSCORE_NAME_LENGTH using C.HIGHSCORE_ALLOWED_CHARS) and "score" (an integer). The list contains C.HIGHSCORE_MAX_ENTRIES entries with scores ordered from highest to lowest.
+        
+        Returns:
+            list[dict]: A list of highscore entry dictionaries with "name" (str) and "score" (int).
+        """
         return [
             {
                 "name": "".join(random.choice(C.HIGHSCORE_ALLOWED_CHARS) for _ in range(C.HIGHSCORE_NAME_LENGTH)),
@@ -26,12 +34,20 @@ class HighscoreManager:
         ]
 
     def __init__(self):
-        """Initialize highscore manager and load persisted highscores."""
+        """
+        Initialize the HighscoreManager and populate its highscores list.
+        
+        Sets self.highscores to an empty list and attempts to load persisted highscores from disk; if the file is missing or invalid, populates with generated default highscores.
+        """
         self.highscores = []
         self.load_highscores()
 
     def load_highscores(self):
-        """Load highscores from disk or initialize defaults."""
+        """
+        Load highscores into self.highscores from the configured highscores file.
+        
+        If the configured highscores file exists, parse it as JSON and assign the result to self.highscores. If the file does not exist, generate a default highscores list, assign it to self.highscores, and persist it to disk. On file access or JSON parsing errors, generate and assign a default highscores list (the error is printed and not propagated).
+        """
         try:
             if os.path.exists(C.HIGHSCORE_FILE):
                 with open(C.HIGHSCORE_FILE, "r", encoding="utf-8") as f:
@@ -60,7 +76,18 @@ class HighscoreManager:
         return score > self.highscores[-1]["score"]
 
     def add_highscore(self, name, score):
-        """Add a new highscore entry."""
+        """
+        Add a new highscore entry, normalize the provided name, persist the updated list, and return its position.
+        
+        The name is uppercased, truncated to C.HIGHSCORE_NAME_LENGTH, filtered to allowed characters, and padded with "A" to reach the required length. The highscores list is sorted descending by score, trimmed to C.HIGHSCORE_MAX_ENTRIES, and saved to disk.
+        
+        Parameters:
+            name (str): Player name to record.
+            score (int): Score value to record.
+        
+        Returns:
+            int: The zero-based index of the newly added entry in the highscores list if present, `-1` otherwise.
+        """
         name = name.upper()[:C.HIGHSCORE_NAME_LENGTH]
         name = "".join(c for c in name if c in C.HIGHSCORE_ALLOWED_CHARS)
         name = name.ljust(C.HIGHSCORE_NAME_LENGTH, "A")
@@ -79,7 +106,14 @@ class HighscoreManager:
 class HighscoreInput:
     """Handles input for entering highscore name."""
     def __init__(self, score):
-        """Initialize highscore input with score."""
+        """
+        Create a highscore name input state for a given score.
+        
+        Initializes the editable name as a list of "A" characters with length C.HIGHSCORE_NAME_LENGTH, sets the current cursor position to 0, marks the input as not finished, and prepares a font for rendering.
+        
+        Parameters:
+            score (int): The score to display while entering the highscore name.
+        """
         self.score = score
         # Initialize name with configured length so tests and runtime honour
         # the `HIGHSCORE_NAME_LENGTH` constant.
@@ -89,7 +123,21 @@ class HighscoreInput:
         self.font = pygame.font.Font(None, 64)
 
     def update(self, events):
-        """Update input based on events."""
+        """
+        Handle pygame KEYDOWN events to edit the current highscore name and to finish input.
+        
+        Parameters:
+            events (iterable): An iterable of pygame events to process.
+        
+        Behavior:
+            - ENTER/RETURN: mark input done and return the finalized name string.
+            - LEFT/RIGHT/BACKSPACE: move the cursor left/right or backspace one position (bounds-clamped).
+            - UP/DOWN: cycle the character at the current cursor position through C.HIGHSCORE_ALLOWED_CHARS (wrap-around).
+        
+        Returns:
+            str: The finalized name when ENTER/RETURN is pressed.
+            None: If the name entry is not yet finished.
+        """
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
@@ -120,7 +168,16 @@ class HighscoreInput:
         return None
 
     def draw(self, screen):
-        """Draw the highscore input screen."""
+        """
+        Render the highscore name input overlay onto the provided screen.
+        
+        Renders a semi-transparent black overlay, the "new highscore" title, the formatted score,
+        the editable name characters with the currently selected character highlighted, and two
+        hint lines explaining controls.
+        
+        Parameters:
+            screen (pygame.Surface): Target surface to draw the input UI onto.
+        """
         overlay = pygame.Surface((C.SCREEN_WIDTH, C.SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 200))
         screen.blit(overlay, (0, 0))
@@ -176,7 +233,12 @@ class HighscoreInput:
 class HighscoreDisplay:
     """Displays the highscore list."""
     def __init__(self, highscore_manager):
-        """Initialize highscore display."""
+        """
+        Create a highscore display bound to a HighscoreManager and initialize UI state.
+        
+        Parameters:
+            highscore_manager (HighscoreManager): Manager providing highscore data used for rendering and interaction.
+        """
         self.highscore_manager = highscore_manager
         self.font_title = pygame.font.Font(None, 64)
         self.font_entry = pygame.font.Font(None, 36)
@@ -193,7 +255,18 @@ class HighscoreDisplay:
         self.input_cooldown = 0
 
     def update(self, dt, events):
-        """Update fade-in animation and button hover effects."""
+        """
+        Update animation state, handle input cooldown, and process navigation key events.
+        
+        Updates the fade-in alpha for the background and the back button's hover animation, decrements the input cooldown timer, and handles keydown events for SPACE, RETURN, or ESCAPE to trigger a transition.
+        
+        Parameters:
+            dt (float): Time delta in seconds since the last update.
+            events (iterable): Iterable of pygame events to process.
+        
+        Returns:
+            str or None: `"main_menu"` when a navigation key is pressed and accepted (also sets a short input cooldown), `None` otherwise.
+        """
         if self.fade_in:
             self.background_alpha = min(255, self.background_alpha + 255 * dt / 0.5)
             if self.background_alpha >= 200:
@@ -219,7 +292,14 @@ class HighscoreDisplay:
         return None
 
     def draw(self, screen):
-        """Draw the highscore display screen."""
+        """
+        Render the highscores screen and back button onto the provided surface.
+        
+        Draws a translucent background overlay, the localized "highscores" title, the list of highscore entries (rank, name, and score) with special colors for the top three positions, and a centered back button whose color and size interpolate based on its hover animation state.
+        
+        Parameters:
+            screen (pygame.Surface): The target surface to draw the highscores UI on.
+        """
         overlay = pygame.Surface((C.SCREEN_WIDTH, C.SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, self.background_alpha))
         screen.blit(overlay, (0, 0))

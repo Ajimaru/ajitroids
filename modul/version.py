@@ -20,7 +20,12 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - best-effort fal
 
 
 def _fallback_version() -> str:
-    """Return the fallback version string."""
+    """
+    Provide the fallback package version.
+    
+    Returns:
+        str: The fallback version string — the cached generated version if available, otherwise "0.0.0".
+    """
     # Use the module-level cached generated version when present.
     if _generated_version:
         return _generated_version

@@ -783,7 +783,11 @@ class TestDifficultyMenu:
     Unit tests for the DifficultyMenu class, verifying initialization and shortcut assignments.
     """
     def test_difficultymenu_initialization(self):
-        """Test DifficultyMenu initializes"""
+        """
+        Verify DifficultyMenu initializes with the expected title and four menu items.
+        
+        Asserts that the menu title is "DIFFICULTY", that there are exactly four items, and that their texts are "Easy", "Normal", "Hard", and "Back" respectively.
+        """
         class DummySettings:
             """
             A dummy settings class used for testing purposes.

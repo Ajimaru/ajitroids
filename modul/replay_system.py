@@ -76,7 +76,18 @@ class ReplayRecorder:
     """Records game sessions for later playback."""
 
     def __init__(self):
-        """Initialize the replay recorder."""
+        """
+        Create a ReplayRecorder and initialize its internal recording state and defaults.
+        
+        Initializes:
+        - recording: whether recording is active (False).
+        - frames: list to store recorded GameFrame objects.
+        - events: list to store recorded GameEvent objects.
+        - start_time: reference start timestamp for the recording (0).
+        - metadata: dictionary for replay metadata (version, difficulty, etc.).
+        - frame_interval: minimum time between recorded frames (DEFAULT_FRAME_INTERVAL).
+        - last_frame_time: timestamp of the most recently recorded frame (0).
+        """
         self.recording = False
         self.frames: List[GameFrame] = []
         self.events: List[GameEvent] = []
@@ -191,7 +202,25 @@ class ReplayRecorder:
         self.events.append(event)
 
     def save_replay(self, filename: Optional[str] = None) -> str:
-        """Save the replay to a file."""
+        """
+        Save the recorded replay to a file in the "replays" directory.
+        
+        If `filename` is omitted, a timestamped filename `replay_<start_time_ms>.json.gz` is used.
+        The function ensures the replays directory exists, appends `.json.gz` when needed, avoids overwriting
+        by adding a numeric suffix if a file already exists, and writes replay metadata, frames, and events as JSON
+        (uses gzip when the filename ends with `.gz`).
+        
+        Parameters:
+            filename (Optional[str]): Desired filename or path relative to the "replays" directory. May end with
+                `.json` or `.json.gz`. If omitted, a generated timestamped `.json.gz` name is used.
+        
+        Returns:
+            str: The full filepath where the replay was saved.
+        
+        Raises:
+            OSError: If a filesystem error occurs while creating directories or writing the file.
+            Exception: Propagates other unexpected errors encountered during serialization or file I/O.
+        """
         try:
             if filename is None:
                 filename = f"replay_{int(self.start_time * 1000)}.json.gz"
@@ -224,7 +253,14 @@ class ReplayRecorder:
             }
 
             def _json_default(obj):
-                """Convert non-JSON objects to serializable format."""
+                """
+                Serialize non-JSON objects into JSON-friendly representations.
+                
+                If the object has `x` and `y` attributes that can be converted to floats, return a dictionary with those values as floats. Otherwise return the object's string representation.
+                
+                Returns:
+                    dict: `{"x": float, "y": float}` when `x` and `y` are present and convertible to float, otherwise a `str` representation of `obj`.
+                """
                 if hasattr(obj, "x") and hasattr(obj, "y"):
                     try:
                         return {"x": float(obj.x), "y": float(obj.y)}
@@ -255,7 +291,20 @@ class ReplayPlayer:
     """Plays back recorded game sessions."""
 
     def __init__(self):
-        """Initialize the replay player."""
+        """
+        Create a ReplayPlayer with default playback state.
+        
+        Initializes these attributes:
+            playing: bool — whether playback is active.
+            paused: bool — whether playback is paused.
+            frames: List[GameFrame] — loaded frames for playback (initially empty).
+            events: List[GameEvent] — loaded events for playback (initially empty).
+            metadata: dict — replay metadata.
+            current_frame_index: int — index of the current frame.
+            playback_speed: float — playback speed multiplier.
+            start_playback_time: float — reference start time for playback timing.
+            _paused_timestamp: Optional[float] — timestamp captured when paused, or None.
+        """
         self.playing = False
         self.paused = False
         self.frames: List[GameFrame] = []
@@ -269,7 +318,18 @@ class ReplayPlayer:
         self._paused_timestamp: Optional[float] = None
 
     def load_replay(self, filepath: str):
-        """Load a replay from file."""
+        """
+        Load a replay file into the player, replacing any current playback state.
+        
+        Parameters:
+            filepath (str): Path to a replay file (.json or .json.gz).
+        
+        Raises:
+            FileNotFoundError: If the file does not exist.
+            json.JSONDecodeError: If the file is not valid JSON.
+            KeyError: If required top-level fields ('metadata', 'frames', 'events') are missing.
+            Exception: For other I/O or parsing errors encountered while loading.
+        """
         try:
             self.stop_playback()
 
@@ -306,7 +366,11 @@ class ReplayPlayer:
             raise
 
     def start_playback(self):
-        """Start playing the replay."""
+        """
+        Begin playback from the start of the loaded frames.
+        
+        If there are no frames, stops playback and returns. Otherwise sets the player to playing, clears the paused state, resets the current frame index to 0, and records the playback start time.
+        """
         if not self.frames:
             self.stop_playback()
             return
@@ -322,7 +386,11 @@ class ReplayPlayer:
         self.current_frame_index = 0
 
     def toggle_pause(self):
-        """Toggle pause state."""
+        """
+        Toggle the player's paused state.
+        
+        If playback is not active or there are no frames, this is a no-op. When pausing, captures the timestamp of the current frame (or 0.0 if unavailable) so playback can resume from the same point. When resuming, adjusts internal playback timing so playback continues from the captured timestamp at the current speed (treating a speed of 0 as 1.0) and clears the stored paused timestamp.
+        """
         if not self.playing or not self.frames:
             return
 
@@ -347,7 +415,14 @@ class ReplayPlayer:
         self._paused_timestamp = None
 
     def set_speed(self, speed: float):
-        """Set playback speed (0.5x, 1x, 2x, etc.)."""
+        """
+        Set the playback speed and adjust internal timing so the current playback position remains unchanged.
+        
+        When playback is active and not paused, updates the internal start time to preserve the current playback timestamp after changing the speed. Otherwise, only updates the stored speed.
+        
+        Parameters:
+            speed (float): New playback speed multiplier (e.g., 0.5 for half-speed, 2.0 for double speed).
+        """
         if self.playing and not self.paused:
             # Adjust start time for new speed
             elapsed = (
@@ -438,7 +513,15 @@ class ReplayManager:
         self.replays_dir = "replays"
 
     def _validate_filepath(self, filepath: str) -> bool:
-        """Validate that filepath is within the replays directory."""
+        """
+        Determine whether the given filepath is located inside the replay directory.
+        
+        Parameters:
+            filepath (str): Path to validate; may be absolute or relative.
+        
+        Returns:
+            bool: True if the resolved filepath is inside self.replays_dir, False otherwise (returns False on error).
+        """
         try:
             replays_abs = os.path.realpath(self.replays_dir)
             file_abs = os.path.realpath(filepath)
@@ -448,7 +531,17 @@ class ReplayManager:
             return False
 
     def list_replays(self) -> List[Dict[str, Any]]:
-        """List all available replay files."""
+        """
+        Return a list of available replay files in the replays directory with their basic metadata.
+        
+        Files that are not valid JSON or are missing required fields are skipped; errors reading individual files are logged but do not stop listing.
+        
+        Returns:
+            List[Dict[str, Any]]: A list of dictionaries sorted by `metadata['start_time']` descending. Each dictionary contains:
+                - 'filename' (str): The file name.
+                - 'filepath' (str): The full path to the file.
+                - 'metadata' (dict): The parsed metadata object from the replay file (empty dict if absent).
+        """
         if not os.path.exists(self.replays_dir):
             return []
 
@@ -491,7 +584,17 @@ class ReplayManager:
         return replays
 
     def delete_replay(self, filepath: str):
-        """Delete a replay file."""
+        """
+        Delete the replay file at the given filepath if it resides inside the replays directory.
+        
+        If the filepath is outside the configured replays directory, the function does nothing.
+        If the file does not exist, the function does nothing. If the file exists and is valid,
+        it is removed; errors during removal are caught and logged.
+        
+        Parameters:
+            filepath (str): Path to the replay file to delete. Only paths inside the manager's
+                replays directory will be acted upon.
+        """
         if not self._validate_filepath(filepath):
             logger.warning(
                 "Attempted to delete file outside replays directory: %s",

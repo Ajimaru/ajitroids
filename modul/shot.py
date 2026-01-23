@@ -12,16 +12,49 @@ class Shot(CircleShape):
 
     @classmethod
     def set_asteroids(cls, asteroids):
-        """Set asteroids group for collision."""
+        """
+        Configure the class-level asteroid target group used for homing and collision checks.
+        
+        Parameters:
+            asteroids: A container (e.g., sprite group or iterable) of asteroid objects that Shot instances will consider when acquiring targets.
+        """
         cls.asteroids_group = asteroids
 
     @classmethod
     def set_enemy_ships(cls, enemy_ships):
-        """Set enemy ships group for collision."""
+        """
+        Configure the class-level group of enemy ships used as potential homing targets.
+        
+        Parameters:
+            enemy_ships (iterable): A collection (e.g., a sprite Group or list) of enemy ship objects that will be used by Shot instances for target acquisition.
+        """
         cls.enemy_ships_group = enemy_ships
 
     def __init__(self, x, y, shot_type=C.WEAPON_STANDARD):
-        """Initialize shot with position and type."""
+        """
+        Create a Shot positioned at (x, y) configured for the given weapon type.
+        
+        Parameters:
+            x (number): X coordinate of the shot's initial position.
+            y (number): Y coordinate of the shot's initial position.
+            shot_type (int): Weapon type constant that selects size, damage, lifetime,
+                penetration, and homing behavior (defaults to C.WEAPON_STANDARD).
+        
+        Description:
+            Initializes common shot attributes (velocity, lifetime, damage, target,
+            homing_power, color) and adjusts properties according to `shot_type`:
+              - WEAPON_LASER: smaller radius, increased damage, penetrating.
+              - WEAPON_MISSILE: larger radius, higher damage, non-penetrating,
+                enables homing (sets `homing_power` and `max_turn_rate`) and uses
+                `target` for seeking.
+              - WEAPON_SHOTGUN: small radius, standard damage, non-penetrating,
+                shorter lifetime.
+        
+        Attributes set:
+            velocity (pygame.Vector2), radius (int), lifetime (float), damage (int),
+            penetrating (bool, if applicable), target (object or None),
+            homing_power (int), max_turn_rate (float, for missiles), color (tuple).
+        """
         super().__init__(x, y, 3)
         self.velocity = pygame.Vector2(0, 0)
         self.shot_type = shot_type
@@ -52,7 +85,14 @@ class Shot(CircleShape):
         self.color = C.WEAPON_COLORS[shot_type]
 
     def update(self, dt):
-        """Update shot position and lifetime."""
+        """
+        Advance the shot's state by the given time step.
+        
+        If this shot is a homing missile with homing power and target groups set, attempt to seek a target. Then move the shot by its velocity scaled by dt, decrement its lifetime, and destroy the shot when lifetime is less than or equal to zero.
+        
+        Parameters:
+            dt (float): Time step in seconds used to advance movement and lifetime.
+        """
         if self.shot_type == C.WEAPON_MISSILE and self.homing_power > 0 and (Shot.asteroids_group or Shot.enemy_ships_group):
             self.seek_target(dt)
 
@@ -63,7 +103,17 @@ class Shot(CircleShape):
             self.kill()
 
     def draw(self, screen):
-        """Draw shot on screen."""
+        """
+        Render the shot on the given surface using appearance determined by the shot type.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the shot onto.
+        
+        Description:
+            - Laser: draws a short line in the shot color along the velocity direction; if velocity is zero, defaults direction to the right.
+            - Missile: draws a filled circle at the shot position and a short tail opposite the velocity; if velocity is zero, uses a downward tail direction.
+            - Other shot types: draws a filled circle at the shot position.
+        """
         if self.shot_type == C.WEAPON_LASER:
             # Guard against zero-length velocity before normalizing
             if self.velocity.length() > 0:
@@ -92,7 +142,14 @@ class Shot(CircleShape):
             pygame.draw.circle(screen, self.color, pos_tuple, self.radius)
 
     def seek_target(self, dt):
-        """Seek nearest target for homing."""
+        """
+        Selects a nearest live target from configured target groups and steers the shot toward it.
+        
+        If the shot has no current live target, searches Shot.asteroids_group and Shot.enemy_ships_group for the closest living object and sets it as self.target. If a live target is present, adjusts self.velocity to turn toward the target by interpolating between the current direction and the direction to the target; the interpolation fraction is capped by self.max_turn_rate * dt (maximum 1.0), preserving the shot's speed. If no target groups are configured or no live targets exist, the method does nothing.
+        
+        Parameters:
+            dt (float): Time step (in seconds) used to scale the maximum turning amount.
+        """
         if not Shot.asteroids_group and not Shot.enemy_ships_group:
             return
 

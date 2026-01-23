@@ -32,7 +32,12 @@ class ReplayListMenu:
     """Menu for listing and selecting replays."""
 
     def __init__(self, replay_manager: ReplayManager):
-        """Initialize replay list menu."""
+        """
+        Create a ReplayListMenu bound to the given ReplayManager and initialize UI state and fonts.
+        
+        Parameters:
+            replay_manager (ReplayManager): Manager used to list, delete, and load replay files.
+        """
         self.replay_manager = replay_manager
         self.title_font = pygame.font.Font(None, MENU_TITLE_FONT_SIZE)
         self.text_font = pygame.font.Font(None, MENU_ITEM_FONT_SIZE)
@@ -183,7 +188,12 @@ class ReplayViewer:
     """Viewer for playing back replays."""
 
     def __init__(self, replay_player: ReplayPlayer):
-        """Initialize replay viewer."""
+        """
+        Create a ReplayViewer bound to a ReplayPlayer for controlling and displaying replay playback.
+        
+        Parameters:
+            replay_player (ReplayPlayer): ReplayPlayer instance used to control playback and provide replay state for rendering.
+        """
         self.replay_player = replay_player
         self.title_font = pygame.font.Font(None, 48)
         self.text_font = pygame.font.Font(None, 32)
@@ -215,7 +225,14 @@ class ReplayViewer:
         return None
 
     def draw_hud(self, screen):
-        """Draw replay HUD with controls and info."""
+        """
+        Draw the replay HUD overlay showing playback status, progress, timestamps, playback speed, controls hint, and a replay label.
+        
+        Renders a semi-transparent bar at the bottom of the screen containing the playback status text, a horizontal progress bar, current and total time, a playback speed indicator (with a defensive fallback if the localized template does not accept the `speed` placeholder), and a centered controls hint; also draws a replay label in the top-right corner.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to draw the HUD onto.
+        """
         # use module-level gettext
         # Draw control bar at bottom
         bar_height = 80

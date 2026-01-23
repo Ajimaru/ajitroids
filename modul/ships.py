@@ -8,14 +8,26 @@ try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
     def gettext(key):
-        """Fallback translation function returning the key when unavailable."""
+        """
+        Return the localized string for the given translation key or the key itself if no translation is available.
+        
+        Parameters:
+            key (str): Translation lookup key.
+        
+        Returns:
+            str: Localized string corresponding to `key`, or `key` unchanged when no translation exists.
+        """
         return key
 
 
 class ShipManager:
     """Manage ship definitions, persistence and unlocks."""
     def __init__(self):
-        """Initialize ship manager and load unlocked ships from disk."""
+        """
+        Initialize the ShipManager: load persisted unlocked ships and set up ship definitions and current selection.
+        
+        Sets self.ships_file to "ships.json", loads persisted unlocked ship IDs into self.unlocked_ships, constructs self.ships with each ship's metadata (initializing each ship's "unlocked" flag from self.unlocked_ships; "standard" is always unlocked), and sets self.current_ship to "standard".
+        """
         self.ships_file = "ships.json"
         self.unlocked_ships = self.load_unlocked_ships()
 
@@ -102,7 +114,17 @@ class ShipManager:
         return False
 
     def unlock_ship_with_notification(self, ship_id, notification_callback=None):
-        """Unlock a ship and call the optional notification callback."""
+        """
+        Unlock the ship identified by ship_id and optionally send a user-facing notification via a callback.
+        
+        Parameters:
+            ship_id (str): Identifier of the ship to unlock.
+            notification_callback (callable, optional): If provided and the ship is unlocked, called with two string arguments
+                (short_message, detailed_message) describing the unlock. Example: (f" {ship_name} unlocked!", "New ship available in ship selection!")
+        
+        Returns:
+            bool: `True` if the ship was unlocked by this call, `False` otherwise.
+        """
         if self.unlock_ship(ship_id):
             ship_name = self.ships[ship_id]["name"]
             print(f"🚀 {ship_name} unlocked!")
@@ -112,9 +134,18 @@ class ShipManager:
         return False
 
     def check_unlock_conditions(self, level, difficulty, notification_callback=None):
-        """Check level/difficulty unlock conditions and notify if unlocked.
-
-        Uses unlock_ship_with_notification to avoid code duplication.
+        """
+        Unlock ships when the player reaches the required level for the given difficulty and notify if an unlock occurs.
+        
+        If `level` is at least 50, maps `difficulty` to a specific ship ("easy"→"speedster", "normal"→"tank", "hard"→"destroyer") and attempts to unlock that ship if it is not already unlocked. When an unlock occurs and `notification_callback` is provided, the callback is invoked with a pair of strings (title, message).
+        
+        Parameters:
+            level (int): The player's current level.
+            difficulty (str): Difficulty identifier; expected values are "easy", "normal", or "hard".
+            notification_callback (callable, optional): Function called on successful unlock with signature callback(title: str, message: str).
+        
+        Returns:
+            bool: `true` if a ship was unlocked by this call, `false` otherwise.
         """
         unlocked_any = False
         if level >= 50:
@@ -131,7 +162,12 @@ class ShipManager:
         return unlocked_any
 
     def get_ship_data(self, ship_id):
-        """Return the ship data dictionary for `ship_id` or the standard ship."""
+        """
+        Get the ship data dictionary for the given ship_id, falling back to the standard ship if not found.
+        
+        Returns:
+            dict: The ship data for ship_id, or the "standard" ship data when ship_id is not defined.
+        """
         return self.ships.get(ship_id, self.ships["standard"])
 
     def get_available_ships(self):
@@ -158,7 +194,14 @@ class ShipManager:
         return ship_id in self.ships and self.ships[ship_id]["unlocked"]
 
     def check_all_ships_unlocked(self, achievement_system):
-        """Trigger achievement when all ships are unlocked."""
+        """
+        Unlock the "Fleet Commander" achievement when every non-default ship has been unlocked.
+        
+        Checks all ships defined in self.ships except the default "standard" and, if each non-default ship ID is present in self.unlocked_ships, invokes achievement_system.unlock("Fleet Commander").
+        
+        Parameters:
+            achievement_system: An object exposing an unlock(achievement_id: str) method; called with "Fleet Commander" when the condition is met.
+        """
         # Consider the default 'standard' ship which is always available.
         # Trigger the achievement when every non-default ship is present in
         # the unlocked_ships list.
@@ -286,7 +329,19 @@ class ShipRenderer:
 
     @staticmethod
     def draw_question_mark(screen, x, y, scale, color):
-        """Draw a question mark symbol for unknown ship types."""
+        """
+        Render a localized question-mark glyph (or "?" fallback) centered at (x, y) to represent unknown ship types.
+        
+        Parameters:
+            screen (pygame.Surface): Destination surface to draw onto.
+            x (int|float): X coordinate of the glyph center.
+            y (int|float): Y coordinate of the glyph center.
+            scale (float): Scale factor multiplied by the base font size (36) to compute the rendered size.
+            color (tuple[int, int, int]): RGB color used to render the glyph.
+        
+        Notes:
+            Uses `gettext("question_mark")` and falls back to "?" if the translation is missing or equals the key.
+        """
         font = pygame.font.Font(None, int(36 * scale))
         symbol = gettext("question_mark")
         # Treat the untranslated key as missing (gettext often returns the key)

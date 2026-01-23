@@ -8,7 +8,9 @@ from modul.menu import Menu
 
 @pytest.fixture(autouse=True)
 def init_pygame(monkeypatch):
-    """Initialize pygame for each test (headless-safe)"""
+    """
+    Prepare pygame for headless tests by setting SDL video/audio drivers to "dummy", initializing pygame and its font module, and ensuring pygame.quit() is called after the test.
+    """
     monkeypatch.setenv("SDL_VIDEODRIVER", "dummy")
     monkeypatch.setenv("SDL_AUDIODRIVER", "dummy")
     pygame.init()

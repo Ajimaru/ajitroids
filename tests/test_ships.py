@@ -116,6 +116,13 @@ class TestShipManager:
         called = []
 
         def callback(title, message):
+            """
+            Append the given title and message as a tuple to the outer `called` list.
+            
+            Parameters:
+                title (str): The title to record.
+                message (str): The message to record.
+            """
             called.append((title, message))
 
         result = manager.unlock_ship_with_notification("destroyer", callback)

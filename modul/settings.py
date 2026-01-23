@@ -15,7 +15,11 @@ current_settings = None
 class Settings:
     """Manages user settings with persistence to JSON file."""
     def __init__(self):
-        """Initialize settings with default values."""
+        """
+        Initialize Settings with sensible defaults, load persisted values, and register this instance as the active runtime settings.
+        
+        Sets default audio/visual preferences (music, sound, fullscreen, difficulty, volumes, dynamic music, sound theme, voice announcements), per-announcement enable flags, input control mappings, language and TTS preferences. Attempts to load and apply values from the persistent settings file (overriding defaults where present), assigns this instance to the module-level `current_settings`, and prints a short snapshot of the resulting settings.
+        """
         self.music_on = True
         self.sound_on = True
         self.fullscreen = False
@@ -77,7 +81,14 @@ class Settings:
         print(f"  Theme={self.sound_theme}")
 
     def save(self):
-        """Save settings to file."""
+        """
+        Persist current settings to "settings.json".
+        
+        Writes the instance's configurable settings as JSON to a UTF-8 encoded file named "settings.json".
+        
+        Returns:
+            bool: `True` if the settings were written successfully, `False` otherwise.
+        """
         settings_data = {
             "music_on": self.music_on,
             "sound_on": self.sound_on,
@@ -105,7 +116,14 @@ class Settings:
             return False
 
     def load(self):
-        """Load settings from file."""
+        """
+        Load settings from "settings.json" into this Settings instance, preserving constructor defaults for any missing keys and merging provided nested mappings.
+        
+        This updates audio/visual flags, difficulty, music and sound volumes, dynamic music and voice announcement toggles, sound theme, announcement_types and controls (only known keys are overridden), language, TTS voice and TTS voice language, and the UI preference for showing TTS options. If the file is absent or an error occurs while reading/parsing, the instance is left unchanged.
+        
+        Returns:
+            True if settings were successfully loaded and applied, False if the settings file is missing or an error occurred while loading.
+        """
         if not os.path.exists("settings.json"):
             print("No settings file found, using default values")
             return False

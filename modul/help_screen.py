@@ -7,7 +7,15 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - provide minimal
     class _InputUtilsStub:
         @staticmethod
         def get_action_keycode(_name):
-            """Stub for get_action_keycode; returns None."""
+            """
+            Fallback stub that provides no keycode for any action.
+            
+            Parameters:
+                _name (str): Action identifier (ignored by this stub).
+            
+            Returns:
+                None: Always returns None to indicate no keybinding is available.
+            """
             return None
 
     input_utils = _InputUtilsStub()
@@ -23,7 +31,15 @@ class HelpScreen:
     """Display keyboard shortcuts and game help."""
 
     def __init__(self):
-        """Initialize the help screen with fonts and shortcut data."""
+        """
+        Initialize HelpScreen state, lazy font placeholders, shortcut definitions, and overlay alpha.
+        
+        Sets:
+        - active: False by default.
+        - title_font, section_font, text_font, small_font: None placeholders to be created lazily by _ensure_fonts().
+        - shortcuts: list of sections; each section is a (section_title, shortcuts_list) tuple where shortcuts_list contains (key_name, description_i18n_key) pairs. Description strings are i18n keys passed through gettext when rendered.
+        - background_alpha: integer alpha (0-255) used for the semi-transparent overlay.
+        """
         self.active = False
 
         # Fonts are initialized lazily to avoid crashes when HelpScreen is

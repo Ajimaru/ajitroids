@@ -115,10 +115,11 @@ class PerformanceProfiler:
             )
 
     def draw(self, screen):
-        """Draw performance metrics overlay.
-
-        Args:
-            screen: pygame Surface to draw on
+        """
+        Render the profiler overlay onto the provided Pygame surface when the profiler is enabled.
+        
+        Parameters:
+            screen (pygame.Surface): Surface to render the overlay onto; no action is taken if the profiler is disabled.
         """
         if not self.enabled:
             return

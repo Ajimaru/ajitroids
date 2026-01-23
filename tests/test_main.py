@@ -47,7 +47,11 @@ def test_main_function_structure(mock_clock, mock_display, mock_init):
 
 
 def test_helper_functions():
-    """Test utility functions in main.py"""
+    """
+    Verify that the helper functions required by the application are present and callable on the imported main module.
+    
+    Asserts that main.player_hit, main.toggle_fullscreen, and main.debug_music_status exist and are callable.
+    """
 
     # Test that helper functions exist
     assert callable(main.player_hit)
