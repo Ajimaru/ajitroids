@@ -1217,10 +1217,10 @@ class TTSVoiceMenu(Menu):
                                 langs = getattr(v, "languages", []) or []
                                 for lang in langs:
                                     try:
-                                        l = lang.decode() if isinstance(lang, (bytes, bytearray)) else str(lang)
+                                        lang_str = lang.decode() if isinstance(lang, (bytes, bytearray)) else str(lang)
                                         # pick primary subtag like 'en' from en_US
-                                        if len(l) >= 2:
-                                            code = l[:2]
+                                        if len(lang_str) >= 2:
+                                            code = lang_str[:2]
                                             self.settings.tts_voice_language = code
                                             break
                                     except Exception:
