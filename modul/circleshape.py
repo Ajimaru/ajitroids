@@ -15,8 +15,6 @@ class CircleShape(pygame.sprite.Sprite):
         # Add to containers if set (for test group injection)
         containers = getattr(type(self), 'containers', ())
         if containers:
-        containers = getattr(type(self), 'containers', ())
-        if containers:
             if isinstance(containers, pygame.sprite.AbstractGroup):
                 containers.add(self)
             else:

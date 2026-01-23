@@ -2,7 +2,7 @@
 
 import time
 import pygame
-from modul.constants import SCREEN_WIDTH
+import modul.constants as C
 try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
@@ -28,9 +28,9 @@ class AchievementNotification:
         self.start_time = time.time()
         self.animation_progress = 0.0
         self.is_fading_out = False
-        self.target_x = SCREEN_WIDTH - 350
+        self.target_x = C.SCREEN_WIDTH - 350
         self.target_y = 80
-        self.current_x = SCREEN_WIDTH
+        self.current_x = C.SCREEN_WIDTH
         self.current_y = self.target_y
         self.title_font = pygame.font.Font(None, 32)
         self.desc_font = pygame.font.Font(None, 20)
@@ -41,20 +41,22 @@ class AchievementNotification:
         current_time = time.time()
         elapsed = current_time - self.start_time
 
+
         if elapsed < self.fade_time:
             self.animation_progress = elapsed / self.fade_time
-            self.current_x = SCREEN_WIDTH - (SCREEN_WIDTH - self.target_x) * self._ease_out(self.animation_progress)
+            self.current_x = C.SCREEN_WIDTH - (C.SCREEN_WIDTH - self.target_x) * self._ease_out(self.animation_progress)
 
         elif elapsed < self.display_time - self.fade_time:
             self.animation_progress = 1.0
             self.current_x = self.target_x
+
 
         elif elapsed < self.display_time:
             if not self.is_fading_out:
                 self.is_fading_out = True
             fade_progress = (elapsed - (self.display_time - self.fade_time)) / self.fade_time
             self.animation_progress = 1.0 - fade_progress
-            self.current_x = self.target_x + (SCREEN_WIDTH - self.target_x) * fade_progress
+            self.current_x = self.target_x + (C.SCREEN_WIDTH - self.target_x) * fade_progress
 
         else:
             return False

@@ -89,7 +89,7 @@ class StatsDashboard:
         ]
 
         for label, value in game_stats:
-            self._draw_stat_line(screen, label, value, y_pos)
+            self._draw_stat_line(screen, label, value, left_x, y_pos)
             y_pos += 35
 
         # Right column - Combat Statistics
@@ -108,7 +108,7 @@ class StatsDashboard:
         ]
 
         for label, value in combat_stats:
-            self._draw_stat_line(screen, label, value, y_pos)
+            self._draw_stat_line(screen, label, value, right_x, y_pos)
             y_pos += 35
 
         # Accuracy and efficiency bars
@@ -135,16 +135,8 @@ class StatsDashboard:
         section_rect = section_surf.get_rect(center=(x, y))
         screen.blit(section_surf, section_rect)
 
-    def _draw_stat_line(self, screen, label, value, y):
-        """Draw a single stat line."""
-        # Determine which column to use based on y position
-        if y < 400:
-            # Left column
-            x = SCREEN_WIDTH / 4
-        else:
-            # Right column
-            x = SCREEN_WIDTH * 3 / 4
-
+    def _draw_stat_line(self, screen, label, value, x, y):
+        """Draw a single stat line at the specified column position."""
         label_surf = self.text_font.render(f"{label}:", True, (200, 200, 200))
         label_rect = label_surf.get_rect(midright=(x - 20, y))
         screen.blit(label_surf, label_rect)
