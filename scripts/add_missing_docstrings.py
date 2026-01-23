@@ -17,11 +17,17 @@ def add_module_docstring(lines, module_node):
     """Insert a placeholder docstring at the top of the module if missing."""
     if ast.get_docstring(module_node) is not None:
         return lines
-    # Find insertion index after any shebang/encoding comments and module-level
-    # comments/imports. We'll insert at top (line 0) unless a shebang present.
+    # Find insertion index after any shebang and encoding comments.
+    # We'll insert at top (line 0) unless a shebang or encoding declaration is present.
     insert_idx = 0
-    if lines and lines[0].startswith('#!'):
+    max_check = min(2, len(lines))
+    # Check for shebang in first line
+    if max_check > 0 and lines[0].startswith('#!'):
         insert_idx = 1
+    # Check for encoding declaration in first or second line
+    for i in range(insert_idx, max_check):
+        if 'coding:' in lines[i] or 'coding=' in lines[i]:
+            insert_idx = i + 1
     doc = f'"""{PLACEHOLDER}"""\n\n'
     lines.insert(insert_idx, doc)
     return lines

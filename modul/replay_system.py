@@ -244,10 +244,10 @@ class ReplayRecorder:
             logger.info("Successfully saved replay to: %s", filepath)
             return filepath
         except OSError as e:
-            logger.error("Failed to save replay: %s", e)
+            logger.exception("Failed to save replay: %s", e)
             raise
         except Exception as e:  # pylint: disable=broad-exception-caught
-            logger.error("Unexpected error saving replay: %s", e)
+            logger.exception("Unexpected error saving replay: %s", e)
             raise
 
 
@@ -293,16 +293,16 @@ class ReplayPlayer:
             self.current_frame_index = 0
             logger.info("Successfully loaded replay: %s", filepath)
         except FileNotFoundError:
-            logger.error("Replay file not found: %s", filepath)
+            logger.exception("Replay file not found: %s", filepath)
             raise
         except json.JSONDecodeError as e:
-            logger.error("Invalid JSON in replay '%s': %s", filepath, e)
+            logger.exception("Invalid JSON in replay '%s': %s", filepath, e)
             raise
         except KeyError as e:
-            logger.error("Missing field in replay '%s': %s", filepath, e)
+            logger.exception("Missing field in replay '%s': %s", filepath, e)
             raise
         except Exception as e:  # pylint: disable=broad-exception-caught
-            logger.error("Failed to load replay '%s': %s", filepath, e)
+            logger.exception("Failed to load replay '%s': %s", filepath, e)
             raise
 
     def start_playback(self):
@@ -338,14 +338,13 @@ class ReplayPlayer:
             return
 
         # Resuming: continue from the captured timestamp
-        resume_ts = getattr(self, "_paused_timestamp", 0.0)
+        resume_ts = self._paused_timestamp if self._paused_timestamp is not None else 0.0
         self.paused = False
         safe_speed = (
             self.playback_speed if self.playback_speed not in (0, 0.0) else 1.0
         )
         self.start_playback_time = time.time() - (resume_ts / safe_speed)
-        if hasattr(self, "_paused_timestamp"):
-            delattr(self, "_paused_timestamp")
+        self._paused_timestamp = None
 
     def set_speed(self, speed: float):
         """Set playback speed (0.5x, 1x, 2x, etc.)."""
@@ -445,7 +444,7 @@ class ReplayManager:
             file_abs = os.path.realpath(filepath)
             return os.path.commonpath([replays_abs, file_abs]) == replays_abs
         except Exception as e:  # pylint: disable=broad-exception-caught
-            logger.error("Error validating filepath '%s': %s", filepath, e)
+            logger.exception("Error validating filepath '%s': %s", filepath, e)
             return False
 
     def list_replays(self) -> List[Dict[str, Any]]:
@@ -478,7 +477,7 @@ class ReplayManager:
                         e,
                     )
                 except Exception as e:  # pylint: disable=broad-exception-caught
-                    logger.error(
+                    logger.exception(
                         "Error reading replay '%s': %s",
                         filename,
                         e,
@@ -505,7 +504,7 @@ class ReplayManager:
                 os.remove(filepath)
                 logger.info("Deleted replay file: %s", filepath)
             except Exception as e:  # pylint: disable=broad-exception-caught
-                logger.error("Failed to delete replay file '%s': %s", filepath, e)
+                logger.exception("Failed to delete replay file '%s': %s", filepath, e)
 
     def get_replay_count(self) -> int:
         """Get the number of replay files."""

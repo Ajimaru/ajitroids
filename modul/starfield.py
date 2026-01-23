@@ -2,9 +2,7 @@
 
 import math
 import random
-
 import pygame
-
 import modul.constants as C
 
 
@@ -16,20 +14,21 @@ class Star:
         self.size = random.choice(C.STAR_SIZES)
         self.color = random.choice(C.STAR_COLORS)
         self.twinkle_timer = random.random() * 2 * math.pi
-        # Initialize current color to a valid RGB tuple so that draw() can
-        # always rely on `current_color` existing (avoid W0201 warnings).
+        # Cache parsed color for safe use in update()
         try:
             color_obj = pygame.Color(self.color)
-            self.current_color = [color_obj.r, color_obj.g, color_obj.b]
+            self._parsed_color = [color_obj.r, color_obj.g, color_obj.b]
         except (ValueError, TypeError):
             # Fallback to white if color parsing fails
-            self.current_color = [255, 255, 255]
+            self._parsed_color = [255, 255, 255]
+        self.current_color = self._parsed_color[:]
 
     def update(self, dt):
         """Update star twinkling effect."""
         self.twinkle_timer += dt
         brightness = abs(math.sin(self.twinkle_timer))
-        self.current_color = [int(c * brightness) for c in pygame.Color(self.color)]
+        # Use cached parsed color for safety
+        self.current_color = [int(c * brightness) for c in self._parsed_color]
 
     def draw(self, screen):
         """Draw star on screen."""

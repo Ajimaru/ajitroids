@@ -3,23 +3,13 @@
 import json
 import math
 import os
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main
 import pygame
 try:
     from modul.i18n import gettext
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i18n unavailable
-<<<<<<< HEAD
     def gettext(key):
         """Fallback translation function returning the key when unavailable."""
         return key
-=======
-    def gettext(k):
-        """Fallback translation function returning the key when unavailable."""
-        return k
->>>>>>> origin/main
 
 
 class ShipManager:
@@ -29,6 +19,9 @@ class ShipManager:
         self.ships_file = "ships.json"
         self.unlocked_ships = self.load_unlocked_ships()
 
+        # The 'unlocked' key for each ship is initialized from self.unlocked_ships here in __init__,
+        # and may be updated later by unlock_ship(), which mutates both self.unlocked_ships and ships[ship_id]['unlocked'].
+        # This is not a dynamic property; it is an initial state that unlock_ship() can change.
         self.ships = {
             "standard": {
                 "name": "Standard Fighter",
@@ -119,34 +112,22 @@ class ShipManager:
         return False
 
     def check_unlock_conditions(self, level, difficulty, notification_callback=None):
-        """Check level/difficulty unlock conditions and notify if unlocked."""
+        """Check level/difficulty unlock conditions and notify if unlocked.
+
+        Uses unlock_ship_with_notification to avoid code duplication.
+        """
         unlocked_any = False
-
         if level >= 50:
-            if difficulty == "easy" and not self.ships["speedster"]["unlocked"]:
-                if self.unlock_ship("speedster"):
+            ship_key = None
+            if difficulty == "easy":
+                ship_key = "speedster"
+            elif difficulty == "normal":
+                ship_key = "tank"
+            elif difficulty == "hard":
+                ship_key = "destroyer"
+            if ship_key and not self.ships[ship_key]["unlocked"]:
+                if self.unlock_ship_with_notification(ship_key, notification_callback):
                     unlocked_any = True
-                    ship_name = self.ships["speedster"]["name"]
-                    print(f"🚀 {ship_name} unlocked!")
-                    if notification_callback:
-                        notification_callback(f" {ship_name} unlocked!", "New ship available in ship selection!")
-
-            elif difficulty == "normal" and not self.ships["tank"]["unlocked"]:
-                if self.unlock_ship("tank"):
-                    unlocked_any = True
-                    ship_name = self.ships["tank"]["name"]
-                    print(f"🚀 {ship_name} unlocked!")
-                    if notification_callback:
-                        notification_callback(f" {ship_name} unlocked!", "New ship available in ship selection!")
-
-            elif difficulty == "hard" and not self.ships["destroyer"]["unlocked"]:
-                if self.unlock_ship("destroyer"):
-                    unlocked_any = True
-                    ship_name = self.ships["destroyer"]["name"]
-                    print(f"🚀 {ship_name} unlocked!")
-                    if notification_callback:
-                        notification_callback(f" {ship_name} unlocked!", "New ship available in ship selection!")
-
         return unlocked_any
 
     def get_ship_data(self, ship_id):
@@ -178,7 +159,6 @@ class ShipManager:
 
     def check_all_ships_unlocked(self, achievement_system):
         """Trigger achievement when all ships are unlocked."""
-<<<<<<< HEAD
         # Consider the default 'standard' ship which is always available.
         # Trigger the achievement when every non-default ship is present in
         # the unlocked_ships list.
@@ -186,9 +166,6 @@ class ShipManager:
             ship_id == "standard" or ship_id in self.unlocked_ships for ship_id in self.ships
         )
         if all_non_default:
-=======
-        if len(self.unlocked_ships) == len(self.ships):
->>>>>>> origin/main
             achievement_system.unlock("Fleet Commander")
 
 
@@ -312,12 +289,8 @@ class ShipRenderer:
         """Draw a question mark symbol for unknown ship types."""
         font = pygame.font.Font(None, int(36 * scale))
         symbol = gettext("question_mark")
-<<<<<<< HEAD
         # Treat the untranslated key as missing (gettext often returns the key)
         if not symbol or symbol == "question_mark":
-=======
-        if not symbol:
->>>>>>> origin/main
             symbol = "?"
         text = font.render(symbol, True, color)
         text_rect = text.get_rect(center=(x, y))

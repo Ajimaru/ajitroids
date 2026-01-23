@@ -1,13 +1,7 @@
 """Player class, input handling and player-related mechanics."""
 
 import math
-<<<<<<< HEAD
 import pygame
-=======
-
-import pygame
-
->>>>>>> origin/main
 import modul.constants as C
 from modul.circleshape import CircleShape
 from modul.ships import ShipRenderer, ship_manager
@@ -42,15 +36,9 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i
 
 
 class Player(CircleShape):
-<<<<<<< HEAD
     """Player character with movement, shooting, and powerups."""
     def __init__(self, x, y, ship_type="standard"):
         """Initialize player with position, ship type, and state."""
-=======
-    """TODO: add docstring."""
-    def __init__(self, x, y, ship_type="standard"):
-        """TODO: add docstring."""
->>>>>>> origin/main
         super().__init__(x, y, C.PLAYER_RADIUS)
         self.rotation = 0
         self.velocity = pygame.Vector2(0, 0)
@@ -75,11 +63,7 @@ class Player(CircleShape):
         self.apply_ship_modifiers()
 
     def apply_ship_modifiers(self):
-<<<<<<< HEAD
         """Apply ship-specific modifiers to player attributes."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         self.base_speed = C.PLAYER_SPEED * self.ship_data["speed_multiplier"]
         self.base_turn_speed = C.PLAYER_TURN_SPEED * self.ship_data["turn_speed_multiplier"]
 
@@ -103,11 +87,7 @@ class Player(CircleShape):
             self.has_rear_shot = False
 
     def draw(self, screen):
-<<<<<<< HEAD
         """Draw the player ship and shield on the screen."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         if (not self.invincible or pygame.time.get_ticks() % 200 < 100) or self.shield_active:
             if self.shield_active:
                 ship_color = C.POWERUP_COLORS.get("shield", "cyan")
@@ -129,11 +109,7 @@ class Player(CircleShape):
             screen.blit(shield_surf, (self.position.x - self.radius * 1.5, self.position.y - self.radius * 1.5))
 
     def triangle(self):
-<<<<<<< HEAD
         """Return the coordinates of the player's ship triangle."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         forward = pygame.Vector2(0, -1).rotate(self.rotation)
         right = pygame.Vector2(1, 0).rotate(self.rotation) * self.radius / 1.5
         a = self.position + forward * self.radius
@@ -142,16 +118,7 @@ class Player(CircleShape):
         return [a, b, c]
 
     def update(self, dt):
-<<<<<<< HEAD
         """Update player state, handle input, and powerup timers."""
-=======
-        # Use input utilities which consult runtime settings for remappable controls
-        """TODO: add docstring."""
->>>>>>> origin/main
-        # use module-level `input_utils` bound at import time
-
-        current_speed = self.base_speed
-        current_turn_speed = self.base_turn_speed
 
         if input_utils.is_action_pressed("rotate_left"):
             self.rotate(-current_turn_speed * dt)
@@ -205,11 +172,7 @@ class Player(CircleShape):
             self.weapon_switch_timer -= dt
 
     def shoot(self):
-<<<<<<< HEAD
         """Handle shooting logic for the current weapon."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         if self.shoot_timer <= 0:
 
             if self.current_weapon != C.WEAPON_STANDARD and self.weapons[self.current_weapon] <= 0:
@@ -276,11 +239,7 @@ class Player(CircleShape):
                 self.shoot_timer = C.PLAYER_SHOOT_COOLDOWN
 
     def fire_triple_shot(self):
-<<<<<<< HEAD
         """Fire three shots in a spread pattern."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         shot1 = Shot(self.position.x, self.position.y)
         shot1.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * C.PLAYER_SHOOT_SPEED
 
@@ -295,20 +254,12 @@ class Player(CircleShape):
             rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * C.PLAYER_SHOOT_SPEED * 0.8
 
     def make_invincible(self):
-<<<<<<< HEAD
         """Make the player invincible for a set duration."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         self.invincible = True
         self.invincible_timer = C.INVINCIBILITY_TIME
 
     def respawn(self):
-<<<<<<< HEAD
         """Reset player state and position after death."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         self.position.x = C.SCREEN_WIDTH / 2
         self.position.y = C.SCREEN_HEIGHT / 2
         self.velocity = pygame.Vector2(0, 0)
@@ -328,11 +279,7 @@ class Player(CircleShape):
         print("Player respawned with 3 seconds of invincibility")
 
     def activate_powerup(self, powerup_type):
-<<<<<<< HEAD
         """Activate the specified powerup effect."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         if powerup_type == "shield":
             self.shield_active = True
             self.shield_timer = C.SHIELD_DURATION
@@ -362,11 +309,7 @@ class Player(CircleShape):
             print(f"Shotgun activated! Ammo: {self.weapons[C.WEAPON_SHOTGUN]}")
 
     def cycle_weapon(self):
-<<<<<<< HEAD
         """Switch to the next available weapon."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         if self.weapon_switch_timer > 0:
             return
 
@@ -391,11 +334,7 @@ class Player(CircleShape):
         print(f"Fallback to standard weapon: {self.current_weapon}")
 
     def draw_weapon_hud(self, screen):
-<<<<<<< HEAD
         """Draw the player's weapon HUD on the screen."""
-=======
-        """TODO: add docstring."""
->>>>>>> origin/main
         font_small = pygame.font.Font(None, 18)
 
         weapons_panel_x = C.SCREEN_WIDTH - 120
@@ -452,10 +391,10 @@ class Player(CircleShape):
             name_text = font_small.render(weapon_name, True, text_color)
             screen.blit(name_text, (weapons_panel_x + 28, weapon_y - 5))
 
-            if weapon_type == C.WEAPON_STANDARD:
-                ammo_display = "99 / 99"
+            max_ammo_val = max_ammo[weapon_type]
+            if ammo == -1 or max_ammo_val == -1:
+                ammo_display = "∞"
             else:
-                max_ammo_val = max_ammo[weapon_type]
                 ammo_display = f"{ammo}/{max_ammo_val}"
 
             ammo_text = font_small.render(ammo_display, True, text_color)

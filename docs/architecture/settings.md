@@ -21,6 +21,7 @@ Settings are stored in the user's home directory:
 
 ```json
 {
+  "language": "en",
   "video": {
     "fullscreen": false,
     "resolution": [1280, 720],
