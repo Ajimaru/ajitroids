@@ -113,9 +113,21 @@ class Sounds:
             print(f"Boss spawn sound could not be loaded: {e}")
         try:
             self.boss_death = pygame.mixer.Sound(asset_path("boss_death.wav"))
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            self.boss_death = None
-            print(f"Boss death sound could not be loaded: {e}")
+        except Exception:  # pylint: disable=broad-exception-caught
+            # Try sensible fallbacks present in older or alternative asset sets
+            fallback_candidates = ["boss_hit.wav", "voice_boss_defeated.wav", "bossfight.wav"]
+            loaded = False
+            for candidate in fallback_candidates:
+                try:
+                    self.boss_death = pygame.mixer.Sound(asset_path(candidate))
+                    logger.warning("Boss death sound missing; using fallback %s", candidate)
+                    loaded = True
+                    break
+                except Exception:
+                    continue
+            if not loaded:
+                self.boss_death = None
+                logger.warning("Boss death sound could not be loaded; checked fallbacks: %s", fallback_candidates)
         try:
             self.powerup = pygame.mixer.Sound(asset_path("powerup.wav"))
         except Exception as e:  # pylint: disable=broad-exception-caught

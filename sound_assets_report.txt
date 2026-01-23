@@ -1,0 +1,61 @@
+Sound asset scan report
+
+Referenced assets (from code):
+ - background.mp3
+ - boss_attack.wav
+ - boss_death.wav
+ - boss_music.mp3
+ - boss_spawn.wav
+ - explosion.wav
+ - game_over.wav
+ - laser_shoot.wav
+ - level_up.wav
+ - menu_confirm.wav
+ - menu_select.wav
+ - player_hit.wav
+ - powerup.wav
+ - rocket_shoot.wav
+ - shield_hit.wav
+ - shoot.wav
+
+Assets present in modul/assets/:
+ - __init__.py
+ - asteroid_hit.wav
+ - background.mp3
+ - boss_attack.wav
+ - boss_hit.wav
+ - boss_music.mp3
+ - boss_spawn.wav
+ - bossfight.wav
+ - explosion.wav
+ - game_over.wav
+ - laser_shoot.wav
+ - level_up.wav
+ - low_health.wav
+ - menu.wav
+ - menu_confirm.wav
+ - menu_select.wav
+ - pause.wav
+ - player_death.wav
+ - player_hit.wav
+ - powerup.wav
+ - resume.wav
+ - rocket_shoot.wav
+ - shield_hit.wav
+ - shoot.wav
+ - speed_boost.wav
+ - triple_shoot.wav
+ - voice_achievement.wav
+ - voice_boss_defeated.wav
+ - voice_boss_incoming.wav
+ - voice_extra_life.wav
+ - voice_game_over.wav
+ - voice_high_score.wav
+ - voice_level_up.wav
+ - voice_low_health.wav
+ - voice_new_weapon.wav
+ - voice_powerup.wav
+ - voice_shield.wav
+
+Missing assets:
+ - boss_death.wav
