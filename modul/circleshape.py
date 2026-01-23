@@ -20,6 +20,7 @@ class CircleShape(pygame.sprite.Sprite):
             else:
                 for group in containers:
                     group.add(self)
+        """Draw the circle shape (to be implemented by subclasses)."""
 
     def update(self, dt):
         """Update the circle shape (to be implemented by subclasses)."""
@@ -35,11 +36,3 @@ class CircleShape(pygame.sprite.Sprite):
     def forward(self):
         """Return the forward direction vector."""
         return pygame.Vector2(0, -1).rotate(self.rotation)
-
-    def draw(self, surface):
-        """Draw the circle shape onto `surface`.
-
-        Subclasses should override this method to render the shape. The
-        base implementation does nothing to keep this class lightweight.
-        """
-        return None

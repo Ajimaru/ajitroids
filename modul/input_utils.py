@@ -1,11 +1,8 @@
 """Utilities for mapping actions to input bindings and keycodes."""
 
 from typing import Optional
-import logging
 import pygame
 from modul import settings as settings_mod
-
-logger = logging.getLogger(__name__)
 
 
 def key_name_to_keycode(name: str) -> Optional[int]:
@@ -104,9 +101,8 @@ def is_action_pressed(action: str) -> bool:
             joy = pygame.joystick.Joystick(joy_id)
             try:
                 joy.init()
-            except Exception as exc:  # pylint: disable=broad-exception-caught
-                # Some joysticks may not initialize; log the failure and treat as not pressed
-                logger.debug("joystick init failed (id=%s): %s", joy_id, exc, exc_info=True)
+            except Exception:  # pylint: disable=broad-exception-caught
+                # Some joysticks may not initialize; treat as not pressed
                 return False
 
             if len(parts) >= 2 and parts[1].startswith("BUTTON"):
@@ -132,7 +128,7 @@ def is_action_pressed(action: str) -> bool:
                     hat = int(parts[1][3:])
                     hat_val = joy.get_hat(hat)
                     if len(parts) > 2:
-                        dirs = parts[2].split("/")
+                        dirs = parts[2].split("_")
                         x, y = hat_val
                         for d in dirs:
                             if d == "UP" and y != 1:

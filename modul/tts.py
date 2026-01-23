@@ -17,7 +17,18 @@ from .settings import current_settings
 
 
 class TTSManager:
+    """
+    Manages text-to-speech functionality using pyttsx3.
 
+    This class provides methods to initialize, configure, and use a text-to-speech engine,
+    including voice selection, speech synthesis, and resource management.
+    """
+    def shutdown(self):
+        """Shut down the TTS manager's executor and clean up resources."""
+        with self._lock:
+            if self._executor is not None:
+                self._executor.shutdown(wait=False)
+                self._executor = None
 
     def __init__(self):
         """Initialize the TTS manager with settings and engine setup."""

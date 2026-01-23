@@ -19,13 +19,11 @@ class Particle(pygame.sprite.Sprite):
         self.alpha = 255
         self.lifetime = 0.5
         # Add to containers if set (for test group injection)
-        # Add to containers if set (for test group injection)
         containers = getattr(type(self), 'containers', ())
         if containers:
-            if isinstance(containers, pygame.sprite.AbstractGroup):
-                containers = (containers,)
             for group in containers:
                 group.add(self)
+
     def update(self, dt):
         """Update particle position, lifetime, and alpha fading."""
         self.position += self.velocity * dt
