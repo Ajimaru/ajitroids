@@ -17,11 +17,17 @@ def add_module_docstring(lines, module_node):
     """Insert a placeholder docstring at the top of the module if missing."""
     if ast.get_docstring(module_node) is not None:
         return lines
-    # Find insertion index after any shebang/encoding comments and module-level
-    # comments/imports. We'll insert at top (line 0) unless a shebang present.
+    # Find insertion index after any shebang and encoding comments.
+    # We'll insert at top (line 0) unless a shebang or encoding declaration is present.
     insert_idx = 0
-    if lines and lines[0].startswith('#!'):
+    max_check = min(2, len(lines))
+    # Check for shebang in first line
+    if max_check > 0 and lines[0].startswith('#!'):
         insert_idx = 1
+    # Check for encoding declaration in first or second line
+    for i in range(insert_idx, max_check):
+        if 'coding:' in lines[i] or 'coding=' in lines[i]:
+            insert_idx = i + 1
     doc = f'"""{PLACEHOLDER}"""\n\n'
     lines.insert(insert_idx, doc)
     return lines
@@ -96,11 +102,27 @@ def backup_and_write(path: Path, lines):
         path.rename(bak)
         path.write_text(''.join(lines), encoding='utf-8')
     else:
-        # fallback: write directly but keep original as .orig
+        # fallback: try .orig
         orig = path.with_suffix(path.suffix + '.orig')
         if not orig.exists():
             path.rename(orig)
-        path.write_text(''.join(lines), encoding='utf-8')
+            path.write_text(''.join(lines), encoding='utf-8')
+        else:
+            # Both .bak and .orig exist; use numbered backups
+            backup_path = find_available_numbered_backup(path)
+            path.rename(backup_path)
+            print(f"Warning: backup saved as {backup_path} (existing .bak and .orig found)")
+            path.write_text(''.join(lines), encoding='utf-8')
+
+
+def find_available_numbered_backup(path: Path) -> Path:
+    """Find an available numbered backup path (e.g., .bak1, .bak2, etc.)."""
+    counter = 1
+    while True:
+        backup_path = path.with_suffix(f'{path.suffix}.bak{counter}')
+        if not backup_path.exists():
+            return backup_path
+        counter += 1
 
 
 def main():
