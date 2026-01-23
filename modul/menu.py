@@ -843,12 +843,10 @@ class LanguageMenu(Menu):
                 if result == code:
                     self.settings.language = result
                     self.settings.save()
-                    # Rebuild all menus to update labels immediately
-                    globals()["main_menu"] = MainMenu()
-                    globals()["options_menu"] = OptionsMenu(self.settings, getattr(self, 'sounds', None))
-                    globals()["controls_menu"] = ControlsMenu(self.settings)
-                    # Rebuild this menu to update its labels
-                    return "options"
+                    # Signal that menus should be rebuilt by the caller. The
+                    # caller (game loop) is responsible for recreating module
+                    # globals in one place to avoid scattered global writes.
+                    return {"action": "rebuild_menus", "target": "options"}
         return None
 
 

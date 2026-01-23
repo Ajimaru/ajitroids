@@ -741,7 +741,20 @@ def main(args=None):
             action = language_menu.update(dt, events)
             language_menu.draw(screen)
 
-            if action == "options":
+            # LanguageMenu may return a rebuild signal when the language
+            # selection changes. Handle structured rebuild requests here so
+            # menu reconstruction is centralized.
+            if isinstance(action, dict) and action.get("action") == "rebuild_menus":
+                # Recreate menus with updated settings
+                main_menu = MainMenu()
+                options_menu = OptionsMenu(game_settings, sounds)
+                controls_menu = ControlsMenu(game_settings)
+                # Activate the requested target
+                target = action.get("target", "options")
+                if target == "options":
+                    game_state = "options"
+                    options_menu.activate()
+            elif action == "options":
                 game_state = "options"
                 options_menu.activate()
 

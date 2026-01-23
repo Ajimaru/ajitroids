@@ -305,5 +305,5 @@ LICENSE.md file for details.
 - GitHub Copilot for assistance with code development
 - Developed with ❤️ and Pygame
 
-\_Note: This project is in active development. New features and improvements are
+_Note: This project is in active development. New features and improvements are
 regularly being added.
