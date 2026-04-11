@@ -29,7 +29,7 @@ write_to = "modul/_version.py"
 fallback_version = "0.24.0"
 
 [build-system]
-requires = ["setuptools>=64", "setuptools-scm>=8"]
+requires = ["setuptools>=64", "setuptools-scm>=9.2.2"]
 build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
