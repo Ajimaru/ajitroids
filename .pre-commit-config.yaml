@@ -73,6 +73,6 @@ repos:
     hooks:
       - id: pytest
         name: pytest (all files)
-        entry: python3 -m pytest
+        entry: .venv/bin/python -m pytest
         language: system
         pass_filenames: false
