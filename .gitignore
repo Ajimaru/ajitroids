@@ -82,3 +82,8 @@ pyvenv.cfg
 .envrc
 Makefile
 replays
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
+.claude/
