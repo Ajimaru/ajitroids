@@ -1,6 +1,6 @@
-markdown>=3.4.0
+markdown>=3.9
 pytest>=7.0.0
 pygame>=2.1.0
-numpy>=1.23
+numpy>=2.0.2
 PyOpenGL==3.1.10
-pyttsx3>=2.90
+pyttsx3>=2.99
