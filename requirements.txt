@@ -1,4 +1,4 @@
-markdown>=3.9
+markdown>=3.10.2
 pytest>=7.0.0
 pygame>=2.1.0
 numpy>=2.2.6
