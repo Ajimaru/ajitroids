@@ -22,7 +22,7 @@ Please read and follow our
 
 ### Prerequisites
 
-- Python 3.9 or higher
+- Python 3.10 or higher
 - Git
 - Basic understanding of Pygame
 - Familiarity with object-oriented programming

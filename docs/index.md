@@ -53,7 +53,7 @@ that's easy to understand and extend.
 
 ## 🛠️ Tech Stack
 
-- **Python 3.9+**: Primary programming language
+- **Python 3.10+**: Primary programming language
 - **Pygame 2.6.1**: Game development framework
 - **pytest**: Testing framework
 - **black**: Code formatting
