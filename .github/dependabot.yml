@@ -1,40 +1,38 @@
-# Basic `dependabot.yml` file with
-# minimum configuration for three package managers
-
 version: 2
 updates:
-  # Enable version updates for GitHub Actions
-  - package-ecosystem: "github-actions"
-    # Workflow files stored in the default location of `.github/workflows`
-    # You don't need to specify `/.github/workflows` for `directory`. You can use `directory: "/"`.
+  - package-ecosystem: github-actions
     directory: "/"
     target-branch: dev
     schedule:
-      interval: "weekly"
-
-  # Keep Python dependencies up to date
-  - package-ecosystem: "pip"
-    directory: "/"
-    target-branch: dev
-    schedule:
-      interval: "weekly"
+      interval: monthly
     open-pull-requests-limit: 5
     groups:
-      python-dev-tools:
+      github-actions:
         patterns:
-          - "black"
-          - "flake8"
-          - "isort"
-          - "pre-commit"
-          - "pytest"
-          - "pytest-*"
-          - "coverage"
-          - "pytest-cov"
-          - "build"
-      python-build-system:
+          - "*"
+
+  - package-ecosystem: pip
+    directory: "/"
+    target-branch: dev
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    groups:
+      dev-dependencies:
+        dependency-type: development
         patterns:
-          - "setuptools"
-          - "wheel"
-      python-runtime:
+          - "*"
+      # Major bumps are deliberately not listed here: they stay individual
+      # PRs, since those are the ones that actually break things.
+      production-dependencies:
+        dependency-type: production
         patterns:
-          - "typing_extensions"
+          - "*"
+        update-types:
+          - minor
+    # Patch bumps are ignored to keep PR volume low; security fixes still
+    # arrive through Dependabot security alerts, which ignore this filter.
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-patch

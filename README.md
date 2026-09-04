@@ -1,7 +1,7 @@
 # 🚀 Ajitroids
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Ajimaru/ajitroids#-license)
-[![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://python.org)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 ![Top Language](https://img.shields.io/github/languages/top/Ajimaru/ajitroids)
 [![Latest Release](https://img.shields.io/github/v/release/Ajimaru/ajitroids?sort=semver)](https://github.com/Ajimaru/ajitroids/releases/latest)
 ![Downloads](https://img.shields.io/github/downloads/Ajimaru/ajitroids/total.svg)
@@ -56,7 +56,7 @@ achieve the highest score.
 
 ### Prerequisites
 
-- Python 3.9 or higher (tested up to 3.12)
+- Python 3.10 or higher (tested up to 3.13)
 - [uv](https://github.com/astral-sh/uv) or pip
 
 ### Method 1: Install from Release (Recommended)
