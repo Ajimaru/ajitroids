@@ -13,8 +13,7 @@ from modul.constants import (ASTEROID_CRYSTAL_SPLIT_COUNT,
                              ASTEROID_TYPE_CRYSTAL, ASTEROID_TYPE_ICE,
                              ASTEROID_TYPE_METAL, ASTEROID_TYPE_NORMAL,
                              ASTEROID_TYPES, ASTEROID_VERTICES,
-                             COLLISION_DEBUG, PLAYER_RADIUS, POWERUP_MAX_COUNT,
-                             POWERUP_SPAWN_CHANCE, SCREEN_HEIGHT, SCREEN_WIDTH)
+                             COLLISION_DEBUG, PLAYER_RADIUS, SCREEN_HEIGHT, SCREEN_WIDTH)
 from modul.groups import collidable, drawable, updatable
 from modul.particle import Particle
 from modul.powerup import PowerUp
@@ -167,17 +166,18 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
             for point in points:
                 pygame.draw.circle(screen, "yellow", point, 2)
 
-    def split(self):
-        """Split the asteroid into smaller pieces or handle metal asteroid damage."""
+    def split(self, damage=1):
+        """Apply damage; return True only when the asteroid is destroyed."""
         # Metal asteroid: show explosion effect
         if self.asteroid_type == ASTEROID_TYPE_METAL:
             for _ in range(2):
                 Particle.create_asteroid_explosion(self.position.x, self.position.y)
 
         # Metal asteroid: survive first hit if large enough
-        if self.asteroid_type == ASTEROID_TYPE_METAL and self.health > 1 and self.radius > ASTEROID_MIN_RADIUS:
-            self.health -= 1
-            return
+        if self.asteroid_type == ASTEROID_TYPE_METAL and self.radius > ASTEROID_MIN_RADIUS:
+            self.health -= damage
+            if self.health > 0:
+                return False
 
         # Remove self from all groups (containers and sprite groups)
         containers = getattr(type(self), 'containers', ())
@@ -190,15 +190,10 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
                 pass
         self.kill()
 
-        # PowerUp spawn logic
-        powerup_group = collidable
-        powerups_count = len([sprite for sprite in powerup_group if isinstance(sprite, PowerUp)])
-        if random.random() < POWERUP_SPAWN_CHANCE and powerups_count < POWERUP_MAX_COUNT:
-            PowerUp(self.position.x, self.position.y)
+        PowerUp.spawn_drop(self.position.x, self.position.y)
 
-        # If minimum size, do not split further
         if self.radius <= ASTEROID_MIN_RADIUS:
-            return
+            return True
 
         # Always create children with strictly smaller radius
         new_radius = max(self.radius - ASTEROID_MIN_RADIUS, ASTEROID_MIN_RADIUS - 1)
@@ -231,6 +226,8 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
             new_asteroid.rotation_speed = rotation_speed
             if self.asteroid_type == ASTEROID_TYPE_METAL:
                 new_asteroid.health = ASTEROID_METAL_HEALTH
+
+        return True
 
     def update(self, dt):
         """Update asteroid position and rotation."""

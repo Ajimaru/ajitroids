@@ -171,6 +171,15 @@ class Player(CircleShape):
         if self.weapon_switch_timer > 0:
             self.weapon_switch_timer -= dt
 
+    def _create_shot(self, shot_type=None):
+        """Apply ship damage modifiers to every projectile firing path."""
+        if shot_type is None:
+            shot = Shot(self.position.x, self.position.y)
+        else:
+            shot = Shot(self.position.x, self.position.y, shot_type)
+        shot.damage *= self.damage_multiplier
+        return shot
+
     def shoot(self):
         """Handle shooting logic for the current weapon."""
         if self.shoot_timer <= 0:
@@ -193,41 +202,41 @@ class Player(CircleShape):
                 if self.triple_shot_active:
                     self.fire_triple_shot()
                 else:
-                    shot = Shot(self.position.x, self.position.y)
+                    shot = self._create_shot()
                     shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * C.PLAYER_SHOOT_SPEED
 
                     if hasattr(self, "has_rear_shot") and self.has_rear_shot:
-                        rear_shot = Shot(self.position.x, self.position.y)
+                        rear_shot = self._create_shot()
                         rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * C.PLAYER_SHOOT_SPEED * 0.8
 
             elif self.current_weapon == C.WEAPON_LASER:
-                shot = Shot(self.position.x, self.position.y, C.WEAPON_LASER)
+                shot = self._create_shot(C.WEAPON_LASER)
                 shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * C.PLAYER_SHOOT_SPEED * 1.5
                 self.weapons[C.WEAPON_LASER] -= 1
 
                 if hasattr(self, "has_rear_shot") and self.has_rear_shot:
-                    rear_shot = Shot(self.position.x, self.position.y)
+                    rear_shot = self._create_shot()
                     rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * C.PLAYER_SHOOT_SPEED * 0.8
 
             elif self.current_weapon == C.WEAPON_MISSILE:
-                shot = Shot(self.position.x, self.position.y, C.WEAPON_MISSILE)
+                shot = self._create_shot(C.WEAPON_MISSILE)
                 shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * C.PLAYER_SHOOT_SPEED * 0.8
                 self.weapons[C.WEAPON_MISSILE] -= 1
 
                 if hasattr(self, "has_rear_shot") and self.has_rear_shot:
-                    rear_shot = Shot(self.position.x, self.position.y)
+                    rear_shot = self._create_shot()
                     rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * C.PLAYER_SHOOT_SPEED * 0.8
 
             elif self.current_weapon == C.WEAPON_SHOTGUN:
                 spread = 30
                 for i in range(5):
                     angle = self.rotation + (i - 2) * (spread / 4)
-                    shot = Shot(self.position.x, self.position.y, C.WEAPON_SHOTGUN)
+                    shot = self._create_shot(C.WEAPON_SHOTGUN)
                     shot.velocity = pygame.Vector2(0, -1).rotate(angle) * C.PLAYER_SHOOT_SPEED
                 self.weapons[C.WEAPON_SHOTGUN] -= 1
 
                 if hasattr(self, "has_rear_shot") and self.has_rear_shot:
-                    rear_shot = Shot(self.position.x, self.position.y)
+                    rear_shot = self._create_shot()
                     rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * C.PLAYER_SHOOT_SPEED * 0.8
 
             if hasattr(self, "sounds") and self.sounds:
@@ -240,17 +249,17 @@ class Player(CircleShape):
 
     def fire_triple_shot(self):
         """Fire three shots in a spread pattern."""
-        shot1 = Shot(self.position.x, self.position.y)
+        shot1 = self._create_shot()
         shot1.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * C.PLAYER_SHOOT_SPEED
 
-        shot2 = Shot(self.position.x, self.position.y)
+        shot2 = self._create_shot()
         shot2.velocity = pygame.Vector2(0, -1).rotate(self.rotation - 15) * C.PLAYER_SHOOT_SPEED
 
-        shot3 = Shot(self.position.x, self.position.y)
+        shot3 = self._create_shot()
         shot3.velocity = pygame.Vector2(0, -1).rotate(self.rotation + 15) * C.PLAYER_SHOOT_SPEED
 
         if hasattr(self, "has_rear_shot") and self.has_rear_shot:
-            rear_shot = Shot(self.position.x, self.position.y)
+            rear_shot = self._create_shot()
             rear_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * C.PLAYER_SHOOT_SPEED * 0.8
 
     def make_invincible(self):
