@@ -55,4 +55,4 @@ jobs:
     uses: ./.github/workflows/release.yml
     with:
       tag: ${{ inputs.tag }}
-      ref: ${{ inputs.tag }}
+      ref: refs/tags/${{ inputs.tag }}
