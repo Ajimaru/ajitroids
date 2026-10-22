@@ -364,16 +364,40 @@ def test_replay_viewer_speed_keys():
     assert player.playback_speed == 2.0
 
 
-def test_replay_viewer_draw_hud():
-    """Test drawing replay viewer HUD."""
+@pytest.mark.parametrize("metadata_duration, expected_total", [
+    (None, "1:30"),
+    (0.0, "1:30"),
+    (60.0, "1:30"),
+    (120.0, "2:00"),
+])
+def test_replay_viewer_draw_hud(monkeypatch, metadata_duration, expected_total):
+    """The HUD total must match playback, including the final frame."""
     screen = pygame.display.set_mode((1280, 720))
     player = ReplayPlayer()
-    viewer = ReplayViewer(player)
-    player.metadata = {'duration': 100.0}
+    player.metadata = {} if metadata_duration is None else {'duration': metadata_duration}
+    player.frames = [GameFrame(
+        timestamp=90.0,
+        player_pos=(100, 200),
+        player_rotation=0.0,
+        player_velocity=(0, 0),
+        score=0,
+        lives=3,
+        level=1,
+    )]
+    monkeypatch.setattr('modul.replay_system.time.time', lambda: 100.0)
+    player.start_playback()
+    monkeypatch.setattr('modul.replay_system.time.time', lambda: 300.0)
+    assert player.get_current_frame() is player.frames[-1]
+    assert player.completed
+    assert player.get_progress_percentage() == 100.0
 
-    # Should not raise an error
+    viewer = ReplayViewer(player)
+    viewer.small_font = MagicMock(wraps=viewer.small_font)
+
     viewer.draw_hud(screen)
-    assert True
+    viewer.small_font.render.assert_any_call(
+        f"{expected_total} / {expected_total}", True, (200, 200, 200)
+    )
 
 
 def test_game_frame_creation():

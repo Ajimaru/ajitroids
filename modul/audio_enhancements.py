@@ -441,7 +441,7 @@ class AudioEnhancementManager:
     def update(self, dt: float, game_state: dict, asset_path_func):
         """Update all audio enhancement systems"""
         # Update dynamic music
-        if "asteroids" in game_state and "enemies" in game_state:
+        if "asteroids_count" in game_state and "enemies_count" in game_state and game_state.get("music_on", True):
             self.dynamic_music.update(
                 dt,
                 game_state.get("asteroids_count", 0),
