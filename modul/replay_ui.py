@@ -258,7 +258,7 @@ class ReplayViewer:
 
         # Time info
         current_time = self.replay_player.get_current_timestamp()
-        total_time = self.replay_player.metadata.get('duration', 0)
+        total_time = self.replay_player._duration()
         time_text = (
             f"{int(current_time // 60)}:{int(current_time % 60):02d} / "
             f"{int(total_time // 60)}:{int(total_time % 60):02d}"

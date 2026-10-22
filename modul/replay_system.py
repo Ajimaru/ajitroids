@@ -258,6 +258,7 @@ class ReplayPlayer:
         """Initialize the replay player."""
         self.playing = False
         self.paused = False
+        self.completed = False
         self.frames: List[GameFrame] = []
         self.events: List[GameEvent] = []
         self.metadata = {}
@@ -312,6 +313,8 @@ class ReplayPlayer:
             return
         self.playing = True
         self.paused = False
+        self.completed = False
+        self._paused_timestamp = None
         self.current_frame_index = 0
         self.start_playback_time = time.time()
 
@@ -319,6 +322,8 @@ class ReplayPlayer:
         """Stop playing the replay."""
         self.playing = False
         self.paused = False
+        self.completed = False
+        self._paused_timestamp = None
         self.current_frame_index = 0
 
     def toggle_pause(self):
@@ -327,13 +332,7 @@ class ReplayPlayer:
             return
 
         if not self.paused:
-            # Pausing: capture a frame timestamp if available
-            if 0 <= self.current_frame_index < len(self.frames):
-                self._paused_timestamp = (
-                    self.frames[self.current_frame_index].timestamp
-                )
-            else:
-                self._paused_timestamp = 0.0
+            self._paused_timestamp = self.get_current_timestamp()
             self.paused = True
             return
 
@@ -362,17 +361,22 @@ class ReplayPlayer:
 
     def get_current_timestamp(self) -> float:
         """Get current playback timestamp."""
+        if self.completed:
+            return self._duration()
         if self.paused:
-            if not self.frames or not (
-                0 <= self.current_frame_index < len(self.frames)
-            ):
-                return 0.0
-            return self.frames[self.current_frame_index].timestamp
+            return self._paused_timestamp or 0.0
+        if not self.playing:
+            return 0.0
         return (time.time() - self.start_playback_time) * self.playback_speed
+
+    def _duration(self):
+        """Include the last recorded frame even when metadata is missing."""
+        last_timestamp = self.frames[-1].timestamp if self.frames else 0.0
+        return max(self.metadata.get("duration", 0.0), last_timestamp)
 
     def get_current_frame(self) -> Optional[GameFrame]:
         """Get the current frame based on playback time."""
-        if not self.playing or not self.frames:
+        if not self.frames or (not self.playing and not self.completed):
             return None
 
         current_time = self.get_current_timestamp()
@@ -384,9 +388,12 @@ class ReplayPlayer:
         ):
             self.current_frame_index += 1
 
-        if self.current_frame_index >= len(self.frames):
-            self.stop_playback()
-            return None
+        if current_time >= self._duration():
+            self.current_frame_index = len(self.frames) - 1
+            self.playing = False
+            self.paused = False
+            self.completed = True
+            self._paused_timestamp = None
 
         return self.frames[self.current_frame_index]
 
@@ -397,7 +404,12 @@ class ReplayPlayer:
             self.start_playback_time = time.time()
             return
 
-        timestamp = max(0, min(timestamp, self.metadata.get('duration', 0)))
+        timestamp = max(0, min(timestamp, self._duration()))
+        if self.completed:
+            self.completed = False
+            self.playing = True
+        if self.paused:
+            self._paused_timestamp = timestamp
 
         # Find closest frame (or clamp to last frame)
         self.current_frame_index = len(self.frames) - 1
@@ -425,7 +437,9 @@ class ReplayPlayer:
         """Get playback progress as percentage (0-100)."""
         if not self.frames:
             return 0.0
-        duration = self.metadata.get('duration', 1.0)
+        duration = self._duration()
+        if duration <= 0:
+            return 100.0 if self.completed else 0.0
         current = self.get_current_timestamp()
         return min(100.0, (current / duration) * 100.0)
 
