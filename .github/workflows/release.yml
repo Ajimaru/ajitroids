@@ -27,7 +27,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.ref || github.ref }}
+          ref: ${{ inputs.ref || format('refs/tags/{0}', inputs.tag || github.ref_name) }}
           fetch-depth: 0  # Fetch all history for setuptools-scm
 
       - name: Set version from tag for build
