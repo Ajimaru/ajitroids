@@ -10,21 +10,50 @@ from modul.particle import Particle
 
 class Boss(CircleShape):
     """Boss enemy with health, movement, and attack patterns."""
-    def __init__(self, level):
-        """Initialize boss with level-based stats."""
+
+    # Attack rotation per boss type. Each entry is cycled through by
+    # `attack_pattern`, so types differ in how they pressure the player.
+    ATTACK_PATTERNS = {
+        "sentinel": ("circle", "spiral", "targeted"),
+        "spiral": ("spiral", "spiral", "circle"),
+        "hunter": ("targeted", "targeted", "circle"),
+        "bulwark": ("circle", "circle", "spiral"),
+    }
+
+    # Visual signature per boss type.
+    SATELLITES = {"sentinel": 3, "spiral": 6, "hunter": 4, "bulwark": 8}
+    SATELLITE_SCALE = {"sentinel": 0.2, "spiral": 0.15, "hunter": 0.18, "bulwark": 0.26}
+    SATELLITE_ORBIT = {"sentinel": 1.2, "spiral": 1.45, "hunter": 1.1, "bulwark": 1.3}
+
+    def __init__(self, level, boss_type=None):
+        """Initialize boss with level- and type-based stats."""
         super().__init__(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2, C.BOSS_RADIUS)
         self.boss_level = level // 10
-        self.max_health = C.BOSS_BASE_HEALTH + (self.boss_level - 1) * C.BOSS_HEALTH_PER_LEVEL
+        # Encounters rotate through the boss roster so repeated fights differ.
+        if boss_type is None:
+            index = max(0, self.boss_level - 1) % len(C.BOSS_TYPES)
+            boss_type = C.BOSS_TYPES[index]
+        self.boss_type = boss_type
+        base_health = C.BOSS_BASE_HEALTH + (self.boss_level - 1) * C.BOSS_HEALTH_PER_LEVEL
+        health_scale = C.BOSS_TYPE_HEALTH_SCALE.get(boss_type, 1.0)
+        self.max_health = max(1, int(round(base_health * health_scale)))
         self.health = self.max_health
-        self.color = C.BOSS_COLOR
+        self.color = C.BOSS_TYPE_COLORS.get(boss_type, C.BOSS_COLOR)
+        self.move_speed = C.BOSS_MOVE_SPEED * C.BOSS_TYPE_SPEED_SCALE.get(boss_type, 1.0)
         self.pulse_timer = 0
         self.rotation = 0
         self.velocity = pygame.Vector2(0, 0)
         self.target_position = pygame.Vector2(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2)
         self.movement_timer = 0
         self.movement_phase = "center"
+        # Countdown to the next random-phase waypoint. A plain timer is used
+        # instead of a float-modulo check so retargeting is frame-rate safe.
+        self.retarget_timer = 0.0
         self.attack_timer = 0
-        self.attack_interval = C.BOSS_ATTACK_INTERVAL
+        self.attack_interval = max(
+            C.BOSS_ATTACK_INTERVAL_MIN,
+            C.BOSS_ATTACK_INTERVAL - self.boss_level * 0.05,
+        )
         self.attack_pattern = 0
         self.hit_flash = 0
         self.death_timer = -1
@@ -68,16 +97,21 @@ class Boss(CircleShape):
             self.movement_timer = 0
         if self.movement_phase == "center":
             target = pygame.Vector2(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT / 2)
-            self._move_towards(target, C.BOSS_MOVE_SPEED)
+            self._move_towards(target, self.move_speed)
         elif self.movement_phase == "random":
-            if self.movement_timer % 1.5 < dt:
+            # Pick a new waypoint once the old one is reached or the dwell time
+            # expires. Retargeting every 1.5s made the boss jitter in place
+            # because it never got near its target before being redirected.
+            self.retarget_timer -= dt
+            if self.retarget_timer <= 0 or self.position.distance_to(self.target_position) < self.radius:
                 margin = 100
                 self.target_position = pygame.Vector2(
                     random.randint(margin, C.SCREEN_WIDTH - margin), random.randint(margin, C.SCREEN_HEIGHT - margin)
                 )
-            self._move_towards(self.target_position, C.BOSS_MOVE_SPEED * 0.7)
+                self.retarget_timer = 4.0
+            self._move_towards(self.target_position, self.move_speed)
         elif self.movement_phase == "chase" and player_position:
-            self._move_towards(player_position, C.BOSS_MOVE_SPEED * 1.2)
+            self._move_towards(player_position, self.move_speed * 1.2)
 
     def _move_towards(self, target, speed, dt=0):
         """Move the boss toward `target` at given `speed`.
@@ -124,14 +158,25 @@ class Boss(CircleShape):
             return attack_data
         return None
 
+    def _scaled_count(self, base, per_level, minimum):
+        """Scale a projectile count with boss level but keep it readable.
+
+        The count is capped so high-level fights stay dodgeable; `minimum`
+        guarantees the pattern never degrades below its base shape.
+        """
+        count = base + self.boss_level * per_level
+        return max(minimum, min(count, C.BOSS_ATTACK_COUNT_MAX))
+
     def attack(self):
-        """Generate attack pattern data."""
-        if self.attack_pattern == 0:
-            return {"type": "circle", "count": 8 + self.boss_level * 2}
-        elif self.attack_pattern == 1:
-            return {"type": "spiral", "count": 12 + self.boss_level * 3}
-        else:
-            return {"type": "targeted", "count": 3 + self.boss_level}
+        """Generate attack pattern data for this boss type."""
+        patterns = self.ATTACK_PATTERNS.get(self.boss_type, self.ATTACK_PATTERNS["sentinel"])
+        pattern = patterns[self.attack_pattern % len(patterns)]
+
+        if pattern == "circle":
+            return {"type": "circle", "count": self._scaled_count(8, 1, 8)}
+        if pattern == "spiral":
+            return {"type": "spiral", "count": self._scaled_count(12, 1, 12)}
+        return {"type": "targeted", "count": self._scaled_count(3, 1, 3)}
 
     def take_damage(self, damage):
         """Apply damage and handle death."""
@@ -168,11 +213,12 @@ class Boss(CircleShape):
         pygame.draw.circle(screen, (0, 0, 0), self.position, inner_radius)
         core_radius = self.radius * 0.4 * pulse
         pygame.draw.circle(screen, color, self.position, core_radius)
-        satellite_count = 3 + self.boss_level
-        satellite_radius = self.radius * 0.2
+        # Satellite ring differs per type so each boss reads at a glance.
+        satellite_count = max(3, self.SATELLITES.get(self.boss_type, 3) + self.boss_level // 2)
+        satellite_radius = self.radius * self.SATELLITE_SCALE.get(self.boss_type, 0.2)
         for i in range(satellite_count):
             angle = math.radians(self.rotation + (i * 360 / satellite_count))
-            orbit_radius = self.radius * 1.2
+            orbit_radius = self.radius * self.SATELLITE_ORBIT.get(self.boss_type, 1.2)
             satellite_pos = (
                 self.position.x + math.cos(angle) * orbit_radius,
                 self.position.y + math.sin(angle) * orbit_radius,

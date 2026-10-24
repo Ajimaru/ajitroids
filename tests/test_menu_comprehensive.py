@@ -892,6 +892,24 @@ class TestSoundTestMenu:
         event = pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN)
         menu.update(0.1, [event])
 
+    @pytest.mark.parametrize("key,direction", [(pygame.K_UP, -1), (pygame.K_DOWN, 1)])
+    @pytest.mark.parametrize("window_size", [1, 16, 32])
+    def test_soundtestmenu_navigation_skips_spacers(self, key, direction, window_size):
+        """Every navigation step selects an action, including scrolling and wraparound."""
+        menu = SoundTestMenu()
+        menu.max_visible_items = window_size
+        menu.update_visible_items()
+        selectable = [i for i, (label, action) in enumerate(menu.sound_items) if label and action]
+        event = pygame.event.Event(pygame.KEYDOWN, key=key)
+        confirm = pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN)
+
+        for step in range(1, len(selectable) + 2):
+            menu.update(0.1, [event])
+            expected = selectable[(step * direction) % len(selectable)]
+            assert 0 <= menu.current_selection < len(menu.visible_items)
+            assert menu.scroll_offset + menu.current_selection == expected
+            assert menu.update(0.1, [confirm]) == menu.sound_items[expected][1]
+
     def test_soundtestmenu_return_key(self):
         """Test return key plays sound"""
         menu = SoundTestMenu()

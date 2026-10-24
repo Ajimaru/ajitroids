@@ -4,27 +4,40 @@ permissions:
   contents: write
 
 on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      ref:
+        required: false
+        type: string
+        default: ''
   push:
     tags:
       - 'v*'
+
+env:
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.ref || format('refs/tags/{0}', inputs.tag || github.ref_name) }}
           fetch-depth: 0  # Fetch all history for setuptools-scm
 
       - name: Set version from tag for build
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${RELEASE_TAG#v}"
           echo "Using version: ${VERSION}"
           echo "SETUPTOOLS_SCM_PRETEND_VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.11'
 
@@ -38,70 +51,132 @@ jobs:
           python -m build
           ls -lh dist/
 
-      - name: Create latest aliases
+      - name: Validate paths (prevent directory traversal)
         run: |
-          # Find the built distribution files (handles version normalization by setuptools)
-          WHL=$(ls -1 dist/ajitroids-*-py3-none-any.whl | head -1)
-          TAR=$(ls -1 dist/ajitroids-*.tar.gz | head -1)
-          if [ -z "$WHL" ] || [ -z "$TAR" ]; then
-            echo "Error: Distribution files not found in dist/"
-            ls -lh dist/
+          for f in dist/*; do
+            rel="$(realpath --relative-to="$(pwd)" "$f")"
+            case "$rel" in
+              .*) echo "Suspicious path: $f ($rel)"; exit 1 ;;
+            esac
+          done
+
+      - name: Determine prerelease
+        id: prerelease
+        run: |
+          TAG_LOWER="$(printf '%s' "$RELEASE_TAG" | tr '[:upper:]' '[:lower:]')"
+          # Prerelease = a/b/rc/dev segment in the VERSION part of the tag
+          # (PEP 440 style, digit or separator before it, e.g. 0.25.0rc1 or
+          # 0.25.0.dev6). The match must end at the tag end or at the local
+          # part ("+hash"), so a commit hash that happens to end in e.g.
+          # "b1" can never flip the detection.
+          if echo "$TAG_LOWER" | grep -qE '(^|[-.0-9])(a|b|rc|dev)([.-]?[0-9]+)?($|\+)'; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Stage release artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release_files
+
+          # Keep the wheel's original, PEP 427-compliant filename
+          # ({name}-{version}-{pytag}-{abitag}-{platformtag}.whl). pip rejects
+          # any renamed wheel ("wrong number of parts"), so it must never be
+          # aliased to a "-latest-" name.
+          cp dist/*.whl dist/*.tar.gz release_files/
+
+          # Also publish a source .zip (versioned + a stable -latest.zip). A zip
+          # has no strict filename parser, so it can be fetched from a fixed
+          # "…-latest.zip" URL. Build it from the sdist tarball rather than the
+          # working tree so it matches the released source exactly.
+          version="${RELEASE_TAG#v}"
+          zip_versioned="release_files/ajitroids-${version}.zip"
+          zip_latest="release_files/ajitroids-latest.zip"
+
+          shopt -s nullglob
+          sdist_candidates=(dist/*.tar.gz)
+          if (( ${#sdist_candidates[@]} != 1 )); then
+            echo "Expected exactly one sdist tarball, found ${#sdist_candidates[@]}" >&2
+            ls -la dist >&2 || true
             exit 1
           fi
-          cp "$WHL" dist/ajitroids-latest-py3-none-any.whl
-          cp "$TAR" dist/ajitroids-latest.tar.gz
-          ls -lh dist/
+          sdist="${sdist_candidates[0]}"
 
-      - name: Extract changelog for tag and build release notes
-        id: changelog
-        run: |
-          TAG="${{ github.ref_name }}"
-          # Escape special regex characters for safe use in awk pattern
-          TAG_ESCAPED=$(printf '%s\n' "${TAG}" | sed 's/[].*^$[()+?{|]/\\&/g')
-          awk "/^## ${TAG_ESCAPED} / {flag=1; next} /^## v/ {flag=0} flag" CHANGELOG.md > _changelog_section.txt
+          python - "$sdist" "$zip_versioned" <<'PY'
+          import sys
+          import tarfile
+          import zipfile
+          from pathlib import Path, PurePosixPath
 
-          # Find previous tag for Full Changelog link
-          CURRENT_TAG="${TAG#v}"  # Remove 'v' prefix
-          ALL_TAGS=$(git tag -l 'v*' --sort=-version:refname)
-          PREV_TAG=$(echo "$ALL_TAGS" | grep -v "^${TAG}$" | head -1)
+          tar_path = Path(sys.argv[1])
+          zip_path = Path(sys.argv[2])
+          zip_path.parent.mkdir(parents=True, exist_ok=True)
 
-          # Build release notes with changelog section and Full Changelog link
-          {
-            cat _changelog_section.txt
-            echo ""
-            if [ -n "$PREV_TAG" ]; then
-              echo "Full Changelog: [$PREV_TAG...$TAG](https://github.com/Ajimaru/ajitroids/compare/$PREV_TAG...$TAG)"
-            else
-              echo "Full Changelog: https://github.com/Ajimaru/ajitroids/releases/tag/$TAG"
-            fi
-          } > _release_notes.txt
+          with tarfile.open(tar_path, "r:gz") as tf, zipfile.ZipFile(
+              zip_path, "w", compression=zipfile.ZIP_DEFLATED
+          ) as zf:
+              for member in tf.getmembers():
+                  if not member.isfile():
+                      continue
 
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          cat _release_notes.txt >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+                  # Defensive: never let a tar member become a path-traversal
+                  # entry in the zip. Tar archives always use POSIX paths.
+                  member_path = PurePosixPath(member.name)
+                  if (
+                      member_path.is_absolute()
+                      or ".." in member_path.parts
+                      or ":" in member.name
+                      or member.name.startswith("\\")
+                  ):
+                      continue
+
+                  extracted = tf.extractfile(member)
+                  if extracted is None:
+                      continue
+
+                  zi = zipfile.ZipInfo(str(member_path))
+                  zi.external_attr = (member.mode & 0o777) << 16
+                  zf.writestr(zi, extracted.read())
+          PY
+
+          cp -f "$zip_versioned" "$zip_latest"
+          ls -lh release_files/
 
       - name: Check if release already exists
         id: check_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if gh release view "${{ github.ref_name }}" >/dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Create GitHub Release
-        if: steps.check_release.outputs.exists == 'false'
-        uses: softprops/action-gh-release@v3
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body: ${{ steps.changelog.outputs.changelog }}
-          draft: false
-          prerelease: false
+          script: |
+            try {
+              await github.rest.repos.getReleaseByTag({
+                ...context.repo,
+                tag: process.env.RELEASE_TAG,
+              });
+              core.setOutput('exists', 'true');
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              core.setOutput('exists', 'false');
+            }
+
+      - name: Create GitHub Release (draft)
+        if: steps.check_release.outputs.exists == 'false'
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: Release ${{ env.RELEASE_TAG }}
+          # Notes are generated by GitHub and grouped by PR label; the
+          # categories live in .github/release.yml. CHANGELOG.md is no longer
+          # the source of the release body, so a release no longer depends on
+          # the changelog having an entry for this exact tag.
+          generate_release_notes: true
+          # Always a draft: a release is published by hand once the notes and
+          # the attached artifacts have been eyeballed. Pushing a tag must
+          # never publish on its own.
+          draft: true
+          prerelease: ${{ steps.prerelease.outputs.is_prerelease }}
           files: |
-            dist/*.whl
-            dist/*.tar.gz
+            release_files/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

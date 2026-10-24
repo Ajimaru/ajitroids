@@ -1,0 +1,21 @@
+# Bandit configuration.
+#
+# B311 (random) is skipped repo-wide: this is a game, and every use of the
+# `random` module drives gameplay — asteroid velocities, starfield layout,
+# particle spread, powerup drop chance, enemy spawn timing. None of it is
+# used for tokens, passwords, keys or anything else security-relevant, so
+# the "not suitable for cryptographic purposes" note is noise. It fired 51
+# times and annotated unrelated pull requests with review comments.
+#
+# Everything else stays enabled. If cryptographic randomness is ever needed
+# (it is not today), use `secrets` and drop this skip.
+skips:
+  - B311
+
+exclude_dirs:
+  - ./tests
+  - ./scripts
+  - ./.venv
+  - ./venv
+  - ./build
+  - ./dist

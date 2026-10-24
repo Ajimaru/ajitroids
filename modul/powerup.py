@@ -9,6 +9,19 @@ from modul.circleshape import CircleShape
 
 class PowerUp(CircleShape):
     """Represents a power-up item that can be collected by the player."""
+    @classmethod
+    def spawn_drop(cls, x, y):
+        """Roll one drop and enforce the cap against the live power-up group."""
+        containers = getattr(cls, "containers", ())
+        if isinstance(containers, pygame.sprite.AbstractGroup):
+            group = containers
+        else:
+            group = containers[0] if containers else ()
+        count = sum(isinstance(obj, cls) for obj in group)
+        if count < C.POWERUP_MAX_COUNT and random.random() < C.POWERUP_SPAWN_CHANCE:
+            return cls(x, y)
+        return None
+
     def __init__(self, x, y, powerup_type=None):
         """Initialize a power-up with position and type."""
         super().__init__(x, y, C.POWERUP_RADIUS)

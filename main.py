@@ -25,6 +25,7 @@ from modul.boss import Boss
 from modul.bossprojectile import BossProjectile
 from modul.groups import collidable, drawable, updatable
 from modul.help_screen import HelpScreen
+from modul import input_utils
 from modul.highscore import HighscoreDisplay, HighscoreInput, HighscoreManager
 from modul.menu import (AchievementsMenu, ControlsMenu, CreditsScreen,
                         DifficultyMenu, GameOverScreen, LanguageMenu, MainMenu,
@@ -328,17 +329,116 @@ def main(args=None):
     max_enemy_ships = {"easy": 1, "normal": 2, "hard": 3}
     current_enemy_ships = []
 
+    boss = None
+    run_active = False
+    # Gameplay seconds survived in the current run. Accumulated from `dt` so
+    # time spent paused or in menus does not count toward "Survivor".
+    survival_time = 0.0
+    pause_binding_down = False
+
+    def finish_run():
+        """Finalize a run once, including quits, restarts, and abandonment."""
+        nonlocal run_active
+        if not run_active:
+            return
+        run_active = False
+        session_stats.end_game(score, level)
+        replay_recorder.stop_recording(score, level)
+        try:
+            saved_path = replay_recorder.save_replay()
+            logger.info("Replay saved: %s", saved_path)
+        except Exception:
+            logger.exception("Failed to save replay")
+
+    def quick_restart_game():
+        """Start a clean run using the actual state owned by this game loop."""
+        global player, score, lives, level, boss_active
+        global boss_defeated_timer, boss_defeated_message
+        global powerups_collected, asteroids_destroyed, shields_used
+        global triple_shots_used, speed_boosts_used
+        nonlocal boss, run_active, last_spawn_time, spawn_interval
+        nonlocal current_enemy_ships, level_up_timer, level_up_text, survival_time
+        finish_run()
+        for group in (asteroids, powerups, shots, particles, collidable, updatable, drawable):
+            for obj in list(group):
+                obj.kill()
+            group.empty()
+        score, lives, level = 0, PLAYER_LIVES, 1
+        survival_time = 0.0
+        boss = None
+        boss_active = False
+        boss_defeated_timer = 0
+        boss_defeated_message = ""
+        level_up_timer, level_up_text = 0, ""
+        powerups_collected = asteroids_destroyed = shields_used = 0
+        triple_shots_used = speed_boosts_used = 0
+        last_spawn_time = time.time()
+        spawn_interval = random.uniform(10, 30)
+        current_enemy_ships = []
+        asteroid_field.spawn_timer = 0
+        asteroid_field.asteroid_count, asteroid_field.spawn_interval = {
+            "easy": (3, 8.0), "normal": (5, 5.0), "hard": (7, 3.0)
+        }[difficulty]
+        player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, ship_manager.current_ship)
+        player.sounds = sounds
+        player.respawn()
+        audio_enhancements.low_health_announced = False
+        session_stats.start_game()
+        replay_recorder.start_recording(difficulty, ship_manager.current_ship)
+        run_active = True
+        for _ in range(3):
+            asteroid_field.spawn_random()
+        logger.info("Game started - Difficulty: %s, Ship: %s", difficulty, ship_manager.current_ship)
+        return "playing"
+
+    def damage_player():
+        """Apply one hit and make the terminal transition idempotent."""
+        global lives, game_state
+        if not run_active or player.invincible or player.shield_active:
+            return
+        lives = max(0, lives - 1)
+        session_stats.record_life_lost()
+        sounds.play_player_hit()
+        Particle.create_ship_explosion(player.position.x, player.position.y)
+        if lives > 0:
+            player.respawn()
+            return
+        logger.info("Game Over! Final Score: %s, Level: %s", score, level)
+        finish_run()
+        sounds.play_game_over()
+        audio_enhancements.trigger_announcement("game_over", priority=10.0)
+        game_over_screen.set_score(score)
+        game_over_screen.fade_in = True
+        game_over_screen.background_alpha = 0
+        game_state = "game_over"
+
     while True:
         events = pygame.event.get()
+        # Poll joystick bindings on their rising edge; keyboard uses KEYDOWN.
+        pause_binding = input_utils.get_action_binding("pause") or ""
+        pause_pressed = pause_binding.startswith("JOY") and input_utils.is_action_pressed("pause")
+        if game_state == "playing" and pause_pressed and not pause_binding_down:
+            game_state = "pause"
+            pause_menu.activate()
+        pause_binding_down = pause_pressed
+        menu_events = []
         for event in events:
             if event.type == pygame.QUIT:
                 logger.info("Game closing...")
-                if game_state in ("playing", "help"):
-                    session_stats.end_game(score, level)
+                finish_run()
                 if args.debug:
                     logger.info("\n" + session_stats.get_formatted_summary())
                 return
 
+            if game_state == "playing" and event.type == pygame.KEYDOWN:
+                if event.key in (pygame.K_ESCAPE, input_utils.get_action_keycode("pause")):
+                    game_state = "pause"
+                    pause_menu.activate()
+                    continue
+                if event.key == pygame.K_r:
+                    game_state = quick_restart_game()
+                    continue
+            menu_events.append(event)
             if event.type == pygame.KEYDOWN:
                 # Handle function keys with elif to prevent multiple messages
                 if event.key == pygame.K_F11:
@@ -374,6 +474,8 @@ def main(args=None):
                 elif event.key == pygame.K_b and player:
                     player.cycle_weapon()
 
+        events = menu_events
+
         if toggle_message and toggle_message_timer > 0:
             font = pygame.font.Font(None, 36)
             message_surface = font.render(toggle_message, True, (255, 255, 255))
@@ -382,14 +484,6 @@ def main(args=None):
             toggle_message_timer -= dt
             if toggle_message_timer <= 0:
                 toggle_message = None
-
-        if game_state == "playing" and event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                game_state = "pause"
-                pause_menu.activate()
-            elif event.key == pygame.K_r:
-                # Quick restart with 'R' key
-                game_state = quick_restart_game()
 
         screen.fill("black")
 
@@ -442,6 +536,7 @@ def main(args=None):
                 credits_screen.scroll_position = SCREEN_HEIGHT
 
             elif action == "exit":
+                finish_run()
                 return
 
             elif action == "achievements":
@@ -510,6 +605,7 @@ def main(args=None):
             for event in events:
                 if event.type == pygame.KEYDOWN:
                     if event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                        finish_run()
                         game_state = "main_menu"
                         main_menu.activate()
                     elif event.key == pygame.K_ESCAPE:
@@ -543,32 +639,7 @@ def main(args=None):
             for event in events:
                 if event.type == pygame.KEYDOWN:
                     if event.key in (pygame.K_RETURN, pygame.K_SPACE):
-                        game_state = "playing"
-                        score = 0
-                        lives = PLAYER_LIVES
-
-                        last_spawn_time = time.time()
-                        spawn_interval = random.uniform(10, 30)
-                        current_enemy_ships = []
-
-                        for asteroid in list(asteroids):
-                            asteroid.kill()
-                        for powerup in list(powerups):
-                            powerup.kill()
-                        for shot in list(shots):
-                            shot.kill()
-                        for particle in list(particles):
-                            particle.kill()
-
-                        for obj in list(collidable):
-                            if isinstance(obj, EnemyShip):
-                                obj.kill()
-
-                        player.position.x = RESPAWN_POSITION_X
-                        player.position.y = RESPAWN_POSITION_Y
-                        player.velocity = pygame.Vector2(0, 0)
-                        player.rotation = 0
-                        player.respawn()
+                        game_state = quick_restart_game()
                     elif event.key == pygame.K_ESCAPE:
                         game_state = "pause"
 
@@ -580,55 +651,7 @@ def main(args=None):
             ship_selection_menu.draw(screen)
 
             if action == "start_game":
-                selected_ship = ship_manager.current_ship
-
-                game_state = "playing"
-                score = 0
-                lives = PLAYER_LIVES
-                level = 1
-
-                # Start tracking session statistics
-                session_stats.start_game()
-
-                # Start recording replay
-                replay_recorder.start_recording(difficulty, selected_ship)
-
-                logger.info(f"Game started - Difficulty: {difficulty}, Ship: {selected_ship}")
-
-                last_spawn_time = time.time()
-                spawn_interval = random.uniform(10, 30)
-                current_enemy_ships = []
-
-                for asteroid in list(asteroids):
-                    asteroid.kill()
-                for powerup in list(powerups):
-                    powerup.kill()
-                for shot in list(shots):
-                    shot.kill()
-                for particle in list(particles):
-                    particle.kill()
-
-                for obj in list(collidable):
-                    if isinstance(obj, EnemyShip):
-                        obj.kill()
-
-                if player in updatable:
-                    player.kill()
-                player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, selected_ship)
-                player.sounds = sounds
-
-                if difficulty == "easy":
-                    asteroid_field.asteroid_count = 3
-                    asteroid_field.spawn_interval = 8.0
-                elif difficulty == "normal":
-                    asteroid_field.asteroid_count = 5
-                    asteroid_field.spawn_interval = 5.0
-                elif difficulty == "hard":
-                    asteroid_field.asteroid_count = 7
-                    asteroid_field.spawn_interval = 3.0
-
-                for _ in range(3):
-                    asteroid_field.spawn_random()
+                game_state = quick_restart_game()
 
             elif action == "difficulty_select":
                 game_state = "difficulty_select"
@@ -792,6 +815,13 @@ def main(args=None):
             # Cache current time for this frame
             current_frame_time = time.time()
 
+            # "Survivor" rewards staying alive in a single run. This runs
+            # before the mid-frame `continue`s below so a frame that ends the
+            # run still counts the time it was played.
+            survival_time += dt
+            if survival_time >= SURVIVOR_TIME and not achievement_system.is_unlocked("Survivor"):
+                achievement_system.unlock("Survivor")
+
             # Update performance profiler
             object_groups = {
                 'asteroids': asteroids,
@@ -804,6 +834,7 @@ def main(args=None):
 
             # Update audio enhancements with game state
             game_state_dict = {
+                'music_on': game_settings.music_on,
                 'asteroids_count': len(asteroids),
                 'enemies_count': len(current_enemy_ships),
                 'boss_active': boss_active,
@@ -815,9 +846,13 @@ def main(args=None):
             starfield.update(dt)
             starfield.draw(screen)
 
-            asteroid_field.update(dt)
+            # During a boss fight the arena is cleared and stays clear: new
+            # asteroids and enemy ships on top of the boss patterns left no
+            # room to dodge.
+            if not boss_active:
+                asteroid_field.update(dt)
 
-            if current_frame_time - last_spawn_time > spawn_interval:
+            if not boss_active and current_frame_time - last_spawn_time > spawn_interval:
                 if len(current_enemy_ships) < max_enemy_ships[difficulty]:
                     enemy_ship = EnemyShip(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 30)
                     updatable.add(enemy_ship)
@@ -833,7 +868,7 @@ def main(args=None):
             for obj in updatable:
                 if isinstance(obj, EnemyShip):
                     obj.update(dt, player.position)
-                else:
+                elif not isinstance(obj, Boss):
                     obj.update(dt)
 
             asteroid_list = list(asteroids)
@@ -860,36 +895,17 @@ def main(args=None):
                         a1.velocity, a2.velocity = v2, v1
 
             for asteroid in asteroids:
-                if asteroid.collides_with(player) and not player.invincible and not player.shield_active:
-                    lives -= 1
-                    sounds.play_player_hit()
-                    Particle.create_ship_explosion(player.position.x, player.position.y)
-
-                    if lives <= 0:
-                        logger.info(f"Game Over! Final Score: {score}, Level: {level}")
-                        session_stats.end_game(score, level)
-
-                        # Stop and save replay
-                        replay_recorder.stop_recording(score, level)
-                        try:
-                            saved_path = replay_recorder.save_replay()
-                            logger.info(f"Replay saved: {saved_path}")
-                        except Exception as e:
-                            logger.error(f"Failed to save replay: {e}")
-
-                        sounds.play_game_over()
-                        audio_enhancements.trigger_announcement("game_over", priority=10.0)
-                        game_over_screen.set_score(score)
-                        game_over_screen.fade_in = True
-                        game_over_screen.background_alpha = 0
-                        game_state = "game_over"
-                    else:
-                        session_stats.record_life_lost()
-                        player.respawn()
+                if asteroid.collides_with(player):
+                    damage_player()
+                    if game_state != "playing":
+                        break
 
                 for shot in shots:
                     if asteroid.collides_with(shot):
                         sounds.play_explosion()
+                        shot.kill()
+                        if not asteroid.split(shot.damage):
+                            break
 
                         original_size = asteroid.radius
                         is_large_asteroid = original_size >= ASTEROID_MIN_RADIUS * 2
@@ -919,39 +935,23 @@ def main(args=None):
                         if score >= 250000 and not achievement_system.is_unlocked("High Scorer"):
                             achievement_system.unlock("High Scorer")
 
-                        if is_large_asteroid and random.random() < POWERUP_SPAWN_CHANCE:
-                            if len(powerups) < POWERUP_MAX_COUNT:
-                                powerup_type = random.choice(POWERUP_TYPES)
-                                PowerUp(asteroid.position.x, asteroid.position.y, powerup_type)
-                                print(f"Power-Up {powerup_type} appears from large asteroid!")
-
-                        asteroid.split()
-                        shot.kill()
                         break
+
+            if game_state != "playing":
+                dt = clock.tick(60) / 1000.0
+                continue
 
             for obj in list(collidable):
                 if isinstance(obj, EnemyShip):
 
                     if obj.collides_with(player) and not player.invincible and not player.shield_active:
-                        lives -= 1
-                        sounds.play_player_hit()
-                        Particle.create_ship_explosion(player.position.x, player.position.y)
                         obj.split()
-
                         if obj in current_enemy_ships:
                             current_enemy_ships.remove(obj)
-
-                        if lives <= 0:
-                            logger.info(f"Game Over! Final Score: {score}, Level: {level}")
-                            session_stats.end_game(score, level)
-                            sounds.play_game_over()
-                            game_over_screen.set_score(score)
-                            game_over_screen.fade_in = True
-                            game_over_screen.background_alpha = 0
-                            game_state = "game_over"
-                        else:
-                            session_stats.record_life_lost()
-                            player.respawn()
+                        damage_player()
+                        if game_state != "playing":
+                            break
+                        continue
 
                     for shot in shots:
                         if obj.collides_with(shot):
@@ -965,6 +965,22 @@ def main(args=None):
                                 current_enemy_ships.remove(obj)
                             logger.debug(f"EnemyShip destroyed! Remaining count: {len(current_enemy_ships)}")
                             break
+
+            # Boss contact and projectile hits share the same damage/finalization path.
+            for obj in list(updatable):
+                if game_state != "playing":
+                    break
+                if isinstance(obj, (Boss, BossProjectile)) and obj.collides_with(player):
+                    if isinstance(obj, Boss) and obj.death_timer >= 0:
+                        continue
+                    if not player.invincible and not player.shield_active:
+                        if isinstance(obj, BossProjectile):
+                            obj.kill()
+                        damage_player()
+
+            if game_state != "playing":
+                dt = clock.tick(60) / 1000.0
+                continue
 
             for enemy_ship in current_enemy_ships:
                 for asteroid in asteroids:
@@ -1062,12 +1078,15 @@ def main(args=None):
                 if current_level % BOSS_LEVEL_INTERVAL == 0:
                     boss = Boss(current_level)
                     boss_active = True
-                    boss_projectiles = pygame.sprite.Group()
-                    level_up_text = "BOSS FIGHT!"
+                    level_up_text = f"BOSS FIGHT: {boss.boss_type.upper()}!"
                     level_up_timer = LEVEL_UP_DISPLAY_TIME * 2
                     for asteroid in list(asteroids):
                         asteroid.kill()
-                    print(f"Boss fight started at level {current_level}!")
+                    # Leftover enemy ships would keep shooting through the fight.
+                    for enemy_ship in list(current_enemy_ships):
+                        enemy_ship.kill()
+                    current_enemy_ships.clear()
+                    print(f"Boss fight started at level {current_level}! Type: {boss.boss_type}")
                     sounds.play_boss_music()
                     audio_enhancements.trigger_announcement("boss_incoming", priority=10.0)
 
@@ -1147,24 +1166,17 @@ def main(args=None):
                     if triple_shots_used >= 20 and not achievement_system.is_unlocked("Triple Threat"):
                         achievement_system.unlock("Triple Threat")
 
-            if current_level > level and current_level % BOSS_LEVEL_INTERVAL == 0:
-                boss = Boss(current_level)
-                boss_active = True
-                boss_projectiles = pygame.sprite.Group()
-                level_message = "BOSS FIGHT!"
-                level_message_timer = LEVEL_UP_DISPLAY_TIME
-                for asteroid in list(asteroids):
-                    asteroid.kill()
-
-            if boss_active and boss in updatable:
+            boss_attack = None
+            if boss is not None and boss in updatable:
                 boss_attack = boss.update(dt, player.position)
 
+            if boss_active and boss is not None and boss in updatable:
                 if boss_attack:
                     if boss_attack["type"] == "circle":
                         for i in range(boss_attack["count"]):
                             angle = math.radians(i * (360 / boss_attack["count"]))
                             velocity = pygame.Vector2(math.cos(angle), math.sin(angle)) * BOSS_PROJECTILE_SPEED
-                            BossProjectile(boss.position.x, boss.position.y, velocity, "normal")
+                            BossProjectile.spawn(boss.position.x, boss.position.y, velocity, "normal")
                             sounds.play_enemy_shoot()
 
                     elif boss_attack["type"] == "spiral":
@@ -1172,20 +1184,21 @@ def main(args=None):
                         for i in range(boss_attack["count"]):
                             angle = math.radians(base_angle + i * (360 / boss_attack["count"]))
                             velocity = pygame.Vector2(math.cos(angle), math.sin(angle)) * BOSS_PROJECTILE_SPEED
-                            BossProjectile(boss.position.x, boss.position.y, velocity, "normal")
+                            BossProjectile.spawn(boss.position.x, boss.position.y, velocity, "normal")
                             sounds.play_enemy_shoot()
 
                     elif boss_attack["type"] == "targeted":
                         if player in updatable:
-                            direction = (player.position - boss.position).normalize()
+                            direction = player.position - boss.position
+                            direction = direction.normalize() if direction.length_squared() else pygame.Vector2(0, 1)
 
                             velocity = direction * BOSS_PROJECTILE_SPEED
-                            BossProjectile(boss.position.x, boss.position.y, velocity, "homing")
+                            BossProjectile.spawn(boss.position.x, boss.position.y, velocity, "homing")
 
                             for i in range(1, boss_attack["count"]):
                                 offset = 10 * i if i % 2 == 0 else -10 * i
                                 offset_dir = direction.rotate(offset)
-                                BossProjectile(boss.position.x, boss.position.y, offset_dir * BOSS_PROJECTILE_SPEED, "normal")
+                                BossProjectile.spawn(boss.position.x, boss.position.y, offset_dir * BOSS_PROJECTILE_SPEED, "normal")
                         sounds.play_enemy_shoot()
 
                 for shot in shots:
@@ -1215,9 +1228,6 @@ def main(args=None):
 
                             boss_defeated_timer = 3.0
                             boss_defeated_message = "BOSS DEFEATED! +1 LIFE!"
-
-            achievement_notifications.update(dt)
-            achievement_notifications.draw(screen)
 
             # Draw voice announcement text
             announcement_text = audio_enhancements.get_announcement_text()
@@ -1392,6 +1402,13 @@ def main(args=None):
                 game_state = "playing"
                 help_screen.deactivate()
 
+        # Achievement notifications are drawn for every game state. Collision
+        # handling can switch `game_state` mid-frame and `continue`, so drawing
+        # these inside the "playing" branch skipped them entirely -- and because
+        # their lifetime is wall-clock based they then expired unseen.
+        achievement_notifications.update(dt)
+        achievement_notifications.draw(screen)
+
         # Draw FPS counter if enabled
         if show_fps:
             fps = clock.get_fps()
@@ -1510,72 +1527,6 @@ def toggle_fullscreen():
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         print("Switched to windowed mode")
 
-
-def quick_restart_game():
-    """Quickly restart the game without going through menus."""
-    global score, lives, level, last_spawn_time, spawn_interval, current_enemy_ships
-    global level_up_timer, level_up_text, boss_active, boss_defeated_timer, boss_defeated_message
-    global powerups_collected, asteroids_destroyed, shields_used, triple_shots_used, speed_boosts_used
-
-    # Stop any ongoing replay recording
-    if replay_recorder.recording:
-        replay_recorder.stop_recording(score, level)
-        try:
-            saved_path = replay_recorder.save_replay()
-            logger.info(f"Replay saved before restart: {saved_path}")
-        except OSError as e:
-            logger.error(f"Failed to save replay: {e}")
-
-    # Reset game state
-    score = 0
-    lives = PLAYER_LIVES
-    level = 1
-    level_up_timer = 0
-    level_up_text = ""
-    boss_active = False
-    boss_defeated_timer = 0
-    boss_defeated_message = ""
-
-    # Reset tracking stats
-    powerups_collected = 0
-    asteroids_destroyed = 0
-    shields_used = 0
-    triple_shots_used = 0
-    speed_boosts_used = 0
-
-    # Reset enemy spawn timers
-    last_spawn_time = time.time()
-    spawn_interval = random.uniform(10, 30)
-    current_enemy_ships = []
-
-    # Clear all game objects in one pass
-    for group in (asteroids, powerups, shots, particles, collidable, updatable):
-        for obj in list(group):
-            if obj is player:
-                continue
-            obj.kill()
-
-    # Respawn player
-    if player:
-        player.respawn()
-        player.position.x = RESPAWN_POSITION_X
-        player.position.y = RESPAWN_POSITION_Y
-        player.velocity.update(0, 0)
-        player.rotation = 0
-
-    # Start new game session
-    session_stats.start_game()
-
-    # Start new replay recording
-    selected_ship = ship_manager.current_ship
-    replay_recorder.start_recording(difficulty, selected_ship)
-
-    # Spawn initial asteroids
-    for _ in range(3):
-        asteroid_field.spawn_random()
-
-    logger.info("Quick restart: Game restarted")
-    return "playing"
 
 
 if __name__ == "__main__":

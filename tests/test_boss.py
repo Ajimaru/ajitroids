@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 import pygame
 import pytest
 
+import modul.constants as C
 from modul.boss import Boss
 from modul.constants import (BOSS_ATTACK_INTERVAL, BOSS_BASE_HEALTH,
                              BOSS_COLOR, BOSS_DEATH_DURATION,
@@ -55,9 +56,13 @@ class TestBoss:
         assert boss.hit_flash == 0
 
     def test_boss_health_scaling(self, mock_pygame):
-        """Test boss health scales correctly with level"""
-        level_10_boss = Boss(10)  # boss_level = 1
-        level_100_boss = Boss(100)  # boss_level = 10
+        """Test boss health scales correctly with level
+
+        Health is the level-based base scaled by the boss type's multiplier,
+        so both bosses are pinned to a single type to isolate level scaling.
+        """
+        level_10_boss = Boss(10, boss_type="sentinel")  # boss_level = 1
+        level_100_boss = Boss(100, boss_type="sentinel")  # boss_level = 10
 
         expected_level_10_health = BOSS_BASE_HEALTH + (1 - 1) * BOSS_HEALTH_PER_LEVEL  # 20
         expected_level_100_health = BOSS_BASE_HEALTH + (10 - 1) * BOSS_HEALTH_PER_LEVEL  # 20 + 90 = 110
@@ -65,6 +70,46 @@ class TestBoss:
         assert level_10_boss.max_health == expected_level_10_health
         assert level_100_boss.max_health == expected_level_100_health
         assert level_100_boss.max_health > level_10_boss.max_health
+
+    def test_boss_types_rotate_between_encounters(self, mock_pygame):
+        """Successive boss encounters use different boss types"""
+        types = [Boss(level).boss_type for level in (10, 20, 30, 40)]
+
+        assert len(set(types)) == 4, types
+        assert all(t in C.BOSS_TYPES for t in types)
+
+    def test_boss_type_affects_stats_and_patterns(self, mock_pygame):
+        """Each boss type has its own health, speed and attack rotation"""
+        bulwark = Boss(50, boss_type="bulwark")
+        hunter = Boss(50, boss_type="hunter")
+
+        # The bulwark is the tanky, slow type; the hunter is fragile and fast.
+        assert bulwark.max_health > hunter.max_health
+        assert bulwark.move_speed < hunter.move_speed
+        assert Boss.ATTACK_PATTERNS["hunter"] != Boss.ATTACK_PATTERNS["bulwark"]
+
+    def test_boss_attack_count_is_capped(self, mock_pygame):
+        """Projectile counts stay readable even at extreme levels"""
+        boss = Boss(1000, boss_type="sentinel")
+
+        for pattern in range(3):
+            boss.attack_pattern = pattern
+            assert boss.attack()["count"] <= C.BOSS_ATTACK_COUNT_MAX
+
+    def test_boss_random_phase_reaches_its_waypoint(self, mock_pygame):
+        """The boss must actually traverse the arena, not jitter in place"""
+        boss = Boss(10, boss_type="sentinel")
+        boss.movement_phase = "random"
+        boss.movement_timer = 0.0
+        boss.retarget_timer = 4.0
+        boss.target_position = pygame.Vector2(C.SCREEN_WIDTH - 150, C.SCREEN_HEIGHT - 150)
+        start = pygame.Vector2(boss.position)
+
+        for _ in range(120):  # 2 seconds at 60 FPS
+            boss._update_movement(1 / 60, None)
+            boss.position += boss.velocity * (1 / 60)
+
+        assert boss.position.distance_to(start) > 150
 
     def test_boss_update_normal(self, mock_pygame):
         """Test boss update in normal state"""

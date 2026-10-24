@@ -38,6 +38,11 @@ def load_locale(lang_code: str):
         return {}
 
 
+def reload_locales():
+    """Clear the locale cache so subsequent lookups re-read the JSON files."""
+    _locales_cache.clear()
+
+
 def t(key: str, lang_code: str = "en"):
     """Return the localized string for the given key and language code."""
     locale = load_locale(lang_code)

@@ -1,0 +1,33 @@
+## Global owner
+
+* @Ajimaru
+
+## Game core
+
+main.py @Ajimaru
+modul/constants.py @Ajimaru
+modul/settings.py @Ajimaru
+modul/_version.py @Ajimaru
+VERSION @Ajimaru
+
+## Assets & localization
+
+modul/assets/ @Ajimaru
+modul/locales/ @Ajimaru
+
+## Project / community docs
+
+README.md @Ajimaru
+CHANGELOG.md @Ajimaru
+CONTRIBUTING.md @Ajimaru
+SECURITY.md @Ajimaru
+CODE_OF_CONDUCT.md @Ajimaru
+Roadmap.md @Ajimaru
+docs/ @Ajimaru
+
+## Build & CI
+
+pyproject.toml @Ajimaru
+setup.cfg @Ajimaru
+uv.lock @Ajimaru
+.github/ @Ajimaru

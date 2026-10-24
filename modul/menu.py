@@ -29,6 +29,7 @@ def _gettext(key):
     except Exception:
         return key
 
+
 # Backwards-compatibility: expose a `gettext` name to call the helper
 gettext = _gettext
 
@@ -780,6 +781,7 @@ main_menu = None
 options_menu = None
 controls_menu = None
 
+
 class LanguageMenu(Menu):
     """
     Menu for selecting the application's language.
@@ -978,7 +980,11 @@ class VoiceAnnouncementsMenu:
             MenuItem(gettext("low_health") + ": OFF", "toggle_low_health"),
             MenuItem(gettext("powerup") + ": OFF", "toggle_powerup"),
             # TTS voice selection (if available)
-            MenuItem(gettext("tts_voice_label") + f": {getattr(settings, 'tts_voice', '') or gettext('default')}", "tts_voice"),
+            MenuItem(
+                gettext("tts_voice_label")
+                + f": {getattr(settings, 'tts_voice', '') or gettext('default')}",
+                "tts_voice",
+            ),
             MenuItem("", None),
             MenuItem(gettext("back"), "back"),
         ]
@@ -1351,33 +1357,23 @@ class SoundTestMenu:
 
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    self.current_selection -= 1
+                if event.key in (pygame.K_UP, pygame.K_DOWN):
+                    direction = -1 if event.key == pygame.K_UP else 1
+                    index = self.scroll_offset + self.current_selection
+                    for _ in range(len(self.sound_items)):
+                        index = (index + direction) % len(self.sound_items)
+                        label, action = self.sound_items[index]
+                        if label and action:
+                            break
+                    else:
+                        continue
 
-                    if self.current_selection < 0:
-                        if self.scroll_offset > 0:
-                            self.scroll_offset -= 1
-                            self.current_selection = 0
-                            self.update_visible_items()
-                        else:
-                            self.scroll_offset = max(0, len(self.sound_items) - self.max_visible_items)
-                            self.current_selection = min(
-                                self.max_visible_items - 1, len(self.sound_items) - 1 - self.scroll_offset
-                            )
-                            self.update_visible_items()
-
-                elif event.key == pygame.K_DOWN:
-                    self.current_selection += 1
-
-                    if self.current_selection >= len(self.visible_items):
-                        if self.scroll_offset + self.max_visible_items < len(self.sound_items):
-                            self.scroll_offset += 1
-                            self.current_selection = len(self.visible_items) - 1
-                            self.update_visible_items()
-                        else:
-                            self.scroll_offset = 0
-                            self.current_selection = 0
-                            self.update_visible_items()
+                    if index < self.scroll_offset:
+                        self.scroll_offset = index
+                    elif index >= self.scroll_offset + self.max_visible_items:
+                        self.scroll_offset = index - self.max_visible_items + 1
+                    self.current_selection = index - self.scroll_offset
+                    self.update_visible_items()
 
                 elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                     if 0 <= self.current_selection < len(self.visible_items):
@@ -1607,7 +1603,6 @@ class SoundTestMenu:
             self.last_played = gettext("sound_played").format(name=gettext("menu_confirm"))
             self.last_played_timer = 2.0
 
-
         elif action == "test_all":
             import threading
             import time
@@ -1650,7 +1645,6 @@ class SoundTestMenu:
                         self.last_played = "Playing all sounds..."
                     self.last_played_timer = 8.0
 
-
         elif action == "back":
             with self._sound_state_lock:
                 if self.playing_all_sounds:
@@ -1662,7 +1656,22 @@ class SoundTestMenu:
         return None
 
     def draw(self, screen):
-        """Implementation detail: see method body for behavior."""
+        """Render the scrollable sound list, scroll hints and status line.
+
+        Entries are drawn from `self.visible_items`, so the highlight index
+        `self.current_selection` is relative to the visible window rather than
+        to `self.sound_items`. A `("", "")` entry is a spacer and is skipped.
+
+        Args:
+            screen: Surface to draw on.
+        """
+        try:
+            from modul.i18n import gettext
+        except Exception:  # pylint: disable=broad-exception-caught
+            def gettext(key):
+                """Fallback used when i18n is unavailable; returns key unchanged."""
+                return key
+
         background = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         background.fill((0, 0, 0, self.background_alpha))
         screen.blit(background, (0, 0))
@@ -1672,102 +1681,55 @@ class SoundTestMenu:
         title_rect = title_surface.get_rect(center=(C.SCREEN_WIDTH / 2, 60))
         screen.blit(title_surface, title_rect)
 
+        item_font = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE)
         indicator_font = pygame.font.Font(None, int(C.MENU_ITEM_FONT_SIZE * 0.7))
 
-        try:
-            from modul.i18n import gettext
-        except Exception:
-            def gettext(key):
-                """Implementation detail: see method body for behavior."""
-                return key
+        item_spacing = 28
+        start_y = 130
 
-class TTSVoiceMenu(Menu):
-    """Menu to select a TTS voice from available system voices."""
+        for index, (label, action) in enumerate(self.visible_items):
+            # ("", "") entries are spacers between sound groups.
+            if not label and not action:
+                continue
 
-    def __init__(self, settings):
-        """TODO: add docstring."""
-        try:
-            from modul.i18n import gettext
-        except Exception:  # pylint: disable=broad-exception-caught
-            def gettext(k):
-                """TODO: add docstring."""
-                return k
+            selected = index == self.current_selection
+            color = pygame.Color(
+                C.MENU_SELECTED_COLOR if selected else C.MENU_UNSELECTED_COLOR
+            )
+            text = f"> {label} <" if selected else label
+            item_surface = item_font.render(text, True, color)
+            item_rect = item_surface.get_rect(
+                center=(C.SCREEN_WIDTH / 2, start_y + index * item_spacing)
+            )
+            screen.blit(item_surface, item_rect)
 
-        super().__init__(gettext("tts_voice_label").upper())
-        self.settings = settings
-        self.add_item(gettext("default"), "tts_voice:__default__")
+        # Scroll hints, shown only when there is something off-screen.
+        hint_color = pygame.Color(C.MENU_UNSELECTED_COLOR)
+        if self.scroll_offset > 0:
+            up_surface = indicator_font.render(gettext("scroll_up"), True, hint_color)
+            screen.blit(up_surface, up_surface.get_rect(center=(C.SCREEN_WIDTH / 2, start_y - 26)))
 
-        # Try to enumerate voices via TTS manager
-        try:
-            from modul.tts import get_tts_manager
-            manager = get_tts_manager()
-            voices = []
-            if manager and getattr(manager, "engine", None):
-                voices = manager.engine.getProperty("voices") or []
-            for v in voices:
-                # Some voice objects expose name and id
-                name = getattr(v, "name", None) or getattr(v, "id", str(v))
-                vid = getattr(v, "id", name)
-                self.add_item(name, f"tts_voice:{vid}")
-        except Exception:  # pylint: disable=broad-exception-caught
-            # If enumeration fails, provide no extra choices
-            pass
+        if self.scroll_offset + self.max_visible_items < len(self.sound_items):
+            down_surface = indicator_font.render(gettext("scroll_down"), True, hint_color)
+            down_y = start_y + len(self.visible_items) * item_spacing + 6
+            screen.blit(down_surface, down_surface.get_rect(center=(C.SCREEN_WIDTH / 2, down_y)))
 
-        self.add_item(gettext("back"), "back")
+        # Status line: what was played last, or the "play all" progress.
+        status = gettext("playing_all_sounds") if self.playing_all_sounds else self.last_played
+        if status:
+            status_surface = indicator_font.render(status, True, pygame.Color(C.MENU_SELECTED_COLOR))
+            screen.blit(
+                status_surface,
+                status_surface.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT - 70)),
+            )
 
-    def update(self, dt, events):
-        # Use base menu navigation
-        """TODO: add docstring."""
-        result = super().update(dt, events)
-        if result:
-            return result
-        return None
-
-    def handle_action(self, action):
-        # Expected action formats: 'tts_voice:<id>' or 'tts_voice:__default__'
-        """TODO: add docstring."""
-        if action == "back":
-            return "options"
-        if action and action.startswith("tts_voice:"):
-            vid = action.split(":", 1)[1]
-            if vid == "__default__":
-                self.settings.tts_voice = ""
-                self.settings.tts_voice_language = self.settings.language
-            else:
-                self.settings.tts_voice = vid
-                # Try to derive language from available voices
-                try:
-                    from modul.tts import get_tts_manager
-
-                    manager = get_tts_manager()
-                    if manager and getattr(manager, "engine", None):
-                        voices = manager.engine.getProperty("voices") or []
-                        for v in voices:
-                            if getattr(v, "id", None) == vid or getattr(v, "name", None) == vid:
-                                langs = getattr(v, "languages", []) or []
-                                for lang in langs:
-                                    try:
-                                        lang_str = lang.decode() if isinstance(lang, (bytes, bytearray)) else str(lang)
-                                        # pick primary subtag like 'en' from en_US
-                                        if len(lang_str) >= 2:
-                                            code = lang_str[:2]
-                                            self.settings.tts_voice_language = code
-                                            break
-                                    except Exception:  # pylint: disable=broad-exception-caught
-                                        continue
-                                break
-                    # Attempt to apply the voice immediately to the running manager
-                    try:
-                        if manager:
-                            manager.set_preferred_voice(vid, self.settings.tts_voice_language)
-                    except Exception:  # pylint: disable=broad-exception-caught
-                        pass
-                except Exception:  # pylint: disable=broad-exception-caught
-                    pass
-            # Persist selection
-            self.settings.save()
-        return None
-
+        instructions_surface = indicator_font.render(
+            gettext("replay_instructions"), True, hint_color
+        )
+        screen.blit(
+            instructions_surface,
+            instructions_surface.get_rect(center=(C.SCREEN_WIDTH / 2, C.SCREEN_HEIGHT - 40)),
+        )
 
 
 # --- AchievementsMenu class ---

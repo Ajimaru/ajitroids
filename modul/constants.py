@@ -156,19 +156,58 @@ LASER_AMMO = 15
 MISSILE_AMMO = 8
 SHOTGUN_AMMO = 12
 
+# Seconds of uninterrupted gameplay required for the "Survivor" achievement.
+SURVIVOR_TIME = 600.0
+
 BOSS_LEVEL_INTERVAL = 10
 BOSS_RADIUS = 50
 BOSS_COLOR = (128, 0, 128)
 BOSS_BASE_HEALTH = 20
 BOSS_HEALTH_PER_LEVEL = 10
-BOSS_MOVE_SPEED = 70
+BOSS_MOVE_SPEED = 140
 BOSS_ATTACK_INTERVAL = 2.0
 BOSS_DEATH_DURATION = 3.0
 BOSS_SCORE = 500
 
 BOSS_PROJECTILE_RADIUS = 8
-BOSS_PROJECTILE_SPEED = 200
+BOSS_PROJECTILE_SPEED = 150
 BOSS_PROJECTILE_COLORS = {"normal": (200, 0, 200), "homing": (255, 0, 0), "explosive": (255, 128, 0)}
+
+# Projectiles per attack are capped so late-level fights stay readable instead
+# of burying the screen. Without a cap the count grows with every boss level.
+BOSS_ATTACK_COUNT_MAX = 12
+# Hard ceiling on boss projectiles alive at once. Attacks fire faster than the
+# projectiles leave the arena, so without this the waves overlap and the screen
+# fills up with bullets that are impossible to dodge.
+BOSS_PROJECTILE_MAX_ALIVE = 18
+# Seconds a boss projectile stays alive. It must be shorter than the attack
+# interval times the number of waves that may overlap.
+BOSS_PROJECTILE_LIFETIME = 2.5
+# Minimum delay between attacks; the boss waits longer than this at low levels
+# so there is a gap to move and shoot in.
+BOSS_ATTACK_INTERVAL_MIN = 1.6
+# Boss types rotate per encounter, each with its own attack patterns and look.
+BOSS_TYPES = ("sentinel", "spiral", "hunter", "bulwark")
+BOSS_TYPE_COLORS = {
+    "sentinel": (128, 0, 128),
+    "spiral": (0, 128, 160),
+    "hunter": (170, 40, 40),
+    "bulwark": (90, 110, 50),
+}
+# Per-type health multiplier: the slow bulwark is tanky, the hunter is fragile.
+BOSS_TYPE_HEALTH_SCALE = {
+    "sentinel": 1.0,
+    "spiral": 0.9,
+    "hunter": 0.8,
+    "bulwark": 1.3,
+}
+# Per-type movement multiplier applied on top of BOSS_MOVE_SPEED.
+BOSS_TYPE_SPEED_SCALE = {
+    "sentinel": 1.0,
+    "spiral": 1.15,
+    "hunter": 1.5,
+    "bulwark": 0.7,
+}
 
 
 def generate_default_highscores():

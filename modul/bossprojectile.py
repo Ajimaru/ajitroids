@@ -8,12 +8,33 @@ from modul.circleshape import CircleShape
 
 class BossProjectile(CircleShape):
     """Projectile fired by boss enemies."""
+
+    @classmethod
+    def spawn(cls, x, y, velocity, projectile_type="normal"):
+        """Create a projectile, retiring the oldest ones past the live cap.
+
+        Boss attacks fire faster than projectiles leave the arena, so the waves
+        overlap. Without a ceiling the screen fills with bullets the player
+        cannot dodge.
+        """
+        containers = getattr(cls, "containers", ())
+        if isinstance(containers, pygame.sprite.AbstractGroup):
+            group = containers
+        else:
+            group = containers[0] if containers else ()
+
+        live = [obj for obj in group if isinstance(obj, cls)]
+        for stale in live[: max(0, len(live) + 1 - C.BOSS_PROJECTILE_MAX_ALIVE)]:
+            stale.kill()
+
+        return cls(x, y, velocity, projectile_type)
+
     def __init__(self, x, y, velocity, projectile_type="normal"):
         """Initialize boss projectile with position, velocity, and type."""
         super().__init__(x, y, C.BOSS_PROJECTILE_RADIUS)
         self.velocity = velocity
         self.type = projectile_type
-        self.lifetime = 5.0
+        self.lifetime = C.BOSS_PROJECTILE_LIFETIME
         self.damage = 1
         self.color = C.BOSS_PROJECTILE_COLORS.get(self.type, C.BOSS_COLOR)
         self.rotation = 0
