@@ -1,0 +1,80 @@
+name: Bug report
+description: Something in the game does not work as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. Please fill in what you can —
+        the version and the steps to reproduce matter most.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the bug, and what you expected instead.
+      placeholder: The ship keeps firing after the boss dies; I expected it to stop.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The exact sequence that triggers it.
+      placeholder: |
+        1. Start a new game on Normal
+        2. Reach wave 5 and defeat the boss
+        3. Watch the weapon indicator
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Game version
+      description: "Shown in the main menu, or run: `python -c \"import modul._version as v; print(v.version)\"`"
+      placeholder: "0.24.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      description: "Output of `python --version`"
+      placeholder: "3.12.4"
+    validations:
+      required: true
+
+  - type: input
+    id: pygame-version
+    attributes:
+      label: pygame version
+      description: "Output of `python -c \"import pygame; print(pygame.version.ver)\"`"
+      placeholder: "2.6.1"
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Traceback or console output
+      description: Paste any error output. It will be formatted automatically.
+      render: shell
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Screenshots, a replay file, or other context.

@@ -1,0 +1,42 @@
+name: Bandit SARIF
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [dev, main]
+  schedule:
+    # Weekly. A daily scan on a game with a small, slow-moving attack surface
+    # only produces identical findings; the push/PR triggers catch real changes.
+    - cron: "0 3 * * 1"
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  bandit:
+    name: Bandit security scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install bandit with SARIF support
+        run: pip install "bandit[sarif]"
+
+      - name: Run Bandit
+        # `|| true` on purpose: findings belong in the Security tab, not in a
+        # red build. The upload step below is what surfaces them.
+        run: |
+          bandit -r modul/ main.py -f sarif -o bandit.sarif || true
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          sarif_file: bandit.sarif

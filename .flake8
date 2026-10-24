@@ -1,4 +1,6 @@
 [flake8]
 max-line-length = 127
 extend-ignore = E128,F405
-exclude = build, venv, __pycache__
+# `.venv` (leading dot) was missing, so `flake8 .` scanned site-packages and
+# reported thousands of violations from third-party code.
+exclude = .git, .venv, venv, build, dist, __pycache__, .eggs, *.egg-info

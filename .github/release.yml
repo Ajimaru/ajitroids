@@ -1,0 +1,46 @@
+# Categories for GitHub's generated release notes.
+#
+# The release workflow sets `generate_release_notes: true`, so these categories
+# are what shapes every release body. The label list below is kept in sync with
+# the labels that actually exist in this repository (`gh label list`) — a label
+# named here that nobody can apply silently groups nothing.
+#
+# A pull request is filed by its labels, and lands in the FIRST category below
+# whose labels it carries — so the order is a priority rule, not cosmetic. A PR
+# labelled both `bug` and `enhancement` shows up under New Features only, never
+# twice. The order puts what users care about first and pushes dependency/CI
+# noise to the bottom.
+#
+# The catch-all `*` at the end means an unlabelled PR is still listed instead of
+# being dropped silently.
+changelog:
+  categories:
+    - title: "⚠️ Breaking Changes"
+      labels: ["breaking"]
+    - title: "🔒 Security"
+      labels: ["security"]
+    - title: "✨ New Features"
+      labels: ["enhancement", "feature"]
+    - title: "🐛 Bug Fixes"
+      labels: ["bug", "fix"]
+    - title: "⚡ Performance"
+      labels: ["performance"]
+    - title: "♻️ Refactoring"
+      labels: ["refactor"]
+    - title: "📚 Documentation"
+      labels: ["documentation"]
+    - title: "🧪 Tests"
+      labels: ["test"]
+    # Dependabot always applies `dependencies` alongside its language labels
+    # (`python`, `python:uv`, `github_actions`), so matching on `dependencies`
+    # alone is enough. The language labels are deliberately NOT listed: they
+    # describe which files changed, not the intent, and listing them here would
+    # file a hand-written Python change under Dependencies.
+    - title: "📦 Dependencies"
+      labels: ["dependencies"]
+    - title: "🔧 CI / Tooling"
+      labels: ["ci", "tooling", "chore", "github_actions"]
+    - title: "🧩 Other Changes"
+      labels: ["*"]
+  exclude:
+    labels: ["skip-changelog", "duplicate", "invalid", "wontfix"]
