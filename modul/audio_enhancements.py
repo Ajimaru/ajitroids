@@ -7,7 +7,11 @@ This module provides three major audio enhancements:
 """
 
 import os
+import shutil
+import subprocess
+import tempfile
 import time
+import wave
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -257,19 +261,107 @@ class VoiceAnnouncement:
             if event_type in self.announcement_enabled:
                 self.announcement_enabled[event_type] = enabled
 
-    def _generate_voice_file(self, text: str, output_path: str) -> bool:
-        """Generate voice audio file using TTS"""
-        if not self.tts_initialized or not self.tts_engine:
+    @staticmethod
+    def _is_loadable_wav(path: str) -> bool:
+        """Report whether a file is a RIFF/WAVE file pygame can actually load."""
+        try:
+            with wave.open(path) as handle:
+                return handle.getnframes() > 0
+        except Exception:  # pylint: disable=broad-exception-caught
+            return False
+
+    @staticmethod
+    def _convert_to_wav(source: str, target: str) -> bool:
+        """Convert an audio file to RIFF/WAVE in place of `target`.
+
+        pyttsx3 delegates to the platform speech engine, and on macOS that is
+        `nsss`, which always writes AIFF-C no matter what extension it is
+        given. pygame cannot load compressed AIFF-C, so the file has to be
+        converted. `afconvert` ships with macOS, so this needs no extra
+        dependency; on Linux and Windows the engines (espeak / SAPI5) already
+        write RIFF/WAVE and this never runs.
+        """
+        converter = shutil.which("afconvert")
+        if not converter:
             return False
 
         try:
-            # Save to file
-            self.tts_engine.save_to_file(text, output_path)
-            self.tts_engine.runAndWait()
-            return os.path.exists(output_path)
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            print(f"Error generating voice file: {e}")
+            result = subprocess.run(
+                [converter, "-f", "WAVE", "-d", "LEI16", source, target],
+                capture_output=True,
+                check=False,
+                timeout=30,
+            )
+        except (OSError, subprocess.SubprocessError) as e:
+            print(f"Error converting voice file: {e}")
             return False
+
+        return result.returncode == 0 and os.path.exists(target)
+
+    def _generate_voice_files(self, jobs: Dict[str, str]) -> Dict[str, bool]:
+        """Generate several voice files, mapping {text: output_path}.
+
+        All jobs are queued and flushed with a single `runAndWait()`. The
+        engine's event loop only runs to completion once, so a second
+        `runAndWait()` on the same engine returns immediately and leaves a
+        truncated file behind - and `pyttsx3.init()` hands back a cached
+        instance, so creating a "fresh" engine per file does not help either.
+        Batching is therefore the only reliable way to produce more than one
+        file per process.
+
+        A text only counts as generated once its destination holds a WAV file
+        that can actually be loaded, so a corrupt or wrongly encoded result
+        never reaches the assets directory.
+        """
+        results = {text: False for text in jobs}
+        if not self.tts_initialized or not self.tts_engine or not jobs:
+            return results
+
+        tmp_dir = tempfile.mkdtemp(prefix="ajitroids-tts-")
+        try:
+            staged = {}
+            for index, text in enumerate(jobs):
+                tmp_path = os.path.join(tmp_dir, f"voice_{index}.wav")
+                staged[text] = tmp_path
+                self.tts_engine.save_to_file(text, tmp_path)
+
+            self.tts_engine.runAndWait()
+
+            for text, tmp_path in staged.items():
+                output_path = jobs[text]
+                if not os.path.exists(tmp_path) or os.path.getsize(tmp_path) == 0:
+                    print(f"TTS produced no output for: {text}")
+                    continue
+
+                source = tmp_path
+                if not self._is_loadable_wav(source):
+                    converted = os.path.join(tmp_dir, f"converted_{os.path.basename(tmp_path)}")
+                    if not self._convert_to_wav(tmp_path, converted):
+                        print(f"Could not convert TTS output to WAV for: {text}")
+                        continue
+                    source = converted
+
+                if not self._is_loadable_wav(source):
+                    print(f"TTS output is not a usable WAV file for: {text}")
+                    continue
+
+                try:
+                    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+                    shutil.move(source, output_path)
+                    results[text] = True
+                except OSError as e:
+                    print(f"Error saving voice file for {text}: {e}")
+
+            return results
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            print(f"Error generating voice files: {e}")
+            return results
+        finally:
+            shutil.rmtree(tmp_dir, ignore_errors=True)
+
+    def _generate_voice_file(self, text: str, output_path: str) -> bool:
+        """Generate a single voice audio file using TTS."""
+        return self._generate_voice_files({text: output_path})[text]
 
     def load_announcement_sounds(self, asset_path_func):
         """Load or generate announcement sounds"""
@@ -287,24 +379,34 @@ class VoiceAnnouncement:
             "high_score": "voice_high_score.wav"
         }
 
-        # Get assets directory
-        assets_dir = Path(__file__).resolve().parent / "assets"
-        assets_dir.mkdir(exist_ok=True)
-
+        # Resolve every path through the caller's lookup. Generation targets
+        # exactly those paths; deriving a directory from __file__ instead
+        # would ignore the caller's choice and write into the packaged assets
+        # folder, overwriting shipped files even when reading from elsewhere.
+        sound_paths = {}
         for event_type, filename in announcement_files.items():
             try:
-                sound_path = asset_path_func(filename)
+                sound_paths[event_type] = asset_path_func(filename)
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                print(f"Error resolving announcement sound {event_type}: {e}")
+                self.announcement_sounds[event_type] = None
 
-                # If file doesn't exist, try to generate it with TTS
-                if not os.path.exists(sound_path) and self.tts_initialized:
-                    announcement_text = self.announcements.get(event_type, "")
-                    if announcement_text:
-                        print(f"Generating voice for: {event_type}")
-                        full_path = assets_dir / filename
-                        if self._generate_voice_file(announcement_text, str(full_path)):
-                            sound_path = str(full_path)
+        # Collect everything that is missing and generate it in one batch,
+        # because the TTS engine only completes a single run per process.
+        if self.tts_initialized:
+            pending = {}
+            for event_type, sound_path in sound_paths.items():
+                if os.path.exists(sound_path):
+                    continue
+                announcement_text = self.announcements.get(event_type, "")
+                if announcement_text and announcement_text not in pending:
+                    print(f"Generating voice for: {event_type}")
+                    pending[announcement_text] = sound_path
+            if pending:
+                self._generate_voice_files(pending)
 
-                # Load the sound file
+        for event_type, sound_path in sound_paths.items():
+            try:
                 if os.path.exists(sound_path):
                     self.announcement_sounds[event_type] = pygame.mixer.Sound(sound_path)
                 else:
