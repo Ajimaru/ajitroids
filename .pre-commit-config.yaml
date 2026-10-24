@@ -99,16 +99,33 @@ repos:
       # This project uses plain JSON locale files, not gettext. A key missing
       # from a translation falls back to English silently, so compare the
       # catalogs explicitly.
+      #
+      # `language: python` lets pre-commit build and cache the hook's own
+      # interpreter, so these run identically on Linux, macOS and Windows
+      # without a project venv being active. A `language: system` entry would
+      # inherit the caller's PATH instead, which breaks whenever a commit is
+      # made from an IDE or git GUI that never activated .venv.
       - id: check-locales
         name: check locale catalogs are in sync
-        entry: python .development/run-in-venv.py scripts/check_locales.py
-        language: system
+        entry: python scripts/check_locales.py
+        language: python
+        # Stdlib only - no additional_dependencies needed.
         pass_filenames: false
         files: ^modul/locales/.*\.json$
 
       # Run the full test suite before committing
       - id: pytest
         name: pytest (all files)
-        entry: python .development/run-in-venv.py -m pytest
-        language: system
+        entry: pytest
+        language: python
+        # pre-commit builds an isolated env for this hook, so the runtime
+        # dependencies the tests import must be declared here; they are not
+        # picked up from requirements.txt.
+        additional_dependencies:
+          - pytest>=7.0.0
+          - pygame>=2.1.0
+          - numpy>=2.2.6
+          - PyOpenGL==3.1.10
+          - pyttsx3>=2.99
+          - markdown>=3.10.3
         pass_filenames: false

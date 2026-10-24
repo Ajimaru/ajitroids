@@ -238,10 +238,16 @@ class TestVoiceAnnouncement:
         assert va.enabled is True
 
     @patch('pygame.mixer.Sound')
-    def test_load_announcement_sounds(self, mock_sound):
+    def test_load_announcement_sounds(self, mock_sound, tmp_path):
         """Test loading announcement sound files"""
         va = VoiceAnnouncement()
-        mock_asset_path = MagicMock(return_value="/path/to/sound.wav")
+        # The asset paths handed in here never exist, so load_announcement_sounds
+        # would fall through to TTS generation and write into the real
+        # modul/assets directory, truncating the committed voice_*.wav files.
+        # Disabling TTS keeps the test to the loading path it actually covers.
+        va.tts_initialized = False
+        va.tts_engine = None
+        mock_asset_path = MagicMock(return_value=str(tmp_path / "sound.wav"))
 
         va.load_announcement_sounds(mock_asset_path)
 
