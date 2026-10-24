@@ -22,10 +22,12 @@ repos:
         name: Fix end of file
       - id: check-yaml
         name: Check YAML syntax
-        # mkdocs.yml legitimately uses `!!python/name:...` for the mermaid
-        # superfence, which safe-loading rejects. `--unsafe` still checks the
-        # syntax, it just does not try to construct custom tags.
-        args: ["--unsafe"]
+        # mkdocs.yml is excluded rather than passing --unsafe globally: it
+        # legitimately needs `!!python/name:pymdownx...` for the mermaid
+        # superfence, and --unsafe would weaken the check for every other
+        # file (the workflows above all). `mkdocs build --strict` in the docs
+        # workflow validates mkdocs.yml properly anyway.
+        exclude: ^mkdocs\.yml$
       - id: check-ast
         name: Check Python AST
 
