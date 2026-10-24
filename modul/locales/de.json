@@ -203,6 +203,7 @@
   "shortcut_b_switch": "B: Waffe wechseln",
   "shortcut_r_restart": "R: Neustart",
   "shortcut_f1_help": "F1: Hilfe",
+  "shortcut_f7_collision": "F7: Kollisionsdebug umschalten",
   "shortcut_f8_fps": "F8: FPS anzeigen",
   "shortcut_f9_sfx": "F9: Sound umschalten",
   "shortcut_f10_music": "F10: Musik umschalten",

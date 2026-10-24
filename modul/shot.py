@@ -7,6 +7,7 @@ from modul.circleshape import CircleShape
 
 class Shot(CircleShape):
     """Represents a projectile shot."""
+    debug_color = (0, 255, 255)
     asteroids_group = None
     enemy_ships_group = None
 
@@ -90,6 +91,7 @@ class Shot(CircleShape):
         else:
             pos_tuple = (int(self.position[0]), int(self.position[1]))
             pygame.draw.circle(screen, self.color, pos_tuple, self.radius)
+        self.draw_collision_debug(screen)
 
     def seek_target(self, dt):
         """Seek nearest target for homing."""

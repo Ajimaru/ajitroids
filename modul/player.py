@@ -37,6 +37,8 @@ except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when i
 
 class Player(CircleShape):
     """Player character with movement, shooting, and powerups."""
+    debug_color = (0, 255, 0)
+
     def __init__(self, x, y, ship_type="standard"):
         """Initialize player with position, ship type, and state."""
         super().__init__(x, y, C.PLAYER_RADIUS)
@@ -107,6 +109,7 @@ class Player(CircleShape):
 
             pygame.draw.circle(shield_surf, rgba_color, (self.radius * 1.5, self.radius * 1.5), self.radius * 1.4, 2)
             screen.blit(shield_surf, (self.position.x - self.radius * 1.5, self.position.y - self.radius * 1.5))
+        self.draw_collision_debug(screen)
 
     def triangle(self):
         """Return the coordinates of the player's ship triangle."""

@@ -5,6 +5,7 @@ import random
 import pygame
 import logging
 
+from modul import constants
 from modul.circleshape import CircleShape
 from modul.constants import (ASTEROID_CRYSTAL_SPLIT_COUNT,
                              ASTEROID_ICE_VELOCITY_MULTIPLIER,
@@ -13,7 +14,7 @@ from modul.constants import (ASTEROID_CRYSTAL_SPLIT_COUNT,
                              ASTEROID_TYPE_CRYSTAL, ASTEROID_TYPE_ICE,
                              ASTEROID_TYPE_METAL, ASTEROID_TYPE_NORMAL,
                              ASTEROID_TYPES, ASTEROID_VERTICES,
-                             COLLISION_DEBUG, PLAYER_RADIUS, SCREEN_HEIGHT, SCREEN_WIDTH)
+                             PLAYER_RADIUS, SCREEN_HEIGHT, SCREEN_WIDTH)
 from modul.groups import collidable, drawable, updatable
 from modul.particle import Particle
 from modul.powerup import PowerUp
@@ -161,8 +162,8 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
         )
 
         pygame.draw.polygon(screen, color, points, 2)
-        if COLLISION_DEBUG:
-            pygame.draw.circle(screen, "red", self.position, self.radius, 1)
+        self.draw_collision_debug(screen)
+        if getattr(constants, "COLLISION_DEBUG", False):
             for point in points:
                 pygame.draw.circle(screen, "yellow", point, 2)
 
@@ -240,6 +241,8 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
 
 class EnemyShip(CircleShape):
     """Represents an enemy ship that pursues the player."""
+    debug_color = (255, 80, 80)
+
     def __init__(self, x, y, radius):
         """Initialize an enemy ship with position and size."""
         super().__init__(x, y, radius)
@@ -317,6 +320,7 @@ class EnemyShip(CircleShape):
 
         points = [(self.position.x + x, self.position.y + y) for x, y in rotated_points]
         pygame.draw.polygon(screen, "red", points, 2)
+        self.draw_collision_debug(screen)
 
     def kill(self):
         """Remove the enemy ship from all groups with explosion effect."""
