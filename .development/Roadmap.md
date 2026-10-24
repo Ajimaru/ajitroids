@@ -28,15 +28,18 @@ the Ajitroids game experience.
     also reports object counts, boss state, level, player position and velocity,
     and active power-ups ✅
 
-### Quality of Life Improvements
+### Quality of Life Improvements ✅
 
 - **Keyboard Shortcuts Reference**: Accessible in-game help screen (press H or
-  F1)
+  F1) ✅
 - **Session Statistics**: Track performance during current play session ✅
 - **Configuration Validation**: Automatic validation and repair of corrupted
-  settings
+  settings ✅
+  - Values of the wrong type, volumes outside 0.0-1.0, unknown difficulty,
+    language or sound theme, and control bindings pygame does not know are reset
+    to their defaults, reported, and the cleaned file is written back ✅
 - **Quick Restart**: Press 'R' during gameplay or game over to instantly restart
-  without menus
+  without menus ✅
 - **Stats Dashboard**: Detailed statistics screen with visual metrics and
   progress bars ✅
 - **Replay System**: Automatic recording of game sessions with playback controls
