@@ -76,26 +76,6 @@ ajitroids
 
 ### Method 2: Clone from Git (For Development)
 
-[![Open Issues](https://img.shields.io/github/issues/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/issues?q=is%3Aissue%20state%3Aopen)
-[![Closed Issues](https://img.shields.io/github/issues-closed-raw/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/issues?q=is%3Aissue%20state%3Aclosed)
-[![Open PRs](https://img.shields.io/github/issues-pr/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/pulls?q=is%3Aopen+is%3Apr+)
-[![Closed PRs](https://img.shields.io/github/issues-pr-closed/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/pulls?q=is%3Apr+is%3Aclosed)
-
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
-![Commit Activity (year)](https://img.shields.io/github/commit-activity/y/Ajimaru/ajitroids)
-![Last Commit](https://img.shields.io/github/last-commit/Ajimaru/ajitroids)
-
-![Build Status](https://img.shields.io/github/actions/workflow/status/Ajimaru/ajitroids/ci.yml)
-[![Coverage](https://codecov.io/gh/Ajimaru/ajitroids/graph/badge.svg?branch=main)](https://codecov.io/gh/Ajimaru/ajitroids)
-[![CI](https://github.com/Ajimaru/ajitroids/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Ajimaru/ajitroids/actions/workflows/ci.yml?query=branch%3Amain)
-![Release Date](https://img.shields.io/github/release-date/Ajimaru/ajitroids)
-
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Code style: prettier](https://img.shields.io/badge/code%20style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
-![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids)
-
-<!-- markdownlint-disable MD033 -->
-
 <details>
 <summary>🔧 Development Setup</summary>
 
@@ -119,10 +99,22 @@ python main.py
 If you plan to contribute or develop for Ajitroids, set up the development
 environment with pre-commit hooks:
 
+> **Supported Python versions: 3.10 - 3.13.** pygame has no prebuilt wheel for
+> 3.14 yet; on a newer interpreter its font module fails to import and the test
+> suite cannot run. The setup scripts pick a supported interpreter for you and
+> refuse to continue if none is installed.
+
 ```bash
 # Run the setup script (Linux/macOS)
 bash .development/setup-dev.sh
+```
 
+```powershell
+# Run the setup script (Windows)
+powershell -ExecutionPolicy Bypass -File .development\setup-dev.ps1
+```
+
+```bash
 # Or manual setup (all platforms)
 pip install pre-commit
 pre-commit install
@@ -133,11 +125,17 @@ pre-commit run --all-files
 
 **What this does:**
 
+- Creates a project-local `.venv` on a supported Python version
+- Installs runtime and documentation dependencies
 - Installs pre-commit framework
 - Activates git hooks that check code quality on every commit
 - Runs **flake8** (style), **pylint** (code analysis), and **prettier**
   (markdown formatting)
 - Prevents commits that violate configured style rules
+
+The hooks run in environments that pre-commit builds and caches itself, so they
+work the same on Linux, macOS and Windows and do not require `.venv` to be
+activated first - committing from an IDE or git GUI works too.
 
 </details>
 
@@ -284,6 +282,26 @@ Unlock these ships by progressing through the game and achieving milestones!
 - Modular sound engine with dynamic effects
 - Efficient particle system for visual effects
 - Collision detection with optimized algorithms
+
+[![Open Issues](https://img.shields.io/github/issues/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/issues?q=is%3Aissue%20state%3Aopen)
+[![Closed Issues](https://img.shields.io/github/issues-closed-raw/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/issues?q=is%3Aissue%20state%3Aclosed)
+[![Open PRs](https://img.shields.io/github/issues-pr/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/pulls?q=is%3Aopen+is%3Apr+)
+[![Closed PRs](https://img.shields.io/github/issues-pr-closed/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/pulls?q=is%3Apr+is%3Aclosed)
+
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
+![Commit Activity (year)](https://img.shields.io/github/commit-activity/y/Ajimaru/ajitroids)
+![Last Commit](https://img.shields.io/github/last-commit/Ajimaru/ajitroids)
+
+![Build Status](https://img.shields.io/github/actions/workflow/status/Ajimaru/ajitroids/ci.yml)
+[![Coverage](https://codecov.io/gh/Ajimaru/ajitroids/graph/badge.svg?branch=main)](https://codecov.io/gh/Ajimaru/ajitroids)
+[![CI](https://github.com/Ajimaru/ajitroids/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Ajimaru/ajitroids/actions/workflows/ci.yml?query=branch%3Amain)
+![Release Date](https://img.shields.io/github/release-date/Ajimaru/ajitroids)
+
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Code style: prettier](https://img.shields.io/badge/code%20style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids)
+
+<!-- markdownlint-disable MD033 -->
 
 ## 📜 License
 

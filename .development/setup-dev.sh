@@ -11,25 +11,62 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 VENV_DIR="$PROJECT_ROOT/.venv"
 
-# Check if Python is available and meets the minimum version requirement
-if ! command -v python3 &> /dev/null; then
-    echo "❌ Python 3 not found. Please install Python 3.10+."
+# Supported interpreter range. The upper bound is not cosmetic: pygame has no
+# prebuilt wheel beyond MAX_MINOR yet, and on a newer interpreter its font
+# module fails to import, which breaks the whole test suite. Raise MAX_MINOR
+# only together with the CI matrix in .github/workflows/ci.yml.
+MIN_MINOR=10
+MAX_MINOR=13
+
+# Report a candidate interpreter's minor version, or nothing if unusable.
+py_minor() {
+    "$1" -c 'import sys; print(sys.version_info[1] if sys.version_info[0] == 3 else "")' 2>/dev/null
+}
+
+# Prefer whatever python3 points at, but fall back to an explicitly versioned
+# interpreter when the default is outside the supported range. This is what
+# keeps the script working on a machine whose python3 has moved ahead.
+PYTHON=""
+CANDIDATES="python3"
+for minor in $(seq "$MAX_MINOR" -1 "$MIN_MINOR"); do
+    CANDIDATES="$CANDIDATES python3.$minor"
+done
+
+for candidate in $CANDIDATES; do
+    command -v "$candidate" &> /dev/null || continue
+    minor=$(py_minor "$candidate")
+    [ -n "$minor" ] || continue
+    if [ "$minor" -ge "$MIN_MINOR" ] && [ "$minor" -le "$MAX_MINOR" ]; then
+        PYTHON="$candidate"
+        break
+    fi
+done
+
+if [ -z "$PYTHON" ]; then
+    echo "❌ No supported Python found. ajitroids needs 3.$MIN_MINOR - 3.$MAX_MINOR."
+    if command -v python3 &> /dev/null; then
+        echo "   Detected default: $(python3 -V 2>&1)"
+    fi
+    echo "   Install a supported version, e.g. 3.$MAX_MINOR, and re-run this script."
     exit 1
 fi
 
-# Verify Python version is >= 3.10
-PY_VER=$(python3 -c 'import sys; print("{}.{}".format(*sys.version_info[:2]))')
-PY_MAJOR=$(python3 -c 'import sys; print(sys.version_info[0])')
-PY_MINOR=$(python3 -c 'import sys; print(sys.version_info[1])')
-if [ "$PY_MAJOR" -lt 3 ] || { [ "$PY_MAJOR" -eq 3 ] && [ "$PY_MINOR" -lt 10 ]; }; then
-    echo "❌ Detected Python $PY_VER. ajitroids requires Python 3.10+."
-    exit 1
+echo "🐍 Using $($PYTHON -V 2>&1) ($(command -v "$PYTHON"))"
+
+# Create/activate venv if needed. An existing venv built on an unsupported
+# interpreter is replaced rather than reused, otherwise the version check above
+# would pass while the broken environment stays in place.
+if [ -d "$VENV_DIR" ]; then
+    EXISTING_MINOR=$(py_minor "$VENV_DIR/bin/python")
+    if [ -z "$EXISTING_MINOR" ] || [ "$EXISTING_MINOR" -lt "$MIN_MINOR" ] || [ "$EXISTING_MINOR" -gt "$MAX_MINOR" ]; then
+        echo "♻️  Existing .venv uses an unsupported Python - recreating it..."
+        rm -rf "$VENV_DIR"
+    fi
 fi
 
-# Create/activate venv if needed
 if [ ! -d "$VENV_DIR" ]; then
     echo "📦 Creating virtual environment..."
-    python3 -m venv "$VENV_DIR"
+    "$PYTHON" -m venv "$VENV_DIR"
 fi
 
 echo "📦 Activating virtual environment..."
@@ -49,20 +86,29 @@ if [ -z "$VIRTUAL_ENV" ]; then
     EXPECTED_PREFIX="$(basename "$VENV_DIR")"
     if [ "$PREFIX" != "$EXPECTED_PREFIX" ]; then
         echo "❌ Failed to activate virtualenv (VIRTUAL_ENV unset, python prefix: $PREFIX)."
-        echo "Please run: source venv/bin/activate (or venv/Scripts/activate) and re-run this script."
+        echo "Please run: source .venv/bin/activate (or .venv/Scripts/activate) and re-run this script."
         exit 1
     fi
 fi
 
+# Install through the venv interpreter explicitly. Going via `$VENV_PYTHON -m pip`
+# rather than a bare `pip` means a half-applied activation can never silently
+# install into the system environment.
+if [ -x "$VENV_DIR/bin/python" ]; then
+    VENV_PYTHON="$VENV_DIR/bin/python"
+else
+    VENV_PYTHON="$VENV_DIR/Scripts/python.exe"
+fi
+
 echo "📦 Installing dependencies..."
-pip install --upgrade pip setuptools wheel
-pip install -r "$PROJECT_ROOT/requirements.txt"
-pip install -r "$PROJECT_ROOT/requirements-docs.txt"
+"$VENV_PYTHON" -m pip install --upgrade pip setuptools wheel
+"$VENV_PYTHON" -m pip install -r "$PROJECT_ROOT/requirements.txt"
+"$VENV_PYTHON" -m pip install -r "$PROJECT_ROOT/requirements-docs.txt"
 
 echo "🪝 Installing pre-commit hooks..."
-pip install pre-commit
+"$VENV_PYTHON" -m pip install pre-commit
 cd "$PROJECT_ROOT"
-pre-commit install
+"$VENV_PYTHON" -m pre_commit install
 
 echo "✅ Development environment setup complete!"
 echo "💡 Pre-commit hooks are now active. They will run on git commit."
