@@ -33,8 +33,9 @@ jobs:
       - name: Run Bandit
         # `|| true` on purpose: findings belong in the Security tab, not in a
         # red build. The upload step below is what surfaces them.
+        # -c .bandit.yaml skips B311 (see that file for why).
         run: |
-          bandit -r modul/ main.py -f sarif -o bandit.sarif || true
+          bandit -c .bandit.yaml -r modul/ main.py -f sarif -o bandit.sarif || true
 
       - name: Upload SARIF to GitHub Security tab
         uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
