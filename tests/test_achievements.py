@@ -2,10 +2,12 @@
 
 import json
 import os
+import pathlib
 from unittest.mock import MagicMock
 
 import pytest
 
+import modul.constants as C
 from modul.achievements import Achievement, AchievementSystem
 
 
@@ -294,3 +296,43 @@ def test_achievement_unlock():
 def test_achievement_not_unlocked():
     system = AchievementSystem()
     assert not system.is_unlocked("Survivor")
+
+
+def test_survivor_unlocks_after_survival_time(clean_achievements_file):
+    """Survivor unlocks once the run reaches SURVIVOR_TIME and only once.
+
+    Mirrors the accumulation the main loop performs so the achievement cannot
+    silently become unreachable again.
+    """
+    system = AchievementSystem()
+    unlocks = []
+    system.set_notification_callback(lambda name, desc: unlocks.append(name))
+
+    survival_time = 0.0
+    dt = 1 / 60
+    while survival_time < C.SURVIVOR_TIME - dt:
+        survival_time += dt
+        if survival_time >= C.SURVIVOR_TIME and not system.is_unlocked("Survivor"):
+            system.unlock("Survivor")
+
+    assert not system.is_unlocked("Survivor"), "must not unlock before the full duration"
+
+    # Cross the threshold.
+    for _ in range(3):
+        survival_time += dt
+        if survival_time >= C.SURVIVOR_TIME and not system.is_unlocked("Survivor"):
+            system.unlock("Survivor")
+
+    assert system.is_unlocked("Survivor")
+    assert unlocks == ["Survivor"], "the notification must fire exactly once"
+
+
+def test_survivor_is_reachable_from_main_loop():
+    """The main loop must contain the unlock for Survivor.
+
+    Survivor was defined but never unlocked anywhere, making it unobtainable.
+    """
+    main_src = (pathlib.Path(__file__).resolve().parents[1] / "main.py").read_text(encoding="utf-8")
+
+    assert 'achievement_system.unlock("Survivor")' in main_src
+    assert "survival_time += dt" in main_src

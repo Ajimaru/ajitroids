@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 import pygame
 import pytest
 
+import modul.constants as C
 from modul.bossprojectile import BossProjectile
 from modul.constants import (BOSS_COLOR, BOSS_PROJECTILE_COLORS,
                              BOSS_PROJECTILE_RADIUS, SCREEN_HEIGHT,
@@ -33,7 +34,7 @@ class TestBossProjectile:
         assert projectile.velocity == velocity
         assert projectile.radius == BOSS_PROJECTILE_RADIUS
         assert projectile.type == "normal"
-        assert projectile.lifetime == 5.0
+        assert projectile.lifetime == C.BOSS_PROJECTILE_LIFETIME
         assert projectile.damage == 1
         assert projectile.rotation == 0
         assert projectile.rotation_speed == 180
@@ -208,3 +209,36 @@ class TestBossProjectile:
         screen = pygame.Surface((800, 600))
 
         projectile.draw(screen)
+
+
+class TestBossProjectileLiveCap:
+    """Boss attacks must not bury the screen in overlapping bullet waves."""
+
+    def test_spawn_enforces_live_cap(self):
+        """Spawning past the cap retires the oldest projectiles"""
+        group = pygame.sprite.Group()
+        BossProjectile.containers = (group,)
+        try:
+            for _ in range(C.BOSS_PROJECTILE_MAX_ALIVE + 25):
+                BossProjectile.spawn(640, 360, pygame.Vector2(10, 0), "normal")
+
+            alive = [o for o in group if isinstance(o, BossProjectile)]
+            assert len(alive) <= C.BOSS_PROJECTILE_MAX_ALIVE
+        finally:
+            BossProjectile.containers = ()
+
+    def test_spawn_returns_projectile(self):
+        """The helper still yields the created projectile"""
+        group = pygame.sprite.Group()
+        BossProjectile.containers = (group,)
+        try:
+            projectile = BossProjectile.spawn(10, 20, pygame.Vector2(1, 1), "homing")
+
+            assert isinstance(projectile, BossProjectile)
+            assert projectile.type == "homing"
+        finally:
+            BossProjectile.containers = ()
+
+    def test_lifetime_is_shorter_than_two_attack_waves(self):
+        """Projectiles must clear before several waves can stack up"""
+        assert C.BOSS_PROJECTILE_LIFETIME < C.BOSS_ATTACK_INTERVAL_MIN * 2

@@ -56,6 +56,8 @@ class DynamicMusicSystem:
         self.min_transition_time = 2.0  # Minimum seconds between transitions
         self.last_transition = 0.0
         self.enabled = True
+        # Track currently loaded to avoid reloading an identical file
+        self.current_track: Optional[str] = None
 
     def calculate_intensity(self, asteroids_count: int, enemies_count: int,
                           boss_active: bool, score: int, level: int) -> IntensityLevel:
@@ -101,12 +103,16 @@ class DynamicMusicSystem:
         try:
             track = self.music_tracks[new_intensity]
 
-            # Fade out current music (non-blocking)
-            pygame.mixer.music.fadeout(1000)
-
-            # Load and play new track
-            pygame.mixer.music.load(asset_path_func(track))
-            pygame.mixer.music.play(-1)
+            # Several intensity levels can share one track. Reloading the same
+            # file would restart playback for no audible gain, so only swap the
+            # stream when the file actually changes.
+            if track != self.current_track:
+                # `music.load()` blocks until a running fadeout has finished, so
+                # stop the stream outright instead of fading into the load.
+                pygame.mixer.music.stop()
+                pygame.mixer.music.load(asset_path_func(track))
+                pygame.mixer.music.play(-1)
+                self.current_track = track
 
             self.current_intensity = new_intensity
             self.transition_cooldown = self.min_transition_time

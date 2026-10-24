@@ -331,6 +331,9 @@ def main(args=None):
 
     boss = None
     run_active = False
+    # Gameplay seconds survived in the current run. Accumulated from `dt` so
+    # time spent paused or in menus does not count toward "Survivor".
+    survival_time = 0.0
     pause_binding_down = False
 
     def finish_run():
@@ -354,13 +357,14 @@ def main(args=None):
         global powerups_collected, asteroids_destroyed, shields_used
         global triple_shots_used, speed_boosts_used
         nonlocal boss, run_active, last_spawn_time, spawn_interval
-        nonlocal current_enemy_ships, level_up_timer, level_up_text
+        nonlocal current_enemy_ships, level_up_timer, level_up_text, survival_time
         finish_run()
         for group in (asteroids, powerups, shots, particles, collidable, updatable, drawable):
             for obj in list(group):
                 obj.kill()
             group.empty()
         score, lives, level = 0, PLAYER_LIVES, 1
+        survival_time = 0.0
         boss = None
         boss_active = False
         boss_defeated_timer = 0
@@ -811,6 +815,13 @@ def main(args=None):
             # Cache current time for this frame
             current_frame_time = time.time()
 
+            # "Survivor" rewards staying alive in a single run. This runs
+            # before the mid-frame `continue`s below so a frame that ends the
+            # run still counts the time it was played.
+            survival_time += dt
+            if survival_time >= SURVIVOR_TIME and not achievement_system.is_unlocked("Survivor"):
+                achievement_system.unlock("Survivor")
+
             # Update performance profiler
             object_groups = {
                 'asteroids': asteroids,
@@ -835,9 +846,13 @@ def main(args=None):
             starfield.update(dt)
             starfield.draw(screen)
 
-            asteroid_field.update(dt)
+            # During a boss fight the arena is cleared and stays clear: new
+            # asteroids and enemy ships on top of the boss patterns left no
+            # room to dodge.
+            if not boss_active:
+                asteroid_field.update(dt)
 
-            if current_frame_time - last_spawn_time > spawn_interval:
+            if not boss_active and current_frame_time - last_spawn_time > spawn_interval:
                 if len(current_enemy_ships) < max_enemy_ships[difficulty]:
                     enemy_ship = EnemyShip(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 30)
                     updatable.add(enemy_ship)
@@ -1063,11 +1078,15 @@ def main(args=None):
                 if current_level % BOSS_LEVEL_INTERVAL == 0:
                     boss = Boss(current_level)
                     boss_active = True
-                    level_up_text = "BOSS FIGHT!"
+                    level_up_text = f"BOSS FIGHT: {boss.boss_type.upper()}!"
                     level_up_timer = LEVEL_UP_DISPLAY_TIME * 2
                     for asteroid in list(asteroids):
                         asteroid.kill()
-                    print(f"Boss fight started at level {current_level}!")
+                    # Leftover enemy ships would keep shooting through the fight.
+                    for enemy_ship in list(current_enemy_ships):
+                        enemy_ship.kill()
+                    current_enemy_ships.clear()
+                    print(f"Boss fight started at level {current_level}! Type: {boss.boss_type}")
                     sounds.play_boss_music()
                     audio_enhancements.trigger_announcement("boss_incoming", priority=10.0)
 
@@ -1157,7 +1176,7 @@ def main(args=None):
                         for i in range(boss_attack["count"]):
                             angle = math.radians(i * (360 / boss_attack["count"]))
                             velocity = pygame.Vector2(math.cos(angle), math.sin(angle)) * BOSS_PROJECTILE_SPEED
-                            BossProjectile(boss.position.x, boss.position.y, velocity, "normal")
+                            BossProjectile.spawn(boss.position.x, boss.position.y, velocity, "normal")
                             sounds.play_enemy_shoot()
 
                     elif boss_attack["type"] == "spiral":
@@ -1165,7 +1184,7 @@ def main(args=None):
                         for i in range(boss_attack["count"]):
                             angle = math.radians(base_angle + i * (360 / boss_attack["count"]))
                             velocity = pygame.Vector2(math.cos(angle), math.sin(angle)) * BOSS_PROJECTILE_SPEED
-                            BossProjectile(boss.position.x, boss.position.y, velocity, "normal")
+                            BossProjectile.spawn(boss.position.x, boss.position.y, velocity, "normal")
                             sounds.play_enemy_shoot()
 
                     elif boss_attack["type"] == "targeted":
@@ -1174,12 +1193,12 @@ def main(args=None):
                             direction = direction.normalize() if direction.length_squared() else pygame.Vector2(0, 1)
 
                             velocity = direction * BOSS_PROJECTILE_SPEED
-                            BossProjectile(boss.position.x, boss.position.y, velocity, "homing")
+                            BossProjectile.spawn(boss.position.x, boss.position.y, velocity, "homing")
 
                             for i in range(1, boss_attack["count"]):
                                 offset = 10 * i if i % 2 == 0 else -10 * i
                                 offset_dir = direction.rotate(offset)
-                                BossProjectile(boss.position.x, boss.position.y, offset_dir * BOSS_PROJECTILE_SPEED, "normal")
+                                BossProjectile.spawn(boss.position.x, boss.position.y, offset_dir * BOSS_PROJECTILE_SPEED, "normal")
                         sounds.play_enemy_shoot()
 
                 for shot in shots:
@@ -1209,9 +1228,6 @@ def main(args=None):
 
                             boss_defeated_timer = 3.0
                             boss_defeated_message = "BOSS DEFEATED! +1 LIFE!"
-
-            achievement_notifications.update(dt)
-            achievement_notifications.draw(screen)
 
             # Draw voice announcement text
             announcement_text = audio_enhancements.get_announcement_text()
@@ -1385,6 +1401,13 @@ def main(args=None):
             if action == "close":
                 game_state = "playing"
                 help_screen.deactivate()
+
+        # Achievement notifications are drawn for every game state. Collision
+        # handling can switch `game_state` mid-frame and `continue`, so drawing
+        # these inside the "playing" branch skipped them entirely -- and because
+        # their lifetime is wall-clock based they then expired unseen.
+        achievement_notifications.update(dt)
+        achievement_notifications.draw(screen)
 
         # Draw FPS counter if enabled
         if show_fps:

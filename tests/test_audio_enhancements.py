@@ -114,9 +114,31 @@ class TestDynamicMusicSystem:
 
         assert result is True
         assert dms.current_intensity == IntensityLevel.BOSS
-        mock_music.fadeout.assert_called_once_with(1000)
         mock_music.load.assert_called_once_with("/path/to/boss_music.mp3")
         mock_music.play.assert_called_once_with(-1)
+        # `music.load()` blocks until a running fadeout finishes, which stalled
+        # the game loop for ~1s on every transition. The stream is stopped
+        # instead of faded so the load returns immediately.
+        mock_music.fadeout.assert_not_called()
+        mock_music.stop.assert_called_once_with()
+
+    @patch('modul.audio_enhancements.pygame.mixer.music')
+    def test_transition_music_skips_reload_of_same_track(self, mock_music):
+        """Intensity changes that map to the same file must not reload it"""
+        dms = DynamicMusicSystem()
+        mock_asset_path = MagicMock(return_value="/path/to/background.mp3")
+
+        # CALM, NORMAL and INTENSE share background.mp3
+        assert dms._transition_music(IntensityLevel.NORMAL, mock_asset_path) is True
+        mock_music.load.assert_called_once_with("/path/to/background.mp3")
+
+        mock_music.reset_mock()
+        assert dms._transition_music(IntensityLevel.INTENSE, mock_asset_path) is True
+
+        assert dms.current_intensity == IntensityLevel.INTENSE
+        mock_music.load.assert_not_called()
+        mock_music.play.assert_not_called()
+        mock_music.stop.assert_not_called()
 
     def test_set_enabled(self):
         """Test enabling/disabling dynamic music"""
