@@ -221,7 +221,10 @@ class Asteroid(CircleShape, pygame.sprite.Sprite):
                 child_radius = self.radius - 1
             if child_radius < ASTEROID_MIN_RADIUS:
                 child_radius = ASTEROID_MIN_RADIUS
-            new_asteroid = Asteroid(self.position.x, self.position.y, child_radius, *child_groups, asteroid_type=self.asteroid_type)
+            new_asteroid = Asteroid(
+                self.position.x, self.position.y, child_radius,
+                *child_groups, asteroid_type=self.asteroid_type,
+            )
             new_asteroid.velocity = velocity
             new_asteroid.rotation_speed = rotation_speed
             if self.asteroid_type == ASTEROID_TYPE_METAL:
@@ -244,7 +247,10 @@ class EnemyShip(CircleShape):
         self.rotation_speed = random.uniform(-0.1, 0.1)
         self.rotation = 0
         # Ensure velocity is nonzero for tests
-        self.velocity = pygame.Vector2(random.choice([-1, 1]) * random.uniform(30, 60), random.choice([-1, 1]) * random.uniform(30, 60))
+        self.velocity = pygame.Vector2(
+            random.choice([-1, 1]) * random.uniform(30, 60),
+            random.choice([-1, 1]) * random.uniform(30, 60),
+        )
 
     def update(self, dt, player_position=None):
         """Update enemy ship position, rotation, and pursuit behavior."""

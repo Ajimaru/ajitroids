@@ -41,7 +41,6 @@ class AchievementNotification:
         current_time = time.time()
         elapsed = current_time - self.start_time
 
-
         if elapsed < self.fade_time:
             self.animation_progress = elapsed / self.fade_time
             self.current_x = C.SCREEN_WIDTH - (C.SCREEN_WIDTH - self.target_x) * self._ease_out(self.animation_progress)
@@ -49,7 +48,6 @@ class AchievementNotification:
         elif elapsed < self.display_time - self.fade_time:
             self.animation_progress = 1.0
             self.current_x = self.target_x
-
 
         elif elapsed < self.display_time:
             if not self.is_fading_out:

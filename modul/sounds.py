@@ -322,7 +322,12 @@ class Sounds:
             # behavior in tests and production.
             try:
                 # Prefer explicit overrides (different object than initial)
-                if hasattr(self, 'boss_attack') and self.boss_attack and self.boss_attack is not self._initial_sounds.get('boss_attack'):
+                if (
+                    hasattr(self, 'boss_attack')
+                    and self.boss_attack
+                    and self.boss_attack
+                    is not self._initial_sounds.get('boss_attack')
+                ):
                     self.boss_attack.play()
                     return
             except pygame.error:
