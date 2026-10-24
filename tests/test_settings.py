@@ -157,3 +157,88 @@ class TestSettings:
         # Should use defaults when loading fails
         assert settings.music_on is True
         assert settings.sound_on is True
+
+
+class TestSettingsValidation:
+    """Test suite for repairing settings files that hold implausible values."""
+
+    @staticmethod
+    def _load_with(data):
+        """Write a settings file holding `data` and load it."""
+        with open("settings.json", "w", encoding="utf-8") as f:
+            json.dump(data, f)
+        settings = Settings()
+        assert settings.load() is True
+        return settings
+
+    def test_volume_above_range_is_clamped(self, clean_settings_file):
+        """A volume beyond 1.0 is clamped, not passed to the mixer"""
+        settings = self._load_with({"music_volume": 99.0})
+        assert settings.music_volume == 1.0
+
+    def test_volume_below_range_is_clamped(self, clean_settings_file):
+        """A negative volume is clamped to 0.0"""
+        settings = self._load_with({"sound_volume": -5.0})
+        assert settings.sound_volume == 0.0
+
+    def test_non_numeric_volume_falls_back_to_default(self, clean_settings_file):
+        """A volume that is not a number cannot be clamped, so it resets"""
+        settings = self._load_with({"music_volume": "loud"})
+        assert settings.music_volume == 0.5
+
+    def test_non_boolean_flag_falls_back_to_default(self, clean_settings_file):
+        """A string in a boolean field resets instead of being truthy"""
+        settings = self._load_with({"music_on": "yes"})
+        assert settings.music_on is True
+
+    def test_unknown_difficulty_falls_back_to_default(self, clean_settings_file):
+        """An unknown difficulty resets to normal"""
+        settings = self._load_with({"difficulty": "impossible"})
+        assert settings.difficulty == "normal"
+
+    def test_unknown_language_falls_back_to_default(self, clean_settings_file):
+        """A language without a locale catalog resets to English"""
+        settings = self._load_with({"language": "klingon"})
+        assert settings.language == "en"
+
+    def test_unknown_sound_theme_falls_back_to_default(self, clean_settings_file):
+        """An unknown sound theme resets to default"""
+        settings = self._load_with({"sound_theme": "techno"})
+        assert settings.sound_theme == "default"
+
+    def test_invalid_control_key_falls_back_to_default(self, clean_settings_file):
+        """A key name pygame does not know would make the action unreachable"""
+        settings = self._load_with({"controls": {"shoot": "K_DOES_NOT_EXIST"}})
+        assert settings.controls["shoot"] == "K_SPACE"
+
+    def test_valid_control_key_is_kept(self, clean_settings_file):
+        """A remapped but valid key survives validation"""
+        settings = self._load_with({"controls": {"shoot": "K_RETURN"}})
+        assert settings.controls["shoot"] == "K_RETURN"
+
+    def test_non_boolean_announcement_flag_falls_back(self, clean_settings_file):
+        """Announcement flags are booleans keyed by event type"""
+        settings = self._load_with({"announcement_types": {"level_up": "on"}})
+        assert settings.announcement_types["level_up"] is True
+
+    def test_valid_settings_are_left_alone(self, clean_settings_file):
+        """Validation must not touch a file that is already sound"""
+        settings = self._load_with({
+            "music_on": False,
+            "music_volume": 0.3,
+            "difficulty": "hard",
+            "language": "de",
+        })
+        assert settings.music_on is False
+        assert settings.music_volume == 0.3
+        assert settings.difficulty == "hard"
+        assert settings.language == "de"
+
+    def test_repaired_file_is_written_back(self, clean_settings_file):
+        """The cleaned values are persisted, so warnings appear only once"""
+        self._load_with({"music_volume": 99.0, "sound_theme": "techno"})
+
+        with open("settings.json", "r", encoding="utf-8") as f:
+            stored = json.load(f)
+        assert stored["music_volume"] == 1.0
+        assert stored["sound_theme"] == "default"
