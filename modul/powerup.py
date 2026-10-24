@@ -9,6 +9,8 @@ from modul.circleshape import CircleShape
 
 class PowerUp(CircleShape):
     """Represents a power-up item that can be collected by the player."""
+    debug_color = (255, 255, 0)
+
     @classmethod
     def spawn_drop(cls, x, y):
         """Roll one drop and enforce the cap against the live power-up group."""
@@ -153,3 +155,4 @@ class PowerUp(CircleShape):
                 direction = pygame.Vector2(0, -1).rotate(angle)
                 end = start + direction * draw_radius * 0.4
                 pygame.draw.line(screen, self.color, start, end, 2)
+        self.draw_collision_debug(screen)

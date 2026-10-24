@@ -11,6 +11,8 @@ from modul.particle import Particle
 class Boss(CircleShape):
     """Boss enemy with health, movement, and attack patterns."""
 
+    debug_color = (255, 140, 0)
+
     # Attack rotation per boss type. Each entry is cycled through by
     # `attack_pattern`, so types differ in how they pressure the player.
     ATTACK_PATTERNS = {
@@ -196,6 +198,7 @@ class Boss(CircleShape):
             color = (255, 255, 255)
         self._draw_boss_shape(screen, color)
         self._draw_health_bar(screen)
+        self.draw_collision_debug(screen)
 
     def _draw_boss_shape(self, screen, color):
         """Draw the boss's visual shape."""

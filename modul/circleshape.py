@@ -2,9 +2,16 @@
 
 import pygame
 
+from modul import constants
+
 
 class CircleShape(pygame.sprite.Sprite):
     """Base class for circular game objects."""
+
+    # Colour of the collision outline, overridden per subclass so the
+    # different object types stay distinguishable while debugging.
+    debug_color = (255, 0, 0)
+
     def __init__(self, x, y, radius):
         """Initialize a circular sprite with position and radius."""
         super().__init__()
@@ -45,6 +52,25 @@ class CircleShape(pygame.sprite.Sprite):
     def forward(self):
         """Return the forward direction vector."""
         return pygame.Vector2(0, -1).rotate(self.rotation)
+
+    def draw_collision_debug(self, surface):
+        """Draw this object's collision circle when collision debug is on.
+
+        The flag is read from the module rather than imported by value, so
+        toggling it at runtime takes effect immediately - a `from ... import
+        COLLISION_DEBUG` would bind the value once at import time and never
+        notice the change.
+        """
+        if not getattr(constants, "COLLISION_DEBUG", False):
+            return
+        if surface is None:
+            return
+        try:
+            pos = (int(self.position.x), int(self.position.y))
+            pygame.draw.circle(surface, self.debug_color, pos, int(self.radius), 1)
+        except (pygame.error, TypeError, ValueError):
+            # Debug overlays must never break rendering.
+            return
 
     def draw(self, surface):
         """Draw the circle onto the given surface.

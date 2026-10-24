@@ -9,6 +9,8 @@ from modul.circleshape import CircleShape
 class BossProjectile(CircleShape):
     """Projectile fired by boss enemies."""
 
+    debug_color = (255, 0, 255)
+
     @classmethod
     def spawn(cls, x, y, velocity, projectile_type="normal"):
         """Create a projectile, retiring the oldest ones past the live cap.
@@ -72,3 +74,4 @@ class BossProjectile(CircleShape):
             pygame.draw.circle(screen, self.color, self.position, self.radius)
             pygame.draw.circle(screen, (255, 255, 255), self.position, self.radius * 0.7, 1)
             pygame.draw.circle(screen, (255, 255, 255), self.position, self.radius * 0.4, 1)
+        self.draw_collision_debug(screen)

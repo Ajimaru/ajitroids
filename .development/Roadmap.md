@@ -14,12 +14,19 @@ the Ajitroids game experience.
 - `--windowed` / `--fullscreen` - Force window mode on startup ✅
 - `--log-file <path>` - Specify custom log file location for logging output ✅
 
-### Debug & Development Tools
+### Debug & Development Tools ✅
 
 - **Logging System**: Structured logging with different levels (DEBUG, INFO,
-  WARNING, ERROR)
+  WARNING, ERROR) ✅
 - **FPS Display**: Toggle with F8 to show real-time performance metrics ✅
-- **Debug Mode**: Collision visualization and extended game information
+- **Debug Mode**: Collision visualization and extended game information ✅
+  - **Collision Visualization**: Toggle with F7, or start with `--debug`. Draws
+    the collision circle of every object, colour-coded per type: player (green),
+    asteroids (red), enemy ships (light red), shots (cyan), power-ups (yellow),
+    boss (orange), boss projectiles (magenta) ✅
+  - **Extended Game Information**: With collision debug active, the FPS overlay
+    also reports object counts, boss state, level, player position and velocity,
+    and active power-ups ✅
 
 ### Quality of Life Improvements
 

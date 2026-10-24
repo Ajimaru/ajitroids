@@ -135,6 +135,8 @@ def main(args=None):
 
     global show_fps
     show_fps = args.debug
+    # Debug mode starts with collision outlines visible; F9 toggles them.
+    C.COLLISION_DEBUG = args.debug
 
     pygame.init()
 
@@ -467,6 +469,16 @@ def main(args=None):
                 elif event.key == pygame.K_F8:
                     show_fps = not show_fps
                     toggle_message = "FPS Display Enabled" if show_fps else "FPS Display Disabled"
+                    toggle_message_timer = 2
+                elif event.key == pygame.K_F7:
+                    # Flip the flag on the module so every object picks the
+                    # change up on its next draw; objects read it live rather
+                    # than caching the value at import time.
+                    C.COLLISION_DEBUG = not C.COLLISION_DEBUG
+                    toggle_message = (
+                        "Collision Debug Enabled" if C.COLLISION_DEBUG
+                        else "Collision Debug Disabled"
+                    )
                     toggle_message_timer = 2
                 elif event.key in (pygame.K_h, pygame.K_F1) and game_state == "playing":
                     game_state = "help"
@@ -1413,9 +1425,36 @@ def main(args=None):
         if show_fps:
             fps = clock.get_fps()
             fps_font = pygame.font.Font(None, 24)
-            fps_text = fps_font.render(f"FPS: {fps:.1f}", True, (0, 255, 0))
-            fps_rect = fps_text.get_rect(topright=(SCREEN_WIDTH - 10, 10))
-            screen.blit(fps_text, fps_rect)
+            debug_lines = [f"FPS: {fps:.1f}"]
+
+            # Collision debug implies the deeper read-out: the extra lines are
+            # only useful while inspecting object state, and they would
+            # otherwise clutter the plain F8 counter.
+            if C.COLLISION_DEBUG:
+                debug_lines.append(f"Asteroids: {len(asteroids)}  Shots: {len(shots)}")
+                debug_lines.append(
+                    f"Enemies: {len(current_enemy_ships)}  Boss: {'yes' if boss_active else '-'}"
+                )
+                debug_lines.append(f"Level: {level}")
+                if player is not None:
+                    debug_lines.append(
+                        f"Pos: {player.position.x:.0f}, {player.position.y:.0f}"
+                    )
+                    debug_lines.append(
+                        f"Vel: {player.velocity.x:.0f}, {player.velocity.y:.0f}"
+                    )
+                    active = [
+                        name for name, flag in (
+                            ("shield", player.shield_active),
+                            ("triple", player.triple_shot_active),
+                        ) if flag
+                    ]
+                    debug_lines.append(f"Powerups: {', '.join(active) if active else '-'}")
+
+            for index, line in enumerate(debug_lines):
+                line_text = fps_font.render(line, True, (0, 255, 0))
+                line_rect = line_text.get_rect(topright=(SCREEN_WIDTH - 10, 10 + index * 20))
+                screen.blit(line_text, line_rect)
 
         # If language changed, rebuild menus/screens so new gettext values apply
         if game_settings.language != last_language:

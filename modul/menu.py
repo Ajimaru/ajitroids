@@ -270,6 +270,7 @@ class PauseMenu(Menu):
             gettext("shortcut_b_switch"),
             gettext("shortcut_r_restart"),
             gettext("shortcut_f1_help"),
+            gettext("shortcut_f7_collision"),
             gettext("shortcut_f8_fps"),
             gettext("shortcut_f9_sfx"),
             gettext("shortcut_f10_music"),
