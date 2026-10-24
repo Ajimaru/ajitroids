@@ -9,14 +9,20 @@ from modul.settings import Settings
 
 
 @pytest.fixture
-def clean_settings_file():
-    """Remove settings file before and after test"""
-    settings_file = "settings.json"
-    if os.path.exists(settings_file):
-        os.remove(settings_file)
+def clean_settings_file(tmp_path, monkeypatch):
+    """Run settings persistence tests in an isolated directory.
+
+    Settings reads and writes the relative path "settings.json", so without
+    chdir these tests would delete the player's real settings in the project
+    root - and the pytest pre-commit hook would wipe them on every commit.
+    """
+    monkeypatch.chdir(tmp_path)
+    settings_file = tmp_path / "settings.json"
+    if settings_file.exists():
+        settings_file.unlink()
     yield
-    if os.path.exists(settings_file):
-        os.remove(settings_file)
+    if settings_file.exists():
+        settings_file.unlink()
 
 
 class TestSettings:
