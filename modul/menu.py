@@ -1357,33 +1357,23 @@ class SoundTestMenu:
 
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    self.current_selection -= 1
+                if event.key in (pygame.K_UP, pygame.K_DOWN):
+                    direction = -1 if event.key == pygame.K_UP else 1
+                    index = self.scroll_offset + self.current_selection
+                    for _ in range(len(self.sound_items)):
+                        index = (index + direction) % len(self.sound_items)
+                        label, action = self.sound_items[index]
+                        if label and action:
+                            break
+                    else:
+                        continue
 
-                    if self.current_selection < 0:
-                        if self.scroll_offset > 0:
-                            self.scroll_offset -= 1
-                            self.current_selection = 0
-                            self.update_visible_items()
-                        else:
-                            self.scroll_offset = max(0, len(self.sound_items) - self.max_visible_items)
-                            self.current_selection = min(
-                                self.max_visible_items - 1, len(self.sound_items) - 1 - self.scroll_offset
-                            )
-                            self.update_visible_items()
-
-                elif event.key == pygame.K_DOWN:
-                    self.current_selection += 1
-
-                    if self.current_selection >= len(self.visible_items):
-                        if self.scroll_offset + self.max_visible_items < len(self.sound_items):
-                            self.scroll_offset += 1
-                            self.current_selection = len(self.visible_items) - 1
-                            self.update_visible_items()
-                        else:
-                            self.scroll_offset = 0
-                            self.current_selection = 0
-                            self.update_visible_items()
+                    if index < self.scroll_offset:
+                        self.scroll_offset = index
+                    elif index >= self.scroll_offset + self.max_visible_items:
+                        self.scroll_offset = index - self.max_visible_items + 1
+                    self.current_selection = index - self.scroll_offset
+                    self.update_visible_items()
 
                 elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                     if 0 <= self.current_selection < len(self.visible_items):

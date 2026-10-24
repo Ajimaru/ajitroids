@@ -228,7 +228,12 @@ class ReplayViewer:
         screen.blit(overlay, (0, bar_y))
 
         # Playback status
-        status = gettext("paused") if self.replay_player.paused else gettext("playing")
+        if self.replay_player.completed:
+            status = gettext("completed")
+        elif self.replay_player.paused:
+            status = gettext("paused")
+        else:
+            status = gettext("playing")
         status_color = (
             (255, 200, 0) if self.replay_player.paused else (0, 255, 0)
         )

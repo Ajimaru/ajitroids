@@ -101,7 +101,7 @@ repos:
       # catalogs explicitly.
       - id: check-locales
         name: check locale catalogs are in sync
-        entry: python scripts/check_locales.py
+        entry: python .development/run-in-venv.py scripts/check_locales.py
         language: system
         pass_filenames: false
         files: ^modul/locales/.*\.json$
@@ -109,6 +109,6 @@ repos:
       # Run the full test suite before committing
       - id: pytest
         name: pytest (all files)
-        entry: python -m pytest
+        entry: python .development/run-in-venv.py -m pytest
         language: system
         pass_filenames: false

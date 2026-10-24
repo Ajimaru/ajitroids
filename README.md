@@ -61,12 +61,12 @@ achieve the highest score.
 
 ### Method 1: Install from Release (Recommended)
 
-Download `ajitroids-latest-py3-none-any.whl` from the
+Install the stable source archive published on the
 [Releases page](https://github.com/Ajimaru/ajitroids/releases/latest):
 
 ```bash
 # Install with pip
-pip install ajitroids-latest-py3-none-any.whl
+pip install https://github.com/Ajimaru/ajitroids/releases/latest/download/ajitroids-latest.zip
 
 # Run the game via the installed console script
 ajitroids

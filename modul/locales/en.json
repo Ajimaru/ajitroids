@@ -187,6 +187,7 @@
   "replay_speed_format": "Speed: {speed}x",
   "playing": "Playing",
   "paused": "Paused",
+  "completed": "Completed",
   "tips": "Tips",
   "tip_collect_powerups": "Collect powerups to upgrade your weapons",
   "tip_use_weapons": "Switch weapons with B to suit the situation",

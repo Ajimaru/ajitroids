@@ -32,9 +32,14 @@ def flatten(obj, prefix: str = "") -> set[str]:
 
 
 def main() -> int:
-    reference_path = LOCALES_DIR / f"{REFERENCE}.json"
-    if not reference_path.exists():
-        print(f"Missing reference locale: {reference_path}", file=sys.stderr)
+    missing_catalogs = [
+        LOCALES_DIR / f"{name}.json"
+        for name in (REFERENCE, "de")
+        if not (LOCALES_DIR / f"{name}.json").is_file()
+    ]
+    if missing_catalogs:
+        for path in missing_catalogs:
+            print(f"Missing required locale: {path}", file=sys.stderr)
         return 1
 
     catalogs: dict[str, set[str]] = {}

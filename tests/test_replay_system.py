@@ -393,11 +393,33 @@ def test_replay_viewer_draw_hud(monkeypatch, metadata_duration, expected_total):
 
     viewer = ReplayViewer(player)
     viewer.small_font = MagicMock(wraps=viewer.small_font)
+    viewer.text_font = MagicMock(wraps=viewer.text_font)
+    monkeypatch.setattr('modul.replay_ui.gettext', lambda key: key)
 
     viewer.draw_hud(screen)
+    viewer.text_font.render.assert_called_once_with("completed", True, (0, 255, 0))
     viewer.small_font.render.assert_any_call(
         f"{expected_total} / {expected_total}", True, (200, 200, 200)
     )
+
+
+@pytest.mark.parametrize("completed,paused,expected", [
+    (True, True, "completed"),
+    (False, True, "paused"),
+    (False, False, "playing"),
+])
+def test_replay_hud_status_priority(monkeypatch, completed, paused, expected):
+    """Completion takes priority while pause and playback labels remain available."""
+    player = ReplayPlayer()
+    player.completed = completed
+    player.paused = paused
+    viewer = ReplayViewer(player)
+    viewer.text_font = MagicMock(wraps=viewer.text_font)
+    monkeypatch.setattr('modul.replay_ui.gettext', lambda key: key)
+
+    viewer.draw_hud(pygame.Surface((1280, 720)))
+
+    assert viewer.text_font.render.call_args.args[0] == expected
 
 
 def test_game_frame_creation():
