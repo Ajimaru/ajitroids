@@ -12,14 +12,21 @@ from modul.achievements import Achievement, AchievementSystem
 
 
 @pytest.fixture
-def clean_achievements_file():
-    """Remove achievements file before and after test"""
-    achievements_file = "achievements.json"
-    if os.path.exists(achievements_file):
-        os.remove(achievements_file)
+def clean_achievements_file(tmp_path, monkeypatch):
+    """Run achievement persistence tests in an isolated directory.
+
+    AchievementSystem defaults to the relative path "achievements.json", so
+    without chdir these tests would delete the player's real achievements in
+    the project root - and the pytest pre-commit hook would wipe them on
+    every commit.
+    """
+    monkeypatch.chdir(tmp_path)
+    achievements_file = tmp_path / "achievements.json"
+    if achievements_file.exists():
+        achievements_file.unlink()
     yield
-    if os.path.exists(achievements_file):
-        os.remove(achievements_file)
+    if achievements_file.exists():
+        achievements_file.unlink()
 
 
 class TestAchievement:
