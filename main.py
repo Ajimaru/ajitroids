@@ -3,6 +3,7 @@
 import argparse
 import logging
 import math
+import os
 import random
 import sys
 import time
@@ -116,7 +117,7 @@ def main(args=None):
     logger = setup_logging(args)
     logger.info(f"Starting Ajitroids v{__version__}")
 
-    global sounds, player, PLAYER_INVINCIBLE_TIME, game_settings
+    global sounds, player, PLAYER_INVINCIBLE_TIME, game_settings, screen
 
     global game_state, score, lives, level
 
@@ -325,6 +326,12 @@ def main(args=None):
 
     toggle_message = None
     toggle_message_timer = 0
+    # Set for exactly one frame after H/F1 opened the help screen: the very
+    # KEYDOWN that triggered it is still part of this frame's event list and
+    # would close the screen again before it is ever drawn.
+    help_just_opened = False
+    # Deferred to after display.flip() so the file contains the finished frame.
+    screenshot_requested = False
 
     last_spawn_time = time.time()
     spawn_interval = random.uniform(10, 30)
@@ -415,6 +422,7 @@ def main(args=None):
         game_state = "game_over"
 
     while True:
+        help_just_opened = False
         events = pygame.event.get()
         # Poll joystick bindings on their rising edge; keyboard uses KEYDOWN.
         pause_binding = input_utils.get_action_binding("pause") or ""
@@ -480,9 +488,14 @@ def main(args=None):
                         else "Collision Debug Disabled"
                     )
                     toggle_message_timer = 2
+                elif event.key == pygame.K_p and game_state == "playing":
+                    screenshot_requested = True
+                    toggle_message = "Screenshot captured"
+                    toggle_message_timer = 2
                 elif event.key in (pygame.K_h, pygame.K_F1) and game_state == "playing":
                     game_state = "help"
                     help_screen.activate()
+                    help_just_opened = True
                 elif event.key == pygame.K_b and player:
                     player.cycle_weapon()
 
@@ -685,8 +698,14 @@ def main(args=None):
             pause_menu.draw(screen)
 
             for event in events:
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    game_state = "pause_confirm"
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        # ESC is the natural "back" key here; without this the
+                        # only ways out of the pause menu were Enter/Space or
+                        # selecting an item with the arrow keys.
+                        game_state = "playing"
+                    elif event.key == pygame.K_SPACE:
+                        game_state = "pause_confirm"
 
             if action == "continue":
                 game_state = "playing"
@@ -1407,7 +1426,10 @@ def main(args=None):
             for obj in drawable:
                 obj.draw(screen)
 
-            action = help_screen.update(dt, events)
+            # Hand the opening KEYDOWN to nobody: HelpScreen closes on
+            # H/F1/ESC, so passing the same event through would make the
+            # screen flash for zero frames.
+            action = help_screen.update(dt, [] if help_just_opened else events)
             help_screen.draw(screen)
 
             if action == "close":
@@ -1524,6 +1546,11 @@ def main(args=None):
 
         pygame.display.flip()
 
+        if screenshot_requested:
+            screenshot_requested = False
+            saved_screenshot = save_screenshot(screen)
+            logger.info("Screenshot saved: %s", saved_screenshot)
+
         dt = clock.tick(60) / 1000.0
 
 
@@ -1554,6 +1581,32 @@ def debug_music_status():
     print(f"   - Volume: {pygame.mixer.music.get_volume()}")
     print(f"   - Mixer Init: {pygame.mixer.get_init()}")
     print(f"   - Settings Music: {game_settings.music_on}")
+
+
+def save_screenshot(surface=None):
+    """Write the current frame to `screenshots/` and return the path.
+
+    Returns None when pygame has no display surface or the write fails; the
+    caller only logs the result, so a missing screenshot never interrupts play.
+    """
+    surface = surface if surface is not None else pygame.display.get_surface()
+    if surface is None:
+        return None
+
+    directory = "screenshots"
+    try:
+        os.makedirs(directory, exist_ok=True)
+        stamp = time.strftime("ajitroids_%Y%m%d_%H%M%S")
+        path = os.path.join(directory, f"{stamp}.png")
+        index = 1
+        while os.path.exists(path):
+            path = os.path.join(directory, f"{stamp}_{index}.png")
+            index += 1
+        pygame.image.save(surface, path)
+        return path
+    except (OSError, pygame.error) as exc:
+        print(f"Could not save screenshot: {exc}")
+        return None
 
 
 def toggle_fullscreen():

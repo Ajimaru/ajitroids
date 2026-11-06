@@ -223,5 +223,17 @@
   "shield_active": "Shield Active",
   "low_health": "Low Health",
   "reverse": "Reverse",
-  "test_all_sounds": "Test All Sounds"
+  "test_all_sounds": "Test All Sounds",
+  "game_controls": "GAME CONTROLS",
+  "function_keys": "FUNCTION KEYS",
+  "desc_control_ship": "Rotate and move the ship",
+  "desc_shoot": "Fire the current weapon",
+  "desc_cycle_weapons": "Cycle weapons (needs ammo)",
+  "desc_quick_restart": "Restart the current run",
+  "desc_pause_back": "Pause / back",
+  "desc_f1_help": "Toggle this help screen",
+  "desc_f8": "Toggle the FPS display",
+  "desc_f9": "Toggle sound effects",
+  "desc_f10": "Toggle music",
+  "desc_f11": "Toggle fullscreen"
 }

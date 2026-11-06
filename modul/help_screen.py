@@ -110,7 +110,29 @@ class HelpScreen:
 
         # Draw shortcuts in columns
         y_pos = 140
-        x_left = SCREEN_WIDTH / 2 - 350
+        x_left = 60
+        desc_x = x_left + 250
+
+        # Tips get their own column. Stacked underneath the shortcut list they
+        # started at y=690, so the last four entries landed outside the 720px
+        # canvas and the footer was drawn on top of the rest. Their x is
+        # measured rather than hardcoded so longer translations cannot collide
+        # with the descriptions.
+        tips = [
+            gettext("tip_collect_powerups"),
+            gettext("tip_use_weapons"),
+            gettext("tip_boss_fights"),
+            gettext("tip_unlock_ships"),
+            gettext("tip_check_achievements"),
+        ]
+        widest_desc = max(
+            (self.text_font.size(f"- {gettext(description)}")[0]
+             for _, items in self.shortcuts for _, description in items),
+            default=0,
+        )
+        widest_tip = max((self.small_font.size(tip)[0] for tip in tips), default=0)
+        x_tips = min(SCREEN_WIDTH - widest_tip - 40, desc_x + widest_desc + 48)
+        x_tips = max(x_tips, desc_x + widest_desc + 24)
 
         for section_title, shortcuts in self.shortcuts:
             # Section title
@@ -126,30 +148,21 @@ class HelpScreen:
 
                 # Description
                 desc_surface = self.text_font.render(f"- {gettext(description)}", True, (200, 200, 200))
-                screen.blit(desc_surface, (x_left + 250, y_pos))
+                screen.blit(desc_surface, (desc_x, y_pos))
 
                 y_pos += 35
 
             y_pos += 20
 
-        # Tips section
-        y_pos += 10
+        tips_y = 140
         tips_title = self.section_font.render(gettext("tips").upper(), True, (100, 200, 255))
-        screen.blit(tips_title, (x_left, y_pos))
-        y_pos += 50
-
-        tips = [
-            gettext("tip_collect_powerups"),
-            gettext("tip_use_weapons"),
-            gettext("tip_boss_fights"),
-            gettext("tip_unlock_ships"),
-            gettext("tip_check_achievements"),
-        ]
+        screen.blit(tips_title, (x_tips, tips_y))
+        tips_y += 50
 
         for tip in tips:
-            tip_surface = self.text_font.render(tip, True, (180, 180, 180))
-            screen.blit(tip_surface, (x_left + 20, y_pos))
-            y_pos += 35
+            tip_surface = self.small_font.render(tip, True, (180, 180, 180))
+            screen.blit(tip_surface, (x_tips + 20, tips_y))
+            tips_y += 32
 
         # Footer
         footer_text = gettext("help_footer")

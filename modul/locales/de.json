@@ -223,5 +223,17 @@
   "shield_active": "Schild aktiv",
   "low_health": "Wenig Energie",
   "reverse": "Rückwärts",
-  "test_all_sounds": "Alle Sounds testen"
+  "test_all_sounds": "Alle Sounds testen",
+  "game_controls": "SPIELSTEUERUNG",
+  "function_keys": "FUNKTIONSTASTEN",
+  "desc_control_ship": "Schiff drehen und bewegen",
+  "desc_shoot": "Aktuelle Waffe abfeuern",
+  "desc_cycle_weapons": "Waffe wechseln (braucht Munition)",
+  "desc_quick_restart": "Aktuellen Lauf neu starten",
+  "desc_pause_back": "Pause / zurück",
+  "desc_f1_help": "Diese Hilfe ein- und ausblenden",
+  "desc_f8": "FPS-Anzeige umschalten",
+  "desc_f9": "Soundeffekte umschalten",
+  "desc_f10": "Musik umschalten",
+  "desc_f11": "Vollbild umschalten"
 }
