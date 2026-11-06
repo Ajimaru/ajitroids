@@ -8,7 +8,7 @@ This module provides three major audio enhancements:
 
 import os
 import shutil
-import subprocess
+import subprocess  # nosec B404
 import tempfile
 import time
 import wave
@@ -280,13 +280,19 @@ class VoiceAnnouncement:
         converted. `afconvert` ships with macOS, so this needs no extra
         dependency; on Linux and Windows the engines (espeak / SAPI5) already
         write RIFF/WAVE and this never runs.
+
+        This is the module's only `subprocess` use; the Bandit notes B404
+        (import) and B603 (call) are suppressed because the argv is fixed and
+        `shell` stays False.
         """
         converter = shutil.which("afconvert")
         if not converter:
             return False
 
         try:
-            result = subprocess.run(
+            # `converter` comes from shutil.which("afconvert"), the argv is fixed
+            # and shell stays False, so there is no command injection surface.
+            result = subprocess.run(  # nosec B603
                 [converter, "-f", "WAVE", "-d", "LEI16", source, target],
                 capture_output=True,
                 check=False,
