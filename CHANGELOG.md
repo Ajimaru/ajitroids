@@ -2,6 +2,34 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## Unreleased
+
+### Added
+
+- Combo chain: consecutive kills inside `COMBO_WINDOW` raise the score
+  multiplier (`ComboTracker` in `modul/combo.py`). Asteroid, enemy-ship and boss
+  kills all feed the chain; taking a hit or quick-restarting resets it, the
+  session best survives and appears in the end-of-session statistics.
+- HUD readout `Combo xN (kills)` with a bar for the remaining window time.
+- `speed_boost` power-up (temporary thrust multiplier). The counter and the
+  "Speed Demon" achievement existed before, but the power-up itself was never
+  spawnable.
+- Achievements "Combo Master" (3x multiplier) and "Chain Reaction" (25 kills in
+  one chain).
+- `P` saves a screenshot to `screenshots/`.
+
+### Changed
+
+- `H` / `F1` opens the help screen; previously the triggering key press closed
+  it again in the same frame, so the screen was never visible.
+- Help screen tips moved into their own column instead of overflowing below the
+  footer, and the missing `en`/`de` translations were added.
+- `ESC` resumes from the pause menu.
+- `F11` toggles fullscreen at runtime; it used to modify a module-level surface
+  the game loop never drew to.
+- `docs/architecture/game-mechanics.md`: power-up table, combo section and point
+  values now match the implementation.
+
 ## v0.24.0 (2026-01-17)
 
 ### Added

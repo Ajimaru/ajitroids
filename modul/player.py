@@ -55,6 +55,8 @@ class Player(CircleShape):
         self.triple_shot_timer = 0
         self.rapid_fire_active = False
         self.rapid_fire_timer = 0
+        self.speed_boost_active = False
+        self.speed_boost_timer = 0
         self.original_cooldown = C.PLAYER_SHOOT_COOLDOWN
         self.current_weapon = C.WEAPON_STANDARD
         self.weapon_switch_timer = 0
@@ -127,10 +129,14 @@ class Player(CircleShape):
             self.rotate(-self.base_turn_speed * dt)
         if input_utils.is_action_pressed("rotate_right"):
             self.rotate(self.base_turn_speed * dt)
+        # Speed boost multiplies thrust only; the velocity cap below still
+        # applies, so the power-up raises acceleration and top speed together.
+        boosted_dt = min(dt, max(0.0, self.speed_boost_timer)) if self.speed_boost_active else 0.0
+        thrust_impulse = self.base_speed * (dt + boosted_dt * (C.SPEED_BOOST_MULTIPLIER - 1.0))
         if input_utils.is_action_pressed("thrust"):
-            self.velocity += self.forward() * self.base_speed * dt
+            self.velocity += self.forward() * thrust_impulse
         if input_utils.is_action_pressed("reverse"):
-            self.velocity -= self.forward() * self.base_speed * dt
+            self.velocity -= self.forward() * thrust_impulse
 
         if input_utils.is_action_pressed("shoot"):
             self.shoot()
@@ -170,6 +176,10 @@ class Player(CircleShape):
             self.rapid_fire_timer -= dt
             if self.rapid_fire_timer <= 0:
                 self.rapid_fire_active = False
+
+        self.speed_boost_timer = max(0.0, self.speed_boost_timer - dt)
+        if self.speed_boost_timer <= 0:
+            self.speed_boost_active = False
 
         if self.weapon_switch_timer > 0:
             self.weapon_switch_timer -= dt
@@ -286,6 +296,8 @@ class Player(CircleShape):
         self.triple_shot_timer = 0
         self.rapid_fire_active = False
         self.rapid_fire_timer = 0
+        self.speed_boost_active = False
+        self.speed_boost_timer = 0
         self.shoot_timer = 0
 
         print("Player respawned with 3 seconds of invincibility")
@@ -304,6 +316,10 @@ class Player(CircleShape):
         elif powerup_type == "rapid_fire":
             self.rapid_fire_active = True
             self.rapid_fire_timer = C.RAPID_FIRE_DURATION
+
+        elif powerup_type == "speed_boost":
+            self.speed_boost_active = True
+            self.speed_boost_timer = C.SPEED_BOOST_DURATION
 
         elif powerup_type == "laser_weapon":
             self.weapons[C.WEAPON_LASER] = min(self.weapons[C.WEAPON_LASER] + C.LASER_AMMO, C.LASER_AMMO)

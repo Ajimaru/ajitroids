@@ -3,6 +3,7 @@
 import argparse
 import logging
 import math
+import os
 import random
 import sys
 import time
@@ -23,9 +24,11 @@ from modul.asteroidfield import AsteroidField
 from modul.audio_enhancements import AudioEnhancementManager, SoundTheme
 from modul.boss import Boss
 from modul.bossprojectile import BossProjectile
+from modul.combo import ComboTracker
 from modul.groups import collidable, drawable, updatable
 from modul.help_screen import HelpScreen
 from modul import input_utils
+from modul.i18n import gettext
 from modul.highscore import HighscoreDisplay, HighscoreInput, HighscoreManager
 from modul.menu import (AchievementsMenu, ControlsMenu, CreditsScreen,
                         DifficultyMenu, GameOverScreen, LanguageMenu, MainMenu,
@@ -116,7 +119,7 @@ def main(args=None):
     logger = setup_logging(args)
     logger.info(f"Starting Ajitroids v{__version__}")
 
-    global sounds, player, PLAYER_INVINCIBLE_TIME, game_settings
+    global sounds, player, PLAYER_INVINCIBLE_TIME, game_settings, screen
 
     global game_state, score, lives, level
 
@@ -281,6 +284,9 @@ def main(args=None):
     session_stats = SessionStats()
     stats_dashboard = StatsDashboard(session_stats)
 
+    # Consecutive kills inside the combo window raise the score multiplier.
+    combo = ComboTracker()
+
     # Performance profiler
     performance_profiler = PerformanceProfiler()
 
@@ -325,6 +331,22 @@ def main(args=None):
 
     toggle_message = None
     toggle_message_timer = 0
+    # Set for exactly one frame after H/F1 opened the help screen: the very
+    # KEYDOWN that triggered it is still part of this frame's event list and
+    # would close the screen again before it is ever drawn.
+    help_just_opened = False
+    # Deferred to after display.flip() so the file contains the finished frame.
+    screenshot_requested = False
+
+    def register_combo_kill(*, asteroid=False):
+        """Score and award achievements before the chain can be reset."""
+        multiplier = combo.register_kill(asteroid=asteroid)
+        if combo.multiplier >= COMBO_TIERS[0][1] and not achievement_system.is_unlocked("Combo Master"):
+            achievement_system.unlock("Combo Master")
+        if combo.asteroid_count >= COMBO_CHAIN_ACHIEVEMENT and not achievement_system.is_unlocked("Chain Reaction"):
+            achievement_system.unlock("Chain Reaction")
+
+        return multiplier
 
     last_spawn_time = time.time()
     spawn_interval = random.uniform(10, 30)
@@ -345,6 +367,7 @@ def main(args=None):
             return
         run_active = False
         session_stats.end_game(score, level)
+        session_stats.record_combo(combo.best)
         replay_recorder.stop_recording(score, level)
         try:
             saved_path = replay_recorder.save_replay()
@@ -367,6 +390,7 @@ def main(args=None):
             group.empty()
         score, lives, level = 0, PLAYER_LIVES, 1
         survival_time = 0.0
+        combo.reset()
         boss = None
         boss_active = False
         boss_defeated_timer = 0
@@ -399,6 +423,7 @@ def main(args=None):
         if not run_active or player.invincible or player.shield_active:
             return
         lives = max(0, lives - 1)
+        combo.reset()
         session_stats.record_life_lost()
         sounds.play_player_hit()
         Particle.create_ship_explosion(player.position.x, player.position.y)
@@ -415,6 +440,7 @@ def main(args=None):
         game_state = "game_over"
 
     while True:
+        help_just_opened = False
         events = pygame.event.get()
         # Poll joystick bindings on their rising edge; keyboard uses KEYDOWN.
         pause_binding = input_utils.get_action_binding("pause") or ""
@@ -480,22 +506,18 @@ def main(args=None):
                         else "Collision Debug Disabled"
                     )
                     toggle_message_timer = 2
+                elif event.key == pygame.K_p and game_state == "playing":
+                    screenshot_requested = True
+                    toggle_message = "Screenshot captured"
+                    toggle_message_timer = 2
                 elif event.key in (pygame.K_h, pygame.K_F1) and game_state == "playing":
                     game_state = "help"
                     help_screen.activate()
+                    help_just_opened = True
                 elif event.key == pygame.K_b and player:
                     player.cycle_weapon()
 
         events = menu_events
-
-        if toggle_message and toggle_message_timer > 0:
-            font = pygame.font.Font(None, 36)
-            message_surface = font.render(toggle_message, True, (255, 255, 255))
-            message_rect = message_surface.get_rect(center=(SCREEN_WIDTH / 2, 50))
-            screen.blit(message_surface, message_rect)
-            toggle_message_timer -= dt
-            if toggle_message_timer <= 0:
-                toggle_message = None
 
         screen.fill("black")
 
@@ -685,8 +707,14 @@ def main(args=None):
             pause_menu.draw(screen)
 
             for event in events:
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    game_state = "pause_confirm"
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        # ESC is the natural "back" key here; without this the
+                        # only ways out of the pause menu were Enter/Space or
+                        # selecting an item with the arrow keys.
+                        game_state = "playing"
+                    elif event.key == pygame.K_SPACE:
+                        game_state = "pause_confirm"
 
             if action == "continue":
                 game_state = "playing"
@@ -834,6 +862,8 @@ def main(args=None):
             if survival_time >= SURVIVOR_TIME and not achievement_system.is_unlocked("Survivor"):
                 achievement_system.unlock("Survivor")
 
+            # The chain expires on gameplay time, so a paused game keeps it.
+            combo.update(dt)
             # Update performance profiler
             object_groups = {
                 'asteroids': asteroids,
@@ -931,7 +961,7 @@ def main(args=None):
                             base_score = SCORE_SMALL
 
                         type_multiplier = ASTEROID_TYPE_SCORE_MULTIPLIERS.get(asteroid.asteroid_type, 1.0)
-                        score += int(round(base_score * type_multiplier))
+                        score += int(round(base_score * type_multiplier * register_combo_kill(asteroid=True)))
 
                         Particle.create_asteroid_explosion(asteroid.position.x, asteroid.position.y)
 
@@ -968,7 +998,7 @@ def main(args=None):
                     for shot in shots:
                         if obj.collides_with(shot):
                             sounds.play_explosion()
-                            score += SCORE_MEDIUM
+                            score += SCORE_MEDIUM * register_combo_kill()
                             session_stats.record_enemy_destroyed()
                             obj.split()
                             shot.kill()
@@ -1080,6 +1110,24 @@ def main(args=None):
             difficulty_text = font.render(f"Difficulty: {difficulty.capitalize()}", True, difficulty_color)
             difficulty_rect = difficulty_text.get_rect(topleft=(20, 110))
             screen.blit(difficulty_text, difficulty_rect)
+
+            if combo.active:
+                combo_color = (255, 215, 0) if combo.multiplier > 1 else (200, 200, 200)
+                # Before the first tier the multiplier is still 1x, so the
+                # counter alone is the useful bit of information.
+                if combo.multiplier > 1:
+                    combo_label = f"{gettext('combo')} x{combo.multiplier} ({combo.count})"
+                else:
+                    combo_label = f"{gettext('combo')} {combo.count}"
+                combo_text = font.render(combo_label, True, combo_color)
+                screen.blit(combo_text, (20, 140))
+
+                # Shrinking bar so the remaining chain time is readable at a glance.
+                bar_x, bar_y, bar_width, bar_height = 20, 168, 160, 5
+                pygame.draw.rect(screen, (60, 60, 60), (bar_x, bar_y, bar_width, bar_height))
+                pygame.draw.rect(
+                    screen, combo_color, (bar_x, bar_y, int(bar_width * combo.ratio), bar_height)
+                )
 
             if player:
                 player.draw_weapon_hud(screen)
@@ -1226,7 +1274,7 @@ def main(args=None):
                             except pygame.error:
                                 pass
 
-                            score += BOSS_SCORE
+                            score += BOSS_SCORE * register_combo_kill()
                             boss_active = False
                             session_stats.record_boss_defeated()
 
@@ -1407,7 +1455,10 @@ def main(args=None):
             for obj in drawable:
                 obj.draw(screen)
 
-            action = help_screen.update(dt, events)
+            # Hand the opening KEYDOWN to nobody: HelpScreen closes on
+            # H/F1/ESC, so passing the same event through would make the
+            # screen flash for zero frames.
+            action = help_screen.update(dt, [] if help_just_opened else events)
             help_screen.draw(screen)
 
             if action == "close":
@@ -1522,7 +1573,21 @@ def main(args=None):
             except Exception as e:
                 logger.exception("Failed to activate restored menu state: %s", e)
 
+        if toggle_message and toggle_message_timer > 0:
+            font = pygame.font.Font(None, 36)
+            message_surface = font.render(toggle_message, True, (255, 255, 255))
+            message_rect = message_surface.get_rect(center=(SCREEN_WIDTH / 2, 50))
+            screen.blit(message_surface, message_rect)
+            toggle_message_timer -= dt
+            if toggle_message_timer <= 0:
+                toggle_message = None
+
         pygame.display.flip()
+
+        if screenshot_requested:
+            screenshot_requested = False
+            saved_screenshot = save_screenshot(screen)
+            logger.info("Screenshot saved: %s", saved_screenshot)
 
         dt = clock.tick(60) / 1000.0
 
@@ -1554,6 +1619,32 @@ def debug_music_status():
     print(f"   - Volume: {pygame.mixer.music.get_volume()}")
     print(f"   - Mixer Init: {pygame.mixer.get_init()}")
     print(f"   - Settings Music: {game_settings.music_on}")
+
+
+def save_screenshot(surface=None):
+    """Write the current frame to `screenshots/` and return the path.
+
+    Returns None when pygame has no display surface or the write fails; the
+    caller only logs the result, so a missing screenshot never interrupts play.
+    """
+    surface = surface if surface is not None else pygame.display.get_surface()
+    if surface is None:
+        return None
+
+    directory = "screenshots"
+    try:
+        os.makedirs(directory, exist_ok=True)
+        stamp = time.strftime("ajitroids_%Y%m%d_%H%M%S")
+        path = os.path.join(directory, f"{stamp}.png")
+        index = 1
+        while os.path.exists(path):
+            path = os.path.join(directory, f"{stamp}_{index}.png")
+            index += 1
+        pygame.image.save(surface, path)
+        return path
+    except (OSError, pygame.error) as exc:
+        print(f"Could not save screenshot: {exc}")
+        return None
 
 
 def toggle_fullscreen():

@@ -155,4 +155,14 @@ class PowerUp(CircleShape):
                 direction = pygame.Vector2(0, -1).rotate(angle)
                 end = start + direction * draw_radius * 0.4
                 pygame.draw.line(screen, self.color, start, end, 2)
+
+        elif self.type == "speed_boost":
+            # Three speed lines with arrow heads pointing up.
+            center = pygame.Vector2(self.position)
+            for offset in (-0.35, 0.0, 0.35):
+                base = center + pygame.Vector2(offset * draw_radius, draw_radius * 0.45)
+                tip = center + pygame.Vector2(offset * draw_radius, -draw_radius * 0.45)
+                pygame.draw.line(screen, self.color, base, tip, 2)
+                pygame.draw.line(screen, self.color, tip, tip + pygame.Vector2(-draw_radius * 0.18, draw_radius * 0.25), 2)
+                pygame.draw.line(screen, self.color, tip, tip + pygame.Vector2(draw_radius * 0.18, draw_radius * 0.25), 2)
         self.draw_collision_debug(screen)

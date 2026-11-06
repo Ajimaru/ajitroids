@@ -282,7 +282,7 @@ class TestAchievementSystem:
         """Test correct number of standard achievements"""
         system = AchievementSystem()
 
-        assert len(system.achievements) == 11
+        assert len(system.achievements) == 13
 
     def test_achievements_have_descriptions(self, clean_achievements_file):
         """Test all achievements have descriptions"""

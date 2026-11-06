@@ -110,7 +110,30 @@ class HelpScreen:
 
         # Draw shortcuts in columns
         y_pos = 140
-        x_left = SCREEN_WIDTH / 2 - 350
+        x_left = 60
+        desc_x = x_left + 250
+
+        # Tips get their own column. Stacked underneath the shortcut list they
+        # started at y=690, so the last four entries landed outside the 720px
+        # canvas and the footer was drawn on top of the rest. Their x is
+        # measured rather than hardcoded so longer translations cannot collide
+        # with the descriptions.
+        tips = [
+            gettext("tip_collect_powerups"),
+            gettext("tip_use_weapons"),
+            gettext("tip_boss_fights"),
+            gettext("tip_unlock_ships"),
+            gettext("tip_check_achievements"),
+        ]
+        widest_desc = max(
+            (self.text_font.size(f"- {gettext(description)}")[0]
+             for _, items in self.shortcuts for _, description in items),
+            default=0,
+        )
+        # Reserve space for tips even when descriptions need fitting.
+        x_tips = min(desc_x + widest_desc + 48, SCREEN_WIDTH - 320)
+        description_width = x_tips - desc_x - 24
+        tips_width = SCREEN_WIDTH - x_tips - 40
 
         for section_title, shortcuts in self.shortcuts:
             # Section title
@@ -126,30 +149,51 @@ class HelpScreen:
 
                 # Description
                 desc_surface = self.text_font.render(f"- {gettext(description)}", True, (200, 200, 200))
-                screen.blit(desc_surface, (x_left + 250, y_pos))
+                if desc_surface.get_width() > description_width:
+                    scale = description_width / desc_surface.get_width()
+                    desc_surface = pygame.transform.smoothscale(
+                        desc_surface, (description_width, max(1, int(desc_surface.get_height() * scale)))
+                    )
+                screen.blit(desc_surface, (desc_x, y_pos))
 
                 y_pos += 35
 
             y_pos += 20
 
-        # Tips section
-        y_pos += 10
-        tips_title = self.section_font.render(gettext("tips").upper(), True, (100, 200, 255))
-        screen.blit(tips_title, (x_left, y_pos))
-        y_pos += 50
-
-        tips = [
-            gettext("tip_collect_powerups"),
-            gettext("tip_use_weapons"),
-            gettext("tip_boss_fights"),
-            gettext("tip_unlock_ships"),
-            gettext("tip_check_achievements"),
-        ]
-
+        # Wrap even unbroken translated words to the available column width.
+        lines = []
         for tip in tips:
-            tip_surface = self.text_font.render(tip, True, (180, 180, 180))
-            screen.blit(tip_surface, (x_left + 20, y_pos))
-            y_pos += 35
+            remaining = tip
+            while remaining:
+                end = len(remaining)
+                while end > 1 and self.small_font.size(remaining[:end])[0] > tips_width - 20:
+                    end -= 1
+                if end < len(remaining):
+                    space = remaining.rfind(" ", 0, end + 1)
+                    if space > 0:
+                        end = space
+                lines.append(remaining[:end])
+                remaining = remaining[end:].lstrip()
+            lines.append("")
+
+        tips_panel = pygame.Surface((tips_width, 50 + len(lines) * 24), pygame.SRCALPHA)
+        tips_title = self.section_font.render(gettext("tips").upper(), True, (100, 200, 255))
+        if tips_title.get_width() > tips_width:
+            scale = tips_width / tips_title.get_width()
+            tips_title = pygame.transform.smoothscale(
+                tips_title, (tips_width, max(1, int(tips_title.get_height() * scale)))
+            )
+        tips_panel.blit(tips_title, (0, 0))
+        for index, line in enumerate(lines):
+            tip_surface = self.small_font.render(line, True, (180, 180, 180))
+            tips_panel.blit(tip_surface, (20, 50 + index * 24))
+        available_height = SCREEN_HEIGHT - 210
+        if tips_panel.get_height() > available_height:
+            scale = available_height / tips_panel.get_height()
+            tips_panel = pygame.transform.smoothscale(
+                tips_panel, (max(1, int(tips_width * scale)), available_height)
+            )
+        screen.blit(tips_panel, (x_tips, 140))
 
         # Footer
         footer_text = gettext("help_footer")

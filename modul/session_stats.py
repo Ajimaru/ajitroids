@@ -19,6 +19,7 @@ class SessionStats:
         self.total_shots_fired = 0
         self.highest_level = 0
         self.total_lives_lost = 0
+        self.best_combo = 0
         self.total_playtime = 0.0
         self.session_start_time = time.time()
         self.reset()
@@ -36,6 +37,7 @@ class SessionStats:
         self.total_shots_fired = 0
         self.highest_level = 0
         self.total_lives_lost = 0
+        self.best_combo = 0
         self.total_playtime = 0.0
         self.total_playtime = 0.0
 
@@ -76,6 +78,10 @@ class SessionStats:
         """Increment lives lost counter."""
         self.total_lives_lost += 1
 
+    def record_combo(self, combo_count):
+        """Keep the longest kill chain seen in the session."""
+        self.best_combo = max(self.best_combo, combo_count)
+
     def get_session_duration(self):
         """Get total session duration in seconds."""
         return time.time() - self.session_start_time
@@ -104,6 +110,7 @@ class SessionStats:
             'total_bosses_defeated': self.total_bosses_defeated,
             'total_powerups_collected': self.total_powerups_collected,
             'total_lives_lost': self.total_lives_lost,
+            'best_combo': self.best_combo,
             'total_playtime': self.total_playtime,
             'session_duration': self.get_session_duration(),
         }
@@ -131,6 +138,7 @@ COMBAT STATS
 Asteroids Destroyed:  {stats['total_asteroids_destroyed']:,}
 Enemies Destroyed:    {stats['total_enemies_destroyed']:,}
 Bosses Defeated:      {stats['total_bosses_defeated']:,}
+Best Combo:           {stats['best_combo']:,}
 
 COLLECTION & SURVIVAL
 =====================

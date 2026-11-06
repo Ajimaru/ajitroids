@@ -227,79 +227,83 @@ def take_damage(self, amount):
 
 ### Power-Up Types
 
-Different power-ups provide various benefits:
+Power-ups drop from shattered asteroids (`PowerUp.spawn_drop`) and are collected
+on contact. The types live in `modul/constants.py`:
 
 ```python
-POWERUP_TYPES = {
-    "rapid_fire": {
-        "duration": 10,
-        "effect": "reduce_shot_cooldown",
-        "multiplier": 0.5
-    },
-    "shield": {
-        "duration": 15,
-        "effect": "invulnerability",
-    },
-    "multi_shot": {
-        "duration": 12,
-        "effect": "shoot_multiple",
-        "count": 3
-    },
-    "speed_boost": {
-        "duration": 8,
-        "effect": "increase_speed",
-        "multiplier": 1.5
-    }
-}
+POWERUP_TYPES = [
+    "shield",          # temporary invulnerability, drawn as a pulsing shell
+    "triple_shot",     # three projectiles per shot
+    "rapid_fire",      # shortened shoot cooldown
+    "laser_weapon",    # grants laser ammo and switches to it
+    "missile_weapon",  # grants missile ammo and switches to it
+    "shotgun_weapon",  # grants shotgun ammo and switches to it
+    "speed_boost",     # temporary thrust multiplier
+]
+
+SHIELD_DURATION = 3.0
+TRIPLE_SHOT_DURATION = 10.0
+RAPID_FIRE_DURATION = 8.0
+SPEED_BOOST_DURATION = 8.0
+SPEED_BOOST_MULTIPLIER = 1.5
 ```
+
+At most `POWERUP_MAX_COUNT` (3) drops exist at once, each rolls
+`POWERUP_SPAWN_CHANCE` (0.3) and expires after `POWERUP_LIFETIME` (15 s).
 
 ### Power-Up Activation
 
+`Player.activate_powerup` switches on a timer-backed effect or hands out ammo:
+
 ```python
 def activate_powerup(self, powerup_type):
-    config = POWERUP_TYPES[powerup_type]
-
-    # Apply effect
-    if config["effect"] == "reduce_shot_cooldown":
-        self.shot_cooldown *= config["multiplier"]
-
-    # Set timer
-    self.powerup_timer = config["duration"]
-    self.active_powerup = powerup_type
+    if powerup_type == "shield":
+        self.shield_active = True
+        self.shield_timer = C.SHIELD_DURATION
+    elif powerup_type == "speed_boost":
+        self.speed_boost_active = True
+        self.speed_boost_timer = C.SPEED_BOOST_DURATION
+    # ... triple_shot / rapid_fire use the same pattern,
+    # weapon power-ups raise ammo and switch `current_weapon`
 ```
+
+Timed effects tick down in `Player.update(dt)`, so they pause with the game. A
+respawn resets all of them.
 
 ## Scoring System
 
 ### Point Values
 
-Different actions award different points:
-
 ```python
-POINTS = {
-    "asteroid_large": 20,
-    "asteroid_medium": 50,
-    "asteroid_small": 100,
-    "boss": 1000,
-    "enemy_ship": 200,
-    "powerup": 50,
-}
+SCORE_LARGE = 20      # large asteroid
+SCORE_MEDIUM = 50     # medium asteroid shard, enemy ship
+SCORE_SMALL = 100     # small asteroid shard
+BOSS_SCORE = 500      # boss defeat (also grants a life)
 ```
 
-### Score Multipliers
+Asteroid points are additionally scaled by `ASTEROID_TYPE_SCORE_MULTIPLIERS`
+(normal 1.0, ice 0.9, metal 1.5, crystal 0.6).
 
-Combo system increases score:
+### Combo Chain
+
+Consecutive kills inside a short window raise the score multiplier. The chain
+lives in `modul/combo.py` and is advanced with gameplay time (`dt`), so pausing
+the game freezes it instead of breaking it, and replays stay deterministic.
+
+| Constant                  | Value               | Meaning                                  |
+| ------------------------- | ------------------- | ---------------------------------------- |
+| `COMBO_WINDOW`            | 2.5 s               | Time after a kill until the chain drops  |
+| `COMBO_TIERS`             | `((12, 3), (5, 2))` | `(kills, multiplier)`, resolved top-down |
+| `COMBO_HUD_MIN`           | 2                   | Chain length from which the HUD shows it |
+| `COMBO_CHAIN_ACHIEVEMENT` | 25                  | Kills needed for "Chain Reaction"        |
+
+Asteroid, enemy-ship and boss kills all feed the chain, and the multiplier is
+resolved after the counter is raised, so the kill that reaches a tier already
+earns it. Taking a hit or quick-restarting resets the chain; the session best
+survives and is reported in the end-of-session statistics.
 
 ```python
-def add_score(self, base_points):
-    # Check time since last kill
-    if time.now() - self.last_kill_time < COMBO_WINDOW:
-        self.combo_multiplier += 0.1
-    else:
-        self.combo_multiplier = 1.0
-
-    points = base_points * self.combo_multiplier
-    self.score += points
-    self.last_kill_time = time.now()
+score += int(round(base_score * type_multiplier * combo.register_kill()))
 ```
 
 ## Lives and Respawn
