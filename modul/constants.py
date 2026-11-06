@@ -61,6 +61,14 @@ SHOT_RADIUS = 5
 SCORE_LARGE = 20
 SCORE_MEDIUM = 50
 SCORE_SMALL = 100
+
+# Combo chain: consecutive kills inside COMBO_WINDOW raise the score
+# multiplier. Tiers are (kills, multiplier) and are resolved in descending
+# order, so the first entry is also the hard cap.
+COMBO_WINDOW = 2.5
+COMBO_TIERS = ((12, 3), (5, 2))
+COMBO_HUD_MIN = 2
+COMBO_CHAIN_ACHIEVEMENT = 25
 PLAYER_LIVES = 3
 INVINCIBILITY_TIME = 3.0
 RESPAWN_POSITION_X = SCREEN_WIDTH / 2
@@ -77,7 +85,15 @@ POWERUP_SPAWN_CHANCE = 0.3
 POWERUP_MAX_COUNT = 3
 POWERUP_LIFETIME = 15.0
 SHIELD_DURATION = 3.0
-POWERUP_TYPES = ["shield", "triple_shot", "rapid_fire", "laser_weapon", "missile_weapon", "shotgun_weapon"]
+POWERUP_TYPES = [
+    "shield",
+    "triple_shot",
+    "rapid_fire",
+    "laser_weapon",
+    "missile_weapon",
+    "shotgun_weapon",
+    "speed_boost",
+]
 POWERUP_COLORS = {
     "shield": "blue",
     "triple_shot": "magenta",
@@ -85,10 +101,13 @@ POWERUP_COLORS = {
     "laser_weapon": "green",
     "missile_weapon": "red",
     "shotgun_weapon": "orange",
+    "speed_boost": "cyan",
 }
 RAPID_FIRE_COOLDOWN = 0.1
 RAPID_FIRE_DURATION = 8.0
 TRIPLE_SHOT_DURATION = 10.0
+SPEED_BOOST_DURATION = 8.0
+SPEED_BOOST_MULTIPLIER = 1.5
 
 HIGHSCORE_FILE = "highscores.json"
 HIGHSCORE_MAX_ENTRIES = 10

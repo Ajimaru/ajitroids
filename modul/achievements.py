@@ -43,6 +43,8 @@ class AchievementSystem:
             ("Shield Expert", "Use shield 50 times."),
             ("Speed Demon", "Use speed boost 25 times."),
             ("Triple Threat", "Use triple shot 20 times."),
+            ("Combo Master", "Reach a 3x combo multiplier."),
+            ("Chain Reaction", "Destroy 25 asteroids in one combo chain."),
             ("Fleet Commander", "Unlock all four spaceships."),
         ]
         for name, description in standard_achievements:

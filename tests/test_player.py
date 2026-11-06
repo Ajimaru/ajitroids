@@ -8,7 +8,7 @@ import pytest
 from modul.constants import (INVINCIBILITY_TIME, LASER_AMMO, MISSILE_AMMO,
                              PLAYER_RADIUS, RAPID_FIRE_COOLDOWN,
                              RAPID_FIRE_DURATION, SCREEN_HEIGHT, SCREEN_WIDTH,
-                             SHIELD_DURATION, SHOTGUN_AMMO,
+                             SHIELD_DURATION, SHOTGUN_AMMO, SPEED_BOOST_DURATION,
                              TRIPLE_SHOT_DURATION, WEAPON_LASER,
                              WEAPON_MISSILE, WEAPON_SHOTGUN, WEAPON_STANDARD)
 from modul.player import Player
@@ -589,6 +589,46 @@ class TestPlayer:
         player.activate_powerup("rapid_fire")
         assert player.rapid_fire_active is True
         assert player.rapid_fire_timer == RAPID_FIRE_DURATION
+
+    def test_player_activate_speed_boost(self, mock_pygame):
+        """Test speed boost powerup activation"""
+        player = Player(100, 100)
+
+        assert player.speed_boost_active is False
+
+        player.activate_powerup("speed_boost")
+        assert player.speed_boost_active is True
+        assert player.speed_boost_timer == SPEED_BOOST_DURATION
+
+    def test_player_speed_boost_expires(self, mock_pygame):
+        """Test that the speed boost timer runs out"""
+        player = Player(100, 100)
+        player.activate_powerup("speed_boost")
+
+        with patch('modul.player.input_utils.is_action_pressed', return_value=False):
+            player.update(SPEED_BOOST_DURATION + 0.1)
+
+        assert player.speed_boost_active is False
+        assert player.speed_boost_timer <= 0
+
+    def test_player_speed_boost_increases_thrust(self, mock_pygame):
+        """Test that the boost multiplies thrust while active"""
+        player = Player(100, 100)
+        controls = {"thrust": True}
+
+        def pressed(action):
+            return controls.get(action, False)
+
+        with patch('modul.player.input_utils.is_action_pressed', side_effect=pressed):
+            player.update(0.1)
+            plain_speed = player.velocity.length()
+
+            player.velocity = pygame.Vector2(0, 0)
+            player.activate_powerup("speed_boost")
+            player.update(0.1)
+            boosted_speed = player.velocity.length()
+
+        assert boosted_speed > plain_speed
 
     def test_player_activate_laser_weapon(self, mock_pygame):
         """Test laser weapon powerup activation"""

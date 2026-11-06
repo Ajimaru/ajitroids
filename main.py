@@ -24,9 +24,11 @@ from modul.asteroidfield import AsteroidField
 from modul.audio_enhancements import AudioEnhancementManager, SoundTheme
 from modul.boss import Boss
 from modul.bossprojectile import BossProjectile
+from modul.combo import ComboTracker
 from modul.groups import collidable, drawable, updatable
 from modul.help_screen import HelpScreen
 from modul import input_utils
+from modul.i18n import gettext
 from modul.highscore import HighscoreDisplay, HighscoreInput, HighscoreManager
 from modul.menu import (AchievementsMenu, ControlsMenu, CreditsScreen,
                         DifficultyMenu, GameOverScreen, LanguageMenu, MainMenu,
@@ -282,6 +284,9 @@ def main(args=None):
     session_stats = SessionStats()
     stats_dashboard = StatsDashboard(session_stats)
 
+    # Consecutive kills inside the combo window raise the score multiplier.
+    combo = ComboTracker()
+
     # Performance profiler
     performance_profiler = PerformanceProfiler()
 
@@ -352,6 +357,7 @@ def main(args=None):
             return
         run_active = False
         session_stats.end_game(score, level)
+        session_stats.record_combo(combo.best)
         replay_recorder.stop_recording(score, level)
         try:
             saved_path = replay_recorder.save_replay()
@@ -374,6 +380,7 @@ def main(args=None):
             group.empty()
         score, lives, level = 0, PLAYER_LIVES, 1
         survival_time = 0.0
+        combo.reset()
         boss = None
         boss_active = False
         boss_defeated_timer = 0
@@ -406,6 +413,7 @@ def main(args=None):
         if not run_active or player.invincible or player.shield_active:
             return
         lives = max(0, lives - 1)
+        combo.reset()
         session_stats.record_life_lost()
         sounds.play_player_hit()
         Particle.create_ship_explosion(player.position.x, player.position.y)
@@ -853,6 +861,13 @@ def main(args=None):
             if survival_time >= SURVIVOR_TIME and not achievement_system.is_unlocked("Survivor"):
                 achievement_system.unlock("Survivor")
 
+            # The chain expires on gameplay time, so a paused game keeps it.
+            combo.update(dt)
+            if combo.multiplier >= COMBO_TIERS[0][1] and not achievement_system.is_unlocked("Combo Master"):
+                achievement_system.unlock("Combo Master")
+            if combo.count >= COMBO_CHAIN_ACHIEVEMENT and not achievement_system.is_unlocked("Chain Reaction"):
+                achievement_system.unlock("Chain Reaction")
+
             # Update performance profiler
             object_groups = {
                 'asteroids': asteroids,
@@ -950,7 +965,7 @@ def main(args=None):
                             base_score = SCORE_SMALL
 
                         type_multiplier = ASTEROID_TYPE_SCORE_MULTIPLIERS.get(asteroid.asteroid_type, 1.0)
-                        score += int(round(base_score * type_multiplier))
+                        score += int(round(base_score * type_multiplier * combo.register_kill()))
 
                         Particle.create_asteroid_explosion(asteroid.position.x, asteroid.position.y)
 
@@ -987,7 +1002,7 @@ def main(args=None):
                     for shot in shots:
                         if obj.collides_with(shot):
                             sounds.play_explosion()
-                            score += SCORE_MEDIUM
+                            score += SCORE_MEDIUM * combo.register_kill()
                             session_stats.record_enemy_destroyed()
                             obj.split()
                             shot.kill()
@@ -1099,6 +1114,24 @@ def main(args=None):
             difficulty_text = font.render(f"Difficulty: {difficulty.capitalize()}", True, difficulty_color)
             difficulty_rect = difficulty_text.get_rect(topleft=(20, 110))
             screen.blit(difficulty_text, difficulty_rect)
+
+            if combo.active:
+                combo_color = (255, 215, 0) if combo.multiplier > 1 else (200, 200, 200)
+                # Before the first tier the multiplier is still 1x, so the
+                # counter alone is the useful bit of information.
+                if combo.multiplier > 1:
+                    combo_label = f"{gettext('combo')} x{combo.multiplier} ({combo.count})"
+                else:
+                    combo_label = f"{gettext('combo')} {combo.count}"
+                combo_text = font.render(combo_label, True, combo_color)
+                screen.blit(combo_text, (20, 140))
+
+                # Shrinking bar so the remaining chain time is readable at a glance.
+                bar_x, bar_y, bar_width, bar_height = 20, 168, 160, 5
+                pygame.draw.rect(screen, (60, 60, 60), (bar_x, bar_y, bar_width, bar_height))
+                pygame.draw.rect(
+                    screen, combo_color, (bar_x, bar_y, int(bar_width * combo.ratio), bar_height)
+                )
 
             if player:
                 player.draw_weapon_hud(screen)
@@ -1245,7 +1278,7 @@ def main(args=None):
                             except pygame.error:
                                 pass
 
-                            score += BOSS_SCORE
+                            score += BOSS_SCORE * combo.register_kill()
                             boss_active = False
                             session_stats.record_boss_defeated()
 

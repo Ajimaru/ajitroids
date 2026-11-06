@@ -235,5 +235,6 @@
   "desc_f8": "Toggle the FPS display",
   "desc_f9": "Toggle sound effects",
   "desc_f10": "Toggle music",
-  "desc_f11": "Toggle fullscreen"
+  "desc_f11": "Toggle fullscreen",
+  "combo": "Combo"
 }
