@@ -346,3 +346,100 @@ def test_dashboard_rows_use_distinct_columns(monkeypatch):
         assert {x for x, _y in positions[5:]} == {C.SCREEN_WIDTH * 3 / 4}
     finally:
         pygame.font.quit()
+
+
+@pytest.mark.parametrize("asteroid_kills,chain_unlocked", [(24, True), (0, False)])
+def test_combo_awards_on_kill_before_same_frame_damage(run_game, monkeypatch, asteroid_kills, chain_unlocked):
+    combo = main.ComboTracker()
+    for index in range(24):
+        combo.register_kill(asteroid=index < asteroid_kills)
+    monkeypatch.setattr(main, "ComboTracker", lambda: combo)
+
+    def drive(step, _context):
+        if step == 4:
+            # New-game initialization resets the tracker, so prime it here.
+            for index in range(24):
+                combo.register_kill(asteroid=index < asteroid_kills)
+            clear_asteroids()
+            main.Asteroid(100, 100, 20, *main.Asteroid.containers)
+            main.Shot(100, 100)
+            main.player.invincible = False
+            main.BossProjectile(*main.player.position, pygame.Vector2())
+        if step == 5:
+            assert main.achievement_system.is_unlocked("Combo Master")
+            assert main.achievement_system.is_unlocked("Chain Reaction") == chain_unlocked
+            assert combo.count == 0
+
+    run_game(drive)
+
+
+@pytest.mark.parametrize("action,sign", [("thrust", -1), ("reverse", 1)])
+def test_partial_frame_speed_boost(monkeypatch, action, sign):
+    monkeypatch.setattr(main.Player, "containers", (), raising=False)
+    monkeypatch.setattr(main.input_utils, "is_action_pressed", lambda name: name == action)
+    player = main.Player(100, 100)
+    player.speed_boost_active = True
+    player.speed_boost_timer = 0.025
+    dt = 0.1
+    expected = player.base_speed * (dt + 0.025 * (C.SPEED_BOOST_MULTIPLIER - 1)) * 0.98
+    player.update(dt)
+    assert player.velocity.y == pytest.approx(sign * expected)
+    assert not player.speed_boost_active
+    assert player.speed_boost_timer == 0
+
+
+def test_screenshot_confirmation_is_in_displayed_and_saved_frame(run_game, monkeypatch):
+    checked = []
+    requested = [False]
+
+    def check_frame(surface, target):
+        text = pygame.font.Font(None, 36).render("Screenshot captured", True, (255, 255, 255))
+        rect = text.get_rect(center=(C.SCREEN_WIDTH / 2, 50))
+        white_pixels = [(x, y) for x in range(text.get_width()) for y in range(text.get_height())
+                        if text.get_at((x, y)) == (255, 255, 255, 255)]
+        assert white_pixels
+        assert all(surface.get_at((rect.x + x, rect.y + y))[:3] == (255, 255, 255) for x, y in white_pixels)
+        checked.append(target)
+
+    def flip():
+        if requested[0]:
+            check_frame(pygame.display.get_surface(), "display")
+
+    def save(surface):
+        check_frame(surface, "save")
+        requested[0] = False
+        return "synthetic.png"
+
+    monkeypatch.setattr(pygame.display, "flip", flip)
+    monkeypatch.setattr(main, "save_screenshot", save)
+
+    def drive(step, _context):
+        if step == 4:
+            requested[0] = True
+            return [key(pygame.K_p)]
+
+    run_game(drive)
+    assert checked == ["display", "save"]
+
+
+def test_help_long_translations_fit_separate_columns(monkeypatch):
+    from modul import help_screen
+    pygame.font.init()
+    try:
+        original = help_screen.gettext
+        monkeypatch.setattr(help_screen, "gettext", lambda key: "LongTranslatedTip" * 20
+                            if key.startswith("tip_") else original(key))
+        help_view = help_screen.HelpScreen()
+        help_view.activate()
+        blits = []
+        screen = SimpleNamespace(blit=lambda surface, pos: blits.append((surface, pos)))
+        help_view.draw(screen)
+        panel, (x, y) = blits[-2]
+        assert x >= 310
+        assert x + panel.get_width() <= C.SCREEN_WIDTH - 40
+        assert y + panel.get_height() <= C.SCREEN_HEIGHT - 70
+        for surface, pos in blits:
+            if isinstance(pos, tuple) and pos[0] == 310:
+                assert pos[0] + surface.get_width() <= x - 24
+    finally:
+        pygame.font.quit()

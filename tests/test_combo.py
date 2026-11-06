@@ -124,3 +124,20 @@ class TestComboTracker:
     def test_zero_window_ratio_is_safe(self):
         """A zero window must not divide by zero."""
         assert ComboTracker(window=0.0).ratio == 0.0
+
+
+@pytest.mark.parametrize("reset", [False, True])
+def test_asteroid_count_uses_shared_chain(reset):
+    combo = ComboTracker()
+    combo.register_kill(asteroid=True)
+    combo.update(combo.window / 2)
+    combo.register_kill()
+    assert combo.count == 2
+    assert combo.asteroid_count == 1
+    if reset:
+        combo.reset()
+    else:
+        combo.update(combo.window)
+    assert combo.asteroid_count == 0
+    combo.register_kill()
+    assert combo.asteroid_count == 0

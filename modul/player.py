@@ -131,11 +131,12 @@ class Player(CircleShape):
             self.rotate(self.base_turn_speed * dt)
         # Speed boost multiplies thrust only; the velocity cap below still
         # applies, so the power-up raises acceleration and top speed together.
-        thrust_speed = self.base_speed * (C.SPEED_BOOST_MULTIPLIER if self.speed_boost_active else 1.0)
+        boosted_dt = min(dt, max(0.0, self.speed_boost_timer)) if self.speed_boost_active else 0.0
+        thrust_impulse = self.base_speed * (dt + boosted_dt * (C.SPEED_BOOST_MULTIPLIER - 1.0))
         if input_utils.is_action_pressed("thrust"):
-            self.velocity += self.forward() * thrust_speed * dt
+            self.velocity += self.forward() * thrust_impulse
         if input_utils.is_action_pressed("reverse"):
-            self.velocity -= self.forward() * thrust_speed * dt
+            self.velocity -= self.forward() * thrust_impulse
 
         if input_utils.is_action_pressed("shoot"):
             self.shoot()
@@ -176,10 +177,9 @@ class Player(CircleShape):
             if self.rapid_fire_timer <= 0:
                 self.rapid_fire_active = False
 
-        if self.speed_boost_timer > 0:
-            self.speed_boost_timer -= dt
-            if self.speed_boost_timer <= 0:
-                self.speed_boost_active = False
+        self.speed_boost_timer = max(0.0, self.speed_boost_timer - dt)
+        if self.speed_boost_timer <= 0:
+            self.speed_boost_active = False
 
         if self.weapon_switch_timer > 0:
             self.weapon_switch_timer -= dt

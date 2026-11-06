@@ -338,6 +338,16 @@ def main(args=None):
     # Deferred to after display.flip() so the file contains the finished frame.
     screenshot_requested = False
 
+    def register_combo_kill(*, asteroid=False):
+        """Score and award achievements before the chain can be reset."""
+        multiplier = combo.register_kill(asteroid=asteroid)
+        if combo.multiplier >= COMBO_TIERS[0][1] and not achievement_system.is_unlocked("Combo Master"):
+            achievement_system.unlock("Combo Master")
+        if combo.asteroid_count >= COMBO_CHAIN_ACHIEVEMENT and not achievement_system.is_unlocked("Chain Reaction"):
+            achievement_system.unlock("Chain Reaction")
+
+        return multiplier
+
     last_spawn_time = time.time()
     spawn_interval = random.uniform(10, 30)
     max_enemy_ships = {"easy": 1, "normal": 2, "hard": 3}
@@ -508,15 +518,6 @@ def main(args=None):
                     player.cycle_weapon()
 
         events = menu_events
-
-        if toggle_message and toggle_message_timer > 0:
-            font = pygame.font.Font(None, 36)
-            message_surface = font.render(toggle_message, True, (255, 255, 255))
-            message_rect = message_surface.get_rect(center=(SCREEN_WIDTH / 2, 50))
-            screen.blit(message_surface, message_rect)
-            toggle_message_timer -= dt
-            if toggle_message_timer <= 0:
-                toggle_message = None
 
         screen.fill("black")
 
@@ -863,11 +864,6 @@ def main(args=None):
 
             # The chain expires on gameplay time, so a paused game keeps it.
             combo.update(dt)
-            if combo.multiplier >= COMBO_TIERS[0][1] and not achievement_system.is_unlocked("Combo Master"):
-                achievement_system.unlock("Combo Master")
-            if combo.count >= COMBO_CHAIN_ACHIEVEMENT and not achievement_system.is_unlocked("Chain Reaction"):
-                achievement_system.unlock("Chain Reaction")
-
             # Update performance profiler
             object_groups = {
                 'asteroids': asteroids,
@@ -965,7 +961,7 @@ def main(args=None):
                             base_score = SCORE_SMALL
 
                         type_multiplier = ASTEROID_TYPE_SCORE_MULTIPLIERS.get(asteroid.asteroid_type, 1.0)
-                        score += int(round(base_score * type_multiplier * combo.register_kill()))
+                        score += int(round(base_score * type_multiplier * register_combo_kill(asteroid=True)))
 
                         Particle.create_asteroid_explosion(asteroid.position.x, asteroid.position.y)
 
@@ -1002,7 +998,7 @@ def main(args=None):
                     for shot in shots:
                         if obj.collides_with(shot):
                             sounds.play_explosion()
-                            score += SCORE_MEDIUM * combo.register_kill()
+                            score += SCORE_MEDIUM * register_combo_kill()
                             session_stats.record_enemy_destroyed()
                             obj.split()
                             shot.kill()
@@ -1278,7 +1274,7 @@ def main(args=None):
                             except pygame.error:
                                 pass
 
-                            score += BOSS_SCORE * combo.register_kill()
+                            score += BOSS_SCORE * register_combo_kill()
                             boss_active = False
                             session_stats.record_boss_defeated()
 
@@ -1576,6 +1572,15 @@ def main(args=None):
                     credits_screen.fade_in = True
             except Exception as e:
                 logger.exception("Failed to activate restored menu state: %s", e)
+
+        if toggle_message and toggle_message_timer > 0:
+            font = pygame.font.Font(None, 36)
+            message_surface = font.render(toggle_message, True, (255, 255, 255))
+            message_rect = message_surface.get_rect(center=(SCREEN_WIDTH / 2, 50))
+            screen.blit(message_surface, message_rect)
+            toggle_message_timer -= dt
+            if toggle_message_timer <= 0:
+                toggle_message = None
 
         pygame.display.flip()
 

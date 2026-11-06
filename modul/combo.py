@@ -18,6 +18,7 @@ class ComboTracker:
         """Create a tracker; defaults come from the constants module."""
         self.window = C.COMBO_WINDOW if window is None else window
         self.tiers = C.COMBO_TIERS if tiers is None else tiers
+        self.asteroid_count = 0
         self.count = 0
         self.timer = 0.0
         self.best = 0
@@ -29,10 +30,9 @@ class ComboTracker:
 
         self.timer -= dt
         if self.timer <= 0:
-            self.timer = 0.0
-            self.count = 0
+            self.reset()
 
-    def register_kill(self):
+    def register_kill(self, *, asteroid=False):
         """Count one kill and return the multiplier this kill scores with.
 
         The multiplier is resolved after the counter was raised, so the kill
@@ -40,11 +40,14 @@ class ComboTracker:
         """
         self.timer = self.window
         self.count += 1
+        if asteroid:
+            self.asteroid_count += 1
         self.best = max(self.best, self.count)
         return self.multiplier
 
     def reset(self):
         """Drop the current chain; the session best is kept."""
+        self.asteroid_count = 0
         self.count = 0
         self.timer = 0.0
 

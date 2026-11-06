@@ -130,9 +130,10 @@ class HelpScreen:
              for _, items in self.shortcuts for _, description in items),
             default=0,
         )
-        widest_tip = max((self.small_font.size(tip)[0] for tip in tips), default=0)
-        x_tips = min(SCREEN_WIDTH - widest_tip - 40, desc_x + widest_desc + 48)
-        x_tips = max(x_tips, desc_x + widest_desc + 24)
+        # Reserve space for tips even when descriptions need fitting.
+        x_tips = min(desc_x + widest_desc + 48, SCREEN_WIDTH - 320)
+        description_width = x_tips - desc_x - 24
+        tips_width = SCREEN_WIDTH - x_tips - 40
 
         for section_title, shortcuts in self.shortcuts:
             # Section title
@@ -148,21 +149,51 @@ class HelpScreen:
 
                 # Description
                 desc_surface = self.text_font.render(f"- {gettext(description)}", True, (200, 200, 200))
+                if desc_surface.get_width() > description_width:
+                    scale = description_width / desc_surface.get_width()
+                    desc_surface = pygame.transform.smoothscale(
+                        desc_surface, (description_width, max(1, int(desc_surface.get_height() * scale)))
+                    )
                 screen.blit(desc_surface, (desc_x, y_pos))
 
                 y_pos += 35
 
             y_pos += 20
 
-        tips_y = 140
-        tips_title = self.section_font.render(gettext("tips").upper(), True, (100, 200, 255))
-        screen.blit(tips_title, (x_tips, tips_y))
-        tips_y += 50
-
+        # Wrap even unbroken translated words to the available column width.
+        lines = []
         for tip in tips:
-            tip_surface = self.small_font.render(tip, True, (180, 180, 180))
-            screen.blit(tip_surface, (x_tips + 20, tips_y))
-            tips_y += 32
+            remaining = tip
+            while remaining:
+                end = len(remaining)
+                while end > 1 and self.small_font.size(remaining[:end])[0] > tips_width - 20:
+                    end -= 1
+                if end < len(remaining):
+                    space = remaining.rfind(" ", 0, end + 1)
+                    if space > 0:
+                        end = space
+                lines.append(remaining[:end])
+                remaining = remaining[end:].lstrip()
+            lines.append("")
+
+        tips_panel = pygame.Surface((tips_width, 50 + len(lines) * 24), pygame.SRCALPHA)
+        tips_title = self.section_font.render(gettext("tips").upper(), True, (100, 200, 255))
+        if tips_title.get_width() > tips_width:
+            scale = tips_width / tips_title.get_width()
+            tips_title = pygame.transform.smoothscale(
+                tips_title, (tips_width, max(1, int(tips_title.get_height() * scale)))
+            )
+        tips_panel.blit(tips_title, (0, 0))
+        for index, line in enumerate(lines):
+            tip_surface = self.small_font.render(line, True, (180, 180, 180))
+            tips_panel.blit(tip_surface, (20, 50 + index * 24))
+        available_height = SCREEN_HEIGHT - 210
+        if tips_panel.get_height() > available_height:
+            scale = available_height / tips_panel.get_height()
+            tips_panel = pygame.transform.smoothscale(
+                tips_panel, (max(1, int(tips_width * scale)), available_height)
+            )
+        screen.blit(tips_panel, (x_tips, 140))
 
         # Footer
         footer_text = gettext("help_footer")
