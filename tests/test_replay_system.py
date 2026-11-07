@@ -586,13 +586,14 @@ def test_replay_recorder_save_with_error_handling(tmp_path):
 
 @pytest.mark.parametrize("mode", ["survival", "time_attack"])
 def test_mode_replay_round_trip(tmp_path, monkeypatch, mode):
+    """A recorded frame keeps its mode-specific fields through a round trip."""
     monkeypatch.chdir(tmp_path)
     recorder = ReplayRecorder()
     recorder.start_recording("normal", "default", mode)
-    state = dict(player_x=1, player_y=2, player_rotation=0, player_vx=0,
-                 player_vy=0, score=42, lives=3, level=1, mode=mode, wave=4,
-                 survival_kills=3, survival_target=20, time_remaining=12.5,
-                 time_kills=2, time_target=10)
+    state = {"player_x": 1, "player_y": 2, "player_rotation": 0, "player_vx": 0,
+             "player_vy": 0, "score": 42, "lives": 3, "level": 1, "mode": mode,
+             "wave": 4, "survival_kills": 3, "survival_target": 20,
+             "time_remaining": 12.5, "time_kills": 2, "time_target": 10}
     recorder.record_frame(state, recorder.start_time + 1)
     path = recorder.save_replay()
     player = ReplayPlayer()
@@ -605,10 +606,11 @@ def test_mode_replay_round_trip(tmp_path, monkeypatch, mode):
 
 
 def test_old_replay_defaults_to_classic(tmp_path):
+    """Replays written before modes existed default to classic."""
     path = tmp_path / "old.json"
-    path.write_text(json.dumps(dict(metadata={}, events=[], frames=[dict(
-        timestamp=0, player_pos=[0, 0], player_rotation=0,
-        player_velocity=[0, 0], score=1, lives=3, level=2)])))
+    path.write_text(json.dumps({"metadata": {}, "events": [], "frames": [{
+        "timestamp": 0, "player_pos": [0, 0], "player_rotation": 0,
+        "player_velocity": [0, 0], "score": 1, "lives": 3, "level": 2}]}))
     player = ReplayPlayer()
     player.load_replay(str(path))
     assert player.frames[0].mode == "classic"

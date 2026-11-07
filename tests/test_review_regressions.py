@@ -1,5 +1,10 @@
 """Regression coverage for the full review's gameplay and subsystem defects."""
 
+# The run_game fixture is passed into tests by name, which pylint flags as
+# redefining an outer name. Pytest fixtures resolve through the test signature,
+# so the parameter and the fixture must share a name.
+# pylint: disable=redefined-outer-name
+
 from types import SimpleNamespace
 from unittest.mock import Mock
 
