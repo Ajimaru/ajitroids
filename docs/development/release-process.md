@@ -347,15 +347,15 @@ For critical bugs in a published release, isolate the fix from unfinished work:
    git commit -m "fix: critical bug description"
    ```
 
-3. Before tagging, inspect `.github/workflows/release.yml` on the hotfix
-   branch: the tag push runs the workflow from the tagged commit, so fixes on
-   `main` or `dev` alone do not protect an older release. If needed, backport
-   the focused workflow changes and any required dependencies so release
-   creation uses `draft: true` and no step publishes automatically. Validate
-   the resulting workflow's syntax, referenced actions, and artifact build and
-   staging steps on the hotfix branch, and commit those changes. Stop if this
-   validation cannot be completed; do not push a release tag until the workflow
-   at the intended tag commit has been verified to create only a draft.
+3. Before tagging, inspect `.github/workflows/release.yml` on the hotfix branch:
+   the tag push runs the workflow from the tagged commit, so fixes on `main` or
+   `dev` alone do not protect an older release. If needed, backport the focused
+   workflow changes and any required dependencies so release creation uses
+   `draft: true` and no step publishes automatically. Validate the resulting
+   workflow's syntax, referenced actions, and artifact build and staging steps
+   on the hotfix branch, and commit those changes. Stop if this validation
+   cannot be completed; do not push a release tag until the workflow at the
+   intended tag commit has been verified to create only a draft.
 
 4. Review the diff against the published tag, validate the built package, and
    tag the validated hotfix commit with the next unused patch version:
@@ -376,8 +376,6 @@ For critical bugs in a published release, isolate the fix from unfinished work:
    already contains the equivalent fix, verify it before resolving any duplicate
    changes. Run CI on both resulting branches. Do not reset either branch to the
    release tag or merge unfinished `dev` work into `main`.
-
-
 
 <!-- /coderabbit-ai-generated:v1 -->## Version Checking
 
