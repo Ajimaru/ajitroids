@@ -1,5 +1,11 @@
 # flake8: noqa
 # pyright: reportUndefinedVariable=false, reportWildcardImportFromLibrary=false
+# pylint: disable=undefined-variable,global-variable-undefined,wrong-import-position
+# pylint: disable=broad-exception-caught,too-many-nested-blocks,redefined-outer-name
+# pylint: disable=import-outside-toplevel,too-few-public-methods
+
+"""Main entry point, argument parsing and the Ajitroids game loop."""
+
 import argparse
 import logging
 import math
@@ -27,7 +33,7 @@ from modul.bossprojectile import BossProjectile
 from modul.combo import ComboTracker
 from modul.events import EventScheduler
 from modul.game_modes import SurvivalProgression, TimeAttackProgression
-from modul.groups import collidable, drawable, updatable
+from modul.groups import collidable
 from modul.hazards import BlackHole, SolarFlare
 from modul.help_screen import HelpScreen
 from modul import input_utils
@@ -54,6 +60,8 @@ from modul.tutorial import Tutorial
 
 
 class GameSettings:
+    """Minimal settings placeholder used before the real Settings load."""
+
     def __init__(self):
         self.fullscreen = False
 
@@ -123,12 +131,13 @@ def setup_logging(args):
 
 
 def main(args=None):
+    """Run the game loop until the player quits."""
 
     if args is None:
         args = parse_arguments()
 
     logger = setup_logging(args)
-    logger.info(f"Starting Ajitroids v{__version__}")
+    logger.info("Starting Ajitroids v%s", __version__)
 
     global sounds, player, PLAYER_INVINCIBLE_TIME, game_settings, screen
 
@@ -158,7 +167,7 @@ def main(args=None):
         pygame.mixer.init(44100, -16, 2, 2048)
         logger.info("Pygame Mixer initialized successfully")
     except Exception as e:
-        logger.error(f"Error during mixer initialization: {e}")
+        logger.error("Error during mixer initialization: %s", e)
 
     pygame.display.set_caption(f"Ajitroids v{__version__}")
 
@@ -226,8 +235,6 @@ def main(args=None):
             pygame.time.delay(100)
         except Exception as e:
             print(f"❌ Error starting music: {e}")
-            import os
-
             background_path = asset_path("background.mp3")
             print(f"Background.mp3 exists: {os.path.exists(background_path)}")
             if os.path.exists(background_path):
@@ -349,9 +356,8 @@ def main(args=None):
         game_settings = Settings()
 
     print(
-        print(
-            f"Initialized variables: player={player}, sounds={sounds}, PLAYER_INVINCIBLE_TIME={PLAYER_INVINCIBLE_TIME}, game_settings={game_settings}"
-        )
+        f"Initialized variables: player={player}, sounds={sounds}, "
+        f"PLAYER_INVINCIBLE_TIME={PLAYER_INVINCIBLE_TIME}, game_settings={game_settings}"
     )
 
     toggle_message = None
@@ -374,8 +380,8 @@ def main(args=None):
         return multiplier
 
     last_spawn_time = time.time()
-    spawn_interval = random.uniform(10, 30)
-    hazard_spawn_timer = random.uniform(HAZARD_SPAWN_MIN_INTERVAL, HAZARD_SPAWN_MAX_INTERVAL)
+    spawn_interval = random.uniform(10, 30)  # nosec B311  # nosemgrep
+    hazard_spawn_timer = random.uniform(HAZARD_SPAWN_MIN_INTERVAL, HAZARD_SPAWN_MAX_INTERVAL)  # nosec B311  # nosemgrep
     max_enemy_ships = {"easy": 1, "normal": 2, "hard": 3}
     current_enemy_ships = []
 
@@ -422,7 +428,7 @@ def main(args=None):
         boss = None
         active_hazard = None
         event_scheduler = EventScheduler()
-        hazard_spawn_timer = random.uniform(HAZARD_SPAWN_MIN_INTERVAL, HAZARD_SPAWN_MAX_INTERVAL)
+        hazard_spawn_timer = random.uniform(HAZARD_SPAWN_MIN_INTERVAL, HAZARD_SPAWN_MAX_INTERVAL)  # nosec B311  # nosemgrep
         boss_active = False
         boss_defeated_timer = 0
         boss_defeated_message = ""
@@ -430,7 +436,7 @@ def main(args=None):
         powerups_collected = asteroids_destroyed = shields_used = 0
         triple_shots_used = speed_boosts_used = 0
         last_spawn_time = time.time()
-        spawn_interval = random.uniform(10, 30)
+        spawn_interval = random.uniform(10, 30)  # nosec B311  # nosemgrep
         current_enemy_ships = []
         asteroid_field.spawn_timer = 0
         asteroid_field.asteroid_count, asteroid_field.spawn_interval = {
@@ -524,8 +530,8 @@ def main(args=None):
     def _spawn_black_hole():
         """Return a black hole placed far from the player."""
         for _ in range(10):
-            x = random.uniform(BLACK_HOLE_RADIUS + 40, SCREEN_WIDTH - BLACK_HOLE_RADIUS - 40)
-            y = random.uniform(BLACK_HOLE_RADIUS + 40, SCREEN_HEIGHT - BLACK_HOLE_RADIUS - 40)
+            x = random.uniform(BLACK_HOLE_RADIUS + 40, SCREEN_WIDTH - BLACK_HOLE_RADIUS - 40)  # nosec B311  # nosemgrep
+            y = random.uniform(BLACK_HOLE_RADIUS + 40, SCREEN_HEIGHT - BLACK_HOLE_RADIUS - 40)  # nosec B311  # nosemgrep
             if player.position.distance_to(pygame.Vector2(x, y)) > BLACK_HOLE_PULL_RADIUS * 1.5:
                 return BlackHole(x, y)
         margin = BLACK_HOLE_RADIUS + 40
@@ -540,11 +546,11 @@ def main(args=None):
     def _spawn_meteor_shower():
         """Rain small, fast asteroids from a single screen edge."""
         nonlocal level_up_timer, level_up_text
-        edge = random.choice(AsteroidField.edges)
+        edge = random.choice(AsteroidField.edges)  # nosec B311  # nosemgrep
         for _ in range(METEOR_SHOWER_COUNT):
-            position = edge[1](random.random())
-            velocity = edge[0].rotate(random.uniform(-30, 30))
-            velocity *= random.uniform(METEOR_SPEED_MIN, METEOR_SPEED_MAX)
+            position = edge[1](random.random())  # nosec B311  # nosemgrep
+            velocity = edge[0].rotate(random.uniform(-30, 30))  # nosec B311  # nosemgrep
+            velocity *= random.uniform(METEOR_SPEED_MIN, METEOR_SPEED_MAX)  # nosec B311  # nosemgrep
             asteroid_field.spawn(ASTEROID_MIN_RADIUS, position, velocity)
         sounds.play_hazard_spawn()
         audio_enhancements.trigger_announcement("event_meteor_shower", priority=5.0)
@@ -567,7 +573,7 @@ def main(args=None):
                 logger.info("Game closing...")
                 finish_run()
                 if args.debug:
-                    logger.info("\n" + session_stats.get_formatted_summary())
+                    logger.info("%s", "\n" + session_stats.get_formatted_summary())
                 return
 
             if game_state == "playing" and event.type == pygame.KEYDOWN:
@@ -588,7 +594,7 @@ def main(args=None):
                     toggle_message = "Performance Profiler Enabled" if profiler_enabled else "Performance Profiler Disabled"
                     toggle_message_timer = 2
                 elif event.key == pygame.K_F10:
-                    game_settings.music_on = not game_settings.music_on
+                    game_settings.music_on = not game_settings.music_on  # pylint: disable=attribute-defined-outside-init
                     game_settings.save()
                     if game_settings.music_on:
                         pygame.mixer.music.set_volume(game_settings.music_volume)
@@ -599,7 +605,7 @@ def main(args=None):
                         toggle_message = "Music Disabled"
                     toggle_message_timer = 2
                 elif event.key == pygame.K_F9:
-                    game_settings.sound_on = not game_settings.sound_on
+                    game_settings.sound_on = not game_settings.sound_on  # pylint: disable=attribute-defined-outside-init
                     game_settings.save()
                     sounds.toggle_sound(game_settings.sound_on)
                     toggle_message = "Sound Effects Enabled" if game_settings.sound_on else "Sound Effects Disabled"
@@ -867,7 +873,7 @@ def main(args=None):
             options_menu.draw(screen)
 
             for event in events:
-                if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE):
+                if event.type == pygame.KEYDOWN and event.key in (pygame.K_SPACE, pygame.K_ESCAPE):
                     game_state = "main_menu"
                     main_menu.activate()
 
@@ -1037,14 +1043,19 @@ def main(args=None):
 
             if not boss_active and current_frame_time - last_spawn_time > spawn_interval:
                 if len(current_enemy_ships) < max_enemy_ships[difficulty]:
-                    enemy_ship = EnemyShip(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 30)
+                    enemy_ship = EnemyShip(
+                        random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), 30,  # nosec B311  # nosemgrep
+                    )
                     updatable.add(enemy_ship)
                     drawable.add(enemy_ship)
                     collidable.add(enemy_ship)
                     current_enemy_ships.append(enemy_ship)
                     last_spawn_time = current_frame_time
-                    spawn_interval = random.uniform(10, 30)
-                    logger.debug(f"EnemyShip spawned! Current count: {len(current_enemy_ships)}, Max: {max_enemy_ships[difficulty]}")
+                    spawn_interval = random.uniform(10, 30)  # nosec B311  # nosemgrep
+                    logger.debug(
+                        "EnemyShip spawned! Current count: %s, Max: %s",
+                        len(current_enemy_ships), max_enemy_ships[difficulty],
+                    )
 
             current_enemy_ships = [ship for ship in current_enemy_ships if ship in updatable]
 
@@ -1057,15 +1068,14 @@ def main(args=None):
                     obj.update(dt)
 
             asteroid_list = list(asteroids)
-            for i in range(len(asteroid_list)):
-                a1 = asteroid_list[i]
+            for i, a1 in enumerate(asteroid_list):
                 for j in range(i + 1, len(asteroid_list)):
                     a2 = asteroid_list[j]
                     dx = a2.position.x - a1.position.x
                     dy = a2.position.y - a1.position.y
                     dist = math.hypot(dx, dy)
                     min_dist = a1.radius + a2.radius
-                    if dist < min_dist and dist > 0:
+                    if 0 < dist < min_dist:
 
                         overlap = min_dist - dist
                         nx = dx / dist
@@ -1159,7 +1169,7 @@ def main(args=None):
 
                             if obj in current_enemy_ships:
                                 current_enemy_ships.remove(obj)
-                            logger.debug(f"EnemyShip destroyed! Remaining count: {len(current_enemy_ships)}")
+                            logger.debug("EnemyShip destroyed! Remaining count: %s", len(current_enemy_ships))
                             break
 
             # Boss contact and projectile hits share the same damage/finalization path.
@@ -1182,7 +1192,9 @@ def main(args=None):
                 for asteroid in asteroids:
                     if enemy_ship.collides_with(asteroid):
                         speed = enemy_ship.velocity.length()
-                        enemy_ship.velocity = pygame.Vector2(random.uniform(-1, 1), random.uniform(-1, 1)).normalize() * speed
+                        enemy_ship.velocity = pygame.Vector2(
+                            random.uniform(-1, 1), random.uniform(-1, 1)  # nosec B311  # nosemgrep
+                        ).normalize() * speed
                         logger.debug("EnemyShip changed direction due to asteroid collision.")
 
             for obj in updatable:
@@ -1262,7 +1274,7 @@ def main(args=None):
                         if level >= min_level
                     ]
                     if available_hazards:
-                        hazard_name = random.choice(available_hazards)
+                        hazard_name = random.choice(available_hazards)  # nosec B311  # nosemgrep
                         if hazard_name == "black_hole":
                             active_hazard = _spawn_black_hole()
                             sounds.play_hazard_spawn()
@@ -1271,7 +1283,7 @@ def main(args=None):
                             active_hazard = SolarFlare()
                             sounds.play_hazard_spawn()
                             audio_enhancements.trigger_announcement("hazard_solar_flare", priority=7.0)
-                    hazard_spawn_timer = random.uniform(
+                    hazard_spawn_timer = random.uniform(  # nosec B311  # nosemgrep
                         HAZARD_SPAWN_MIN_INTERVAL, HAZARD_SPAWN_MAX_INTERVAL
                     )
 
@@ -1290,7 +1302,10 @@ def main(args=None):
                 asteroids_data = [_serialize_position(a, radius_default=12) for a in asteroids]
                 enemies_data = [_serialize_position(e, radius_default=14) for e in current_enemy_ships]
                 shots_data = [_serialize_position(s, radius_default=4) for s in shots]
-                powerups_data = [_serialize_position(p, radius_default=6, extra={'type': getattr(p, 'type', 'unknown')}) for p in powerups]
+                powerups_data = [
+                    _serialize_position(p, radius_default=6, extra={'type': getattr(p, 'type', 'unknown')})
+                    for p in powerups
+                ]
                 hazards_data = [_serialize_position(h, radius_default=24, extra={'type': type(h).__name__}) for h in hazards]
 
                 game_state_data = {
@@ -1428,7 +1443,8 @@ def main(args=None):
                     audio_enhancements.trigger_announcement("level_up", priority=8.0)
 
                 print(
-                    f"Level up! Now level {level}, asteroids: {asteroid_field.asteroid_count}, interval: {asteroid_field.spawn_interval}"
+                    f"Level up! Now level {level}, asteroids: {asteroid_field.asteroid_count}, "
+                    f"interval: {asteroid_field.spawn_interval}"
                 )
 
             if level_up_timer > 0:
@@ -1511,7 +1527,10 @@ def main(args=None):
                             for i in range(1, boss_attack["count"]):
                                 offset = 10 * i if i % 2 == 0 else -10 * i
                                 offset_dir = direction.rotate(offset)
-                                BossProjectile.spawn(boss.position.x, boss.position.y, offset_dir * BOSS_PROJECTILE_SPEED, "normal")
+                                BossProjectile.spawn(
+                                    boss.position.x, boss.position.y,
+                                    offset_dir * BOSS_PROJECTILE_SPEED, "normal",
+                                )
                         sounds.play_enemy_shoot()
 
                 for shot in shots:
@@ -1869,7 +1888,8 @@ def main(args=None):
 
 
 def player_hit():
-    global lives
+    """Respawn the player after a hit, or end the run when lives run out."""
+    global game_state, lives
 
     lives -= 1
     sounds.play_explosion()
@@ -1890,7 +1910,8 @@ def player_hit():
 
 
 def debug_music_status():
-    print(f"🎵 Music status:")
+    """Print the current music and mixer status for debugging."""
+    print("🎵 Music status:")
     print(f"   - Busy: {pygame.mixer.music.get_busy()}")
     print(f"   - Volume: {pygame.mixer.music.get_volume()}")
     print(f"   - Mixer Init: {pygame.mixer.get_init()}")
@@ -1924,6 +1945,7 @@ def save_screenshot(surface=None):
 
 
 def toggle_fullscreen():
+    """Switch between windowed and fullscreen mode at runtime."""
     global screen
     game_settings.fullscreen = not game_settings.fullscreen
     if game_settings.fullscreen:

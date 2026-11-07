@@ -11,7 +11,7 @@ import random
 import modul.constants as C
 
 
-class EventScheduler:
+class EventScheduler:  # pylint: disable=too-few-public-methods
     """Pick a random event on a cooldown, gated by the current level."""
 
     def __init__(self):
@@ -30,8 +30,8 @@ class EventScheduler:
         if not available:
             self.cooldown = C.EVENT_MIN_INTERVAL
             return None
-        event = random.choices(
+        event = random.choices(  # nosec B311
             available, weights=[C.EVENT_WEIGHTS[name] for name in available]
         )[0]
-        self.cooldown = random.uniform(C.EVENT_MIN_INTERVAL, C.EVENT_MAX_INTERVAL)
+        self.cooldown = random.uniform(C.EVENT_MIN_INTERVAL, C.EVENT_MAX_INTERVAL)  # nosec B311  # nosemgrep
         return event

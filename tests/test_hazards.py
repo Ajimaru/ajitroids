@@ -116,6 +116,6 @@ def test_solar_flare_warning_prevents_contact():
     """The warning band must be harmless until its countdown ends."""
     flare = SolarFlare(warning=1.0)
     player = CircleShape(0, flare.position.y, 5)
-    assert not flare.collides_with(player)
+    assert not flare.collides_with(player)  # nosec B101
     flare.update(1.0)
-    assert flare.collides_with(player)
+    assert flare.collides_with(player)  # nosec B101

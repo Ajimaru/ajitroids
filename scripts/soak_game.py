@@ -6,28 +6,34 @@ ship for the remaining combos. Intended for manual runs, not CI.
 
 Usage: python scripts/soak_game.py [frames]
 """
+# The SDL dummy drivers must be set before pygame imports, so the game imports
+# deliberately live below the environment setup. Ruff and pylint are told to
+# leave this script's import layout and dev-only shortcuts alone.
+# ruff: noqa: I001, RUF100, BLE001
+# pylint: disable=wrong-import-position,global-statement,invalid-name,broad-exception-caught
+
 import contextlib
 import os
 import sys
 import tempfile
-import traceback
-from types import SimpleNamespace
-from pathlib import Path
 import time
+import traceback
+from pathlib import Path
+from types import SimpleNamespace
 
 FRAMES = int(sys.argv[1]) if len(sys.argv) > 1 else 36000
 
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
 
-import pygame  # noqa: E402
+import pygame
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import main  # noqa: E402
-import modul.audio_enhancements as audio  # noqa: E402
-from modul.replay_system import ReplayRecorder  # noqa: E402
-from modul.session_stats import SessionStats  # noqa: E402
+import main
+import modul.audio_enhancements as audio
+from modul.replay_system import ReplayRecorder
+from modul.session_stats import SessionStats
 
 # Classic first so the level-50 ship unlocks (keyed by difficulty) land early;
 # the survival/time-attack combos then run with the newest unlocked ship.
@@ -50,7 +56,7 @@ _ORIG_TIME = time.time
 _SIM_TIME = _ORIG_TIME()
 
 
-_ACTIONS = set()
+_ACTIONS: set[str] = set()
 
 
 def _patched_is_action_pressed(action):
@@ -70,7 +76,7 @@ def _patch_runtime():
 
     pygame.time.Clock = lambda: SimpleNamespace(tick=tick, get_fps=lambda: 62.5)
     time.time = lambda: _SIM_TIME
-    main.input_utils.is_action_pressed = _patched_is_action_pressed
+    main.input_utils.is_action_pressed = _patched_is_action_pressed  # nosemgrep
 
 
 def run_combo(mode, difficulty, frames):
