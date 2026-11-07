@@ -104,6 +104,8 @@ class StatsDashboard:
             (gettext("enemies_destroyed"), f"{stats.get('total_enemies_destroyed', 0):,}"),
             (gettext("bosses_defeated"), f"{stats.get('total_bosses_defeated', 0)}"),
             (gettext("powerups_collected"), f"{stats.get('total_powerups_collected', 0):,}"),
+            (gettext("events_triggered"), f"{stats.get('total_events_triggered', 0)}"),
+            (gettext("hazards_survived"), f"{stats.get('total_hazards_survived', 0)}"),
             (gettext("lives_lost"), f"{stats.get('total_lives_lost', 0)}"),
         ]
 
@@ -112,11 +114,11 @@ class StatsDashboard:
             y_pos += 35
 
         # Accuracy and efficiency bars
-        y_pos = 400
+        y_pos = 460
         self._draw_progress_bars(screen, stats, y_pos)
 
         # Session duration
-        y_pos = 560
+        y_pos = 610
         session_time = self.session_stats.format_time(stats['session_duration'])
         time_text = gettext("session_duration_format").format(time=session_time)
         time_surf = self.section_font.render(time_text, True, (100, 200, 255))

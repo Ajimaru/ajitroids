@@ -45,6 +45,8 @@ achieve the highest score.
   Metal, Crystal) with unique behaviors
 - **Highscore System**: Save your best results and compare them
 - **Boss Fights**: Face epic boss enemies in higher levels
+- **Hazards & Events**: Black holes and solar flares appear from higher levels;
+  random EMPs and meteor showers spice up runs
 - **Customizable Settings**: Fullscreen mode, audio options, themes and more
 - **Smooth Animations**: Fluid ship movements and asteroid rotations
 - **Quick Restart**: Press 'R' to instantly restart without going through menus
@@ -198,6 +200,8 @@ ajitroids
 - **Asteroids:** Destroy asteroids to collect points
 - **Power-Ups:** Collect special power-ups for unique abilities
 - **Boss Enemies:** Powerful boss enemies appear after certain levels
+- **Hazards & Events:** Random hazards and one-shot events keep higher levels
+  varied
 - **Highscores:** Save your best performances and compare them with others
 - **Achievements:** Unlock achievements for completing special challenges
 
@@ -228,6 +232,7 @@ Time Attack quota so "hard" stays harder than "easy".
 ### Function Keys
 
 - **F1 / H**: Toggle help screen (in-game)
+- **F7**: Toggle collision outlines
 - **F8**: Toggle FPS display
 - **F9**: Toggle sound effects
 - **F10**: Toggle music

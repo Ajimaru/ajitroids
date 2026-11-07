@@ -346,6 +346,30 @@ unlocks, `Level Master`, `High Scorer` and `Asteroid Hunter` only trigger in
 classic. Survival and time attack still track `level` internally (replay frames
 record it) but it drives nothing, so the HUD hides the level row there.
 
+## Environmental Hazards and Events
+
+From higher levels, classic runs layer random hazards and one-shot events on top
+of the asteroid loop. They are accents, not replacements: asteroids, the score
+curve and the mode pacing stay in charge, and boss fights pause them.
+
+| Hazard      | From level | Effect                                                               |
+| ----------- | ---------- | -------------------------------------------------------------------- |
+| Black hole  | 5          | Pulls the player, asteroids and shots toward its core; contact hurts |
+| Solar flare | 8          | A hot band sweeps down the screen after a warning; a shield protects |
+
+Hazards spawn one at a time on a 25–40 s cooldown, live for a limited time and
+warn the player first (`modul/hazards.py`).
+
+| Event         | From level | Effect                                       |
+| ------------- | ---------- | -------------------------------------------- |
+| EMP           | 2          | Clears every asteroid on screen (no score)   |
+| Meteor shower | 3          | Rains small, fast asteroids in from one edge |
+
+Events are picked by `modul/events.py` on the same cooldown system, gated by
+level so new players meet them only after the basics. Surviving hazards and
+triggering events feed the session statistics and the "First Contact" and "Event
+Horizon" achievements.
+
 ## Lives and Respawn
 
 ### Taking Damage

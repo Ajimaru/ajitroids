@@ -45,6 +45,8 @@ class AchievementSystem:
             ("Triple Threat", "Use triple shot 20 times."),
             ("Combo Master", "Reach a 3x combo multiplier."),
             ("Chain Reaction", "Destroy 25 asteroids in one combo chain."),
+            ("First Contact", "Trigger your first special event."),
+            ("Event Horizon", "Survive a black hole."),
             ("Fleet Commander", "Unlock all four spaceships."),
         ]
         for name, description in standard_achievements:

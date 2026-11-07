@@ -24,6 +24,15 @@
 - Achievements "Combo Master" (3x multiplier) and "Chain Reaction" (25 kills in
   one chain).
 - `P` saves a screenshot to `screenshots/`.
+- Environmental hazards and random events for classic runs: black holes (gravity
+  well, from level 5), solar flares (sweeping band, from level 8), meteor
+  showers (edge burst of small asteroids, from level 3) and the EMP event
+  (clears the field, from level 2). One hazard at a time on a cooldown, paused
+  during boss fights (`modul/hazards.py`, `modul/events.py`).
+- Achievements "First Contact" (trigger an event) and "Event Horizon" (survive a
+  black hole); session statistics now track events triggered and hazards
+  survived on the stats dashboard.
+- Distinct voice announcements for each hazard and event type.
 
 ### Changed
 

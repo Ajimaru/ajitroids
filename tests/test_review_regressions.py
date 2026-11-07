@@ -2,8 +2,12 @@
 
 # The run_game fixture is passed into tests by name, which pylint flags as
 # redefining an outer name. Pytest fixtures resolve through the test signature,
-# so the parameter and the fixture must share a name.
-# pylint: disable=redefined-outer-name
+# so the parameter and the fixture must share a name. Tests also reach into
+# voice-generation internals, import lazily to keep optional modules out of the
+# import path, ignore some step-context arguments, and use drive() callbacks
+# whose branches return events only sometimes (the runner treats None as []).
+# pylint: disable=redefined-outer-name,protected-access,import-outside-toplevel
+# pylint: disable=unused-argument,missing-function-docstring,inconsistent-return-statements
 
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -86,14 +90,14 @@ def test_quick_restart_uses_live_state(run_game, restart_from_game_over):
             else:
                 return [key(pygame.K_r)]
         if step == 5 and restart_from_game_over:
-            assert main.game_state == "game_over"
+            assert main.game_state == "game_over"  # nosec B101
             return [key(pygame.K_r)]
         if step == 6:
-            assert (main.game_state, main.score, main.level, main.lives) == ("playing", 0, 1, C.PLAYER_LIVES)
-            assert context.recorder.recording
-            assert context.stats.games_played == 2
-            assert context.stats.total_score == 1234
-            assert len(main.Asteroid.containers[0]) == 3
+            assert (main.game_state, main.score, main.level, main.lives) == ("playing", 0, 1, C.PLAYER_LIVES)  # nosec B101
+            assert context.recorder.recording  # nosec B101
+            assert context.stats.games_played == 2  # nosec B101
+            assert context.stats.total_score == 1234  # nosec B101
+            assert len(main.Asteroid.containers[0]) == 3  # nosec B101
 
     run_game(drive)
 
@@ -101,7 +105,7 @@ def test_quick_restart_uses_live_state(run_game, restart_from_game_over):
 @pytest.mark.parametrize("binding", ["K_ESCAPE", "p", "JOY0_BUTTON1", "JOY0_AXIS1_NEG", "JOY0_HAT0_UP"])
 def test_pause_consumes_its_event_and_does_not_reuse_it(run_game, monkeypatch, binding):
     pressed = [False]
-    original = main.input_utils.is_action_pressed
+    original = main.input_utils.is_action_pressed  # nosemgrep
     monkeypatch.setattr(
         main.input_utils, "is_action_pressed", lambda action: pressed[0] if action == "pause" else original(action)
     )
@@ -115,7 +119,7 @@ def test_pause_consumes_its_event_and_does_not_reuse_it(run_game, monkeypatch, b
                 pause_key = main.input_utils.get_action_keycode("pause")
                 return [key(pause_key), pygame.event.Event(pygame.MOUSEMOTION)]
         if step == 6:
-            assert main.game_state == "pause"
+            assert main.game_state == "pause"  # nosec B101
 
     run_game(drive)
 
@@ -128,19 +132,19 @@ def test_reset_clears_bosses_levels_weapons_and_restarts_sessions(run_game, monk
         if step == 4:
             main.score = 9 * C.POINTS_PER_LEVEL
         if step == 5:
-            assert main.boss_active
+            assert main.boss_active  # nosec B101
             main.BossProjectile(10, 10, pygame.Vector2())
             main.player.weapons[C.WEAPON_LASER] = 10
             return [key(pygame.K_ESCAPE)]
         if step == 6:
             return [key(pygame.K_RETURN)]
         if step == (11 if new_game else 7):
-            assert (main.score, main.level, main.lives) == (0, 1, C.PLAYER_LIVES)
-            assert not main.boss_active
-            assert not any(isinstance(obj, (main.Boss, main.BossProjectile)) for obj in main.Boss.containers[0])
-            assert main.player.weapons[C.WEAPON_LASER] == 0
-            assert context.stats.games_played == 2
-            assert context.stats.total_score == 9 * C.POINTS_PER_LEVEL
+            assert (main.score, main.level, main.lives) == (0, 1, C.PLAYER_LIVES)  # nosec B101
+            assert not main.boss_active  # nosec B101
+            assert not any(isinstance(obj, (main.Boss, main.BossProjectile)) for obj in main.Boss.containers[0])  # nosec B101
+            assert main.player.weapons[C.WEAPON_LASER] == 0  # nosec B101
+            assert context.stats.games_played == 2  # nosec B101
+            assert context.stats.total_score == 9 * C.POINTS_PER_LEVEL  # nosec B101
 
     run_game(drive, stop_at=12 if new_game else 8)
 
@@ -167,15 +171,15 @@ def test_terminal_collision_saves_replay_and_counts_one_game(run_game, tmp_path,
             else:
                 main.BossProjectile(x, y, pygame.Vector2())
         if step == 5:
-            assert main.game_state == "game_over"
-            assert main.lives == 0
-            assert context.stats.total_score == 1000
-            assert context.stats.total_lives_lost == 1
-            assert not context.recorder.recording
-            assert len(list((tmp_path / "replays").glob("*"))) == 1
+            assert main.game_state == "game_over"  # nosec B101
+            assert main.lives == 0  # nosec B101
+            assert context.stats.total_score == 1000  # nosec B101
+            assert context.stats.total_lives_lost == 1  # nosec B101
+            assert not context.recorder.recording  # nosec B101
+            assert len(list((tmp_path / "replays").glob("*"))) == 1  # nosec B101
 
     context = run_game(drive)
-    assert context.stats.total_score == 1000
+    assert context.stats.total_score == 1000  # nosec B101
 
 
 @pytest.mark.parametrize("protection", ["invincible", "shield_active"])
@@ -187,7 +191,7 @@ def test_boss_hazards_respect_player_protection(run_game, protection):
             main.Boss(10)
             main.BossProjectile(*main.player.position, pygame.Vector2())
         if step == 5:
-            assert main.lives == C.PLAYER_LIVES
+            assert main.lives == C.PLAYER_LIVES  # nosec B101
 
     run_game(drive)
 
@@ -212,9 +216,9 @@ def test_boss_updates_once_and_targeted_overlap_is_safe(run_game, monkeypatch):
             boss.attack_pattern = 2
             context.calls_before = len(calls)
         if step == 6:
-            assert len(calls) == context.calls_before + 1
-            assert all(position is not None for _dt, position in calls)
-            assert any(isinstance(obj, main.BossProjectile) for obj in main.BossProjectile.containers[0])
+            assert len(calls) == context.calls_before + 1  # nosec B101
+            assert all(position is not None for _dt, position in calls)  # nosec B101
+            assert any(isinstance(obj, main.BossProjectile) for obj in main.BossProjectile.containers[0])  # nosec B101
 
     run_game(drive)
 
@@ -228,18 +232,18 @@ def test_survival_mode_skips_classic_only_progression(run_game, monkeypatch):
             clear_asteroids()
             main.score = 9 * C.POINTS_PER_LEVEL  # reaches level 10 next frame
         if step == 5:
-            assert main.level == 10
-            assert not main.boss_active
-            assert not any(isinstance(obj, main.Boss) for obj in main.Boss.containers[0])
+            assert main.level == 10  # nosec B101
+            assert not main.boss_active  # nosec B101
+            assert not any(isinstance(obj, main.Boss) for obj in main.Boss.containers[0])  # nosec B101
             main.score = 666 * C.POINTS_PER_LEVEL
         if step == 6:
-            assert main.level >= 666
-            assert not main.achievement_system.is_unlocked("Level Master")
+            assert main.level >= 666  # nosec B101
+            assert not main.achievement_system.is_unlocked("Level Master")  # nosec B101
             main.Shot(100, 100)
             main.Asteroid(100, 100, 40, *main.Asteroid.containers, asteroid_type="normal")
         if step == 7:
-            assert main.score > 666 * C.POINTS_PER_LEVEL
-            assert not main.achievement_system.is_unlocked("High Scorer")
+            assert main.score > 666 * C.POINTS_PER_LEVEL  # nosec B101
+            assert not main.achievement_system.is_unlocked("High Scorer")  # nosec B101
 
     run_game(drive, stop_at=9)
 
@@ -254,8 +258,8 @@ def test_classic_mode_still_awards_score_achievements(run_game):
             main.Shot(100, 100)
             main.Asteroid(100, 100, 40, *main.Asteroid.containers, asteroid_type="normal")
         if step == 5:
-            assert main.score >= 250_000
-            assert main.achievement_system.is_unlocked("High Scorer")
+            assert main.score >= 250_000  # nosec B101
+            assert main.achievement_system.is_unlocked("High Scorer")  # nosec B101
 
     run_game(drive, stop_at=7)
 
@@ -267,15 +271,15 @@ def test_metal_asteroid_rewards_only_the_fatal_hit(run_game):
             context.asteroid = main.Asteroid(100, 100, 40, *main.Asteroid.containers, asteroid_type="metal")
             main.Shot(100, 100)
         if step == 5:
-            assert context.asteroid.health == 1
-            assert main.score == 0
-            assert context.stats.total_asteroids_destroyed == 0
-            assert not main.achievement_system.is_unlocked("First Blood")
+            assert context.asteroid.health == 1  # nosec B101
+            assert main.score == 0  # nosec B101
+            assert context.stats.total_asteroids_destroyed == 0  # nosec B101
+            assert not main.achievement_system.is_unlocked("First Blood")  # nosec B101
             main.Shot(100, 100)
         if step == 6:
-            assert main.score == 30
-            assert context.stats.total_asteroids_destroyed == 1
-            assert main.achievement_system.is_unlocked("First Blood")
+            assert main.score == 30  # nosec B101
+            assert context.stats.total_asteroids_destroyed == 1  # nosec B101
+            assert main.achievement_system.is_unlocked("First Blood")  # nosec B101
 
     run_game(drive)
 
@@ -287,9 +291,9 @@ def test_quit_from_pause_finalizes_once(run_game, tmp_path):
             return [key(pygame.K_ESCAPE)]
 
     context = run_game(drive)
-    assert context.stats.total_score == 4321
-    assert not context.recorder.recording
-    assert len(list((tmp_path / "replays").glob("*"))) == 1
+    assert context.stats.total_score == 4321  # nosec B101
+    assert not context.recorder.recording  # nosec B101
+    assert len(list((tmp_path / "replays").glob("*"))) == 1  # nosec B101
 
 
 @pytest.mark.parametrize(
@@ -308,14 +312,14 @@ def test_destroyer_damage_applies_to_every_projectile(monkeypatch, weapon, base_
         player.current_weapon = weapon
         player.weapons[weapon] = 10
     player.shoot()
-    assert len(shots) == count
+    assert len(shots) == count  # nosec B101
     boss = main.Boss(10)
     before = boss.health
     monkeypatch.setattr(main.Particle, "containers", (), raising=False)
     for shot in shots:
-        assert shot.damage == base_damage * 2
+        assert shot.damage == base_damage * 2  # nosec B101
         boss.take_damage(shot.damage)
-    assert boss.health == before - count * base_damage * 2
+    assert boss.health == before - count * base_damage * 2  # nosec B101
 
 
 def test_powerup_drop_cap_and_one_roll_per_destruction(monkeypatch):
@@ -329,10 +333,10 @@ def test_powerup_drop_cap_and_one_roll_per_destruction(monkeypatch):
         for _ in range(C.POWERUP_MAX_COUNT - 1):
             main.PowerUp(0, 0)
         asteroid = main.Asteroid(0, 0, 40, asteroids)
-        assert asteroid.split()
-        assert len(powerups) == C.POWERUP_MAX_COUNT
+        assert asteroid.split()  # nosec B101
+        assert len(powerups) == C.POWERUP_MAX_COUNT  # nosec B101
         main.Asteroid(0, 0, 20, asteroids).split()
-        assert len(powerups) == C.POWERUP_MAX_COUNT
+        assert len(powerups) == C.POWERUP_MAX_COUNT  # nosec B101
     finally:
         pygame.quit()
 
@@ -341,12 +345,12 @@ def test_dynamic_music_receives_counts_and_respects_mute(monkeypatch):
     monkeypatch.setattr(audio, "TTS_AVAILABLE", False)
     manager = audio.AudioEnhancementManager()
     manager.dynamic_music.update = Mock()
-    state = dict(asteroids_count=10, enemies_count=2, boss_active=True, score=25000, level=10)
+    state = {"asteroids_count": 10, "enemies_count": 2, "boss_active": True, "score": 25000, "level": 10}
     asset_path = Mock()
     manager.update(0.016, state, asset_path)
     manager.dynamic_music.update.assert_called_once_with(0.016, 10, 2, True, 25000, 10, asset_path)
     manager.update(0.016, dict(state, music_on=False), asset_path)
-    assert manager.dynamic_music.update.call_count == 1
+    assert manager.dynamic_music.update.call_count == 1  # nosec B101
 
 
 def test_paused_seek_and_playback_completion(monkeypatch):
@@ -360,22 +364,22 @@ def test_paused_seek_and_playback_completion(monkeypatch):
     player.get_current_frame()
     player.toggle_pause()
     player.skip_forward(5)
-    assert player.get_current_timestamp() == 7
+    assert player.get_current_timestamp() == 7  # nosec B101
     player.set_speed(2)
     player.toggle_pause()
-    assert player.get_current_timestamp() == 7
+    assert player.get_current_timestamp() == 7  # nosec B101
     clock[0] += 10
-    assert player.get_current_frame() == player.frames[-1]
-    assert not player.playing
-    assert player.get_current_timestamp() == 10
-    assert player.get_current_frame() == player.frames[-1]
+    assert player.get_current_frame() == player.frames[-1]  # nosec B101
+    assert not player.playing  # nosec B101
+    assert player.get_current_timestamp() == 10  # nosec B101
+    assert player.get_current_frame() == player.frames[-1]  # nosec B101
     player.skip_backward(5)
-    assert player.playing
-    assert player.get_current_frame().timestamp == 5
+    assert player.playing  # nosec B101
+    assert player.get_current_frame().timestamp == 5  # nosec B101
     player.stop_playback()
-    assert player.get_current_frame() is None
+    assert player.get_current_frame() is None  # nosec B101
     player.start_playback()
-    assert player.get_current_timestamp() == 0
+    assert player.get_current_timestamp() == 0  # nosec B101
 
 
 def test_dashboard_rows_use_distinct_columns(monkeypatch):
@@ -391,9 +395,9 @@ def test_dashboard_rows_use_distinct_columns(monkeypatch):
 
         monkeypatch.setattr(dashboard, "_draw_stat_line", draw_line)
         dashboard.draw(pygame.Surface((C.SCREEN_WIDTH, C.SCREEN_HEIGHT)))
-        assert len(positions) == 10
-        assert {x for x, _y in positions[:5]} == {C.SCREEN_WIDTH / 4}
-        assert {x for x, _y in positions[5:]} == {C.SCREEN_WIDTH * 3 / 4}
+        assert len(positions) == 12  # nosec B101
+        assert {x for x, _y in positions[:5]} == {C.SCREEN_WIDTH / 4}  # nosec B101
+        assert {x for x, _y in positions[5:]} == {C.SCREEN_WIDTH * 3 / 4}  # nosec B101
     finally:
         pygame.font.quit()
 
@@ -416,9 +420,9 @@ def test_combo_awards_on_kill_before_same_frame_damage(run_game, monkeypatch, as
             main.player.invincible = False
             main.BossProjectile(*main.player.position, pygame.Vector2())
         if step == 5:
-            assert main.achievement_system.is_unlocked("Combo Master")
-            assert main.achievement_system.is_unlocked("Chain Reaction") == chain_unlocked
-            assert combo.count == 0
+            assert main.achievement_system.is_unlocked("Combo Master")  # nosec B101
+            assert main.achievement_system.is_unlocked("Chain Reaction") == chain_unlocked  # nosec B101
+            assert combo.count == 0  # nosec B101
 
     run_game(drive)
 
@@ -433,9 +437,9 @@ def test_partial_frame_speed_boost(monkeypatch, action, sign):
     dt = 0.1
     expected = player.base_speed * (dt + 0.025 * (C.SPEED_BOOST_MULTIPLIER - 1)) * 0.98
     player.update(dt)
-    assert player.velocity.y == pytest.approx(sign * expected)
-    assert not player.speed_boost_active
-    assert player.speed_boost_timer == 0
+    assert player.velocity.y == pytest.approx(sign * expected)  # nosec B101
+    assert not player.speed_boost_active  # nosec B101
+    assert player.speed_boost_timer == 0  # nosec B101
 
 
 def test_screenshot_confirmation_is_in_displayed_and_saved_frame(run_game, monkeypatch):
@@ -447,8 +451,8 @@ def test_screenshot_confirmation_is_in_displayed_and_saved_frame(run_game, monke
         rect = text.get_rect(center=(C.SCREEN_WIDTH / 2, 50))
         white_pixels = [(x, y) for x in range(text.get_width()) for y in range(text.get_height())
                         if text.get_at((x, y)) == (255, 255, 255, 255)]
-        assert white_pixels
-        assert all(surface.get_at((rect.x + x, rect.y + y))[:3] == (255, 255, 255) for x, y in white_pixels)
+        assert white_pixels  # nosec B101
+        assert all(surface.get_at((rect.x + x, rect.y + y))[:3] == (255, 255, 255) for x, y in white_pixels)  # nosec B101
         checked.append(target)
 
     def flip():
@@ -469,7 +473,7 @@ def test_screenshot_confirmation_is_in_displayed_and_saved_frame(run_game, monke
             return [key(pygame.K_p)]
 
     run_game(drive)
-    assert checked == ["display", "save"]
+    assert checked == ["display", "save"]  # nosec B101
 
 
 def test_help_long_translations_fit_separate_columns(monkeypatch):
@@ -485,11 +489,173 @@ def test_help_long_translations_fit_separate_columns(monkeypatch):
         screen = SimpleNamespace(blit=lambda surface, pos: blits.append((surface, pos)))
         help_view.draw(screen)
         panel, (x, y) = blits[-2]
-        assert x >= 310
-        assert x + panel.get_width() <= C.SCREEN_WIDTH - 40
-        assert y + panel.get_height() <= C.SCREEN_HEIGHT - 70
+        assert x >= 310  # nosec B101
+        assert x + panel.get_width() <= C.SCREEN_WIDTH - 40  # nosec B101
+        assert y + panel.get_height() <= C.SCREEN_HEIGHT - 70  # nosec B101
         for surface, pos in blits:
             if isinstance(pos, tuple) and pos[0] == 310:
-                assert pos[0] + surface.get_width() <= x - 24
+                assert pos[0] + surface.get_width() <= x - 24  # nosec B101
     finally:
         pygame.font.quit()
+
+
+@pytest.mark.parametrize("hazard_class", [main.BlackHole, main.SolarFlare])
+def test_active_hazards_suspend_during_boss_and_resume(run_game, hazard_class):
+    """Active hazards pause while a boss is up and resume once it clears."""
+    def drive(step, context):
+        if step == 4:
+            clear_asteroids()
+            main.player.invincible = False
+            main.player.velocity.update(0, 0)
+            if hazard_class is main.BlackHole:
+                context.hazard = hazard_class(*main.player.position)
+                context.remaining = context.hazard.lifetime
+            else:
+                context.hazard = hazard_class(warning=0)
+                context.hazard.position.y = main.player.position.y
+                context.remaining = context.hazard.position.y
+            main.boss_active = True
+        if step == 5:
+            assert main.lives == C.PLAYER_LIVES  # nosec B101
+            remaining = (context.hazard.lifetime if hazard_class is main.BlackHole
+                         else context.hazard.position.y)
+            assert remaining == context.remaining  # nosec B101
+            assert main.player.velocity.length() == 0  # nosec B101
+            main.boss_active = False
+        if step == 6:
+            assert main.lives == C.PLAYER_LIVES - 1  # nosec B101
+
+    run_game(drive)
+
+
+def test_flare_exits_bottom_without_wrapping(run_game):
+    """A solar flare must leave the arena instead of wrapping to the top."""
+    def drive(step, context):
+        if step == 4:
+            context.flare = main.SolarFlare(warning=0)
+            context.flare.position.y = C.SCREEN_HEIGHT - 1
+        if step == 5:
+            assert context.flare.position.y > C.SCREEN_HEIGHT  # nosec B101
+        if step == 17:
+            assert not context.flare.alive()  # nosec B101
+
+    run_game(drive, stop_at=18)
+
+
+@pytest.mark.parametrize("event", [
+    "hazard_black_hole", "hazard_solar_flare", "event_emp", "event_meteor_shower",
+])
+def test_hazard_announcements_toggle_persist_and_load_voice(monkeypatch, tmp_path, event):
+    """Hazard/event announcements toggle, persist and map to voice files."""
+    from modul.menu import VoiceAnnouncementsMenu
+    from modul.settings import Settings
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(audio, "TTS_AVAILABLE", False)
+    pygame.font.init()
+    try:
+        settings = Settings()
+        menu = VoiceAnnouncementsMenu(settings)
+        assert settings.announcement_types[event]  # nosec B101
+        item = next(item for item in menu.items if item.action == f"toggle_{event}")
+        menu.handle_action(item.action)
+        assert item.text.endswith("OFF")  # nosec B101
+        assert not Settings().announcement_types[event]  # nosec B101
+        menu.handle_action(item.action)
+        assert Settings().announcement_types[event]  # nosec B101
+
+        voice = audio.VoiceAnnouncement()
+        voice.tts_initialized = True
+        voice._generate_voice_files = Mock()
+        voice.load_announcement_sounds(lambda name: str(tmp_path / name))
+        jobs = voice._generate_voice_files.call_args.args[0]
+        assert jobs[voice.announcements[event]] == str(tmp_path / f"voice_{event}.wav")  # nosec B101
+    finally:
+        pygame.font.quit()
+
+
+def test_restart_refreshes_event_and_hazard_cooldowns(run_game, monkeypatch):
+    """Quick restart rebuilds schedulers and rerolls hazard timers."""
+    schedulers = []
+    intervals = []
+    original_scheduler = main.EventScheduler
+    original_uniform = main.random.uniform
+
+    def scheduler():
+        instance = original_scheduler()
+        schedulers.append(instance)
+        return instance
+
+    def uniform(low, high):
+        if (low, high) == (C.HAZARD_SPAWN_MIN_INTERVAL, C.HAZARD_SPAWN_MAX_INTERVAL):
+            intervals.append((low, high))
+        return original_uniform(low, high)
+
+    monkeypatch.setattr(main, "EventScheduler", scheduler)
+    monkeypatch.setattr(main.random, "uniform", uniform)
+
+    def drive(step, context):
+        if step == 4:
+            schedulers[-1].cooldown = 0.01
+            context.count = len(intervals)
+            return [key(pygame.K_r)]
+        if step == 5:
+            assert len(schedulers) == 3  # setup, first run, restart  # nosec B101
+            assert schedulers[-1].cooldown == pytest.approx(C.EVENT_FIRST_DELAY - 0.016)  # nosec B101
+            assert len(intervals) == context.count + 1  # nosec B101
+
+    run_game(drive)
+
+
+def test_black_hole_fallback_keeps_distance(run_game, monkeypatch):
+    """The fallback spawn still keeps the hole away from the player."""
+    original_uniform = main.random.uniform
+
+    def uniform(low, high):
+        if (low, high) == (C.HAZARD_SPAWN_MIN_INTERVAL, C.HAZARD_SPAWN_MAX_INTERVAL):
+            return 0
+        if low == C.BLACK_HOLE_RADIUS + 40:
+            return main.player.position.x if high > C.SCREEN_HEIGHT else main.player.position.y
+        return original_uniform(low, high)
+
+    monkeypatch.setattr(main.random, "uniform", uniform)
+    monkeypatch.setattr(main.random, "choice", lambda options: "black_hole" if "black_hole" in options else options[0])
+
+    def drive(step, _context):
+        if step == 4:
+            main.score = 4 * C.POINTS_PER_LEVEL
+        if step == 6:
+            holes = [obj for obj in main.BlackHole.containers[0] if isinstance(obj, main.BlackHole)]
+            assert len(holes) == 1  # nosec B101
+            assert holes[0].position.distance_to(main.player.position) > C.BLACK_HOLE_PULL_RADIUS * 1.5  # nosec B101
+
+    run_game(drive)
+
+
+def test_replay_renders_hazards_from_selected_frame(run_game, monkeypatch):
+    """The replay viewer draws hazards from the selected frame."""
+    replay = ReplayPlayer()
+    replay.frames = [
+        GameFrame(float(i), (100, 100), 0, (0, 0), 0, 3, 1, hazards=[
+            {"type": "BlackHole", "x": 400 + i * 100, "y": 300, "radius": 24},
+            {"type": "SolarFlare", "x": 640, "y": 450 + i * 100, "radius": 20},
+        ]) for i in range(2)
+    ]
+    replay.metadata = {"duration": 1}
+    monkeypatch.setattr(main, "ReplayPlayer", lambda: replay)
+    monkeypatch.setattr(main.ReplayViewer, "draw_hud", lambda *_args: None)
+
+    def drive(step, _context):
+        if step == 4:
+            main.game_state = "replay_viewer"
+            replay.start_playback()
+            replay.toggle_pause()
+        if step in (5, 6):
+            screen = pygame.display.get_surface()
+            index = step - 5
+            assert screen.get_at((400 + index * 100, 300))[:3] == C.BLACK_HOLE_CORE_COLOR  # nosec B101
+            assert screen.get_at((10, 450 + index * 100))[:3] == C.SOLAR_FLARE_COLOR  # nosec B101
+            if step == 5:
+                replay.skip_forward(1)
+
+    run_game(drive)

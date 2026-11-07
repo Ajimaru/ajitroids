@@ -17,6 +17,8 @@ class SessionStats:
         self.total_bosses_defeated = 0
         self.total_powerups_collected = 0
         self.total_shots_fired = 0
+        self.total_events_triggered = 0
+        self.total_hazards_survived = 0
         self.highest_level = 0
         self.total_lives_lost = 0
         self.best_combo = 0
@@ -35,6 +37,8 @@ class SessionStats:
         self.total_bosses_defeated = 0
         self.total_powerups_collected = 0
         self.total_shots_fired = 0
+        self.total_events_triggered = 0
+        self.total_hazards_survived = 0
         self.highest_level = 0
         self.total_lives_lost = 0
         self.best_combo = 0
@@ -74,6 +78,14 @@ class SessionStats:
         """Increment shot fired counter."""
         self.total_shots_fired += 1
 
+    def record_event_triggered(self):
+        """Increment the in-run event counter."""
+        self.total_events_triggered += 1
+
+    def record_hazard_survived(self):
+        """Increment the hazard-survival counter."""
+        self.total_hazards_survived += 1
+
     def record_life_lost(self):
         """Increment lives lost counter."""
         self.total_lives_lost += 1
@@ -109,6 +121,8 @@ class SessionStats:
             'total_enemies_destroyed': self.total_enemies_destroyed,
             'total_bosses_defeated': self.total_bosses_defeated,
             'total_powerups_collected': self.total_powerups_collected,
+            'total_events_triggered': self.total_events_triggered,
+            'total_hazards_survived': self.total_hazards_survived,
             'total_lives_lost': self.total_lives_lost,
             'best_combo': self.best_combo,
             'total_playtime': self.total_playtime,

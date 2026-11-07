@@ -62,6 +62,7 @@ class GameFrame:
     powerups: List[Dict[str, Any]] = field(default_factory=list)
     enemies: List[Dict[str, Any]] = field(default_factory=list)
     particles: List[Dict[str, Any]] = field(default_factory=list)
+    hazards: List[Dict[str, Any]] = field(default_factory=list)
     mode: str = "classic"
     wave: int = 1
     survival_kills: int = 0
@@ -178,6 +179,9 @@ class ReplayRecorder:
             ),
             particles=_quantize_dict_list(
                 cast(List[Dict[str, Any]], game_state.get('particles', []))
+            ),
+            hazards=_quantize_dict_list(
+                cast(List[Dict[str, Any]], game_state.get('hazards', []))
             ),
         )
         self.frames.append(frame)

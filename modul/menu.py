@@ -1002,6 +1002,10 @@ class VoiceAnnouncementsMenu:
             MenuItem(gettext("shield_active") + ": OFF", "toggle_shield_active"),
             MenuItem(gettext("low_health") + ": OFF", "toggle_low_health"),
             MenuItem(gettext("powerup") + ": OFF", "toggle_powerup"),
+            MenuItem("Hazard Black Hole: ON", "toggle_hazard_black_hole"),
+            MenuItem("Hazard Solar Flare: ON", "toggle_hazard_solar_flare"),
+            MenuItem("Event Emp: ON", "toggle_event_emp"),
+            MenuItem("Event Meteor Shower: ON", "toggle_event_meteor_shower"),
             # TTS voice selection (if available)
             MenuItem(
                 gettext("tts_voice_label")
@@ -1040,6 +1044,10 @@ class VoiceAnnouncementsMenu:
         self.items[8].text = f"{gettext('shield_active')}: {'ON' if announcements.get('shield_active', False) else 'OFF'}"
         self.items[9].text = f"{gettext('low_health')}: {'ON' if announcements.get('low_health', False) else 'OFF'}"
         self.items[10].text = f"{gettext('powerup')}: {'ON' if announcements.get('powerup', False) else 'OFF'}"
+        self.items[11].text = f"Hazard Black Hole: {'ON' if announcements.get('hazard_black_hole', True) else 'OFF'}"
+        self.items[12].text = f"Hazard Solar Flare: {'ON' if announcements.get('hazard_solar_flare', True) else 'OFF'}"
+        self.items[13].text = f"Event Emp: {'ON' if announcements.get('event_emp', True) else 'OFF'}"
+        self.items[14].text = f"Event Meteor Shower: {'ON' if announcements.get('event_meteor_shower', True) else 'OFF'}"
 
     def update(self, dt, events):
         """Handle keyboard navigation and selection for announcements toggles.
@@ -1110,6 +1118,11 @@ class VoiceAnnouncementsMenu:
             "toggle_shield_active": "shield_active",
             "toggle_low_health": "low_health",
             "toggle_powerup": "powerup",
+            "toggle_hazard_black_hole": "hazard_black_hole",
+            "toggle_hazard_solar_flare": "hazard_solar_flare",
+            "toggle_event_emp": "event_emp",
+            "toggle_event_meteor_shower": "event_meteor_shower",
+
         }
 
         if action in announcement_map:
@@ -1139,13 +1152,14 @@ class VoiceAnnouncementsMenu:
         font = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE)
         start_y = 130
 
+        spacing = min(C.MENU_ITEM_SPACING, (C.SCREEN_HEIGHT - start_y - 40) / (len(self.items) - 1))
         visible_count = 0
         for i, item in enumerate(self.items):
             if item.text == "":
                 visible_count += 0.5
                 continue
 
-            y = start_y + visible_count * C.MENU_ITEM_SPACING
+            y = start_y + visible_count * spacing
             is_selected = i == self.current_selection
             color = C.MENU_SELECTED_COLOR if is_selected else C.MENU_UNSELECTED_COLOR
 
