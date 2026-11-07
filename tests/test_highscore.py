@@ -429,3 +429,25 @@ class TestHighscoreDisplay:
         screen = pygame.Surface((800, 600))
 
         display.draw(screen)  # Gold, silver, bronze should be rendered
+
+
+@pytest.mark.parametrize("mode", ["survival", "time_attack"])
+def test_mode_rankings_preserve_legacy_scores(clean_highscore_file, mode):
+    manager = HighscoreManager()
+    legacy = manager.scores_for_mode()[:]
+    for score in range(HIGHSCORE_MAX_ENTRIES + 2):
+        manager.add_highscore("NEW", score, mode)
+    restored = HighscoreManager()
+    assert restored.scores_for_mode() == legacy
+    assert len(restored.scores_for_mode(mode)) == HIGHSCORE_MAX_ENTRIES
+    assert restored.scores_for_mode(mode)[0]["score"] == HIGHSCORE_MAX_ENTRIES + 1
+    assert not restored.is_highscore(0, mode)
+    other = "time_attack" if mode == "survival" else "survival"
+    assert restored.is_highscore(0, other)
+
+
+def test_highscore_display_switches_mode(clean_highscore_file):
+    display = HighscoreDisplay(HighscoreManager())
+    display.update(0.1, [pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RIGHT)])
+    assert display.mode == "survival"
+    display.draw(pygame.Surface((800, 600)))

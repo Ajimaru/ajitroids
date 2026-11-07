@@ -250,3 +250,13 @@ class TestGameModeMenu:
             ]
         finally:
             pygame.quit()
+
+
+@pytest.mark.parametrize("mode", ["classic", "survival", "time_attack"])
+def test_mode_menu_confirms_initial_mode(mode):
+    pygame.font.init()
+    menu = GameModeMenu(mode)
+    menu.activate()
+    menu.input_cooldown = 0
+    action = menu.update(1, [pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN)])
+    assert action == "mode_" + mode

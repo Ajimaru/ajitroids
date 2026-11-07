@@ -287,7 +287,6 @@ def main(args=None):
     credits_screen = CreditsScreen()
     game_over_screen = GameOverScreen()
     difficulty_menu = DifficultyMenu()
-    game_mode_menu = GameModeMenu()
     ship_selection_menu = ShipSelectionMenu()
     tutorial = Tutorial()
     help_screen = HelpScreen()
@@ -315,6 +314,7 @@ def main(args=None):
     # attack keep their own progression objects so the loop only has to ask
     # them for the next wave/round numbers.
     game_mode = args.mode if getattr(args, "mode", None) in GAME_MODES else "classic"
+    game_mode_menu = GameModeMenu(game_mode)
     survival = SurvivalProgression()
     time_attack = TimeAttackProgression()
 
@@ -434,7 +434,7 @@ def main(args=None):
         player.respawn()
         audio_enhancements.low_health_announced = False
         session_stats.start_game()
-        replay_recorder.start_recording(difficulty, ship_manager.current_ship)
+        replay_recorder.start_recording(difficulty, ship_manager.current_ship, game_mode)
         run_active = True
         for _ in range(3):
             asteroid_field.spawn_random()
@@ -621,6 +621,7 @@ def main(args=None):
                 replay_list_menu.activate()
 
             elif action == "highscores":
+                highscore_display.mode = game_mode
                 game_state = "highscore_display"
 
             elif action == "statistics":
@@ -1186,6 +1187,13 @@ def main(args=None):
                     'score': score,
                     'lives': lives,
                     'level': level,
+                    'mode': game_mode,
+                    'wave': survival.wave,
+                    'survival_kills': survival.kills,
+                    'survival_target': survival.target,
+                    'time_remaining': time_attack.remaining,
+                    'time_kills': time_attack.kills,
+                    'time_target': time_attack.target,
                     'asteroids': asteroids_data,
                     'enemies': enemies_data,
                     'shots': shots_data,
@@ -1446,7 +1454,7 @@ def main(args=None):
 
             name = highscore_input.update(events)
             if name:
-                highscore_manager.add_highscore(name, score)
+                highscore_manager.add_highscore(name, score, game_mode)
                 game_state = "highscore_display"
                 score = 0
 
@@ -1471,7 +1479,8 @@ def main(args=None):
             game_over_screen.draw(screen)
 
             if action == "highscore_display":
-                if highscore_manager.is_highscore(score):
+                highscore_display.mode = game_mode
+                if highscore_manager.is_highscore(score, game_mode):
                     game_state = "highscore_input"
                     highscore_input = HighscoreInput(score)
                 else:
@@ -1568,7 +1577,15 @@ def main(args=None):
                 lives_text = font.render(f"Lives: {frame.lives}", True, (255, 255, 255))
                 screen.blit(lives_text, (20, 50))
 
-                level_text = font.render(f"Level: {frame.level}", True, (200, 200, 200))
+                if frame.mode == "survival":
+                    status = (f"{gettext('mode_survival')}: {gettext('wave')} {frame.wave} "
+                              f"({frame.survival_kills}/{frame.survival_target})")
+                elif frame.mode == "time_attack":
+                    status = (f"{gettext('mode_time_attack')}: {math.ceil(frame.time_remaining)}s "
+                              f"({frame.time_kills}/{frame.time_target})")
+                else:
+                    status = f"Level: {frame.level}"
+                level_text = font.render(status, True, (200, 200, 200))
                 screen.blit(level_text, (20, 80))
 
             # Draw replay HUD
@@ -1661,6 +1678,7 @@ def main(args=None):
                 credits_screen = CreditsScreen()
                 game_over_screen = GameOverScreen()
                 difficulty_menu = DifficultyMenu()
+                game_mode_menu = GameModeMenu(game_mode)
                 ship_selection_menu = ShipSelectionMenu()
                 tutorial = Tutorial()
                 help_screen = HelpScreen()
@@ -1691,6 +1709,8 @@ def main(args=None):
             try:
                 if game_state == 'main_menu':
                     main_menu.activate()
+                elif game_state == 'mode_select':
+                    game_mode_menu.activate()
                 elif game_state == 'options':
                     options_menu.activate()
                 elif game_state == 'controls':

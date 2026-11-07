@@ -582,3 +582,34 @@ def test_replay_recorder_save_with_error_handling(tmp_path):
             os.chmod(invalid_dir, 0o755)
         except PermissionError:
             pass
+
+
+@pytest.mark.parametrize("mode", ["survival", "time_attack"])
+def test_mode_replay_round_trip(tmp_path, monkeypatch, mode):
+    monkeypatch.chdir(tmp_path)
+    recorder = ReplayRecorder()
+    recorder.start_recording("normal", "default", mode)
+    state = dict(player_x=1, player_y=2, player_rotation=0, player_vx=0,
+                 player_vy=0, score=42, lives=3, level=1, mode=mode, wave=4,
+                 survival_kills=3, survival_target=20, time_remaining=12.5,
+                 time_kills=2, time_target=10)
+    recorder.record_frame(state, recorder.start_time + 1)
+    path = recorder.save_replay()
+    player = ReplayPlayer()
+    player.load_replay(path)
+    assert player.metadata["mode"] == mode
+    frame = player.frames[0]
+    for key in ("mode", "wave", "survival_kills", "survival_target",
+                "time_remaining", "time_kills", "time_target"):
+        assert getattr(frame, key) == state[key]
+
+
+def test_old_replay_defaults_to_classic(tmp_path):
+    path = tmp_path / "old.json"
+    path.write_text(json.dumps(dict(metadata={}, events=[], frames=[dict(
+        timestamp=0, player_pos=[0, 0], player_rotation=0,
+        player_velocity=[0, 0], score=1, lives=3, level=2)])))
+    player = ReplayPlayer()
+    player.load_replay(str(path))
+    assert player.frames[0].mode == "classic"
+    assert player.frames[0].level == 2

@@ -53,24 +53,34 @@ class HighscoreManager:
         except OSError as e:  # fallback for file write errors
             print(f"Error saving highscores: {e}")
 
-    def is_highscore(self, score):
-        """Check if the score qualifies as a highscore."""
-        if len(self.highscores) < C.HIGHSCORE_MAX_ENTRIES:
-            return True
-        return score > self.highscores[-1]["score"]
+    def scores_for_mode(self, mode="classic"):
+        """Return a ranking, treating legacy records as Classic."""
+        return sorted(
+            (entry for entry in self.highscores if entry.get("mode", "classic") == mode),
+            key=lambda entry: entry["score"], reverse=True,
+        )
 
-    def add_highscore(self, name, score):
+    def is_highscore(self, score, mode="classic"):
+        """Check if the score qualifies as a highscore."""
+        ranking = self.scores_for_mode(mode)
+        if len(ranking) < C.HIGHSCORE_MAX_ENTRIES:
+            return True
+        return score > ranking[-1]["score"]
+
+    def add_highscore(self, name, score, mode="classic"):
         """Add a new highscore entry."""
         name = name.upper()[:C.HIGHSCORE_NAME_LENGTH]
         name = "".join(c for c in name if c in C.HIGHSCORE_ALLOWED_CHARS)
         name = name.ljust(C.HIGHSCORE_NAME_LENGTH, "A")
 
-        self.highscores.append({"name": name, "score": score})
-        self.highscores.sort(key=lambda x: x["score"], reverse=True)
-        self.highscores = self.highscores[:C.HIGHSCORE_MAX_ENTRIES]
+        ranking = self.scores_for_mode(mode)
+        ranking.append({"name": name, "score": score, "mode": mode})
+        ranking.sort(key=lambda entry: entry["score"], reverse=True)
+        ranking = ranking[:C.HIGHSCORE_MAX_ENTRIES]
+        self.highscores = [entry for entry in self.highscores if entry.get("mode", "classic") != mode] + ranking
         self.save_highscores()
 
-        for i, entry in enumerate(self.highscores):
+        for i, entry in enumerate(ranking):
             if entry["name"] == name and entry["score"] == score:
                 return i
         return -1
@@ -178,6 +188,7 @@ class HighscoreDisplay:
     def __init__(self, highscore_manager):
         """Initialize highscore display."""
         self.highscore_manager = highscore_manager
+        self.mode = "classic"
         self.font_title = pygame.font.Font(None, 64)
         self.font_entry = pygame.font.Font(None, 36)
         self.font_button = pygame.font.Font(None, C.MENU_ITEM_FONT_SIZE)
@@ -212,6 +223,10 @@ class HighscoreDisplay:
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if self.input_cooldown <= 0:
+                    if event.key in (pygame.K_LEFT, pygame.K_RIGHT):
+                        modes = C.GAME_MODES
+                        step = 1 if event.key == pygame.K_RIGHT else -1
+                        self.mode = modes[(modes.index(self.mode) + step) % len(modes)]
                     if event.key in (pygame.K_SPACE, pygame.K_RETURN, pygame.K_ESCAPE):
                         self.input_cooldown = 0.15
                         return "main_menu"
@@ -224,10 +239,13 @@ class HighscoreDisplay:
         overlay.fill((0, 0, 0, self.background_alpha))
         screen.blit(overlay, (0, 0))
 
-        title_text = self.font_title.render(gettext("highscores"), True, pygame.Color("white"))
+        title = f"{gettext('highscores')} - {gettext('mode_' + self.mode)}"
+        title_text = self.font_title.render(title, True, pygame.Color("white"))
         screen.blit(title_text, (C.SCREEN_WIDTH // 2 - title_text.get_width() // 2, 50))
 
-        for i, entry in enumerate(self.highscore_manager.highscores):
+        hint = self.font_button.render("<  >", True, pygame.Color("white"))
+        screen.blit(hint, hint.get_rect(midtop=(C.SCREEN_WIDTH // 2, 110)))
+        for i, entry in enumerate(self.highscore_manager.scores_for_mode(self.mode)):
             if i == 0:
                 color = pygame.Color("gold")
             elif i == 1:

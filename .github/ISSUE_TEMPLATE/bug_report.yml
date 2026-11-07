@@ -33,7 +33,7 @@ body:
     id: version
     attributes:
       label: Game version
-      description: "Shown in the main menu, or run: `python main.py --version`"
+      description: "Shown in the main menu, or run: `python main.py --version`. For a checkout showing `0.0.0+unknown`, provide the revision from `git rev-parse HEAD`."
       placeholder: "0.25.0"
     validations:
       required: true

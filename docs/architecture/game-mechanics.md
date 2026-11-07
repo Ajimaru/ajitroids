@@ -322,8 +322,16 @@ The rules live in `modul/game_modes.py` as `SurvivalProgression` and
 `TimeAttackProgression`. They hold no pygame state, so the pacing can be
 unit-tested without booting the game.
 
-Boss fights and the score-based `AsteroidField` scaling are classic-only; the
-alternative modes drive the field themselves via the progression objects.
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:e273caae65c0807bb74b38aa44b844a0c5c240fc5d24e139ea37045cb37ad8ed -->
+
+Boss fights and the score-based `AsteroidField` scaling are classic-only.
+Survival progression controls asteroid count and spawn interval; Time Attack
+retains the difficulty-selected field settings.
+
+<!-- /coderabbit-ai-generated:v1 -->
+
 Cleared waves/rounds award `SURVIVAL_WAVE_SCORE_BONUS * wave` and
 `TIME_ATTACK_SCORE_BONUS * round` respectively.
 

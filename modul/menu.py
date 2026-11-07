@@ -951,7 +951,7 @@ class DifficultyMenu(Menu):
 class GameModeMenu(Menu):
     """Choose the game mode before picking a difficulty."""
 
-    def __init__(self):
+    def __init__(self, mode="classic"):
         """Create one entry per game mode plus a back option."""
         try:
             from modul.i18n import gettext
@@ -964,6 +964,10 @@ class GameModeMenu(Menu):
         self.add_item(gettext("mode_survival"), "mode_survival", "2")
         self.add_item(gettext("mode_time_attack"), "mode_time_attack", "3")
         self.add_item(gettext("back"), "main_menu", "Z")
+
+        self.items[0].selected = False
+        self.selected_index = {"classic": 0, "survival": 1, "time_attack": 2}.get(mode, 0)
+        self.items[self.selected_index].selected = True
 
 
 class VoiceAnnouncementsMenu:

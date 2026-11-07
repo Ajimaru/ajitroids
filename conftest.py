@@ -17,7 +17,7 @@ from pathlib import Path
 
 # Keep local runs headless, mirroring the CI env. Must be set before any
 # pygame.init() in the test fixtures.
-os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 
 ROOT = Path(__file__).resolve().parent

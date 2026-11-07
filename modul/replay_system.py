@@ -62,6 +62,13 @@ class GameFrame:
     powerups: List[Dict[str, Any]] = field(default_factory=list)
     enemies: List[Dict[str, Any]] = field(default_factory=list)
     particles: List[Dict[str, Any]] = field(default_factory=list)
+    mode: str = "classic"
+    wave: int = 1
+    survival_kills: int = 0
+    survival_target: int = 0
+    time_remaining: float = 0.0
+    time_kills: int = 0
+    time_target: int = 0
 
 
 @dataclass
@@ -85,7 +92,7 @@ class ReplayRecorder:
         self.frame_interval = DEFAULT_FRAME_INTERVAL
         self.last_frame_time = 0
 
-    def start_recording(self, difficulty: str, ship_type: str):
+    def start_recording(self, difficulty: str, ship_type: str, mode: str = "classic"):
         """Start recording a new game session."""
         self.recording = True
         self.frames = []
@@ -95,6 +102,7 @@ class ReplayRecorder:
         self.metadata = {
             'version': '1.1',
             'difficulty': difficulty,
+            'mode': mode,
             'ship_type': ship_type,
             'start_time': self.start_time,
             'frame_rate_hz': round(1.0 / self.frame_interval, 2),
@@ -152,6 +160,10 @@ class ReplayRecorder:
             score=game_state['score'],
             lives=game_state['lives'],
             level=game_state['level'],
+            **{key: game_state[key] for key in (
+                'mode', 'wave', 'survival_kills', 'survival_target',
+                'time_remaining', 'time_kills', 'time_target',
+            ) if key in game_state},
             asteroids=_quantize_dict_list(
                 cast(List[Dict[str, Any]], game_state.get('asteroids', []))
             ),

@@ -154,20 +154,39 @@ The release stays a draft on purpose: notes and artifacts are reviewed by hand
 before publishing. Tests are not part of this workflow; the `CI` workflow also
 runs on tag pushes.
 
-Prerelease tags (`0.25.0rc1`, `0.25.0.dev6`) are detected and flagged as
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:83806380482e1b71b0cbcb57b03aa15aeef7056b4f9e2e9239b57cd1dda81a85 -->
+
+Prerelease tags (`v0.25.0rc1`, `v0.25.0.dev6`) are detected and flagged as
 prereleases automatically.
 
 ## Manual Release (Fallback)
 
+<!-- /coderabbit-ai-generated:v1 -->
+
 If the workflow cannot run, build and publish from a local full clone. A shallow
 clone has no tag history and cannot resolve the version.
 
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:d84c98bb82e9268e4dcdb31f7b9bc2c11f8dfe30f30ccbac897c0d01357d67b2 -->
+
 ### 1. Build Package
 
+Use a full clone with tag history. Before installing tools or building, verify
+that the working tree is clean (the status command must produce no output),
+fetch the tags, and check out the intended release tag:
+
 ```bash
+git status --porcelain
+git fetch origin --tags
+git switch --detach v1.2.3
 pip install build
 python -m build
 ```
+
+<!-- /coderabbit-ai-generated:v1 -->
 
 This creates:
 
@@ -301,24 +320,54 @@ Changes:
 
 ## Hotfix Process
 
-For critical bugs in a published release:
+<!-- coderabbit-ai-generated:v1 -->
 
-1. **Fix on `dev`** and let CI pass
+<!-- coderabbit-ai-generated-section:v1:aac7785c8d23a0cad86523c991d633cc4c207c1ff8f2780ad5113443825196ae -->
+
+For critical bugs in a published release, isolate the fix from unfinished work:
+
+1. Start from a clean working tree in a full clone. Fetch tags and branch from
+   the published release that needs the fix (for example, `v0.25.0`):
 
    ```bash
+   git status --porcelain
+   git fetch origin --tags
+   git switch -c hotfix/0.25.1 v0.25.0
+   ```
+
+   Stop if status reports local changes; commit or stash them first.
+
+2. Apply only the critical fix and its regression tests. If the fix already
+   exists elsewhere, cherry-pick its focused commit and resolve conflicts
+   without importing unrelated development changes. Run the test suite and
+   applicable checks from CI, then commit the validated fix:
+
+   ```bash
+   git add <changed-files>
    git commit -m "fix: critical bug description"
    ```
 
-2. **Merge `dev` into `main`** (fast-forward only)
-
-3. **Tag the patch release**
+3. Review the diff against the published tag, validate the built package, and
+   tag the hotfix commit with the next unused patch version:
 
    ```bash
+   git diff v0.25.0...HEAD
    git tag -a v0.25.1 -m "Release version 0.25.1"
+   git push origin hotfix/0.25.1
    git push origin v0.25.1
    ```
 
-## Version Checking
+   Wait for tag CI and the release workflow, inspect the draft's notes and
+   artifacts, and publish the patch release as described above.
+
+4. Reconcile the hotfix with both `main` and `dev` through separate pull
+   requests. Merge the hotfix branch into each branch, resolving conflicts while
+   preserving that branch's existing changes and the bug fix. If a branch
+   already contains the equivalent fix, verify it before resolving any duplicate
+   changes. Run CI on both resulting branches. Do not reset either branch to the
+   release tag or merge unfinished `dev` work into `main`.
+
+<!-- /coderabbit-ai-generated:v1 -->## Version Checking
 
 The version is shown in the main menu and by the CLI:
 
