@@ -493,3 +493,159 @@ def test_help_long_translations_fit_separate_columns(monkeypatch):
                 assert pos[0] + surface.get_width() <= x - 24
     finally:
         pygame.font.quit()
+
+
+@pytest.mark.parametrize("hazard_class", [main.BlackHole, main.SolarFlare])
+def test_active_hazards_suspend_during_boss_and_resume(run_game, hazard_class):
+    def drive(step, context):
+        if step == 4:
+            clear_asteroids()
+            main.player.invincible = False
+            main.player.velocity.update(0, 0)
+            if hazard_class is main.BlackHole:
+                context.hazard = hazard_class(*main.player.position)
+                context.remaining = context.hazard.lifetime
+            else:
+                context.hazard = hazard_class(warning=0)
+                context.hazard.position.y = main.player.position.y
+                context.remaining = context.hazard.position.y
+            main.boss_active = True
+        if step == 5:
+            assert main.lives == C.PLAYER_LIVES
+            remaining = (context.hazard.lifetime if hazard_class is main.BlackHole
+                         else context.hazard.position.y)
+            assert remaining == context.remaining
+            assert main.player.velocity.length() == 0
+            main.boss_active = False
+        if step == 6:
+            assert main.lives == C.PLAYER_LIVES - 1
+
+    run_game(drive)
+
+
+def test_flare_exits_bottom_without_wrapping(run_game):
+    def drive(step, context):
+        if step == 4:
+            context.flare = main.SolarFlare(warning=0)
+            context.flare.position.y = C.SCREEN_HEIGHT - 1
+        if step == 5:
+            assert context.flare.position.y > C.SCREEN_HEIGHT
+        if step == 17:
+            assert not context.flare.alive()
+
+    run_game(drive, stop_at=18)
+
+
+@pytest.mark.parametrize("event", [
+    "hazard_black_hole", "hazard_solar_flare", "event_emp", "event_meteor_shower",
+])
+def test_hazard_announcements_toggle_persist_and_load_voice(monkeypatch, tmp_path, event):
+    from modul.menu import VoiceAnnouncementsMenu
+    from modul.settings import Settings
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(audio, "TTS_AVAILABLE", False)
+    pygame.font.init()
+    try:
+        settings = Settings()
+        menu = VoiceAnnouncementsMenu(settings)
+        assert settings.announcement_types[event]
+        item = next(item for item in menu.items if item.action == f"toggle_{event}")
+        menu.handle_action(item.action)
+        assert item.text.endswith("OFF")
+        assert not Settings().announcement_types[event]
+        menu.handle_action(item.action)
+        assert Settings().announcement_types[event]
+
+        voice = audio.VoiceAnnouncement()
+        voice.tts_initialized = True
+        voice._generate_voice_files = Mock()
+        voice.load_announcement_sounds(lambda name: str(tmp_path / name))
+        jobs = voice._generate_voice_files.call_args.args[0]
+        assert jobs[voice.announcements[event]] == str(tmp_path / f"voice_{event}.wav")
+    finally:
+        pygame.font.quit()
+
+
+def test_restart_refreshes_event_and_hazard_cooldowns(run_game, monkeypatch):
+    schedulers = []
+    intervals = []
+    original_scheduler = main.EventScheduler
+    original_uniform = main.random.uniform
+
+    def scheduler():
+        instance = original_scheduler()
+        schedulers.append(instance)
+        return instance
+
+    def uniform(low, high):
+        if (low, high) == (C.HAZARD_SPAWN_MIN_INTERVAL, C.HAZARD_SPAWN_MAX_INTERVAL):
+            intervals.append((low, high))
+        return original_uniform(low, high)
+
+    monkeypatch.setattr(main, "EventScheduler", scheduler)
+    monkeypatch.setattr(main.random, "uniform", uniform)
+
+    def drive(step, context):
+        if step == 4:
+            schedulers[-1].cooldown = 0.01
+            context.count = len(intervals)
+            return [key(pygame.K_r)]
+        if step == 5:
+            assert len(schedulers) == 3  # setup, first run, restart
+            assert schedulers[-1].cooldown == pytest.approx(C.EVENT_FIRST_DELAY - 0.016)
+            assert len(intervals) == context.count + 1
+
+    run_game(drive)
+
+
+def test_black_hole_fallback_keeps_distance(run_game, monkeypatch):
+    original_uniform = main.random.uniform
+
+    def uniform(low, high):
+        if (low, high) == (C.HAZARD_SPAWN_MIN_INTERVAL, C.HAZARD_SPAWN_MAX_INTERVAL):
+            return 0
+        if low == C.BLACK_HOLE_RADIUS + 40:
+            return main.player.position.x if high > C.SCREEN_HEIGHT else main.player.position.y
+        return original_uniform(low, high)
+
+    monkeypatch.setattr(main.random, "uniform", uniform)
+    monkeypatch.setattr(main.random, "choice", lambda options: "black_hole" if "black_hole" in options else options[0])
+
+    def drive(step, _context):
+        if step == 4:
+            main.score = 4 * C.POINTS_PER_LEVEL
+        if step == 6:
+            holes = [obj for obj in main.BlackHole.containers[0] if isinstance(obj, main.BlackHole)]
+            assert len(holes) == 1
+            assert holes[0].position.distance_to(main.player.position) > C.BLACK_HOLE_PULL_RADIUS * 1.5
+
+    run_game(drive)
+
+
+def test_replay_renders_hazards_from_selected_frame(run_game, monkeypatch):
+    replay = ReplayPlayer()
+    replay.frames = [
+        GameFrame(float(i), (100, 100), 0, (0, 0), 0, 3, 1, hazards=[
+            {"type": "BlackHole", "x": 400 + i * 100, "y": 300, "radius": 24},
+            {"type": "SolarFlare", "x": 640, "y": 450 + i * 100, "radius": 20},
+        ]) for i in range(2)
+    ]
+    replay.metadata = {"duration": 1}
+    monkeypatch.setattr(main, "ReplayPlayer", lambda: replay)
+    monkeypatch.setattr(main.ReplayViewer, "draw_hud", lambda *_args: None)
+
+    def drive(step, context):
+        if step == 4:
+            main.game_state = "replay_viewer"
+            replay.start_playback()
+            replay.toggle_pause()
+        if step in (5, 6):
+            screen = pygame.display.get_surface()
+            index = step - 5
+            assert screen.get_at((400 + index * 100, 300))[:3] == C.BLACK_HOLE_CORE_COLOR
+            assert screen.get_at((10, 450 + index * 100))[:3] == C.SOLAR_FLARE_COLOR
+            if step == 5:
+                replay.skip_forward(1)
+
+    run_game(drive)

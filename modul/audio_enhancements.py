@@ -388,6 +388,10 @@ class VoiceAnnouncement:
             "shield_active": "voice_shield.wav",
             "low_health": "voice_low_health.wav",
             "powerup": "voice_powerup.wav",
+            "hazard_black_hole": "voice_hazard_black_hole.wav",
+            "hazard_solar_flare": "voice_hazard_solar_flare.wav",
+            "event_emp": "voice_event_emp.wav",
+            "event_meteor_shower": "voice_event_meteor_shower.wav",
             "extra_life": "voice_extra_life.wav",
             "achievement": "voice_achievement.wav",
             "high_score": "voice_high_score.wav"

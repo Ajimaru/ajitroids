@@ -12,6 +12,8 @@ import sys
 import tempfile
 import traceback
 from types import SimpleNamespace
+from pathlib import Path
+import time
 
 FRAMES = int(sys.argv[1]) if len(sys.argv) > 1 else 36000
 
@@ -19,6 +21,8 @@ os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
 
 import pygame  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import main  # noqa: E402
 import modul.audio_enhancements as audio  # noqa: E402
@@ -42,6 +46,8 @@ COMBOS = [
 _ORIG_EVENT_GET = pygame.event.get
 _ORIG_DELAY = pygame.time.delay
 _ORIG_CLOCK = pygame.time.Clock
+_ORIG_TIME = time.time
+_SIM_TIME = _ORIG_TIME()
 
 
 _ACTIONS = set()
@@ -56,7 +62,14 @@ def _patch_runtime():
     """Replace wall-clock timing, TTS and input with scripted stand-ins."""
     audio.TTS_AVAILABLE = False
     pygame.time.delay = lambda _ms: None
-    pygame.time.Clock = lambda: SimpleNamespace(tick=lambda _fps: 16, get_fps=lambda: 60)
+
+    def tick(_fps):
+        global _SIM_TIME
+        _SIM_TIME += 0.016
+        return 16
+
+    pygame.time.Clock = lambda: SimpleNamespace(tick=tick, get_fps=lambda: 62.5)
+    time.time = lambda: _SIM_TIME
     main.input_utils.is_action_pressed = _patched_is_action_pressed
 
 

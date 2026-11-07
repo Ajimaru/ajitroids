@@ -410,7 +410,7 @@ def main(args=None):
         global triple_shots_used, speed_boosts_used
         nonlocal boss, run_active, last_spawn_time, spawn_interval
         nonlocal current_enemy_ships, level_up_timer, level_up_text, survival_time
-        nonlocal active_hazard
+        nonlocal active_hazard, event_scheduler, hazard_spawn_timer
         finish_run()
         for group in (asteroids, powerups, shots, particles, collidable, updatable, drawable):
             for obj in list(group):
@@ -421,6 +421,8 @@ def main(args=None):
         combo.reset()
         boss = None
         active_hazard = None
+        event_scheduler = EventScheduler()
+        hazard_spawn_timer = random.uniform(HAZARD_SPAWN_MIN_INTERVAL, HAZARD_SPAWN_MAX_INTERVAL)
         boss_active = False
         boss_defeated_timer = 0
         boss_defeated_message = ""
@@ -526,7 +528,14 @@ def main(args=None):
             y = random.uniform(BLACK_HOLE_RADIUS + 40, SCREEN_HEIGHT - BLACK_HOLE_RADIUS - 40)
             if player.position.distance_to(pygame.Vector2(x, y)) > BLACK_HOLE_PULL_RADIUS * 1.5:
                 return BlackHole(x, y)
-        return BlackHole(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4)
+        margin = BLACK_HOLE_RADIUS + 40
+        corners = [
+            pygame.Vector2(x, y)
+            for x in (margin, SCREEN_WIDTH - margin)
+            for y in (margin, SCREEN_HEIGHT - margin)
+        ]
+        position = max(corners, key=player.position.distance_to)
+        return BlackHole(position.x, position.y)
 
     def _spawn_meteor_shower():
         """Rain small, fast asteroids from a single screen edge."""
@@ -1042,6 +1051,8 @@ def main(args=None):
             for obj in updatable:
                 if isinstance(obj, EnemyShip):
                     obj.update(dt, player.position)
+                elif isinstance(obj, (BlackHole, SolarFlare)) and boss_active:
+                    continue
                 elif not isinstance(obj, Boss):
                     obj.update(dt)
 
@@ -1194,12 +1205,12 @@ def main(args=None):
                     obj.position.x = 0
                 if obj.position.y < 0:
                     obj.position.y = SCREEN_HEIGHT
-                elif obj.position.y > SCREEN_HEIGHT:
+                elif obj.position.y > SCREEN_HEIGHT and not isinstance(obj, SolarFlare):
                     obj.position.y = 0
 
             # Hazards: gravity pulls are velocity-only, so they move objects on
             # the next frame; the hole's event horizon damages on contact.
-            if hazards:
+            if hazards and not boss_active:
                 pullable = list(asteroids) + list(shots)
                 if player:
                     pullable.append(player)
@@ -1674,6 +1685,17 @@ def main(args=None):
                     x = int(p.get('x', 0))
                     y = int(p.get('y', 0))
                     pygame.draw.circle(screen, (0, 255, 0), (x, y), 6, 1)
+
+                # Rebuild hazard visuals from the selected frame, including after seeks.
+                for hazard in frame.hazards:
+                    x = int(hazard.get('x', 0))
+                    y = int(hazard.get('y', 0))
+                    radius = int(hazard.get('radius', 24))
+                    if hazard.get('type') == 'BlackHole':
+                        pygame.draw.circle(screen, BLACK_HOLE_RING_COLOR, (x, y), radius, 2)
+                        pygame.draw.circle(screen, BLACK_HOLE_CORE_COLOR, (x, y), int(radius * 0.7))
+                    elif hazard.get('type') == 'SolarFlare':
+                        pygame.draw.rect(screen, SOLAR_FLARE_COLOR, (0, y - radius, SCREEN_WIDTH, radius * 2))
 
                 # HUD text
                 score_text = font.render(f"Score: {frame.score}", True, (255, 255, 255))

@@ -114,6 +114,8 @@ class SolarFlare(Hazard):
 
     def collides_with(self, other):
         """A screen-wide band: contact depends only on vertical overlap."""
+        if self.warning_remaining > 0:
+            return False
         return abs(other.position.y - self.position.y) <= self.half_thickness + other.radius
 
     def draw(self, surface):
