@@ -11,7 +11,7 @@ from modul.achievement_notification import (AchievementNotification,
 from modul.constants import SCREEN_WIDTH
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="module")
 def init_pygame():
     """Initialize pygame for each test"""
     pygame.init()

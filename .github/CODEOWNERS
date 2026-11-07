@@ -7,8 +7,6 @@
 main.py @Ajimaru
 modul/constants.py @Ajimaru
 modul/settings.py @Ajimaru
-modul/_version.py @Ajimaru
-VERSION @Ajimaru
 
 ## Assets & localization
 

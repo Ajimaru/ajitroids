@@ -33,8 +33,8 @@ body:
     id: version
     attributes:
       label: Game version
-      description: "Shown in the main menu, or run: `python -c \"import modul._version as v; print(v.version)\"`"
-      placeholder: "0.24.0"
+      description: "Shown in the main menu, or run: `python main.py --version`. For a checkout showing `0.0.0+unknown`, provide the revision from `git rev-parse HEAD`."
+      placeholder: "0.25.0"
     validations:
       required: true
 

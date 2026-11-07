@@ -25,14 +25,15 @@ from modul.audio_enhancements import AudioEnhancementManager, SoundTheme
 from modul.boss import Boss
 from modul.bossprojectile import BossProjectile
 from modul.combo import ComboTracker
+from modul.game_modes import SurvivalProgression, TimeAttackProgression
 from modul.groups import collidable, drawable, updatable
 from modul.help_screen import HelpScreen
 from modul import input_utils
 from modul.i18n import gettext
 from modul.highscore import HighscoreDisplay, HighscoreInput, HighscoreManager
 from modul.menu import (AchievementsMenu, ControlsMenu, CreditsScreen,
-                        DifficultyMenu, GameOverScreen, LanguageMenu, MainMenu,
-                        OptionsMenu, PauseMenu, ShipSelectionMenu,
+                        DifficultyMenu, GameModeMenu, GameOverScreen, LanguageMenu,
+                        MainMenu, OptionsMenu, PauseMenu, ShipSelectionMenu,
                         SoundTestMenu, TTSVoiceMenu, VoiceAnnouncementsMenu)
 from modul.particle import Particle
 from modul.performance_profiler import PerformanceProfiler
@@ -80,11 +81,19 @@ Examples:
   python main.py --debug          # Start with debug logging
   python main.py --skip-intro     # Skip main menu
   python main.py --windowed       # Force windowed mode
+  python main.py --mode survival  # Start directly in survival mode
         """
     )
     parser.add_argument('--version', action='version', version=f'Ajitroids v{__version__}')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode with verbose logging')
     parser.add_argument('--skip-intro', action='store_true', help='Skip main menu and start game immediately')
+    parser.add_argument(
+        '--mode',
+        choices=("classic", "survival", "time_attack"),
+        default="classic",
+        help='Game mode: classic (score levels and bosses), survival (endless waves), '
+             'time_attack (clear a kill quota before the round clock runs out)',
+    )
     mode_group = parser.add_mutually_exclusive_group()
     mode_group.add_argument('--windowed', action='store_true', help='Start in windowed mode')
     mode_group.add_argument('--fullscreen', action='store_true', help='Start in fullscreen mode')
@@ -301,6 +310,14 @@ def main(args=None):
     global difficulty
     difficulty = "normal"
 
+    # Game mode chosen in the menu (or forced with --mode). Survival and time
+    # attack keep their own progression objects so the loop only has to ask
+    # them for the next wave/round numbers.
+    game_mode = args.mode if getattr(args, "mode", None) in GAME_MODES else "classic"
+    game_mode_menu = GameModeMenu(game_mode)
+    survival = SurvivalProgression()
+    time_attack = TimeAttackProgression()
+
     game_state = "main_menu" if not args.skip_intro else "difficulty_select"
     if args.skip_intro:
         difficulty_menu.activate()
@@ -405,16 +422,26 @@ def main(args=None):
         asteroid_field.asteroid_count, asteroid_field.spawn_interval = {
             "easy": (3, 8.0), "normal": (5, 5.0), "hard": (7, 3.0)
         }[difficulty]
+        survival.set_difficulty(difficulty)
+        survival.reset()
+        time_attack.set_difficulty(difficulty)
+        time_attack.reset()
+        if game_mode == "survival":
+            asteroid_field.asteroid_count = survival.asteroid_count
+            asteroid_field.spawn_interval = survival.spawn_interval
         player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, ship_manager.current_ship)
         player.sounds = sounds
         player.respawn()
         audio_enhancements.low_health_announced = False
         session_stats.start_game()
-        replay_recorder.start_recording(difficulty, ship_manager.current_ship)
+        replay_recorder.start_recording(difficulty, ship_manager.current_ship, game_mode)
         run_active = True
         for _ in range(3):
             asteroid_field.spawn_random()
-        logger.info("Game started - Difficulty: %s, Ship: %s", difficulty, ship_manager.current_ship)
+        logger.info(
+            "Game started - Mode: %s, Difficulty: %s, Ship: %s",
+            game_mode, difficulty, ship_manager.current_ship,
+        )
         return "playing"
 
     def damage_player():
@@ -438,6 +465,47 @@ def main(args=None):
         game_over_screen.fade_in = True
         game_over_screen.background_alpha = 0
         game_state = "game_over"
+
+    def end_run(reason):
+        """End the run without going through the lives system (e.g. time out)."""
+        global lives, game_state
+        if not run_active:
+            return
+        lives = 0
+        logger.info("Run ended (%s) - Score: %s, Level: %s", reason, score, level)
+        finish_run()
+        sounds.play_game_over()
+        audio_enhancements.trigger_announcement("game_over", priority=10.0)
+        game_over_screen.set_score(score)
+        game_over_screen.fade_in = True
+        game_over_screen.background_alpha = 0
+        game_state = "game_over"
+
+    def clear_survival_wave():
+        """Reward the cleared wave and re-arm the field for the next one."""
+        global score
+        nonlocal level_up_timer, level_up_text
+        score += survival.bonus
+        survival.next_wave()
+        asteroid_field.asteroid_count = survival.asteroid_count
+        asteroid_field.spawn_interval = survival.spawn_interval
+        # Force a spawn on the next frame so the cleared arena refills at once.
+        asteroid_field.spawn_timer = asteroid_field.spawn_interval
+        level_up_text = f"WAVE {survival.wave}!"
+        level_up_timer = LEVEL_UP_DISPLAY_TIME
+        sounds.play_level_up()
+        logger.info("Survival wave cleared, now wave %s", survival.wave)
+
+    def clear_time_attack_round():
+        """Reward the cleared round and hand out the next kill quota."""
+        global score
+        nonlocal level_up_timer, level_up_text
+        score += time_attack.bonus
+        time_attack.next_round()
+        level_up_text = f"ROUND {time_attack.round}!"
+        level_up_timer = LEVEL_UP_DISPLAY_TIME
+        sounds.play_level_up()
+        logger.info("Time attack round cleared, now round %s", time_attack.round)
 
     while True:
         help_just_opened = False
@@ -542,8 +610,8 @@ def main(args=None):
                     print(f"❌ Music error in main menu: {e}")
 
             if action == "start_game":
-                game_state = "difficulty_select"
-                difficulty_menu.activate()
+                game_state = "mode_select"
+                game_mode_menu.activate()
 
             elif action == "tutorial":
                 game_state = "tutorial"
@@ -553,6 +621,7 @@ def main(args=None):
                 replay_list_menu.activate()
 
             elif action == "highscores":
+                highscore_display.mode = game_mode
                 game_state = "highscore_display"
 
             elif action == "statistics":
@@ -577,6 +646,27 @@ def main(args=None):
                 game_state = "achievements"
                 achievements_menu = AchievementsMenu(achievement_system)
                 achievements_menu.activate()
+
+        elif game_state == "mode_select":
+            menu_starfield.update(dt)
+            menu_starfield.draw(screen)
+
+            action = game_mode_menu.update(dt, events)
+            game_mode_menu.draw(screen)
+
+            for event in events:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    game_state = "main_menu"
+                    main_menu.activate()
+
+            if action in ("mode_classic", "mode_survival", "mode_time_attack"):
+                game_mode = action.replace("mode_", "")
+                game_state = "difficulty_select"
+                difficulty_menu.activate()
+
+            elif action == "main_menu":
+                game_state = "main_menu"
+                main_menu.activate()
 
         elif game_state == "difficulty_select":
             menu_starfield.update(dt)
@@ -862,6 +952,12 @@ def main(args=None):
             if survival_time >= SURVIVOR_TIME and not achievement_system.is_unlocked("Survivor"):
                 achievement_system.unlock("Survivor")
 
+            # Time attack ends the run when the round clock hits zero.
+            if game_mode == "time_attack" and time_attack.update(dt):
+                end_run("time attack clock expired")
+                dt = clock.tick(60) / 1000.0
+                continue
+
             # The chain expires on gameplay time, so a paused game keeps it.
             combo.update(dt)
             # Update performance profiler
@@ -971,11 +1067,22 @@ def main(args=None):
                         asteroids_destroyed += 1
                         session_stats.record_asteroid_destroyed()
 
-                        if asteroids_destroyed >= 1000 and not achievement_system.is_unlocked("Asteroid Hunter"):
-                            achievement_system.unlock("Asteroid Hunter")
+                        # Score-driven achievements belong to the mode whose
+                        # pacing is the score curve; survival and time attack
+                        # hand out points far too fast to make them meaningful.
+                        if game_mode == "classic":
+                            if asteroids_destroyed >= 1000 and not achievement_system.is_unlocked("Asteroid Hunter"):
+                                achievement_system.unlock("Asteroid Hunter")
 
-                        if score >= 250000 and not achievement_system.is_unlocked("High Scorer"):
-                            achievement_system.unlock("High Scorer")
+                            if score >= 250000 and not achievement_system.is_unlocked("High Scorer"):
+                                achievement_system.unlock("High Scorer")
+
+                        if game_mode == "survival":
+                            if survival.register_kill():
+                                clear_survival_wave()
+                        elif game_mode == "time_attack":
+                            if time_attack.register_kill():
+                                clear_time_attack_round()
 
                         break
 
@@ -1080,6 +1187,13 @@ def main(args=None):
                     'score': score,
                     'lives': lives,
                     'level': level,
+                    'mode': game_mode,
+                    'wave': survival.wave,
+                    'survival_kills': survival.kills,
+                    'survival_target': survival.target,
+                    'time_remaining': time_attack.remaining,
+                    'time_kills': time_attack.kills,
+                    'time_target': time_attack.target,
                     'asteroids': asteroids_data,
                     'enemies': enemies_data,
                     'shots': shots_data,
@@ -1099,17 +1213,21 @@ def main(args=None):
             lives_rect = lives_text.get_rect(topleft=(20, 50))
             screen.blit(lives_text, lives_rect)
 
-            level_text = font.render(f"Level: {level}", True, (200, 200, 200))
-            level_rect = level_text.get_rect(topleft=(20, 80))
-            screen.blit(level_text, level_rect)
+            # Survival and time attack do not use the score-driven level curve,
+            # so the level row is hidden and the column below moves up.
+            hud_y = 80
+            if game_mode == "classic":
+                level_text = font.render(f"Level: {level}", True, (200, 200, 200))
+                screen.blit(level_text, (20, hud_y))
+                hud_y += 30
 
             difficulty_color = {"easy": (0, 255, 0), "normal": (255, 255, 0), "hard": (255, 0, 0)}.get(
                 difficulty, (200, 200, 200)
             )
 
             difficulty_text = font.render(f"Difficulty: {difficulty.capitalize()}", True, difficulty_color)
-            difficulty_rect = difficulty_text.get_rect(topleft=(20, 110))
-            screen.blit(difficulty_text, difficulty_rect)
+            screen.blit(difficulty_text, (20, hud_y))
+            hud_y += 30
 
             if combo.active:
                 combo_color = (255, 215, 0) if combo.multiplier > 1 else (200, 200, 200)
@@ -1120,14 +1238,32 @@ def main(args=None):
                 else:
                     combo_label = f"{gettext('combo')} {combo.count}"
                 combo_text = font.render(combo_label, True, combo_color)
-                screen.blit(combo_text, (20, 140))
+                screen.blit(combo_text, (20, hud_y))
 
                 # Shrinking bar so the remaining chain time is readable at a glance.
-                bar_x, bar_y, bar_width, bar_height = 20, 168, 160, 5
+                bar_x, bar_y, bar_width, bar_height = 20, hud_y + 28, 160, 5
                 pygame.draw.rect(screen, (60, 60, 60), (bar_x, bar_y, bar_width, bar_height))
                 pygame.draw.rect(
                     screen, combo_color, (bar_x, bar_y, int(bar_width * combo.ratio), bar_height)
                 )
+
+            # Mode readout goes top-centre: the left column carries
+            # score/lives/level/combo and the weapon HUD owns the right edge.
+            if game_mode == "survival":
+                wave_text = font.render(
+                    f"{gettext('mode_survival')}: {gettext('wave')} {survival.wave} "
+                    f"({survival.kills}/{survival.target})",
+                    True, (120, 220, 255),
+                )
+                screen.blit(wave_text, wave_text.get_rect(midtop=(SCREEN_WIDTH / 2, 18)))
+            elif game_mode == "time_attack":
+                clock_color = (255, 90, 90) if time_attack.remaining <= 10 else (120, 220, 255)
+                clock_text = font.render(
+                    f"{gettext('mode_time_attack')}: {int(math.ceil(time_attack.remaining))}s "
+                    f"({time_attack.kills}/{time_attack.target})",
+                    True, clock_color,
+                )
+                screen.blit(clock_text, clock_text.get_rect(midtop=(SCREEN_WIDTH / 2, 18)))
 
             if player:
                 player.draw_weapon_hud(screen)
@@ -1135,7 +1271,7 @@ def main(args=None):
             current_level = min(score // POINTS_PER_LEVEL + 1, MAX_LEVEL)
 
             if current_level > level:
-                if current_level % BOSS_LEVEL_INTERVAL == 0:
+                if game_mode == "classic" and current_level % BOSS_LEVEL_INTERVAL == 0:
                     boss = Boss(current_level)
                     boss_active = True
                     level_up_text = f"BOSS FIGHT: {boss.boss_type.upper()}!"
@@ -1152,7 +1288,7 @@ def main(args=None):
 
                 level = current_level
 
-                if level == 50:
+                if level == 50 and game_mode == "classic":
                     if difficulty == "easy" and not ship_manager.is_ship_unlocked("speedster"):
                         ship_manager.unlock_ship_with_notification("speedster", achievement_notifications.add_notification)
                     elif difficulty == "normal" and not ship_manager.is_ship_unlocked("tank"):
@@ -1160,19 +1296,20 @@ def main(args=None):
                     elif difficulty == "hard" and not ship_manager.is_ship_unlocked("destroyer"):
                         ship_manager.unlock_ship_with_notification("destroyer", achievement_notifications.add_notification)
 
-                if level >= 666 and not achievement_system.is_unlocked("Level Master"):
+                if game_mode == "classic" and level >= 666 and not achievement_system.is_unlocked("Level Master"):
                     achievement_system.unlock("Level Master")
 
-                if level <= 10:
+                if game_mode == "classic" and level <= 10:
                     asteroid_field.asteroid_count = min(BASE_ASTEROID_COUNT + (level - 1) * ASTEROID_COUNT_PER_LEVEL, 12)
                     asteroid_field.spawn_interval = max(BASE_SPAWN_INTERVAL - (level - 1) * SPAWN_INTERVAL_REDUCTION, 1.0)
 
-                if level_up_timer <= 0:
-                    level_up_timer = LEVEL_UP_DISPLAY_TIME
-                    level_up_text = f"LEVEL {level}!"
+                if game_mode == "classic":
+                    if level_up_timer <= 0:
+                        level_up_timer = LEVEL_UP_DISPLAY_TIME
+                        level_up_text = f"LEVEL {level}!"
 
-                sounds.play_level_up()
-                audio_enhancements.trigger_announcement("level_up", priority=8.0)
+                    sounds.play_level_up()
+                    audio_enhancements.trigger_announcement("level_up", priority=8.0)
 
                 print(
                     f"Level up! Now level {level}, asteroids: {asteroid_field.asteroid_count}, interval: {asteroid_field.spawn_interval}"
@@ -1317,7 +1454,7 @@ def main(args=None):
 
             name = highscore_input.update(events)
             if name:
-                highscore_manager.add_highscore(name, score)
+                highscore_manager.add_highscore(name, score, game_mode)
                 game_state = "highscore_display"
                 score = 0
 
@@ -1342,7 +1479,8 @@ def main(args=None):
             game_over_screen.draw(screen)
 
             if action == "highscore_display":
-                if highscore_manager.is_highscore(score):
+                highscore_display.mode = game_mode
+                if highscore_manager.is_highscore(score, game_mode):
                     game_state = "highscore_input"
                     highscore_input = HighscoreInput(score)
                 else:
@@ -1439,7 +1577,15 @@ def main(args=None):
                 lives_text = font.render(f"Lives: {frame.lives}", True, (255, 255, 255))
                 screen.blit(lives_text, (20, 50))
 
-                level_text = font.render(f"Level: {frame.level}", True, (200, 200, 200))
+                if frame.mode == "survival":
+                    status = (f"{gettext('mode_survival')}: {gettext('wave')} {frame.wave} "
+                              f"({frame.survival_kills}/{frame.survival_target})")
+                elif frame.mode == "time_attack":
+                    status = (f"{gettext('mode_time_attack')}: {math.ceil(frame.time_remaining)}s "
+                              f"({frame.time_kills}/{frame.time_target})")
+                else:
+                    status = f"Level: {frame.level}"
+                level_text = font.render(status, True, (200, 200, 200))
                 screen.blit(level_text, (20, 80))
 
             # Draw replay HUD
@@ -1532,6 +1678,7 @@ def main(args=None):
                 credits_screen = CreditsScreen()
                 game_over_screen = GameOverScreen()
                 difficulty_menu = DifficultyMenu()
+                game_mode_menu = GameModeMenu(game_mode)
                 ship_selection_menu = ShipSelectionMenu()
                 tutorial = Tutorial()
                 help_screen = HelpScreen()
@@ -1562,6 +1709,8 @@ def main(args=None):
             try:
                 if game_state == 'main_menu':
                     main_menu.activate()
+                elif game_state == 'mode_select':
+                    game_mode_menu.activate()
                 elif game_state == 'options':
                     options_menu.activate()
                 elif game_state == 'controls':

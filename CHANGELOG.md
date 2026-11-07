@@ -6,6 +6,13 @@
 
 ### Added
 
+- Game modes: `classic` (unchanged), `survival` (endless waves with growing
+  quotas and faster spawns) and `time_attack` (kill quota per round against a
+  clock, cleared rounds add time). Selectable in a new mode menu or directly
+  with `--mode`. Progression lives in `modul/game_modes.py` and is unit-tested.
+- HUD readout for the active mode (wave counter, round clock with kill quota).
+- Survival and time attack hide the level row, because their pacing comes from
+  waves and rounds rather than the score curve.
 - Combo chain: consecutive kills inside `COMBO_WINDOW` raise the score
   multiplier (`ComboTracker` in `modul/combo.py`). Asteroid, enemy-ship and boss
   kills all feed the chain; taking a hit or quick-restarting resets it, the
@@ -27,8 +34,57 @@
 - `ESC` resumes from the pause menu.
 - `F11` toggles fullscreen at runtime; it used to modify a module-level surface
   the game loop never drew to.
+- `Level Master`, `High Scorer`, `Asteroid Hunter` and the level-50 ship unlocks
+  only trigger in classic, so survival and time attack cannot farm them
+  incidentally.
+- Survival waves and time attack quotas scale with the selected difficulty, so
+  "hard" is harder in every mode instead of only in classic.
 - `docs/architecture/game-mechanics.md`: power-up table, combo section and point
   values now match the implementation.
+
+### Build & CI
+
+- Versioning reduced to one source: the git tag. `VERSION`,
+  `modul/update_version.py` and the generated `modul/_version.py` are gone, and
+  `pyproject.toml` no longer carries a `fallback_version`. `modul/version.py`
+  reads the installed package metadata and reports `0.0.0+unknown` when the
+  project is not installed.
+- CI checks out the full tag history, because `setuptools-scm` needs it for the
+  editable install and the lockfile check.
+- pytest minimum raised to 9.0.3 in `requirements.txt`, the `dev` extra and
+  `minversion` (CVE-2025-71176 in the insecure temp-directory handling).
+- `pre-commit` moved into the `dev` extra, so `uv sync --extra dev` restores the
+  git hook environment instead of leaving it broken after a venv rebuild. The CI
+  job no longer installs it separately.
+- Test runtime cut from ~50 s to ~6 s: the per-test
+  `pygame.init()`/`pygame.quit()` fixtures are now module-scoped, and the
+  headless SDL driver is set once in `conftest.py` instead of per test.
+- Manual release defaults to `main` and accepts prerelease tags like
+  `v0.25.0rc1`; `docs/development/release-process.md` and the bug report
+  template describe the real flow and use `python main.py --version`.
+- Minimum Python raised to 3.11. This drops the `filelock 4.1.0` resolution
+  branch from `uv.lock` and with it the last Trivy advisories, which only
+  affected Python < 3.11.
+
+## v0.25.0
+
+### Added
+
+- Remappable keyboard/gamepad controls, German localization and TTS voice
+  selection.
+- Four boss types with distinct attacks and stats, scaling health, and a cap on
+  boss projectiles.
+
+### Fixed
+
+- Gameplay, replay, audio and statistics issues, including run resets,
+  collision/reward handling, replay completion and dashboard layout.
+- Tutorial translations, menu navigation and release/install workflows.
+
+### Build & CI
+
+- Python support now starts at 3.10 and includes 3.13; CI, security scanning,
+  locale checks and release workflows were consolidated and hardened.
 
 ## v0.24.0 (2026-01-17)
 

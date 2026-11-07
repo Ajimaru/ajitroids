@@ -9,7 +9,7 @@ import pytest
 from modul.ships import ShipManager, ShipRenderer
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="module")
 def init_pygame():
     """Initialize pygame for each test"""
     pygame.init()

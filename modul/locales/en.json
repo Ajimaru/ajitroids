@@ -236,5 +236,10 @@
   "desc_f9": "Toggle sound effects",
   "desc_f10": "Toggle music",
   "desc_f11": "Toggle fullscreen",
-  "combo": "Combo"
+  "combo": "Combo",
+  "game_mode": "Game Mode",
+  "mode_classic": "Classic",
+  "mode_survival": "Survival",
+  "mode_time_attack": "Time Attack",
+  "wave": "Wave"
 }

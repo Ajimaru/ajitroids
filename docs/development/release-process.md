@@ -20,32 +20,40 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ### Version Source
 
-Versions are managed through Git tags using `setuptools-scm`:
+The git tag is the only version source. No version string is stored in the
+repository: there is no `VERSION` file, no bump commit and no generated module.
+`setuptools-scm` resolves the version from the tag history at install/build
+time, and the game reads it back from the installed package metadata
+(`modul/version.py`).
 
 ```toml
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"
-write_to = "modul/_version.py"
 ```
 
-The version is automatically generated based on Git tags and commits.
+Consequences:
+
+- A release is a tag; nothing else has to be edited.
+- `local_scheme = "no-local-version"` strips the `+g<hash>` suffix, so the
+  version stays PEP 440 clean.
+- Building outside a git checkout (source archive without `.git`) is not
+  supported. The release workflow always builds from a full clone.
 
 ## Release Types
 
 ### Development Releases
 
-Commits on `main` without a tag get a dev version:
+Commits after the last tag get a dev version. Twelve commits after `v0.25.0`
+resolve to:
 
 ```
-1.2.3.dev5+g1234567
+0.25.1.dev12
 ```
 
-This includes:
-
-- Last tag version: `1.2.3`
-- Commits since tag: `.dev5`
-- Git hash: `+g1234567`
+- Base: next patch after the last tag (`0.25.1`)
+- Commits since the tag: `.dev12`
+- No git hash, because of `local_scheme = "no-local-version"`
 
 ### Stable Releases
 
@@ -106,15 +114,7 @@ flake8 modul/ tests/ main.py
 python -m build
 ```
 
-### 2. Create Release Branch (Optional)
-
-For major releases, create a release branch:
-
-```bash
-git checkout -b release/1.2.3
-```
-
-### 3. Tag the Release
+### 2. Tag the Release
 
 Create an annotated tag:
 
@@ -131,7 +131,7 @@ Release version 1.2.3
 - Link to changelog
 ```
 
-### 4. Push Tag
+### 3. Push Tag
 
 ```bash
 git push origin v1.2.3
@@ -141,50 +141,52 @@ This triggers the GitHub Actions release workflow.
 
 ## GitHub Actions Release Workflow
 
-The release workflow (`.github/workflows/release.yml`) automatically:
+A pushed `v*` tag starts `.github/workflows/release.yml`, which:
 
-1. **Detects** new version tags (matching `v*.*.*`)
-2. **Builds** the package
-3. **Runs tests** to verify release
-4. **Creates GitHub Release** with changelog
-5. **Publishes** to PyPI (if configured)
+1. **Checks out** the tagged commit with full history
+2. **Exports** the tag as `SETUPTOOLS_SCM_PRETEND_VERSION`, so the built version
+   always equals the tag
+3. **Builds** sdist and wheel
+4. **Stages** the artifacts plus a versioned and a `-latest` source zip
+5. **Creates a draft GitHub Release** with generated notes and the artifacts
 
-### Workflow Configuration
+The release stays a draft on purpose: notes and artifacts are reviewed by hand
+before publishing. Tests are not part of this workflow; the `CI` workflow also
+runs on tag pushes.
 
-```yaml
-name: Release
+<!-- coderabbit-ai-generated:v1 -->
 
-on:
-  push:
-    tags:
-      - "v*.*.*"
+<!-- coderabbit-ai-generated-section:v1:83806380482e1b71b0cbcb57b03aa15aeef7056b4f9e2e9239b57cd1dda81a85 -->
 
-jobs:
-  release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-      - name: Build package
-        run: python -m build
-      - name: Create Release
-        uses: actions/create-release@v1
-```
+Prerelease tags (`v0.25.0rc1`, `v0.25.0.dev6`) are detected and flagged as
+prereleases automatically.
 
 ## Manual Release (Fallback)
 
-If automated release fails, you can release manually:
+<!-- /coderabbit-ai-generated:v1 -->
+
+If the workflow cannot run, build and publish from a local full clone. A shallow
+clone has no tag history and cannot resolve the version.
+
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:d84c98bb82e9268e4dcdb31f7b9bc2c11f8dfe30f30ccbac897c0d01357d67b2 -->
 
 ### 1. Build Package
 
-```bash
-# Install build tools
-pip install build twine
+Use a full clone with tag history. Before installing tools or building, verify
+that the working tree is clean (the status command must produce no output),
+fetch the tags, and check out the intended release tag:
 
-# Build distribution
+```bash
+git status --porcelain
+git fetch origin --tags
+git switch --detach v1.2.3
+pip install build
 python -m build
 ```
+
+<!-- /coderabbit-ai-generated:v1 -->
 
 This creates:
 
@@ -194,27 +196,11 @@ This creates:
 ### 2. Test Package
 
 ```bash
-# Install in test environment
 pip install dist/ajitroids-1.2.3-py3-none-any.whl
-
-# Test game runs
-python -m ajitroids
+ajitroids --version
 ```
 
-### 3. Upload to PyPI
-
-```bash
-# Upload to Test PyPI first
-twine upload --repository testpypi dist/*
-
-# Test install from Test PyPI
-pip install --index-url https://test.pypi.org/simple/ ajitroids
-
-# Upload to production PyPI
-twine upload dist/*
-```
-
-### 4. Create GitHub Release
+### 3. Create GitHub Release
 
 1. Go to GitHub releases page
 2. Click "Draft a new release"
@@ -236,12 +222,10 @@ twine upload dist/*
 
 ### Release
 
-- [ ] Release branch created (for major releases)
-- [ ] Git tag created
+- [ ] Git tag created (`vX.Y.Z`)
 - [ ] Tag pushed to GitHub
 - [ ] GitHub Actions workflow succeeded
-- [ ] GitHub Release created
-- [ ] Package published (if applicable)
+- [ ] Draft release reviewed and published
 
 ### Post-Release
 
@@ -289,7 +273,7 @@ Thanks to @username1, @username2 for contributions!
 
 ## Installation
 
-\`\`\`bash pip install ajitroids==1.2.3 \`\`\`
+Download `ajitroids-1.2.3.zip` or the wheel from the release assets.
 
 ## Full Changelog
 
@@ -336,48 +320,80 @@ Changes:
 
 ## Hotfix Process
 
-For critical bugs in production:
+<!-- coderabbit-ai-generated:v1 -->
 
-1. **Create hotfix branch** from release tag
+<!-- coderabbit-ai-generated-section:v1:c0b84636e219d80ed95604b24a933082a78bad7d96fdf482f1e010efb8a3ad73 -->
+
+For critical bugs in a published release, isolate the fix from unfinished work:
+
+1. Start from a clean working tree in a full clone. Fetch tags and branch from
+   the published release that needs the fix (for example, `v0.25.0`):
 
    ```bash
-   git checkout -b hotfix/1.2.4 v1.2.3
+   git status --porcelain
+   git fetch origin --tags
+   git switch -c hotfix/0.25.1 v0.25.0
    ```
 
-2. **Fix the bug**
+   Stop if status reports local changes; commit or stash them first.
+
+2. Apply only the critical fix and its regression tests. If the fix already
+   exists elsewhere, cherry-pick its focused commit and resolve conflicts
+   without importing unrelated development changes. Run the test suite and
+   applicable checks from CI, then commit the validated fix:
 
    ```bash
-   # Make fix
+   git add <changed-files>
    git commit -m "fix: critical bug description"
    ```
 
-3. **Tag hotfix release**
+3. Before tagging, inspect `.github/workflows/release.yml` on the hotfix branch:
+   the tag push runs the workflow from the tagged commit, so fixes on `main` or
+   `dev` alone do not protect an older release. If needed, backport the focused
+   workflow changes and any required dependencies so release creation uses
+   `draft: true` and no step publishes automatically. Validate the resulting
+   workflow's syntax, referenced actions, and artifact build and staging steps
+   on the hotfix branch, and commit those changes. Stop if this validation
+   cannot be completed; do not push a release tag until the workflow at the
+   intended tag commit has been verified to create only a draft.
+
+4. Review the diff against the published tag, validate the built package, and
+   tag the validated hotfix commit with the next unused patch version:
 
    ```bash
-   git tag v1.2.4
-   git push origin v1.2.4
+   git diff v0.25.0...HEAD
+   git tag -a v0.25.1 -m "Release version 0.25.1"
+   git push origin hotfix/0.25.1
+   git push origin v0.25.1
    ```
 
-4. **Merge back to main**
-   ```bash
-   git checkout main
-   git merge hotfix/1.2.4
-   ```
+   Wait for tag CI and the release workflow, inspect the draft's notes and
+   artifacts, and publish the patch release as described above.
 
-## Version Checking
+5. Reconcile the hotfix with both `main` and `dev` through separate pull
+   requests. Merge the hotfix branch into each branch, resolving conflicts while
+   preserving that branch's existing changes and the bug fix. If a branch
+   already contains the equivalent fix, verify it before resolving any duplicate
+   changes. Run CI on both resulting branches. Do not reset either branch to the
+   release tag or merge unfinished `dev` work into `main`.
 
-Users can check their version:
+<!-- /coderabbit-ai-generated:v1 -->## Version Checking
 
-```python
-from modul._version import version
-print(f"Ajitroids version: {version}")
-```
-
-Or via command line:
+The version is shown in the main menu and by the CLI:
 
 ```bash
-python -c "from modul._version import version; print(version)"
+python main.py --version
 ```
+
+Programmatic access goes through the single accessor module:
+
+```python
+from modul.version import get_version
+print(f"Ajitroids version: {get_version()}")
+```
+
+Without an installed package the accessor returns `0.0.0+unknown`, so install
+the project (`uv sync` or `pip install -e .`) before reporting a version.
 
 ## Release Cadence
 

@@ -1,12 +1,12 @@
 # 🚀 Ajitroids
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Ajimaru/ajitroids#-license)
-[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
-![Top Language](https://img.shields.io/github/languages/top/Ajimaru/ajitroids)
-[![Latest Release](https://img.shields.io/github/v/release/Ajimaru/ajitroids?sort=semver)](https://github.com/Ajimaru/ajitroids/releases/latest)
-![Downloads](https://img.shields.io/github/downloads/Ajimaru/ajitroids/total.svg)
-![Maintenance](https://img.shields.io/maintenance/yes/2026)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Ajimaru/ajitroids/pulls)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square&logo=open-source-initiative&logoColor=white)](https://github.com/Ajimaru/ajitroids#-license)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg?style=flat-square&logo=python&logoColor=white)](https://python.org)
+![Top Language](https://img.shields.io/github/languages/top/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)
+[![Latest Release](https://img.shields.io/github/v/release/Ajimaru/ajitroids?sort=semver&style=flat-square&logo=github&logoColor=white)](https://github.com/Ajimaru/ajitroids/releases/latest)
+![Downloads](https://img.shields.io/github/downloads/Ajimaru/ajitroids/total.svg?style=flat-square&logo=github&logoColor=white)
+![Maintenance](https://img.shields.io/maintenance/yes/2026?style=flat-square&logo=github&logoColor=white)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/Ajimaru/ajitroids/pulls)
 
 ![Stars](https://img.shields.io/github/stars/Ajimaru/ajitroids?style=social)
 ![Forks](https://img.shields.io/github/forks/Ajimaru/ajitroids?style=social)
@@ -39,6 +39,8 @@ achieve the highest score.
   - **Sound Themes**: Choose between different audio packs (Default, Retro,
     Sci-Fi, Orchestral)
 - **Power-Up System**: Collect various weapon upgrades and shields
+- **Three Game Modes**: Classic score chase with boss fights, endless Survival
+  waves and Time Attack rounds against the clock
 - **Advanced Asteroid Types**: Face four distinct asteroid types (Normal, Ice,
   Metal, Crystal) with unique behaviors
 - **Highscore System**: Save your best results and compare them
@@ -56,7 +58,7 @@ achieve the highest score.
 
 ### Prerequisites
 
-- Python 3.10 or higher (tested up to 3.13)
+- Python 3.11 or higher (tested up to 3.13)
 - [uv](https://github.com/astral-sh/uv) or pip
 
 ### Method 1: Install from Release (Recommended)
@@ -84,8 +86,9 @@ ajitroids
 git clone https://github.com/Ajimaru/ajitroids.git
 cd ajitroids
 
-# Install dependencies with uv (recommended)
-uv sync
+# Install dependencies with uv (recommended); --extra dev also installs
+# pre-commit, which the git hooks rely on
+uv sync --extra dev
 
 # Or install with pip
 pip install -r requirements.txt
@@ -99,7 +102,7 @@ python main.py
 If you plan to contribute or develop for Ajitroids, set up the development
 environment with pre-commit hooks:
 
-> **Supported Python versions: 3.10 - 3.13.** pygame has no prebuilt wheel for
+> **Supported Python versions: 3.11 - 3.13.** pygame has no prebuilt wheel for
 > 3.14 yet; on a newer interpreter its font module fails to import and the test
 > suite cannot run. The setup scripts pick a supported interpreter for you and
 > refuse to continue if none is installed.
@@ -198,6 +201,20 @@ ajitroids
 - **Highscores:** Save your best performances and compare them with others
 - **Achievements:** Unlock achievements for completing special challenges
 
+## 🎮 Game Modes
+
+Pick a mode in the start menu or force it with `--mode`:
+
+| Mode            | What it plays like                                                                                                                                            |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Classic**     | Score-driven levels with a boss fight every 10 levels. Achievements, ship unlocks and the level display are tuned for this mode.                              |
+| **Survival**    | Endless waves. Every wave demands more kills, keeps more asteroids alive and respawns them faster; clearing one pays a score bonus. There are no boss fights. |
+| **Time Attack** | Clear a kill quota before the round clock runs out. A cleared round adds bonus time, an expired clock ends the run.                                           |
+
+Difficulty applies to all three: it sets the asteroid density in Classic and
+Time Attack, scales both wave quota and spawn pacing in Survival, and raises the
+Time Attack quota so "hard" stays harder than "easy".
+
 ## 🎯 Controls
 
 ### Game Controls
@@ -246,6 +263,10 @@ python main.py --debug
 # Skip main menu and start game directly
 python main.py --skip-intro
 
+# Start directly in a game mode (classic, survival or time_attack)
+python main.py --mode survival
+python main.py --mode time_attack
+
 # Force windowed or fullscreen mode
 python main.py --windowed
 python main.py --fullscreen
@@ -283,23 +304,23 @@ Unlock these ships by progressing through the game and achieving milestones!
 - Efficient particle system for visual effects
 - Collision detection with optimized algorithms
 
-[![Open Issues](https://img.shields.io/github/issues/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/issues?q=is%3Aissue%20state%3Aopen)
-[![Closed Issues](https://img.shields.io/github/issues-closed-raw/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/issues?q=is%3Aissue%20state%3Aclosed)
-[![Open PRs](https://img.shields.io/github/issues-pr/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/pulls?q=is%3Aopen+is%3Apr+)
-[![Closed PRs](https://img.shields.io/github/issues-pr-closed/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/pulls?q=is%3Apr+is%3Aclosed)
+[![Open Issues](https://img.shields.io/github/issues/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)](https://github.com/Ajimaru/ajitroids/issues?q=is%3Aissue%20state%3Aopen)
+[![Closed Issues](https://img.shields.io/github/issues-closed-raw/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)](https://github.com/Ajimaru/ajitroids/issues?q=is%3Aissue%20state%3Aclosed)
+[![Open PRs](https://img.shields.io/github/issues-pr/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)](https://github.com/Ajimaru/ajitroids/pulls?q=is%3Aopen+is%3Apr+)
+[![Closed PRs](https://img.shields.io/github/issues-pr-closed/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)](https://github.com/Ajimaru/ajitroids/pulls?q=is%3Apr+is%3Aclosed)
 
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
-![Commit Activity (year)](https://img.shields.io/github/commit-activity/y/Ajimaru/ajitroids)
-![Last Commit](https://img.shields.io/github/last-commit/Ajimaru/ajitroids)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=flat-square&logo=pre-commit&logoColor=white)](https://pre-commit.com/)
+![Commit Activity (year)](https://img.shields.io/github/commit-activity/y/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)
+![Last Commit](https://img.shields.io/github/last-commit/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)
 
-![Build Status](https://img.shields.io/github/actions/workflow/status/Ajimaru/ajitroids/ci.yml)
+![Build Status](https://img.shields.io/github/actions/workflow/status/Ajimaru/ajitroids/ci.yml?style=flat-square&logo=githubactions&logoColor=white)
 [![Coverage](https://codecov.io/gh/Ajimaru/ajitroids/graph/badge.svg?branch=main)](https://codecov.io/gh/Ajimaru/ajitroids)
 [![CI](https://github.com/Ajimaru/ajitroids/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Ajimaru/ajitroids/actions/workflows/ci.yml?query=branch%3Amain)
-![Release Date](https://img.shields.io/github/release-date/Ajimaru/ajitroids)
+![Release Date](https://img.shields.io/github/release-date/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)
 
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Code style: prettier](https://img.shields.io/badge/code%20style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
-![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square&logo=black&logoColor=white)](https://github.com/psf/black)
+[![Code style: prettier](https://img.shields.io/badge/code%20style-prettier-ff69b4.svg?style=flat-square&logo=prettier&logoColor=white)](https://github.com/prettier/prettier)
+![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)
 
 <!-- markdownlint-disable MD033 -->
 

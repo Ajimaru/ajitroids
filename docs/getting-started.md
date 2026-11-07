@@ -7,7 +7,7 @@ on Ajitroids.
 
 Before you begin, ensure you have the following installed:
 
-- **Python 3.10 or higher**:
+- **Python 3.11 or higher**:
   [Download Python](https://www.python.org/downloads/)
 - **Git**: [Download Git](https://git-scm.com/downloads)
 - **uv** (recommended) or pip for package management

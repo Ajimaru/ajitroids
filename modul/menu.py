@@ -948,6 +948,28 @@ class DifficultyMenu(Menu):
         self.add_item(gettext("back"), "main_menu", "Z")
 
 
+class GameModeMenu(Menu):
+    """Choose the game mode before picking a difficulty."""
+
+    def __init__(self, mode="classic"):
+        """Create one entry per game mode plus a back option."""
+        try:
+            from modul.i18n import gettext
+        except Exception:  # pylint: disable=broad-exception-caught
+            def gettext(key):
+                """Fallback gettext when i18n import fails; returns key unchanged."""
+                return key
+        super().__init__(gettext("game_mode").upper())
+        self.add_item(gettext("mode_classic"), "mode_classic", "1")
+        self.add_item(gettext("mode_survival"), "mode_survival", "2")
+        self.add_item(gettext("mode_time_attack"), "mode_time_attack", "3")
+        self.add_item(gettext("back"), "main_menu", "Z")
+
+        self.items[0].selected = False
+        self.selected_index = {"classic": 0, "survival": 1, "time_attack": 2}.get(mode, 0)
+        self.items[self.selected_index].selected = True
+
+
 class VoiceAnnouncementsMenu:
     """Menu to configure voice announcement toggles"""
 

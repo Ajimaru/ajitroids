@@ -31,30 +31,31 @@ disable = [
 ]
 
 [tool.pylint.format]
-ignore-patterns = ["modul/_version.py"]
 max-line-length = 127
 
 [tool.black]
 line-length = 127
-target-version = ["py39", "py310", "py311", "py312"]
+target-version = ["py311", "py312", "py313"]
 
 # NOTE: flake8 does not read pyproject.toml, so its settings live in .flake8
 # at the repo root (max-line-length = 127, extend-ignore = E128,F405). Keeping
 # a [tool.flake8] table here only invites the two drifting apart.
 
 [tool.pytest.ini_options]
-minversion = "7.0"
+minversion = "9.0.3"
 addopts = "-v"
 testpaths = ["tests"]
 filterwarnings = [
   "ignore:pkg_resources is deprecated as an API:UserWarning",
 ]
 
+# The git tag is the only version source. No version string is written into
+# the repository and no fallback is kept: building outside a git checkout is
+# not supported. The version reaches the runtime through the installed package
+# metadata (see modul/version.py).
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"
-write_to = "modul/_version.py"
-fallback_version = "0.24.0"
 
 [build-system]
 requires = ["setuptools>=64", "setuptools-scm>=8"]
@@ -62,10 +63,11 @@ build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.0",
+    "pytest>=9.0.3",
     "pytest-cov>=4.0",
     "flake8>=7.0",
     "black>=24.0",
+    "pre-commit>=4.0",
 ]
 
 [project]
@@ -73,7 +75,7 @@ name = "ajitroids"
 dynamic = ["version"]
 description = "Another Asteroids"
 readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "pygame==2.6.1",
 ]
@@ -84,7 +86,6 @@ license = { text = "MIT" }
 keywords = ["asteroids", "pygame", "space", "game"]
 classifiers = [
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",

@@ -122,7 +122,7 @@ repos:
         # dependencies the tests import must be declared here; they are not
         # picked up from requirements.txt.
         additional_dependencies:
-          - pytest>=7.0.0
+          - pytest>=9.0.3
           - pygame>=2.1.0
           - numpy>=2.2.6
           - PyOpenGL==3.1.10

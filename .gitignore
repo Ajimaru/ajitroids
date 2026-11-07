@@ -22,9 +22,6 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Generated Version File
-modul/_version.py
-
 # Virtual Environment
 .venv/
 venv/

@@ -9,7 +9,7 @@ from modul.constants import SCREEN_HEIGHT, SCREEN_WIDTH
 from modul.tutorial import Tutorial
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="module")
 def init_pygame():
     """Initialize pygame for each test"""
     pygame.init()

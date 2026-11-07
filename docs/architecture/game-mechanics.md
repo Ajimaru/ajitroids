@@ -306,6 +306,46 @@ survives and is reported in the end-of-session statistics.
 score += int(round(base_score * type_multiplier * combo.register_kill()))
 ```
 
+## Game Modes
+
+`--mode` (or the mode menu between main menu and difficulty select) picks the
+progression rules. All modes share the same entities and rendering; only the
+pacing differs.
+
+| Mode          | Progression                                                                                                 |
+| ------------- | ----------------------------------------------------------------------------------------------------------- |
+| `classic`     | Score-driven levels, boss fight every 10 levels                                                             |
+| `survival`    | Endless waves: every wave raises the kill quota, keeps more asteroids alive and shortens the spawn interval |
+| `time_attack` | Kill quota per round against a clock; a cleared round adds bonus time, an expired clock ends the run        |
+
+The rules live in `modul/game_modes.py` as `SurvivalProgression` and
+`TimeAttackProgression`. They hold no pygame state, so the pacing can be
+unit-tested without booting the game.
+
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:e273caae65c0807bb74b38aa44b844a0c5c240fc5d24e139ea37045cb37ad8ed -->
+
+Boss fights and the score-based `AsteroidField` scaling are classic-only.
+Survival progression controls asteroid count and spawn interval; Time Attack
+retains the difficulty-selected field settings.
+
+<!-- /coderabbit-ai-generated:v1 -->
+
+Cleared waves/rounds award `SURVIVAL_WAVE_SCORE_BONUS * wave` and
+`TIME_ATTACK_SCORE_BONUS * round` respectively.
+
+Difficulty scales the alternative modes as well:
+`SURVIVAL_DIFFICULTY_TARGET_FACTORS`/`SURVIVAL_DIFFICULTY_INTERVAL_FACTORS`
+adjust wave quotas and spawn pacing, and `TIME_ATTACK_DIFFICULTY_TARGET_FACTORS`
+raises the round quota on hard so the denser asteroid field does not turn the
+higher difficulty into the easier one.
+
+The score-driven rewards follow the same rule: boss fights, the level-50 ship
+unlocks, `Level Master`, `High Scorer` and `Asteroid Hunter` only trigger in
+classic. Survival and time attack still track `level` internally (replay frames
+record it) but it drives nothing, so the HUD hides the level row there.
+
 ## Lives and Respawn
 
 ### Taking Damage

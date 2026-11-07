@@ -11,6 +11,7 @@ the Ajitroids game experience.
 - `--help` - Show usage information and available options ✅
 - `--debug` - Enable debug mode with additional logging and FPS display ✅
 - `--skip-intro` - Skip main menu and start game directly ✅
+- `--mode <classic|survival|time_attack>` - Select a game mode ✅
 - `--windowed` / `--fullscreen` - Force window mode on startup ✅
 - `--log-file <path>` - Specify custom log file location for logging output ✅
 
@@ -53,9 +54,9 @@ the Ajitroids game experience.
   - **Metal Asteroids** (Gray): Tough asteroids requiring 2 hits to destroy ✅
   - **Crystal Asteroids** (Purple): Shatter into 3 pieces instead of 2 ✅
 
-### Audio Enhancement System
+### Audio Enhancement System ✅
 
-- **Dynamic Music System**: Music intensity adapts to gameplay
+- **Dynamic Music System**: Music intensity adapts to gameplay ✅
   - **Calm**: Low asteroid/enemy count, peaceful exploration
   - **Normal**: Moderate activity, standard gameplay
   - **Intense**: High asteroid/enemy count, challenging action
@@ -68,7 +69,7 @@ the Ajitroids game experience.
   - Game events ("Game over!", "Achievement unlocked!") ✅
   - Health warnings ("Warning! Low health!") ✅
 
-- **Sound Theme System**: Multiple audio styles
+- **Sound Theme System**: Multiple audio styles ✅
   - **Default**: Classic Ajitroids sounds
   - **Retro**: 8-bit arcade nostalgia
   - **Sci-Fi**: Futuristic space sounds
@@ -85,17 +86,17 @@ the Ajitroids game experience.
 - ~~Competitive mode with separate scores~~
 - ~~Player collision interactions~~
 
-#### 2. New Game Modes
+#### 2. New Game Modes ✅
 
-- **Survival Mode**: Endless waves with increasing difficulty
-- **Time Attack**: Complete objectives within time limits
+- **Survival Mode**: Endless waves with increasing difficulty ✅
+- **Time Attack**: Complete objectives within time limits ✅
 - ~~**Wave Mode**: Pre-defined wave patterns like traditional arcade~~
 - ~~**Zen Mode**: Relaxed gameplay without enemies~~
 - ~~**Challenge Mode**: Daily/weekly challenges with specific objectives~~
 
-#### 3. Enhanced Power-Up System
+#### 3. Enhanced Power-Up System ✅
 
-- **Combo System**: Chain kills for multiplier bonuses
+- **Combo System**: Chain kills for multiplier bonuses ✅
 - ~~**Power-Up Stacking**: Combine multiple power-ups for unique effects~~
 - ~~**Negative Power-Ups**: Add risk/reward with occasional debuffs~~
 - ~~**Ultimate Ability**: Charge meter for devastating special attacks~~
@@ -235,13 +236,13 @@ the Ajitroids game experience.
 5. ✅ Quick restart option
 6. ✅ Stats dashboard
 7. ✅ Replay system
-8. Controller support
+8. ✅ Controller support
 9. ✅ Remappable controls
 
 ### Medium Priority (Significant Impact)
 
-1. ~~Combo/multiplier system~~
-2. Additional game modes (Survival, Time Attack)
+1. ✅ Combo/multiplier system
+2. ✅ Additional game modes (Survival, Time Attack)
 3. ✅ More enemy types
 4. Enhanced particle effects
 5. ~~Practice mode~~
@@ -264,16 +265,11 @@ the Ajitroids game experience.
 
 ## 🔄 Recent Progress & Next Steps
 
-- **Completed:** Remappable controls (UI + persistence), German localization
-  (modul/locales/de.json), readable persisted key names, duplicate-binding
-  rejection, non-blocking TTS manager, TTS voice selection UI, and persisting
-  selected voice to settings.
-- **In Progress:** Repository-wide lint fixes and pre-commit environment
-  resolution (some hooks failed in this workspace; commits were saved with hooks
-  bypassed to preserve work).
-- **Next Steps:** Run full pre-commit hooks after fixing the environment,
-  address remaining flake8/pylint issues incrementally, run the test suite, and
-  open a PR summarizing these accessibility/localization/TTS changes.
+- **Completed:** Remappable controls, German localization, TTS voice selection,
+  combo scoring, and Survival/Time Attack modes. All modes support difficulty;
+  mode selection is available in the menu and through `--mode`.
+- **Next Steps:** Prioritize the remaining unchecked gameplay, accessibility,
+  graphics and content suggestions based on player feedback.
 
 ## 🤝 Contributing
 

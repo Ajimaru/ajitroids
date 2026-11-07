@@ -1,36 +1,49 @@
-"""Version helper for runtime display.
+"""Single runtime source for the version string.
 
-Tries to read the installed package version via importlib.metadata. If the
-package is not installed (e.g., running from source), it falls back to the
-setuptools-scm generated ``modul._version``. This avoids needing to bump
-version strings in multiple places.
+The version is derived from the git tag at install/build time and shipped as
+package metadata, so no version string lives in the repository. Reading it
+through ``importlib.metadata`` keeps the displayed version in sync with the
+tag that produced the installed distribution.
+
+If the package is not installed (running from a bare source checkout), the
+marker ``0.0.0+unknown`` is returned instead of guessing.
 """
 
+import json
 from importlib import metadata
+from pathlib import Path
+from urllib.parse import urlparse
+from urllib.request import url2pathname
+
+_PACKAGE_NAME = "ajitroids"
+_UNKNOWN_VERSION = "0.0.0+unknown"
 
 
-# Prefer generated version from setuptools-scm when available. Keep as a
-# module-level optional value to avoid repeated dynamic imports inside
-# functions and to satisfy linters complaining about imports outside
-# the top-level (C0415).
-try:
-    from modul._version import __version__ as _generated_version  # type: ignore
-except (ImportError, ModuleNotFoundError):  # pragma: no cover - best-effort fallback
-    _generated_version = None
+def _read_version() -> str:
+    """Return the installed package version, or the unknown marker."""
+    try:
+        distribution = metadata.distribution(_PACKAGE_NAME)
+        source = Path(__file__).resolve()
+        # Wheels identify their files in RECORD. Editable installs identify
+        # their source root in the standard direct_url.json metadata.
+        if any(
+            Path(distribution.locate_file(file)).resolve() == source
+            for file in distribution.files or ()
+        ):
+            return distribution.version
+        direct_url = json.loads(distribution.read_text("direct_url.json") or "{}")
+        if direct_url.get("dir_info", {}).get("editable"):
+            url = urlparse(direct_url.get("url", ""))
+            if url.scheme == "file":
+                root = Path(url2pathname(url.path)).resolve()
+                if root / "modul" / "version.py" == source:
+                    return distribution.version
+        return _UNKNOWN_VERSION
+    except (metadata.PackageNotFoundError, ValueError, OSError):
+        return _UNKNOWN_VERSION
 
 
-def _fallback_version() -> str:
-    """Return the fallback version string."""
-    # Use the module-level cached generated version when present.
-    if _generated_version:
-        return _generated_version
-    return "0.0.0"
-
-
-try:
-    __version__ = metadata.version("ajitroids")
-except metadata.PackageNotFoundError:
-    __version__ = _fallback_version()
+__version__ = _read_version()
 
 
 def get_version() -> str:
