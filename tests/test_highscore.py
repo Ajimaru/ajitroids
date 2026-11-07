@@ -11,7 +11,7 @@ from modul.constants import (HIGHSCORE_FILE, HIGHSCORE_MAX_ENTRIES,
 from modul.highscore import HighscoreDisplay, HighscoreInput, HighscoreManager
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="module")
 def init_pygame():
     """Initialize pygame for each test"""
     pygame.init()

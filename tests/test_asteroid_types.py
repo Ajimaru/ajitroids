@@ -13,7 +13,7 @@ from modul.constants import (ASTEROID_CRYSTAL_SPLIT_COUNT,
 from modul.powerup import PowerUp
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="module")
 def init_pygame():
     """Initialize pygame for each test"""
     pygame.init()

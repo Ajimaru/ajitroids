@@ -8,7 +8,7 @@ from modul.constants import (POWERUP_COLORS, POWERUP_LIFETIME, POWERUP_RADIUS,
 from modul.powerup import PowerUp
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="module")
 def init_pygame():
     """Initialize pygame for each test"""
     pygame.init()

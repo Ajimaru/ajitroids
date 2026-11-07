@@ -12,7 +12,7 @@ from modul.powerup import PowerUp
 from modul.shot import Shot
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="module")
 def init_pygame():
     """Initialize pygame for each test"""
     pygame.init()

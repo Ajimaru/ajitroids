@@ -56,6 +56,9 @@
 - `pre-commit` moved into the `dev` extra, so `uv sync --extra dev` restores the
   git hook environment instead of leaving it broken after a venv rebuild. The CI
   job no longer installs it separately.
+- Test runtime cut from ~50 s to ~6 s: the per-test
+  `pygame.init()`/`pygame.quit()` fixtures are now module-scoped, and the
+  headless SDL driver is set once in `conftest.py` instead of per test.
 - Manual release defaults to `main` and accepts prerelease tags like
   `v0.25.0rc1`; `docs/development/release-process.md` and the bug report
   template describe the real flow and use `python main.py --version`.
