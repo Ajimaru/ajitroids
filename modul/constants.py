@@ -69,6 +69,42 @@ COMBO_WINDOW = 2.5
 COMBO_TIERS = ((12, 3), (5, 2))
 COMBO_HUD_MIN = 2
 COMBO_CHAIN_ACHIEVEMENT = 25
+
+# Game modes. "classic" is the score-driven endless run with boss fights; the
+# others reuse the same loop with different progression rules.
+GAME_MODES = ("classic", "survival", "time_attack")
+
+# Survival: endless waves. Each wave demands more kills, keeps more asteroids
+# alive at once and replaces them faster.
+SURVIVAL_WAVE_BASE_TARGET = 6
+SURVIVAL_WAVE_TARGET_STEP = 2
+SURVIVAL_WAVE_MAX_TARGET = 30
+SURVIVAL_WAVE_BASE_COUNT = 3
+SURVIVAL_WAVE_COUNT_STEP = 1
+SURVIVAL_WAVE_MAX_COUNT = 12
+SURVIVAL_WAVE_BASE_INTERVAL = 5.0
+SURVIVAL_WAVE_INTERVAL_STEP = 0.25
+SURVIVAL_WAVE_MIN_INTERVAL = 1.2
+SURVIVAL_WAVE_SCORE_BONUS = 250
+
+# Difficulty scaling for survival waves. Time attack already inherits the
+# difficulty through the asteroid field density, so it needs no extra factor.
+SURVIVAL_DIFFICULTY_TARGET_FACTORS = {"easy": 0.75, "normal": 1.0, "hard": 1.3}
+SURVIVAL_DIFFICULTY_INTERVAL_FACTORS = {"easy": 1.25, "normal": 1.0, "hard": 0.8}
+
+# Time attack: clear a kill quota before the round clock expires. Cleared
+# rounds add time; running out ends the run.
+TIME_ATTACK_ROUND_TIME = 45.0
+TIME_ATTACK_BASE_TARGET = 10
+TIME_ATTACK_TARGET_STEP = 3
+TIME_ATTACK_MAX_TARGET = 60
+TIME_ATTACK_BONUS_TIME = 10.0
+TIME_ATTACK_SCORE_BONUS = 500
+
+# Time attack inherits the asteroid density from the difficulty, which alone
+# would make "hard" easier (more targets to kill). The quota has to grow with
+# it so the modes stay ordered by challenge.
+TIME_ATTACK_DIFFICULTY_TARGET_FACTORS = {"easy": 0.7, "normal": 1.0, "hard": 1.4}
 PLAYER_LIVES = 3
 INVINCIBILITY_TIME = 3.0
 RESPAWN_POSITION_X = SCREEN_WIDTH / 2

@@ -39,6 +39,8 @@ achieve the highest score.
   - **Sound Themes**: Choose between different audio packs (Default, Retro,
     Sci-Fi, Orchestral)
 - **Power-Up System**: Collect various weapon upgrades and shields
+- **Three Game Modes**: Classic score chase with boss fights, endless Survival
+  waves and Time Attack rounds against the clock
 - **Advanced Asteroid Types**: Face four distinct asteroid types (Normal, Ice,
   Metal, Crystal) with unique behaviors
 - **Highscore System**: Save your best results and compare them
@@ -198,6 +200,20 @@ ajitroids
 - **Highscores:** Save your best performances and compare them with others
 - **Achievements:** Unlock achievements for completing special challenges
 
+## 🎮 Game Modes
+
+Pick a mode in the start menu or force it with `--mode`:
+
+| Mode            | What it plays like                                                                                                                                            |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Classic**     | Score-driven levels with a boss fight every 10 levels. Achievements, ship unlocks and the level display are tuned for this mode.                              |
+| **Survival**    | Endless waves. Every wave demands more kills, keeps more asteroids alive and respawns them faster; clearing one pays a score bonus. There are no boss fights. |
+| **Time Attack** | Clear a kill quota before the round clock runs out. A cleared round adds bonus time, an expired clock ends the run.                                           |
+
+Difficulty applies to all three: it sets the asteroid density in Classic and
+Time Attack, scales both wave quota and spawn pacing in Survival, and raises the
+Time Attack quota so "hard" stays harder than "easy".
+
 ## 🎯 Controls
 
 ### Game Controls
@@ -245,6 +261,10 @@ python main.py --debug
 
 # Skip main menu and start game directly
 python main.py --skip-intro
+
+# Start directly in a game mode (classic, survival or time_attack)
+python main.py --mode survival
+python main.py --mode time_attack
 
 # Force windowed or fullscreen mode
 python main.py --windowed

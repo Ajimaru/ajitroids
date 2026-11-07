@@ -236,5 +236,10 @@
   "desc_f9": "Soundeffekte umschalten",
   "desc_f10": "Musik umschalten",
   "desc_f11": "Vollbild umschalten",
-  "combo": "Combo"
+  "combo": "Combo",
+  "game_mode": "Spielmodus",
+  "mode_classic": "Klassisch",
+  "mode_survival": "Überleben",
+  "mode_time_attack": "Zeitangriff",
+  "wave": "Welle"
 }

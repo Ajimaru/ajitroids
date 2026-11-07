@@ -6,6 +6,13 @@
 
 ### Added
 
+- Game modes: `classic` (unchanged), `survival` (endless waves with growing
+  quotas and faster spawns) and `time_attack` (kill quota per round against a
+  clock, cleared rounds add time). Selectable in a new mode menu or directly
+  with `--mode`. Progression lives in `modul/game_modes.py` and is unit-tested.
+- HUD readout for the active mode (wave counter, round clock with kill quota).
+- Survival and time attack hide the level row, because their pacing comes from
+  waves and rounds rather than the score curve.
 - Combo chain: consecutive kills inside `COMBO_WINDOW` raise the score
   multiplier (`ComboTracker` in `modul/combo.py`). Asteroid, enemy-ship and boss
   kills all feed the chain; taking a hit or quick-restarting resets it, the
@@ -27,8 +34,33 @@
 - `ESC` resumes from the pause menu.
 - `F11` toggles fullscreen at runtime; it used to modify a module-level surface
   the game loop never drew to.
+- `Level Master`, `High Scorer`, `Asteroid Hunter` and the level-50 ship unlocks
+  only trigger in classic, so survival and time attack cannot farm them
+  incidentally.
+- Survival waves and time attack quotas scale with the selected difficulty, so
+  "hard" is harder in every mode instead of only in classic.
 - `docs/architecture/game-mechanics.md`: power-up table, combo section and point
   values now match the implementation.
+
+## v0.25.0
+
+### Added
+
+- Remappable keyboard/gamepad controls, German localization and TTS voice
+  selection.
+- Four boss types with distinct attacks and stats, scaling health, and a cap on
+  boss projectiles.
+
+### Fixed
+
+- Gameplay, replay, audio and statistics issues, including run resets,
+  collision/reward handling, replay completion and dashboard layout.
+- Tutorial translations, menu navigation and release/install workflows.
+
+### Build & CI
+
+- Python support now starts at 3.10 and includes 3.13; CI, security scanning,
+  locale checks and release workflows were consolidated and hardened.
 
 ## v0.24.0 (2026-01-17)
 

@@ -23,6 +23,7 @@ def run_game(monkeypatch, tmp_path):
     monkeypatch.setattr(pygame.time, "delay", lambda _ms: None)
     monkeypatch.setattr(pygame.time, "Clock", lambda: SimpleNamespace(tick=lambda _fps: 16, get_fps=lambda: 60))
     monkeypatch.setattr(main.MainMenu, "update", lambda *_args: "start_game")
+    monkeypatch.setattr(main.GameModeMenu, "update", lambda *_args: "mode_classic")
     monkeypatch.setattr(main.DifficultyMenu, "update", lambda *_args: "difficulty_normal")
     monkeypatch.setattr(main.ShipSelectionMenu, "update", lambda *_args: "start_game")
     monkeypatch.setattr(main, "collidable", pygame.sprite.Group())
@@ -37,7 +38,10 @@ def run_game(monkeypatch, tmp_path):
     def run(callback, stop_at=7):
         def events():
             step = len(context.observations) + 1
-            context.observations.append((main.game_state, main.score, main.lives, main.level))
+            # The mode screen is scripted away above; keeping it out of the
+            # step counter means the existing step numbers stay valid.
+            if main.game_state != "mode_select":
+                context.observations.append((main.game_state, main.score, main.lives, main.level))
             if step >= stop_at:
                 return [pygame.event.Event(pygame.QUIT)]
             return callback(step, context) or []
@@ -208,6 +212,47 @@ def test_boss_updates_once_and_targeted_overlap_is_safe(run_game, monkeypatch):
             assert any(isinstance(obj, main.BossProjectile) for obj in main.BossProjectile.containers[0])
 
     run_game(drive)
+
+
+def test_survival_mode_skips_classic_only_progression(run_game, monkeypatch):
+    """Alternative modes must not inherit classic's score-driven rewards."""
+    monkeypatch.setattr(main.GameModeMenu, "update", lambda *_args: "mode_survival")
+
+    def drive(step, _context):
+        if step == 4:
+            clear_asteroids()
+            main.score = 9 * C.POINTS_PER_LEVEL  # reaches level 10 next frame
+        if step == 5:
+            assert main.level == 10
+            assert not main.boss_active
+            assert not any(isinstance(obj, main.Boss) for obj in main.Boss.containers[0])
+            main.score = 666 * C.POINTS_PER_LEVEL
+        if step == 6:
+            assert main.level >= 666
+            assert not main.achievement_system.is_unlocked("Level Master")
+            main.Shot(100, 100)
+            main.Asteroid(100, 100, 40, *main.Asteroid.containers, asteroid_type="normal")
+        if step == 7:
+            assert main.score > 666 * C.POINTS_PER_LEVEL
+            assert not main.achievement_system.is_unlocked("High Scorer")
+
+    run_game(drive, stop_at=9)
+
+
+def test_classic_mode_still_awards_score_achievements(run_game):
+    """The classic gate must not switch the rewards off for the default mode."""
+
+    def drive(step, _context):
+        if step == 4:
+            clear_asteroids()
+            main.score = 250_000 - 20
+            main.Shot(100, 100)
+            main.Asteroid(100, 100, 40, *main.Asteroid.containers, asteroid_type="normal")
+        if step == 5:
+            assert main.score >= 250_000
+            assert main.achievement_system.is_unlocked("High Scorer")
+
+    run_game(drive, stop_at=7)
 
 
 def test_metal_asteroid_rewards_only_the_fatal_hit(run_game):
