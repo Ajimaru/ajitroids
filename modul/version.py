@@ -1,36 +1,29 @@
-"""Version helper for runtime display.
+"""Single runtime source for the version string.
 
-Tries to read the installed package version via importlib.metadata. If the
-package is not installed (e.g., running from source), it falls back to the
-setuptools-scm generated ``modul._version``. This avoids needing to bump
-version strings in multiple places.
+The version is derived from the git tag at install/build time and shipped as
+package metadata, so no version string lives in the repository. Reading it
+through ``importlib.metadata`` keeps the displayed version in sync with the
+tag that produced the installed distribution.
+
+If the package is not installed (running from a bare source checkout), the
+marker ``0.0.0+unknown`` is returned instead of guessing.
 """
 
 from importlib import metadata
 
-
-# Prefer generated version from setuptools-scm when available. Keep as a
-# module-level optional value to avoid repeated dynamic imports inside
-# functions and to satisfy linters complaining about imports outside
-# the top-level (C0415).
-try:
-    from modul._version import __version__ as _generated_version  # type: ignore
-except (ImportError, ModuleNotFoundError):  # pragma: no cover - best-effort fallback
-    _generated_version = None
+_PACKAGE_NAME = "ajitroids"
+_UNKNOWN_VERSION = "0.0.0+unknown"
 
 
-def _fallback_version() -> str:
-    """Return the fallback version string."""
-    # Use the module-level cached generated version when present.
-    if _generated_version:
-        return _generated_version
-    return "0.0.0"
+def _read_version() -> str:
+    """Return the installed package version, or the unknown marker."""
+    try:
+        return metadata.version(_PACKAGE_NAME)
+    except metadata.PackageNotFoundError:
+        return _UNKNOWN_VERSION
 
 
-try:
-    __version__ = metadata.version("ajitroids")
-except metadata.PackageNotFoundError:
-    __version__ = _fallback_version()
+__version__ = _read_version()
 
 
 def get_version() -> str:

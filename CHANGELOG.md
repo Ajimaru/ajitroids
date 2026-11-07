@@ -42,6 +42,24 @@
 - `docs/architecture/game-mechanics.md`: power-up table, combo section and point
   values now match the implementation.
 
+### Build & CI
+
+- Versioning reduced to one source: the git tag. `VERSION`,
+  `modul/update_version.py` and the generated `modul/_version.py` are gone, and
+  `pyproject.toml` no longer carries a `fallback_version`. `modul/version.py`
+  reads the installed package metadata and reports `0.0.0+unknown` when the
+  project is not installed.
+- CI checks out the full tag history, because `setuptools-scm` needs it for the
+  editable install and the lockfile check.
+- pytest minimum raised to 9.0.3 in `requirements.txt`, the `dev` extra and
+  `minversion` (CVE-2025-71176 in the insecure temp-directory handling).
+- `pre-commit` moved into the `dev` extra, so `uv sync --extra dev` restores the
+  git hook environment instead of leaving it broken after a venv rebuild. The CI
+  job no longer installs it separately.
+- Manual release defaults to `main` and accepts prerelease tags like
+  `v0.25.0rc1`; `docs/development/release-process.md` and the bug report
+  template describe the real flow and use `python main.py --version`.
+
 ## v0.25.0
 
 ### Added

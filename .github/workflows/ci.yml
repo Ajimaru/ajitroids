@@ -51,6 +51,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # setuptools-scm derives the version from the tag history. A shallow
+          # clone has neither tags nor the commit distance, so the editable
+          # install in the next step would fail without this.
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -90,7 +95,6 @@ jobs:
       - name: Run pre-commit
         if: ${{ matrix.run-precommit }}
         run: |
-          python -m pip install pre-commit
           pre-commit run --all-files --show-diff-on-failure --color always
 
       - name: Build package
@@ -104,6 +108,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # uv resolves the local project version through setuptools-scm, so the
+          # tag history must be present here as well.
+          fetch-depth: 0
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.13'

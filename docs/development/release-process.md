@@ -20,32 +20,40 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ### Version Source
 
-Versions are managed through Git tags using `setuptools-scm`:
+The git tag is the only version source. No version string is stored in the
+repository: there is no `VERSION` file, no bump commit and no generated module.
+`setuptools-scm` resolves the version from the tag history at install/build
+time, and the game reads it back from the installed package metadata
+(`modul/version.py`).
 
 ```toml
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"
-write_to = "modul/_version.py"
 ```
 
-The version is automatically generated based on Git tags and commits.
+Consequences:
+
+- A release is a tag; nothing else has to be edited.
+- `local_scheme = "no-local-version"` strips the `+g<hash>` suffix, so the
+  version stays PEP 440 clean.
+- Building outside a git checkout (source archive without `.git`) is not
+  supported. The release workflow always builds from a full clone.
 
 ## Release Types
 
 ### Development Releases
 
-Commits on `main` without a tag get a dev version:
+Commits after the last tag get a dev version. Twelve commits after `v0.25.0`
+resolve to:
 
 ```
-1.2.3.dev5+g1234567
+0.25.1.dev12
 ```
 
-This includes:
-
-- Last tag version: `1.2.3`
-- Commits since tag: `.dev5`
-- Git hash: `+g1234567`
+- Base: next patch after the last tag (`0.25.1`)
+- Commits since the tag: `.dev12`
+- No git hash, because of `local_scheme = "no-local-version"`
 
 ### Stable Releases
 
@@ -106,15 +114,7 @@ flake8 modul/ tests/ main.py
 python -m build
 ```
 
-### 2. Create Release Branch (Optional)
-
-For major releases, create a release branch:
-
-```bash
-git checkout -b release/1.2.3
-```
-
-### 3. Tag the Release
+### 2. Tag the Release
 
 Create an annotated tag:
 
@@ -131,7 +131,7 @@ Release version 1.2.3
 - Link to changelog
 ```
 
-### 4. Push Tag
+### 3. Push Tag
 
 ```bash
 git push origin v1.2.3
@@ -141,48 +141,31 @@ This triggers the GitHub Actions release workflow.
 
 ## GitHub Actions Release Workflow
 
-The release workflow (`.github/workflows/release.yml`) automatically:
+A pushed `v*` tag starts `.github/workflows/release.yml`, which:
 
-1. **Detects** new version tags (matching `v*.*.*`)
-2. **Builds** the package
-3. **Runs tests** to verify release
-4. **Creates GitHub Release** with changelog
-5. **Publishes** to PyPI (if configured)
+1. **Checks out** the tagged commit with full history
+2. **Exports** the tag as `SETUPTOOLS_SCM_PRETEND_VERSION`, so the built version
+   always equals the tag
+3. **Builds** sdist and wheel
+4. **Stages** the artifacts plus a versioned and a `-latest` source zip
+5. **Creates a draft GitHub Release** with generated notes and the artifacts
 
-### Workflow Configuration
+The release stays a draft on purpose: notes and artifacts are reviewed by hand
+before publishing. Tests are not part of this workflow; the `CI` workflow also
+runs on tag pushes.
 
-```yaml
-name: Release
-
-on:
-  push:
-    tags:
-      - "v*.*.*"
-
-jobs:
-  release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-      - name: Build package
-        run: python -m build
-      - name: Create Release
-        uses: actions/create-release@v1
-```
+Prerelease tags (`0.25.0rc1`, `0.25.0.dev6`) are detected and flagged as
+prereleases automatically.
 
 ## Manual Release (Fallback)
 
-If automated release fails, you can release manually:
+If the workflow cannot run, build and publish from a local full clone. A shallow
+clone has no tag history and cannot resolve the version.
 
 ### 1. Build Package
 
 ```bash
-# Install build tools
-pip install build twine
-
-# Build distribution
+pip install build
 python -m build
 ```
 
@@ -194,27 +177,11 @@ This creates:
 ### 2. Test Package
 
 ```bash
-# Install in test environment
 pip install dist/ajitroids-1.2.3-py3-none-any.whl
-
-# Test game runs
-python -m ajitroids
+ajitroids --version
 ```
 
-### 3. Upload to PyPI
-
-```bash
-# Upload to Test PyPI first
-twine upload --repository testpypi dist/*
-
-# Test install from Test PyPI
-pip install --index-url https://test.pypi.org/simple/ ajitroids
-
-# Upload to production PyPI
-twine upload dist/*
-```
-
-### 4. Create GitHub Release
+### 3. Create GitHub Release
 
 1. Go to GitHub releases page
 2. Click "Draft a new release"
@@ -236,12 +203,10 @@ twine upload dist/*
 
 ### Release
 
-- [ ] Release branch created (for major releases)
-- [ ] Git tag created
+- [ ] Git tag created (`vX.Y.Z`)
 - [ ] Tag pushed to GitHub
 - [ ] GitHub Actions workflow succeeded
-- [ ] GitHub Release created
-- [ ] Package published (if applicable)
+- [ ] Draft release reviewed and published
 
 ### Post-Release
 
@@ -289,7 +254,7 @@ Thanks to @username1, @username2 for contributions!
 
 ## Installation
 
-\`\`\`bash pip install ajitroids==1.2.3 \`\`\`
+Download `ajitroids-1.2.3.zip` or the wheel from the release assets.
 
 ## Full Changelog
 
@@ -336,48 +301,40 @@ Changes:
 
 ## Hotfix Process
 
-For critical bugs in production:
+For critical bugs in a published release:
 
-1. **Create hotfix branch** from release tag
-
-   ```bash
-   git checkout -b hotfix/1.2.4 v1.2.3
-   ```
-
-2. **Fix the bug**
+1. **Fix on `dev`** and let CI pass
 
    ```bash
-   # Make fix
    git commit -m "fix: critical bug description"
    ```
 
-3. **Tag hotfix release**
+2. **Merge `dev` into `main`** (fast-forward only)
+
+3. **Tag the patch release**
 
    ```bash
-   git tag v1.2.4
-   git push origin v1.2.4
-   ```
-
-4. **Merge back to main**
-   ```bash
-   git checkout main
-   git merge hotfix/1.2.4
+   git tag -a v0.25.1 -m "Release version 0.25.1"
+   git push origin v0.25.1
    ```
 
 ## Version Checking
 
-Users can check their version:
-
-```python
-from modul._version import version
-print(f"Ajitroids version: {version}")
-```
-
-Or via command line:
+The version is shown in the main menu and by the CLI:
 
 ```bash
-python -c "from modul._version import version; print(version)"
+python main.py --version
 ```
+
+Programmatic access goes through the single accessor module:
+
+```python
+from modul.version import get_version
+print(f"Ajitroids version: {get_version()}")
+```
+
+Without an installed package the accessor returns `0.0.0+unknown`, so install
+the project (`uv sync` or `pip install -e .`) before reporting a version.
 
 ## Release Cadence
 

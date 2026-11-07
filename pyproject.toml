@@ -31,7 +31,6 @@ disable = [
 ]
 
 [tool.pylint.format]
-ignore-patterns = ["modul/_version.py"]
 max-line-length = 127
 
 [tool.black]
@@ -43,18 +42,20 @@ target-version = ["py39", "py310", "py311", "py312"]
 # a [tool.flake8] table here only invites the two drifting apart.
 
 [tool.pytest.ini_options]
-minversion = "7.0"
+minversion = "9.0.3"
 addopts = "-v"
 testpaths = ["tests"]
 filterwarnings = [
   "ignore:pkg_resources is deprecated as an API:UserWarning",
 ]
 
+# The git tag is the only version source. No version string is written into
+# the repository and no fallback is kept: building outside a git checkout is
+# not supported. The version reaches the runtime through the installed package
+# metadata (see modul/version.py).
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"
-write_to = "modul/_version.py"
-fallback_version = "0.24.0"
 
 [build-system]
 requires = ["setuptools>=64", "setuptools-scm>=8"]
@@ -62,10 +63,11 @@ build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.0",
+    "pytest>=9.0.3",
     "pytest-cov>=4.0",
     "flake8>=7.0",
     "black>=24.0",
+    "pre-commit>=4.0",
 ]
 
 [project]
