@@ -1,12 +1,12 @@
 # 🚀 Ajitroids
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Ajimaru/ajitroids#-license)
-[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
-![Top Language](https://img.shields.io/github/languages/top/Ajimaru/ajitroids)
-[![Latest Release](https://img.shields.io/github/v/release/Ajimaru/ajitroids?sort=semver)](https://github.com/Ajimaru/ajitroids/releases/latest)
-![Downloads](https://img.shields.io/github/downloads/Ajimaru/ajitroids/total.svg)
-![Maintenance](https://img.shields.io/maintenance/yes/2026)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Ajimaru/ajitroids/pulls)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square&logo=open-source-initiative&logoColor=white)](https://github.com/Ajimaru/ajitroids#-license)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg?style=flat-square&logo=python&logoColor=white)](https://python.org)
+![Top Language](https://img.shields.io/github/languages/top/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)
+[![Latest Release](https://img.shields.io/github/v/release/Ajimaru/ajitroids?sort=semver&style=flat-square&logo=github&logoColor=white)](https://github.com/Ajimaru/ajitroids/releases/latest)
+![Downloads](https://img.shields.io/github/downloads/Ajimaru/ajitroids/total.svg?style=flat-square&logo=github&logoColor=white)
+![Maintenance](https://img.shields.io/maintenance/yes/2026?style=flat-square&logo=github&logoColor=white)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/Ajimaru/ajitroids/pulls)
 
 ![Stars](https://img.shields.io/github/stars/Ajimaru/ajitroids?style=social)
 ![Forks](https://img.shields.io/github/forks/Ajimaru/ajitroids?style=social)
@@ -304,23 +304,23 @@ Unlock these ships by progressing through the game and achieving milestones!
 - Efficient particle system for visual effects
 - Collision detection with optimized algorithms
 
-[![Open Issues](https://img.shields.io/github/issues/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/issues?q=is%3Aissue%20state%3Aopen)
-[![Closed Issues](https://img.shields.io/github/issues-closed-raw/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/issues?q=is%3Aissue%20state%3Aclosed)
-[![Open PRs](https://img.shields.io/github/issues-pr/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/pulls?q=is%3Aopen+is%3Apr+)
-[![Closed PRs](https://img.shields.io/github/issues-pr-closed/Ajimaru/ajitroids)](https://github.com/Ajimaru/ajitroids/pulls?q=is%3Apr+is%3Aclosed)
+[![Open Issues](https://img.shields.io/github/issues/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)](https://github.com/Ajimaru/ajitroids/issues?q=is%3Aissue%20state%3Aopen)
+[![Closed Issues](https://img.shields.io/github/issues-closed-raw/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)](https://github.com/Ajimaru/ajitroids/issues?q=is%3Aissue%20state%3Aclosed)
+[![Open PRs](https://img.shields.io/github/issues-pr/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)](https://github.com/Ajimaru/ajitroids/pulls?q=is%3Aopen+is%3Apr+)
+[![Closed PRs](https://img.shields.io/github/issues-pr-closed/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)](https://github.com/Ajimaru/ajitroids/pulls?q=is%3Apr+is%3Aclosed)
 
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
-![Commit Activity (year)](https://img.shields.io/github/commit-activity/y/Ajimaru/ajitroids)
-![Last Commit](https://img.shields.io/github/last-commit/Ajimaru/ajitroids)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=flat-square&logo=pre-commit&logoColor=white)](https://pre-commit.com/)
+![Commit Activity (year)](https://img.shields.io/github/commit-activity/y/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)
+![Last Commit](https://img.shields.io/github/last-commit/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)
 
-![Build Status](https://img.shields.io/github/actions/workflow/status/Ajimaru/ajitroids/ci.yml)
+![Build Status](https://img.shields.io/github/actions/workflow/status/Ajimaru/ajitroids/ci.yml?style=flat-square&logo=githubactions&logoColor=white)
 [![Coverage](https://codecov.io/gh/Ajimaru/ajitroids/graph/badge.svg?branch=main)](https://codecov.io/gh/Ajimaru/ajitroids)
 [![CI](https://github.com/Ajimaru/ajitroids/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Ajimaru/ajitroids/actions/workflows/ci.yml?query=branch%3Amain)
-![Release Date](https://img.shields.io/github/release-date/Ajimaru/ajitroids)
+![Release Date](https://img.shields.io/github/release-date/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)
 
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Code style: prettier](https://img.shields.io/badge/code%20style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
-![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square&logo=black&logoColor=white)](https://github.com/psf/black)
+[![Code style: prettier](https://img.shields.io/badge/code%20style-prettier-ff69b4.svg?style=flat-square&logo=prettier&logoColor=white)](https://github.com/prettier/prettier)
+![Language Count](https://img.shields.io/github/languages/count/Ajimaru/ajitroids?style=flat-square&logo=github&logoColor=white)
 
 <!-- markdownlint-disable MD033 -->
 
