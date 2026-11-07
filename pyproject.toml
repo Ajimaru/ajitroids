@@ -35,7 +35,7 @@ max-line-length = 127
 
 [tool.black]
 line-length = 127
-target-version = ["py39", "py310", "py311", "py312"]
+target-version = ["py311", "py312", "py313"]
 
 # NOTE: flake8 does not read pyproject.toml, so its settings live in .flake8
 # at the repo root (max-line-length = 127, extend-ignore = E128,F405). Keeping
@@ -75,7 +75,7 @@ name = "ajitroids"
 dynamic = ["version"]
 description = "Another Asteroids"
 readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "pygame==2.6.1",
 ]
@@ -86,7 +86,6 @@ license = { text = "MIT" }
 keywords = ["asteroids", "pygame", "space", "game"]
 classifiers = [
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",

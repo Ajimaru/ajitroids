@@ -1,7 +1,7 @@
 # 🚀 Ajitroids
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Ajimaru/ajitroids#-license)
-[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
 ![Top Language](https://img.shields.io/github/languages/top/Ajimaru/ajitroids)
 [![Latest Release](https://img.shields.io/github/v/release/Ajimaru/ajitroids?sort=semver)](https://github.com/Ajimaru/ajitroids/releases/latest)
 ![Downloads](https://img.shields.io/github/downloads/Ajimaru/ajitroids/total.svg)
@@ -58,7 +58,7 @@ achieve the highest score.
 
 ### Prerequisites
 
-- Python 3.10 or higher (tested up to 3.13)
+- Python 3.11 or higher (tested up to 3.13)
 - [uv](https://github.com/astral-sh/uv) or pip
 
 ### Method 1: Install from Release (Recommended)
@@ -86,8 +86,9 @@ ajitroids
 git clone https://github.com/Ajimaru/ajitroids.git
 cd ajitroids
 
-# Install dependencies with uv (recommended)
-uv sync
+# Install dependencies with uv (recommended); --extra dev also installs
+# pre-commit, which the git hooks rely on
+uv sync --extra dev
 
 # Or install with pip
 pip install -r requirements.txt
@@ -101,7 +102,7 @@ python main.py
 If you plan to contribute or develop for Ajitroids, set up the development
 environment with pre-commit hooks:
 
-> **Supported Python versions: 3.10 - 3.13.** pygame has no prebuilt wheel for
+> **Supported Python versions: 3.11 - 3.13.** pygame has no prebuilt wheel for
 > 3.14 yet; on a newer interpreter its font module fails to import and the test
 > suite cannot run. The setup scripts pick a supported interpreter for you and
 > refuse to continue if none is installed.

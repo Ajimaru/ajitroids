@@ -62,6 +62,9 @@
 - Manual release defaults to `main` and accepts prerelease tags like
   `v0.25.0rc1`; `docs/development/release-process.md` and the bug report
   template describe the real flow and use `python main.py --version`.
+- Minimum Python raised to 3.11. This drops the `filelock 4.1.0` resolution
+  branch from `uv.lock` and with it the last Trivy advisories, which only
+  affected Python < 3.11.
 
 ## v0.25.0
 
