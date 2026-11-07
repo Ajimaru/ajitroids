@@ -322,7 +322,7 @@ Changes:
 
 <!-- coderabbit-ai-generated:v1 -->
 
-<!-- coderabbit-ai-generated-section:v1:aac7785c8d23a0cad86523c991d633cc4c207c1ff8f2780ad5113443825196ae -->
+<!-- coderabbit-ai-generated-section:v1:c0b84636e219d80ed95604b24a933082a78bad7d96fdf482f1e010efb8a3ad73 -->
 
 For critical bugs in a published release, isolate the fix from unfinished work:
 
@@ -347,8 +347,18 @@ For critical bugs in a published release, isolate the fix from unfinished work:
    git commit -m "fix: critical bug description"
    ```
 
-3. Review the diff against the published tag, validate the built package, and
-   tag the hotfix commit with the next unused patch version:
+3. Before tagging, inspect `.github/workflows/release.yml` on the hotfix
+   branch: the tag push runs the workflow from the tagged commit, so fixes on
+   `main` or `dev` alone do not protect an older release. If needed, backport
+   the focused workflow changes and any required dependencies so release
+   creation uses `draft: true` and no step publishes automatically. Validate
+   the resulting workflow's syntax, referenced actions, and artifact build and
+   staging steps on the hotfix branch, and commit those changes. Stop if this
+   validation cannot be completed; do not push a release tag until the workflow
+   at the intended tag commit has been verified to create only a draft.
+
+4. Review the diff against the published tag, validate the built package, and
+   tag the validated hotfix commit with the next unused patch version:
 
    ```bash
    git diff v0.25.0...HEAD
@@ -360,12 +370,14 @@ For critical bugs in a published release, isolate the fix from unfinished work:
    Wait for tag CI and the release workflow, inspect the draft's notes and
    artifacts, and publish the patch release as described above.
 
-4. Reconcile the hotfix with both `main` and `dev` through separate pull
+5. Reconcile the hotfix with both `main` and `dev` through separate pull
    requests. Merge the hotfix branch into each branch, resolving conflicts while
    preserving that branch's existing changes and the bug fix. If a branch
    already contains the equivalent fix, verify it before resolving any duplicate
    changes. Run CI on both resulting branches. Do not reset either branch to the
    release tag or merge unfinished `dev` work into `main`.
+
+
 
 <!-- /coderabbit-ai-generated:v1 -->## Version Checking
 
