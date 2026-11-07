@@ -204,9 +204,9 @@ the Ajitroids game experience.
 
 - ~~**Additional Ships**: 10+ unique ship types~~
 - ~~**More Boss Varieties**: Unique boss mechanics~~
-- **Environmental Hazards**: Black holes, meteor showers, solar flares
+- **Environmental Hazards**: Black holes, meteor showers, solar flares ✅
 - ~~**Power-Up Variety**: 20+ different power-ups~~
-- ~~**Special Events**: Random beneficial or challenging events~~
+- **Special Events**: Random beneficial or challenging events ✅
 
 ### Platform & Distribution
 

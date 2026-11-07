@@ -391,9 +391,9 @@ def test_dashboard_rows_use_distinct_columns(monkeypatch):
 
         monkeypatch.setattr(dashboard, "_draw_stat_line", draw_line)
         dashboard.draw(pygame.Surface((C.SCREEN_WIDTH, C.SCREEN_HEIGHT)))
-        assert len(positions) == 10
-        assert {x for x, _y in positions[:5]} == {C.SCREEN_WIDTH / 4}
-        assert {x for x, _y in positions[5:]} == {C.SCREEN_WIDTH * 3 / 4}
+        assert len(positions) == 12  # nosec B101
+        assert {x for x, _y in positions[:5]} == {C.SCREEN_WIDTH / 4}  # nosec B101
+        assert {x for x, _y in positions[5:]} == {C.SCREEN_WIDTH * 3 / 4}  # nosec B101
     finally:
         pygame.font.quit()
 

@@ -98,6 +98,8 @@ ajitroids/
 │   ├── asteroid.py      # Asteroid logic
 │   ├── boss.py          # Boss enemy logic
 │   ├── powerup.py       # Power-up system
+│   ├── hazards.py       # Environmental hazards
+│   ├── events.py        # Random in-run events
 │   ├── menu.py          # Menu system
 │   ├── sounds.py        # Sound management
 │   ├── achievements.py  # Achievement system

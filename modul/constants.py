@@ -264,6 +264,51 @@ BOSS_TYPE_SPEED_SCALE = {
     "bulwark": 0.7,
 }
 
+# Environmental hazards. A hazard is a screen-local danger that adds pressure
+# for a limited time without replacing the core asteroid loop. Each entry maps
+# a hazard to the level/wave/round where it may first appear, mirroring how
+# boss fights are gated by level.
+HAZARD_LEVEL_UNLOCK = {
+    "black_hole": 5,
+    "solar_flare": 8,
+}
+# Seconds between hazard spawn attempts (the actual wait is random in range).
+HAZARD_SPAWN_MIN_INTERVAL = 25.0
+HAZARD_SPAWN_MAX_INTERVAL = 40.0
+
+BLACK_HOLE_RADIUS = 40
+# Acceleration at the core, in pixels per second squared. It falls off linearly
+# to zero at BLACK_HOLE_PULL_RADIUS so the pull stays readable and escapable.
+BLACK_HOLE_GRAVITY_STRENGTH = 420.0
+BLACK_HOLE_PULL_RADIUS = 260.0
+BLACK_HOLE_LIFETIME = 12.0
+BLACK_HOLE_MAX_COUNT = 1
+BLACK_HOLE_RING_COLOR = (150, 70, 200)
+BLACK_HOLE_CORE_COLOR = (25, 10, 45)
+
+SOLAR_FLARE_THICKNESS = 40
+SOLAR_FLARE_SPEED = 120.0
+SOLAR_FLARE_WARNING = 2.0
+SOLAR_FLARE_COLOR = (255, 180, 60)
+SOLAR_FLARE_WARNING_COLOR = (255, 60, 60)
+SOLAR_FLARE_MAX_COUNT = 1
+
+# In-run events. Picked at random on a cooldown, gated by the current level so
+# players meet them only after the basics. Events are accents: they may help or
+# briefly pressure the player but never replace the asteroid loop.
+EVENT_TYPES = ("emp", "meteor_shower")
+EVENT_LEVEL_UNLOCK = {"emp": 2, "meteor_shower": 3}
+EVENT_WEIGHTS = {"emp": 1.0, "meteor_shower": 1.0}
+# Seconds before the first event can fire and between consecutive events.
+EVENT_FIRST_DELAY = 20.0
+EVENT_MIN_INTERVAL = 25.0
+EVENT_MAX_INTERVAL = 45.0
+
+# Meteor shower event: a burst of small, fast asteroids from one edge.
+METEOR_SHOWER_COUNT = 10
+METEOR_SPEED_MIN = 180.0
+METEOR_SPEED_MAX = 260.0
+
 
 def generate_default_highscores():
     """Generate default highscores for initial game state / fallback data.

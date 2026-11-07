@@ -43,6 +43,7 @@ class HelpScreen:
             ]),
             ("FUNCTION KEYS", [
                 ("f1_h", "desc_f1_help"),
+                ("f7", "desc_f7"),
                 ("f8", "desc_f8"),
                 ("f9", "desc_f9"),
                 ("f10", "desc_f10"),
@@ -124,6 +125,7 @@ class HelpScreen:
             gettext("tip_boss_fights"),
             gettext("tip_unlock_ships"),
             gettext("tip_check_achievements"),
+            gettext("tip_hazards_events"),
         ]
         widest_desc = max(
             (self.text_font.size(f"- {gettext(description)}")[0]

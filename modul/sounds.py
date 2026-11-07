@@ -216,6 +216,11 @@ class Sounds:
         if self.sound_on and self.boss_spawn:
             self.boss_spawn.play()
 
+    def play_hazard_spawn(self):
+        """Play the hazard warning sound (reuses the boss-spawn alert)."""
+        if self.sound_on and self.boss_spawn:
+            self.boss_spawn.play()
+
     def play_boss_death(self):
         """Play boss death sound effect."""
         if self.sound_on and self.boss_death:

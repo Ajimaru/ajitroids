@@ -25,8 +25,10 @@ from modul.audio_enhancements import AudioEnhancementManager, SoundTheme
 from modul.boss import Boss
 from modul.bossprojectile import BossProjectile
 from modul.combo import ComboTracker
+from modul.events import EventScheduler
 from modul.game_modes import SurvivalProgression, TimeAttackProgression
 from modul.groups import collidable, drawable, updatable
+from modul.hazards import BlackHole, SolarFlare
 from modul.help_screen import HelpScreen
 from modul import input_utils
 from modul.i18n import gettext
@@ -147,7 +149,7 @@ def main(args=None):
 
     global show_fps
     show_fps = args.debug
-    # Debug mode starts with collision outlines visible; F9 toggles them.
+    # Debug mode starts with collision outlines visible; F7 toggles them.
     C.COLLISION_DEBUG = args.debug
 
     pygame.init()
@@ -244,6 +246,7 @@ def main(args=None):
     shots = pygame.sprite.Group()
     particles = pygame.sprite.Group()
     powerups = pygame.sprite.Group()
+    hazards = pygame.sprite.Group()
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
 
@@ -251,6 +254,8 @@ def main(args=None):
     Shot.containers = shots, updatable, drawable
     Particle.containers = particles, updatable, drawable
     PowerUp.containers = powerups, updatable, drawable
+    BlackHole.containers = hazards, updatable, drawable
+    SolarFlare.containers = hazards, updatable, drawable
     Player.containers = updatable, drawable
     AsteroidField.containers = updatable
     Boss.containers = updatable, drawable
@@ -295,6 +300,9 @@ def main(args=None):
 
     # Consecutive kills inside the combo window raise the score multiplier.
     combo = ComboTracker()
+
+    # Random in-run events (EMP, ...) on a cooldown, gated by level.
+    event_scheduler = EventScheduler()
 
     # Performance profiler
     performance_profiler = PerformanceProfiler()
@@ -367,10 +375,12 @@ def main(args=None):
 
     last_spawn_time = time.time()
     spawn_interval = random.uniform(10, 30)
+    hazard_spawn_timer = random.uniform(HAZARD_SPAWN_MIN_INTERVAL, HAZARD_SPAWN_MAX_INTERVAL)
     max_enemy_ships = {"easy": 1, "normal": 2, "hard": 3}
     current_enemy_ships = []
 
     boss = None
+    active_hazard = None
     run_active = False
     # Gameplay seconds survived in the current run. Accumulated from `dt` so
     # time spent paused or in menus does not count toward "Survivor".
@@ -400,6 +410,7 @@ def main(args=None):
         global triple_shots_used, speed_boosts_used
         nonlocal boss, run_active, last_spawn_time, spawn_interval
         nonlocal current_enemy_ships, level_up_timer, level_up_text, survival_time
+        nonlocal active_hazard
         finish_run()
         for group in (asteroids, powerups, shots, particles, collidable, updatable, drawable):
             for obj in list(group):
@@ -409,6 +420,7 @@ def main(args=None):
         survival_time = 0.0
         combo.reset()
         boss = None
+        active_hazard = None
         boss_active = False
         boss_defeated_timer = 0
         boss_defeated_message = ""
@@ -506,6 +518,29 @@ def main(args=None):
         level_up_timer = LEVEL_UP_DISPLAY_TIME
         sounds.play_level_up()
         logger.info("Time attack round cleared, now round %s", time_attack.round)
+
+    def _spawn_black_hole():
+        """Return a black hole placed far from the player."""
+        for _ in range(10):
+            x = random.uniform(BLACK_HOLE_RADIUS + 40, SCREEN_WIDTH - BLACK_HOLE_RADIUS - 40)
+            y = random.uniform(BLACK_HOLE_RADIUS + 40, SCREEN_HEIGHT - BLACK_HOLE_RADIUS - 40)
+            if player.position.distance_to(pygame.Vector2(x, y)) > BLACK_HOLE_PULL_RADIUS * 1.5:
+                return BlackHole(x, y)
+        return BlackHole(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4)
+
+    def _spawn_meteor_shower():
+        """Rain small, fast asteroids from a single screen edge."""
+        nonlocal level_up_timer, level_up_text
+        edge = random.choice(AsteroidField.edges)
+        for _ in range(METEOR_SHOWER_COUNT):
+            position = edge[1](random.random())
+            velocity = edge[0].rotate(random.uniform(-30, 30))
+            velocity *= random.uniform(METEOR_SPEED_MIN, METEOR_SPEED_MAX)
+            asteroid_field.spawn(ASTEROID_MIN_RADIUS, position, velocity)
+        sounds.play_hazard_spawn()
+        audio_enhancements.trigger_announcement("event_meteor_shower", priority=5.0)
+        level_up_text = "METEOR SHOWER!"
+        level_up_timer = LEVEL_UP_DISPLAY_TIME
 
     while True:
         help_just_opened = False
@@ -966,7 +1001,8 @@ def main(args=None):
                 'shots': shots,
                 'particles': particles,
                 'powerups': powerups,
-                'enemies': current_enemy_ships
+                'enemies': current_enemy_ships,
+                'hazards': hazards
             }
             performance_profiler.update(dt, clock, object_groups)
 
@@ -1161,6 +1197,73 @@ def main(args=None):
                 elif obj.position.y > SCREEN_HEIGHT:
                     obj.position.y = 0
 
+            # Hazards: gravity pulls are velocity-only, so they move objects on
+            # the next frame; the hole's event horizon damages on contact.
+            if hazards:
+                pullable = list(asteroids) + list(shots)
+                if player:
+                    pullable.append(player)
+                for hazard in list(hazards):
+                    if isinstance(hazard, BlackHole):
+                        hazard.apply_forces(pullable, dt)
+                    if player and hazard.collides_with(player) and not player.invincible and not player.shield_active:
+                        damage_player()
+
+            # Surviving a hazard until it dissipates is tracked, and surviving
+            # a black hole in particular earns Event Horizon.
+            if active_hazard is not None and active_hazard not in updatable:
+                if game_state == "playing":
+                    session_stats.record_hazard_survived()
+                    if isinstance(active_hazard, BlackHole) and not achievement_system.is_unlocked("Event Horizon"):
+                        achievement_system.unlock("Event Horizon")
+                active_hazard = None
+
+            if game_state != "playing":
+                dt = clock.tick(60) / 1000.0
+                continue
+
+            # Random events fire on a cooldown. Classic mode only for now and
+            # never during a boss fight, so the arena pacing stays untouched.
+            if game_mode == "classic" and not boss_active:
+                event_name = event_scheduler.update(dt, level)
+                if event_name:
+                    session_stats.record_event_triggered()
+                    if not achievement_system.is_unlocked("First Contact"):
+                        achievement_system.unlock("First Contact")
+                if event_name == "emp":
+                    for asteroid in list(asteroids):
+                        Particle.create_asteroid_explosion(asteroid.position.x, asteroid.position.y)
+                        asteroid.kill()
+                    sounds.play_powerup()
+                    audio_enhancements.trigger_announcement("event_emp", priority=5.0)
+                    level_up_text = "EMP: ASTEROIDS CLEARED!"
+                    level_up_timer = LEVEL_UP_DISPLAY_TIME
+                elif event_name == "meteor_shower":
+                    _spawn_meteor_shower()
+
+            # Hazards spawn on a cooldown, one at a time and never during a
+            # boss fight, so the arena never stacks unfair pressure.
+            if game_mode == "classic" and not boss_active and not hazards:
+                hazard_spawn_timer -= dt
+                if hazard_spawn_timer <= 0:
+                    available_hazards = [
+                        name for name, min_level in HAZARD_LEVEL_UNLOCK.items()
+                        if level >= min_level
+                    ]
+                    if available_hazards:
+                        hazard_name = random.choice(available_hazards)
+                        if hazard_name == "black_hole":
+                            active_hazard = _spawn_black_hole()
+                            sounds.play_hazard_spawn()
+                            audio_enhancements.trigger_announcement("hazard_black_hole", priority=7.0)
+                        elif hazard_name == "solar_flare":
+                            active_hazard = SolarFlare()
+                            sounds.play_hazard_spawn()
+                            audio_enhancements.trigger_announcement("hazard_solar_flare", priority=7.0)
+                    hazard_spawn_timer = random.uniform(
+                        HAZARD_SPAWN_MIN_INTERVAL, HAZARD_SPAWN_MAX_INTERVAL
+                    )
+
             # Record replay frame
             if replay_recorder.recording and player:
                 def _serialize_position(obj, radius_default=8, extra=None):
@@ -1177,6 +1280,7 @@ def main(args=None):
                 enemies_data = [_serialize_position(e, radius_default=14) for e in current_enemy_ships]
                 shots_data = [_serialize_position(s, radius_default=4) for s in shots]
                 powerups_data = [_serialize_position(p, radius_default=6, extra={'type': getattr(p, 'type', 'unknown')}) for p in powerups]
+                hazards_data = [_serialize_position(h, radius_default=24, extra={'type': type(h).__name__}) for h in hazards]
 
                 game_state_data = {
                     'player_x': player.position.x,
@@ -1199,6 +1303,7 @@ def main(args=None):
                     'shots': shots_data,
                     'powerups': powerups_data,
                     'particles': [],
+                    'hazards': hazards_data,
                 }
                 replay_recorder.record_frame(game_state_data, current_frame_time)
 

@@ -133,6 +133,8 @@ The menu system implements a state machine:
 - **`boss.py`**: Boss enemy AI and attack patterns
 - **`shot.py`**: Projectile physics and lifecycle
 - **`powerup.py`**: Power-up types and effects
+- **`hazards.py`**: Environmental hazards (black holes, solar flares)
+- **`events.py`**: In-run event scheduling
 
 ### System Modules
 
